@@ -604,6 +604,29 @@ describe('EmailEditor', () => {
     await expect.element(field).toHaveAttribute('aria-readonly', 'true');
   });
 
+  it("inserts the toolbar's variable into the button label that held the focus", async () => {
+    const button: EditorEmailBlock = {
+      id: 'b1',
+      key: 'b1',
+      type: 'button',
+      attributes: {},
+      content: { label: 'Reset', href: '{{resetUrl}}' },
+    };
+    const probe = await mount([paragraph('Hello', 'p1'), button]);
+    const field = page.getByRole('textbox', { name: 'Button label' });
+    await userEvent.click(field);
+    await userEvent.keyboard('{End}');
+
+    await userEvent.click(find('[data-slot=variable-menu]'));
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=combobox-item]', 'Reset link')));
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[1].content).toEqual({ label: 'Reset{{resetUrl}}', href: '{{resetUrl}}' }),
+    );
+    expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello' });
+    await expect.element(field.getByText('Reset link')).toHaveAttribute('data-slot', 'variable');
+  });
+
   it('refuses typing and opens no block menu when read-only', async () => {
     const probe = await mount([paragraph('Hello', 'p1')], { readOnly: true });
     await userEvent.type(page.getByRole('textbox', { name: 'Body' }), ' there');

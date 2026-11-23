@@ -19,6 +19,7 @@ interface Probe {
 
 function Host({ initial, disabled, probe }: { initial: string; disabled?: boolean; probe: Probe }) {
   const [value, setValue] = useState(initial);
+  const [invalid, setInvalid] = useState(false);
   return (
     <div className="style-nova p-12">
       <VariableTextField
@@ -31,9 +32,14 @@ function Host({ initial, disabled, probe }: { initial: string; disabled?: boolea
         declarations={() => declared}
         label="Label"
         disabled={disabled}
+        invalid={invalid}
+        className="cn-input"
       />
       <button type="button" onClick={() => setValue('Reset {{tripUrl}}')}>
         Load
+      </button>
+      <button type="button" onClick={() => setInvalid(true)}>
+        Invalidate
       </button>
     </div>
   );
@@ -48,6 +54,7 @@ async function mount(initial = '', disabled = false): Promise<Probe> {
 
 const field = () => page.getByRole('textbox', { name: 'Label' });
 const last = (values: string[]) => values[values.length - 1];
+const box = () => getComputedStyle(field().element().closest('[data-slot=variable-text-field]')!);
 
 describe('VariableTextField', () => {
   it('draws each token of its value as a chip, and an undeclared one marked', async () => {
@@ -116,5 +123,24 @@ describe('VariableTextField', () => {
 
     expect(document.querySelector('[data-slot=trigger-menu]')).toBeNull();
     expect(probe.values).toEqual([]);
+  });
+
+  it('draws the focus ring while the text inside it holds the focus', async () => {
+    await mount('Go');
+    const resting = box().boxShadow;
+
+    await userEvent.click(field());
+
+    await vi.waitFor(() => expect(box().boxShadow).not.toBe(resting));
+  });
+
+  it('draws the destructive border while invalid', async () => {
+    await mount('Go');
+    const valid = box().borderColor;
+
+    await userEvent.click(page.getByRole('button', { name: 'Invalidate' }));
+
+    await expect.element(field()).toHaveAttribute('aria-invalid', 'true');
+    expect(box().borderColor).not.toBe(valid);
   });
 });

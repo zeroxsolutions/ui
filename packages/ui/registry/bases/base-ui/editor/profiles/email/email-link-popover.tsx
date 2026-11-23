@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldDescription, FieldError } from '@/registry/bases/base-ui/ui/field';
 import { Popover, PopoverHeader, PopoverTitle } from '@/registry/bases/base-ui/ui/popover';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { hrefProblem, variableTokens } from '@zeroxsolutions/editor-core/template/index';
+import { hrefProblems } from '@zeroxsolutions/editor-core/template/index';
 import { RectPopover } from '../../document/ui/rect-popover';
 import type { Point } from '../../document/ui/selection-rect';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
@@ -65,6 +65,11 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
   const problemId = useId();
   const variablesId = useId();
 
+  const popup = useRef<HTMLDivElement>(null);
+  // Whether the popup held the focus as it closed, so the focus goes back to the text rather than to the
+  // control that opened it; an outside press leaves the focus where it pressed.
+  const refocus = useRef(false);
+
   useEffect(
     () =>
       onEmailLinkRequest(editor, (target) => {
@@ -74,26 +79,34 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
     [editor],
   );
 
+  // A change from outside, such as a host's load, moves what the target's positions point at.
+  const shown = open !== null;
+  useEffect(() => {
+    if (!shown) return;
+    return editor.onChange(() => setOpen(null));
+  }, [editor, shown]);
+
   const context = contextOf(editor)?.context;
   const declarations = () => context?.declarations() ?? [];
   const typeOf = (name: string) => declarations().find((declaration) => declaration.name === name)?.type;
   const target = open?.target;
   const trimmed = href.trim();
 
-  // An undeclared token is its own problem, which its chip also shows; one that opens the href is the only one.
-  const undeclared = [...new Set(variableTokens(trimmed))].filter((name) => typeOf(name) === undefined);
-  const leadingUndeclared = undeclared.some((name) => trimmed.startsWith(`{{${name}}}`));
-  const faulty = trimmed !== '' && !leadingUndeclared && hrefProblem(trimmed, typeOf) !== null;
-  const problems = [
-    ...undeclared.map((name) => messages.problem({ kind: 'variable-undeclared', block: null, name })),
-    ...(faulty && target
-      ? [messages.problem({ kind: target.kind === 'button' ? 'href-invalid' : 'link-invalid', block: null })]
-      : []),
-  ];
+  const problems =
+    trimmed === '' || !target
+      ? []
+      : hrefProblems(trimmed, typeOf).map((problem) =>
+          messages.problem(
+            problem.kind === 'variable-undeclared'
+              ? { kind: problem.kind, block: null, name: problem.name }
+              : { kind: target.kind === 'button' ? 'href-invalid' : 'link-invalid', block: null },
+          ),
+        );
   const urls = declarations().filter((declaration) => declaration.type === 'url');
   const reason = target?.reason ?? null;
 
   const close = () => {
+    refocus.current = true;
     setOpen(null);
     editor.focus();
   };
@@ -115,7 +128,9 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
     <Popover
       open={open !== null}
       onOpenChange={(next) => {
-        if (!next) setOpen(null);
+        if (next) return;
+        refocus.current = popup.current?.contains(document.activeElement) ?? false;
+        setOpen(null);
       }}
     >
       <RectPopover
@@ -124,6 +139,8 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
         align="start"
         // The field takes the focus once it is built, which is after the popup opens.
         initialFocus={false}
+        ref={popup}
+        finalFocus={() => (refocus.current ? (contextOf(editor)?.engine.view.dom ?? false) : false)}
         aria-labelledby={titleId}
         data-slot="email-link-popover"
         className="w-80"
@@ -147,7 +164,7 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
                 describedBy={problems.length > 0 ? problemId : undefined}
                 autoFocus={reason === null}
                 messages={messages}
-                className="cn-input flex items-center data-disabled:opacity-50"
+                className="cn-input data-disabled:bg-input/50 h-auto min-h-8 data-disabled:cursor-not-allowed data-disabled:opacity-50"
               />
               {reason !== null && <FieldDescription>{reason}</FieldDescription>}
               {problems.length > 0 && <FieldError id={problemId} errors={problems.map((message) => ({ message }))} />}
@@ -175,7 +192,7 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
               </div>
             )}
             <div className="flex justify-end gap-2">
-              {target.kind === 'text' && target.href !== '' && (
+              {target.kind === 'text' && target.linked && (
                 <Button type="button" variant="ghost" size="sm" onClick={remove}>
                   {messages.removeLink}
                 </Button>

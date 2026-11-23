@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/email-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @zeroxsolutions/editor-core@^0.2.0 lucide-react zod
+pnpm add @tiptap/react @zeroxsolutions/editor-core@^0.2.0 lucide-react zod
 ```
 
 <Step>Add the components it is built from.</Step>
@@ -252,9 +252,10 @@ and `lanes` at their defaults, and a higher value throws `editor.profile.bound_a
 ## Variables
 
 A variable has a `name` of word characters, a `type` of `string`, `duration`, `url` or `email`, and an
-optional `label`, `sampleValue` and `required`. Type `{{` or use the toolbar's variable menu to insert one
-into text, and type `{{` in a button's label to insert one there. A token naming no declaration is drawn in
-red. A `required` variable that no block uses is a problem.
+optional `label`, `sampleValue` and `required`. Type `{{` or use the toolbar's variable menu to insert one,
+in text, in a button's label or in a link. The menu inserts into the label or the link field when that held
+the focus before the menu. A token naming no declaration is drawn in red. A `required` variable that no block
+uses is a problem.
 
 The Link button in the toolbar or the selection bubble opens the link popover on the selected text, or on the
 link the caret is in. A button's Link, in its block menu, opens the same popover on the button's link. Type

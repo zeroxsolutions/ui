@@ -53,6 +53,19 @@ export interface VariableTextFieldProps {
 
 const fieldKey = new PluginKey('variableTextField');
 
+/** Each field's root, with the editor a variable inserted there goes into while the field takes typing. */
+const fields = new WeakMap<Element, () => IEditor | null>();
+
+/**
+ * The editor of the variable text field `element` is in, while that field takes typing, or null. A variable
+ * menu outside the field reads it off the element that held the focus before the menu took it, so the
+ * variable lands in the field rather than in the document around it.
+ */
+export function variableTextFieldOf(element: Element | null): IEditor | null {
+  const root = element?.closest('[data-slot=variable-text-field]');
+  return (root && fields.get(root)?.()) ?? null;
+}
+
 /** `text` on one line: each line break in it a space. */
 const lineOf = (text: string) => text.replace(/\r\n?|\n/g, ' ');
 
@@ -148,6 +161,7 @@ export function VariableTextField({
 
   const [engine, setEngine] = useState<{ view?: EditorView } | null>(null);
   const [field, setField] = useState<{ editor: IEditor; variables: VariableFeature } | null>(null);
+  const root = useRef<HTMLDivElement>(null);
   const reported = useRef(value);
   const loading = useRef(false);
 
@@ -200,6 +214,15 @@ export function VariableTextField({
     field?.editor.setEditable(!disabled);
   }, [field, disabled]);
 
+  useEffect(() => {
+    const element = root.current;
+    if (!element || !field) return;
+    fields.set(element, () => (field.editor.isEditable() ? field.editor : null));
+    return () => {
+      fields.delete(element);
+    };
+  }, [field]);
+
   // The engine reads the attributes when it draws, which a new state alone does not cause.
   useEffect(() => {
     const view = engine?.view;
@@ -221,10 +244,16 @@ export function VariableTextField({
 
   return (
     <div
+      ref={root}
       data-slot="variable-text-field"
       data-disabled={disabled || undefined}
       data-invalid={invalid || undefined}
-      className={cn('variable-text-field cn-editor-content min-w-0', className)}
+      // The ring an input draws on its own focus and invalid state, drawn here because the focus and
+      // `aria-invalid` sit on the text inside.
+      className={cn(
+        'variable-text-field cn-editor-content min-w-0 transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-invalid:border-destructive data-invalid:ring-3 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40',
+        className,
+      )}
       onKeyDownCapture={keyDown}
     >
       <span id={labelId} className="sr-only">

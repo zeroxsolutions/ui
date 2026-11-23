@@ -51,6 +51,7 @@ import {
   emailLinkAt,
   emailLinkTarget,
   laneAt,
+  hasEmailLinkPopover,
   requestEmailLink,
   type EngineState,
   type Found,
@@ -226,7 +227,10 @@ const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph'>, () => No
 };
 
 export interface EmailKitOptions extends BlockIdentityOptions {
-  /** The declarations the chips and the link popover read; the profile's own when absent. A getter, so a host changes them live. */
+  /**
+   * The declarations the chips and the link popover read; the profile's own when absent. A getter, so a host
+   * changes them live.
+   */
   declarations?: () => readonly VariableDeclaration[];
   /** The variable feature the host also hands its trigger layer; one is built on `declarations` when absent. */
   variables?: VariableFeature;
@@ -579,7 +583,7 @@ export function emailKit(
           const target = linkTarget(editor);
           return !!target && requestEmailLink(editor, target);
         },
-        can: (editor) => linkTarget(editor) !== undefined,
+        can: (editor) => hasEmailLinkPopover(editor) && linkTarget(editor) !== undefined,
       },
       setColumnsRatio: {
         args: z.object({ ratio: z.array(z.number().int().min(1).max(12)).min(2) }),

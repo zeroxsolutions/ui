@@ -43,8 +43,10 @@ export type EmailLinkTarget =
       /** The text the link covers, or will: the selection, or the whole link the caret is in. */
       from: number;
       to: number;
-      /** The href of the link already there, or empty when the text has none. */
+      /** The href of the link already there, or empty when the text has none or links of several hrefs. */
       href: string;
+      /** Whether the text holds a link, which Remove link takes off. */
+      linked: boolean;
       reason: null;
     };
 
@@ -108,31 +110,39 @@ export function selectBlockOf(editor: IEditor, element: Element): boolean {
   return engine.chain().setNodeSelection(found).run();
 }
 
-/** The href of the link the selection is in, the first one where it spans several, or null when it holds none. */
+/** The href of the link the selection is in, or null when it holds none or links of several hrefs. */
 export function emailLinkAt(editor: IEditor): string | null {
   const engine = contextOf(editor)?.engine;
-  return engine ? linkIn(engine.state) : null;
+  const hrefs = engine ? linksIn(engine.state) : [];
+  return hrefs.length === 1 ? hrefs[0] : null;
 }
 
-function linkIn(state: EngineState): string | null {
+function hrefOf(marks: readonly { type: { name: string }; attrs: Record<string, unknown> }[]): string | null {
+  const link = marks.find((mark) => mark.type.name === 'emailLink');
+  return typeof link?.attrs.href === 'string' ? link.attrs.href : null;
+}
+
+/** The hrefs of the links the selection is in or holds, each once. */
+function linksIn(state: EngineState): string[] {
   const { selection, doc } = state;
-  const linkOf = (marks: readonly { type: { name: string }; attrs: Record<string, unknown> }[]) => {
-    const link = marks.find((mark) => mark.type.name === 'emailLink');
-    return typeof link?.attrs.href === 'string' ? link.attrs.href : null;
-  };
-  if (selection.empty) return linkOf(selection.$from.marks());
-  let href: string | null = null;
+  if (selection.empty) {
+    const href = hrefOf(selection.$from.marks());
+    return href === null ? [] : [href];
+  }
+  const hrefs = new Set<string>();
   doc.nodesBetween(selection.from, selection.to, (node) => {
-    href ??= node.isInline ? linkOf(node.marks) : null;
-    return href === null;
+    const href = node.isInline ? hrefOf(node.marks) : null;
+    if (href !== null) hrefs.add(href);
+    return true;
   });
-  return href;
+  return [...hrefs];
 }
 
 /**
  * What a link popover opened on the selection now edits: the button a node selection picked, or the selected
- * text, widened to the whole link a caret or a selection inside one is in. Undefined where there is nothing to
- * link: a caret outside a link, or text that takes no mark, such as a code block's.
+ * text, each end widened to the whole link it cuts into, and a caret to the link it is in. Undefined where
+ * there is nothing to link: a caret outside a link, or text that takes no mark, such as a code block's.
+ * Text holding links of several hrefs shows no href; setting one links the whole of it.
  */
 export function emailLinkTarget(engine: Editor, reason: (button: Found) => string | null): EmailLinkTarget | undefined {
   const { state } = engine;
@@ -143,45 +153,50 @@ export function emailLinkTarget(engine: Editor, reason: (button: Found) => strin
     return { kind: 'button', pos: button.pos, href: String(picked.attrs.href ?? ''), reason: reason(button) };
   }
   const link = state.schema.marks.emailLink;
-  const { $from, empty } = state.selection;
+  const { $from, empty, from, to } = state.selection;
   if (!link || !$from.parent.type.allowsMarkType(link)) return undefined;
-  const href = linkIn(state);
-  if (empty && href === null) return undefined;
-  let { from, to } = state.selection;
-  if (href !== null) {
-    const range = markRange(state, from, href);
-    if (range) {
-      from = Math.min(from, range.from);
-      to = Math.max(to, range.to);
-    }
-  }
-  return { kind: 'text', from, to, href: href ?? '', reason: null };
+  const hrefs = linksIn(state);
+  if (empty && hrefs.length === 0) return undefined;
+  const runs = linkRuns(state, from);
+  const start =
+    runs.find((run) => run.from <= from && from < run.to) ?? (empty ? runs.find((run) => run.to === from) : undefined);
+  const end =
+    runs.find((run) => run.from < to && to <= run.to) ?? (empty ? runs.find((run) => run.from === to) : undefined);
+  return {
+    kind: 'text',
+    from: Math.min(from, start?.from ?? from),
+    to: Math.max(to, end?.to ?? to),
+    href: hrefs.length === 1 ? hrefs[0] : '',
+    linked: hrefs.length > 0,
+    reason: null,
+  };
 }
 
-/** The text around `pos` in its block that carries the link to `href`. */
-function markRange(state: EngineState, pos: number, href: string): { from: number; to: number } | undefined {
+/** The runs of linked text in the block around `pos`: each stretch of one href, where it starts and ends. */
+function linkRuns(state: EngineState, pos: number): { from: number; to: number }[] {
   const $pos = state.doc.resolve(pos);
-  const start = $pos.start();
-  const linked = (node: ProseMirrorNode) =>
-    node.marks.some((mark) => mark.type.name === 'emailLink' && mark.attrs.href === href);
-  const children: { from: number; to: number; linked: boolean }[] = [];
+  const base = $pos.start();
+  const runs: { from: number; to: number; href: string }[] = [];
   $pos.parent.forEach((child, offset) => {
-    children.push({ from: start + offset, to: start + offset + child.nodeSize, linked: linked(child) });
+    const href = hrefOf(child.marks);
+    if (href === null) return;
+    const from = base + offset;
+    const last = runs[runs.length - 1];
+    if (last && last.href === href && last.to === from) last.to = from + child.nodeSize;
+    else runs.push({ from, to: from + child.nodeSize, href });
   });
-  const at = children.findIndex((child) => child.linked && child.from <= pos && pos <= child.to);
-  if (at < 0) return undefined;
-  let first = at;
-  let last = at;
-  while (first > 0 && children[first - 1].linked) first -= 1;
-  while (last < children.length - 1 && children[last + 1].linked) last += 1;
-  return { from: children[first].from, to: children[last].to };
+  return runs;
+}
+
+/** Whether a link popover is listening to `editor`, so `editEmailLink` has one to open. */
+export function hasEmailLinkPopover(editor: IEditor): boolean {
+  return (contextOf(editor)?.context.linkListeners.size ?? 0) > 0;
 }
 
 /** Tells the link popovers listening to `editor` to open on `target`; false when none is listening. */
 export function requestEmailLink(editor: IEditor, target: EmailLinkTarget): boolean {
-  const listeners = contextOf(editor)?.context.linkListeners;
-  if (!listeners || listeners.size === 0) return false;
-  for (const listener of listeners) listener(target);
+  if (!hasEmailLinkPopover(editor)) return false;
+  for (const listener of contextOf(editor)?.context.linkListeners ?? []) listener(target);
   return true;
 }
 

@@ -9,11 +9,13 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/registry/bases/base-ui/ui/combobox';
+import { useRef } from 'react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { EditorToolbarComboboxTrigger } from '../../document/ui/editor-toolbar-combobox-trigger';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { insertVariable, matchesVariable, variableIcon, variableLabel } from './variable';
+import { variableTextFieldOf } from './variable-text-field';
 
 export interface VariableMenuProps {
   editor: IEditor;
@@ -25,7 +27,11 @@ export interface VariableMenuProps {
   className?: string;
 }
 
-/** The toolbar's variable picker: a filterable list of the declarations, each inserted at the caret. */
+/**
+ * The toolbar's variable picker: a filterable list of the declarations, each inserted at the caret. When a
+ * variable text field held the focus as the picker was reached, such as a button's label, the variable goes
+ * into that field instead of `editor`.
+ */
 export function VariableMenu({
   editor,
   declarations,
@@ -33,6 +39,13 @@ export function VariableMenu({
   disabled,
   className,
 }: VariableMenuProps) {
+  // Read as the picker takes the focus: the press reads the element it is taking the focus from, the keyboard
+  // the element it came from. A move between the toolbar's own controls keeps the field read before.
+  const field = useRef<IEditor | null>(null);
+  const reach = (from: Element | null, trigger: HTMLElement) => {
+    if (from && trigger.closest('[role=toolbar]')?.contains(from)) return;
+    field.current = variableTextFieldOf(from);
+  };
   return (
     <Combobox
       items={declarations as VariableDeclaration[]}
@@ -41,8 +54,9 @@ export function VariableMenu({
       disabled={disabled}
       onValueChange={(declaration: VariableDeclaration | null) => {
         if (!declaration) return;
-        insertVariable(editor, declaration.name);
-        editor.focus();
+        const target = field.current?.status === 'destroyed' ? editor : (field.current ?? editor);
+        insertVariable(target, declaration.name);
+        target.focus();
       }}
       itemToStringLabel={variableLabel}
       // The same match as the `{{` menu: a label or a name.
@@ -53,6 +67,8 @@ export function VariableMenu({
         icon={BracesIcon}
         label={messages.variable}
         className={className}
+        onPointerDownCapture={(event) => reach(document.activeElement, event.currentTarget)}
+        onFocusCapture={(event) => reach(event.relatedTarget as Element | null, event.currentTarget)}
       />
       <ComboboxContent className="w-64">
         <ComboboxInput showTrigger={false} placeholder={messages.findVariable} aria-label={messages.findVariable} />

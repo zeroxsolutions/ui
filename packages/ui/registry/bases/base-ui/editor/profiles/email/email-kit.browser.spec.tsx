@@ -74,12 +74,14 @@ function EmailHarness({
   blocks,
   extra,
   options,
+  popover,
   onReady,
 }: {
   profile: EditorProfile;
   blocks: EditorEmailBlock[];
   extra: EditorFeature[];
   options?: EmailKitOptions;
+  popover: boolean;
   onReady(editor: IEditor): void;
 }) {
   const [features] = useState(() => emailKit(profile, extra, options));
@@ -98,7 +100,7 @@ function EmailHarness({
       />
       {/* Below the text, so the bubble over a selection never covers them. */}
       {editor && <EditorToolbar editor={editor} items={ui.toolbar} />}
-      {editor && <EmailLinkPopover editor={editor} />}
+      {editor && popover && <EmailLinkPopover editor={editor} />}
       {editor && <SlashMenu editor={editor} items={ui.slash} />}
       {editor && <BubbleMenu editor={editor} items={ui.bubble} container={root} />}
     </div>
@@ -111,11 +113,19 @@ async function mount(
     profile = fullProfile,
     options,
     extra = [],
-  }: { profile?: EditorProfile; options?: EmailKitOptions; extra?: EditorFeature[] } = {},
+    popover = true,
+  }: { profile?: EditorProfile; options?: EmailKitOptions; extra?: EditorFeature[]; popover?: boolean } = {},
 ): Promise<IEditor> {
   let ready: IEditor | null = null;
   await render(
-    <EmailHarness profile={profile} blocks={blocks} extra={extra} options={options} onReady={(e) => (ready = e)} />,
+    <EmailHarness
+      profile={profile}
+      blocks={blocks}
+      extra={extra}
+      options={options}
+      popover={popover}
+      onReady={(e) => (ready = e)}
+    />,
   );
   return vi.waitFor(() => {
     if (!ready) throw new Error('the editor is not ready');
@@ -355,6 +365,67 @@ describe('the email kit', () => {
 
     expect(editor.can('editEmailLink')).toBe(false);
     expect(editor.run('editEmailLink')).toBe(false);
+  });
+
+  it('offers no link edit while no link popover is drawn', async () => {
+    const editor = await mount([paragraph('Open the [page]({{resetUrl}})')], { popover: false });
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{ArrowLeft}');
+
+    await vi.waitFor(() => expect(editor.isActive('emailLink')).toBe(true));
+    expect(editor.can('editEmailLink')).toBe(false);
+  });
+
+  it('widens a selection cutting into a link to the whole link, so Remove link takes all of it', async () => {
+    const editor = await mount([paragraph('Open the [page]({{resetUrl}}) now')]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{Home}' + '{ArrowRight}'.repeat(5) + '{Shift>}' + '{ArrowRight}'.repeat(6) + '{/Shift}');
+
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
+    await userEvent.click(popover.getByRole('button', { name: 'Remove link' }));
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Open the page now' }));
+  });
+
+  it('shows no href over links of several hrefs, and links the whole selection to the one applied', async () => {
+    const editor = await mount([paragraph('[One](https://x.test/1) and [two](https://x.test/2)')]);
+    await caretAfter('One and two');
+    await userEvent.keyboard('{Shift>}{Home}{/Shift}');
+
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    const field = popover.getByRole('textbox', { name: 'Link' });
+    await expect.element(field).toHaveFocus();
+    expect(field.element().textContent).toBe('');
+    expect(popover.getByRole('button', { name: 'Remove link' }).query()).not.toBeNull();
+    await userEvent.keyboard('https://x.test/3{Enter}');
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: '[One and two](https://x.test/3)' }));
+  });
+
+  it('gives the focus back to the text when Escape closes the popover', async () => {
+    await mount([paragraph('Open the page')]);
+    await caretAfter('Open the page');
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
+
+    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    const popover = page.getByRole('dialog', { name: 'Link' });
+    await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+
+    await expect.element(popover).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(document.activeElement).toBe(find('[contenteditable=true]')));
+  });
+
+  it('closes the popover when the document changes from outside', async () => {
+    const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })]);
+    const popover = await openButtonLink();
+
+    editor.setContent(fromEmailBlocks([paragraph('Another email')], codecs));
+
+    await expect.element(popover).not.toBeInTheDocument();
   });
 
   it('toggles italic from the bubble menu', async () => {
