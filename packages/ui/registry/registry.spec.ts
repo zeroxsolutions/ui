@@ -103,6 +103,12 @@ function packageOf(specifier: string): string {
     .join('/');
 }
 
+/** The package a `dependencies` entry installs: `<name>@<range>` pins the range the item needs. */
+function dependencyName(entry: string): string {
+  const at = entry.indexOf('@', 1);
+  return at === -1 ? entry : entry.slice(0, at);
+}
+
 /** Each component or block file an item ships, mapped to that item's name. */
 function ownersOf(items: RegistryItem[]): Map<string, string> {
   return new Map(
@@ -180,7 +186,7 @@ function declarationProblems(item: RegistryItem, owners: ReadonlyMap<string, str
   const declared: Declaration = {
     files: item.files.map((file) => `${file.path} (${file.type})`),
     registryDependencies: item.registryDependencies ?? [],
-    dependencies: item.dependencies ?? [],
+    dependencies: (item.dependencies ?? []).map(dependencyName),
   };
   return (['files', 'registryDependencies', 'dependencies'] as const).flatMap((field) => [
     ...expected[field]

@@ -1121,7 +1121,7 @@
         "@tiptap/extension-task-list",
         "@tiptap/react",
         "@tiptap/starter-kit",
-        "@zeroxsolutions/editor-core",
+        "@zeroxsolutions/editor-core@^0.2.0",
         "tiptap-extension-global-drag-handle"
       ],
       "devDependencies": ["@tailwindcss/typography"],
@@ -3322,7 +3322,7 @@
           "target": "@components/editor/profiles/variables/variable.tsx"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"],
+      "dependencies": ["@zeroxsolutions/editor-core@^0.2.0", "lucide-react", "zod"],
       "css": {
         ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
           "text-align": "left"
@@ -3396,7 +3396,7 @@
           "target": "@components/editor/profiles/sms/sms-problems.ts"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core"]
+      "dependencies": ["@zeroxsolutions/editor-core@^0.2.0"]
     },
     {
       "name": "email-editor-demo",
