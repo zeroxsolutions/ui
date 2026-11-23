@@ -264,6 +264,11 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   },
 };
 
+/** The node view of a block whose profile turned the language control off. */
+function PlainCodeBlockView(props: NodeViewProps<CodeBlockAttrs>) {
+  return <CodeBlockView {...props} languagePicker={false} />;
+}
+
 /** What a profile may narrow: whether the editable block offers a language control. */
 export interface CodeBlockOptions {
   /** Show the language control. When false, a block is plain `text`. Default: true. */
@@ -272,9 +277,7 @@ export interface CodeBlockOptions {
 
 export function codeBlock(options: CodeBlockOptions = {}): EditorFeature {
   const languagePicker = options.languagePicker ?? true;
-  const view = languagePicker
-    ? CodeBlockNodeView
-    : (props: NodeViewProps<CodeBlockAttrs>) => <CodeBlockView {...props} languagePicker={false} />;
+  const view = languagePicker ? CodeBlockNodeView : PlainCodeBlockView;
   return defineFeature({
     id: 'code-block',
     nodes: [
