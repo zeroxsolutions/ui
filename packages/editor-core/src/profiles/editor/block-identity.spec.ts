@@ -1,12 +1,30 @@
 import { history, undo } from '@tiptap/pm/history';
+import { z } from 'zod';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Editor } from '../../document/advanced.js';
 import { createDocumentEditor } from '../../document/core/create-document-editor.js';
-import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
+import type { EditorFeature, IEditor, NodeJSON, NodeSpec } from '../../document/core/types/index.js';
 import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
 import { emailNodeSpecs } from '../core/email-nodes.js';
 
-const email: EditorFeature = { id: 'email', nodes: emailNodeSpecs.nodes, marks: emailNodeSpecs.marks };
+// Stand-ins for the document's own callout and rule, which live outside editor-core; the callout holds
+// inline text here so a caret in it sits in the block itself.
+const documentNodes: NodeSpec[] = [
+  {
+    name: 'callout',
+    group: 'block',
+    content: 'inline*',
+    defining: true,
+    attrs: z.object({ variant: z.string().optional(), align: z.string().optional() }),
+  },
+  { name: 'horizontalRule', group: 'block', atom: true },
+];
+
+const email: EditorFeature = {
+  id: 'email',
+  nodes: [...documentNodes, ...emailNodeSpecs.nodes],
+  marks: emailNodeSpecs.marks,
+};
 const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
 
 type Attrs = Record<string, unknown> & { id?: string | null; key?: string | null };
@@ -16,7 +34,7 @@ function paragraph(text: string, attrs: Attrs = {}): NodeJSON {
 }
 
 function callout(text: string, attrs: Attrs = {}): NodeJSON {
-  return { type: 'emailCallout', attrs, content: [{ type: 'text', text }] };
+  return { type: 'callout', attrs, content: [{ type: 'text', text }] };
 }
 
 function button(attrs: Attrs): NodeJSON {
@@ -94,12 +112,12 @@ describe('blockIdentity', () => {
     editor.run('insertContent', { content: { type: 'paragraph', content: [{ type: 'text', text: 'new' }] } });
 
     const paragraphs = blocks(editor).filter((block) => block.type === 'paragraph');
-    const callouts = blocks(editor).filter((block) => block.type === 'emailCallout');
+    const callouts = blocks(editor).filter((block) => block.type === 'callout');
     expect(paragraphs).toHaveLength(3);
     expect(paragraphs[0]).toEqual({ type: 'paragraph', id: 'a', key: 'ka' });
     expect(paragraphs.slice(1).every((block) => block.id === null)).toBe(true);
     expect(callouts).toHaveLength(2);
-    expect(callouts[0]).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(callouts[0]).toEqual({ type: 'callout', id: 'b', key: 'kb' });
     expect(callouts[1].id).toBeNull();
     expect(keysAreUnique(editor)).toBe(true);
   });
@@ -112,7 +130,7 @@ describe('blockIdentity', () => {
     expect(atStart.engine.state.doc.child(0).textContent).toBe('');
     expect(empty.id).toBeNull();
     expect(empty.key).not.toBe('kb');
-    expect(kept).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(kept).toEqual({ type: 'callout', id: 'b', key: 'kb' });
 
     const plain = mount([paragraph('one', { id: 'a', key: 'ka' })]);
     plain.engine.commands.setTextSelection(1);
@@ -125,13 +143,13 @@ describe('blockIdentity', () => {
     command.engine.commands.setTextSelection(1);
     command.engine.commands.splitBlock();
     expect(blocks(command.editor)[0].id).toBeNull();
-    expect(blocks(command.editor)[1]).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(blocks(command.editor)[1]).toEqual({ type: 'callout', id: 'b', key: 'kb' });
 
     const inside = mount([callout('note', { id: 'b', key: 'kb' })]);
     inside.engine.commands.setTextSelection(3);
     press(inside.engine, 'Enter');
     const [first, second] = blocks(inside.editor);
-    expect(first).toEqual({ type: 'emailCallout', id: 'b', key: 'kb' });
+    expect(first).toEqual({ type: 'callout', id: 'b', key: 'kb' });
     expect(second.id).toBeNull();
     expect(keysAreUnique(inside.editor)).toBe(true);
   });
@@ -148,10 +166,10 @@ describe('blockIdentity', () => {
     const from = engine.state.doc.child(0).nodeSize;
     engine.view.dispatch(engine.state.tr.delete(from, from + second.nodeSize).insert(0, second));
     engine.commands.setTextSelection(2);
-    expect(editor.run('setNode', { name: 'emailCallout' })).toBe(true);
+    expect(editor.run('setNode', { name: 'callout' })).toBe(true);
 
     expect(blocks(editor)).toEqual([
-      { type: 'emailCallout', id: 'b', key: 'kb' },
+      { type: 'callout', id: 'b', key: 'kb' },
       { type: 'paragraph', id: 'a', key: 'ka' },
     ]);
     expect(editor.getText()).toContain('oxne');
@@ -172,7 +190,7 @@ describe('blockIdentity', () => {
     engine.commands.setTextSelection(engine.state.doc.content.size - 1);
     paste(engine, copyBlocks(engine));
 
-    const callouts = blocks(editor).filter((block) => block.type === 'emailCallout');
+    const callouts = blocks(editor).filter((block) => block.type === 'callout');
     expect(callouts).toHaveLength(2);
     expect(callouts[0]).toEqual(original);
     expect(callouts[0].id).toBe('b');
@@ -325,7 +343,7 @@ describe('blockIdentity', () => {
     ];
     const calloutCaret = (engine: Editor) => engine.state.doc.child(0).nodeSize + 2;
     const attempts: Array<[string, (editor: IEditor, engine: Editor) => void]> = [
-      ['insert', (editor) => editor.run('insertContent', { content: { type: 'emailDivider' } })],
+      ['insert', (editor) => editor.run('insertContent', { content: { type: 'horizontalRule' } })],
       ['delete', (editor) => editor.run('deleteBlock')],
       [
         'delete a whole block',
@@ -342,12 +360,12 @@ describe('blockIdentity', () => {
           engine.view.dispatch(engine.state.tr.delete(from, engine.state.doc.content.size).insert(0, last));
         },
       ],
-      ['retype', (editor) => editor.run('setNode', { name: 'emailCallout' })],
+      ['retype', (editor) => editor.run('setNode', { name: 'callout' })],
       [
         'attribute change',
         (editor, engine) => {
           engine.commands.setTextSelection(calloutCaret(engine));
-          editor.run('updateAttributes', { name: 'emailCallout', attrs: { align: 'center' } });
+          editor.run('updateAttributes', { name: 'callout', attrs: { align: 'center' } });
         },
       ],
       ['split', (_, engine) => engine.commands.splitBlock()],
@@ -418,7 +436,7 @@ describe('blockIdentity', () => {
       editor.setContent(loaded);
 
       expect(blocks(editor).map((block) => [block.type, block.id])).toEqual([
-        ['emailCallout', 'x'],
+        ['callout', 'x'],
         ['paragraph', null],
       ]);
       expect(keysAreUnique(editor)).toBe(true);

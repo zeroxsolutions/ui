@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { DocJSON, NodeCodec } from '../../document/core/types/index.js';
+import type { DocJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
 import { sameBlockContent } from '../../template/email/index.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
 import { TRAVEL_DEFAULT_BLOCKS } from './fixtures/travel-defaults.fixture.js';
@@ -158,5 +158,80 @@ describe('email blocks', () => {
       }),
     ]);
     expect(doc.content![0].attrs).toMatchObject({ id: 'a', key: 'k', label: 'Go', href: 'h' });
+  });
+
+  describe("the document's own nodes", () => {
+    const para = (text: string): NodeJSON => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+    const docOf = (...content: NodeJSON[]): DocJSON => ({ type: 'doc', content });
+    const only = (doc: DocJSON) => toEmailBlocks(doc)[0];
+
+    it('reads a list as a bulletList of listItems holding one paragraph each', () => {
+      const [list] = fromEmailBlocks([block({ type: 'list', content: { items: ['one', '_two_'] } })]).content!;
+      expect(list.type).toBe('bulletList');
+      expect(list.content?.map((item) => item.type)).toEqual(['listItem', 'listItem']);
+      expect(list.content?.map((item) => item.content?.map((child) => child.type))).toEqual([
+        ['paragraph'],
+        ['paragraph'],
+      ]);
+      expect(list.content?.[0].content?.[0].attrs).toMatchObject({ source: 'one' });
+    });
+
+    it('reads a callout as an info callout holding one paragraph', () => {
+      const [callout] = fromEmailBlocks([block({ type: 'callout', content: { text: 'Note' } })]).content!;
+      expect(callout).toMatchObject({ type: 'callout', attrs: { variant: 'info' } });
+      expect(callout.content).toEqual([{ type: 'paragraph', content: [{ type: 'text', text: 'Note' }] }]);
+    });
+
+    it('reads code as a codeBlock keeping its text in the code attribute', () => {
+      const [code] = fromEmailBlocks([block({ type: 'code', content: { code: '{{code}}' } })]).content!;
+      expect(code).toMatchObject({ type: 'codeBlock', attrs: { language: 'text', code: '{{code}}' } });
+      expect(code.content).toBeUndefined();
+    });
+
+    it('reads a divider as a horizontalRule', () => {
+      expect(fromEmailBlocks([block({ type: 'divider' })]).content?.[0].type).toBe('horizontalRule');
+    });
+
+    it('exports a heading as a paragraph keeping its text', () => {
+      const heading: NodeJSON = { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Hi' }] };
+      expect(only(docOf(heading))).toMatchObject({ type: 'paragraph', attributes: {}, content: { text: 'Hi' } });
+    });
+
+    it('exports a blockquote as a paragraph joining its paragraphs with a space', () => {
+      const quote: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
+      expect(only(docOf(quote))).toMatchObject({ type: 'paragraph', content: { text: 'a b' } });
+    });
+
+    it('exports an orderedList as a list', () => {
+      const ordered: NodeJSON = {
+        type: 'orderedList',
+        content: [
+          { type: 'listItem', content: [para('a')] },
+          { type: 'listItem', content: [para('b')] },
+        ],
+      };
+      expect(only(docOf(ordered))).toMatchObject({ type: 'list', content: { items: ['a', 'b'] } });
+    });
+
+    it('exports a taskList as a list', () => {
+      const tasks: NodeJSON = { type: 'taskList', content: [{ type: 'taskItem', content: [para('a')] }] };
+      expect(only(docOf(tasks))).toMatchObject({ type: 'list', content: { items: ['a'] } });
+    });
+
+    it('exports a listItem holding two paragraphs as one item joined with a space', () => {
+      const list: NodeJSON = { type: 'bulletList', content: [{ type: 'listItem', content: [para('a'), para('b')] }] };
+      expect(only(docOf(list)).content).toEqual({ items: ['a b'] });
+    });
+
+    it('exports a nested list inside an item as part of that item', () => {
+      const nested: NodeJSON = { type: 'bulletList', content: [{ type: 'listItem', content: [para('b')] }] };
+      const list: NodeJSON = { type: 'bulletList', content: [{ type: 'listItem', content: [para('a'), nested] }] };
+      expect(only(docOf(list)).content).toEqual({ items: ['a b'] });
+    });
+
+    it('exports a callout from its stored text unchanged', () => {
+      const blocks = [block({ type: 'callout', content: { text: '_**a**_' } })];
+      expect(toEmailBlocks(fromEmailBlocks(blocks))).toEqual(blocks);
+    });
   });
 });

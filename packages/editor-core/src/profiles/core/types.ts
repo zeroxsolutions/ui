@@ -18,7 +18,8 @@ export type ProblemKind =
   | 'list-too-long'
   | 'too-many-blocks'
   | 'sms-segment-exceeded'
-  | 'sms-placeholder-malformed';
+  | 'sms-placeholder-malformed'
+  | 'block-not-carried';
 
 export interface VariableDeclaration {
   name: string;
@@ -31,10 +32,15 @@ export interface VariableDeclaration {
 /** The wire shape of one email block. `lanes` is set on columns only. */
 export type EditorEmailBlock = EmailBlockJSON;
 
-/** `block` is the block's id, or its key when the id is null. */
+/**
+ * `block` is the block's id, or its key when the id is null. `blockId` and `blockKey` are set on a
+ * `block-not-carried` problem, which is read off the document and so names the block by both.
+ */
 export interface ProfileProblem {
   kind: ProblemKind;
   block: string | null;
+  blockId?: string | null;
+  blockKey?: string;
   field?: string;
   item?: number;
   offset?: number;

@@ -1,4 +1,7 @@
 export {
+  docProblems,
+  EMAIL_BLOCK_NODES,
+  EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,
   emailNodeSpecs,
   emailProfile,

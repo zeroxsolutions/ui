@@ -6,6 +6,7 @@ import {
   type InlineRun,
   type InlineText,
 } from '../../template/index.js';
+import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
 import { splitVariables } from './sms-text.js';
 import type { EditorEmailBlock } from './types.js';
 
@@ -105,6 +106,26 @@ function attributesOf(node: NodeJSON): Record<string, unknown> {
   return present(rest);
 }
 
+/** The email attributes a document node carries, by `EMAIL_GLOBAL_ATTRIBUTES`; the rest of its attributes are the document's own. */
+function carriedAttributes(node: NodeJSON): Record<string, unknown> {
+  const names = (EMAIL_GLOBAL_ATTRIBUTES[node.type] ?? []).filter((name) => name !== 'source');
+  return present(Object.fromEntries(names.map((name) => [name, node.attrs?.[name]])));
+}
+
+/** The paragraphs of `node`, in order, however deep: a heading, a paragraph and a code block each read as one. */
+function textblocksOf(node: NodeJSON): NodeJSON[] {
+  if (node.type === 'paragraph' || node.type === 'heading') return [node];
+  if (node.type === 'codeBlock') return [{ type: 'paragraph', content: plainContent(str(node.attrs?.code)) }];
+  return (node.content ?? []).flatMap(textblocksOf);
+}
+
+/** The markup of the paragraphs of `node` joined by a space; a lone paragraph keeps its stored `source`. */
+function joinedMarkup(node: NodeJSON, source?: unknown): string {
+  const blocks = textblocksOf(node);
+  if (blocks.length === 1) return markupOf(blocks[0].content ?? [], source ?? blocks[0].attrs?.source);
+  return blocks.map((block) => printed(block.content ?? [])).join(' ');
+}
+
 function identityOf(node: NodeJSON): Pick<EditorEmailBlock, 'id' | 'key'> {
   const { id, key } = node.attrs ?? {};
   return { id: typeof id === 'string' ? id : null, key: str(key) };
@@ -139,30 +160,35 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         attributes,
         content: { text: markupOf(node.content ?? [], node.attrs?.source) },
       };
-    case 'emailCallout':
+    case 'heading':
+    case 'blockquote':
+      return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
+    case 'callout':
       return {
         ...base,
         type: 'callout',
-        attributes,
-        content: { text: markupOf(node.content ?? [], node.attrs?.source) },
+        attributes: carriedAttributes(node),
+        content: { text: joinedMarkup(node, node.attrs?.source) },
       };
-    case 'emailList':
+    case 'bulletList':
+    case 'orderedList':
+    case 'taskList':
       return {
         ...base,
         type: 'list',
-        attributes,
-        content: { items: (node.content ?? []).map((item) => markupOf(item.content ?? [], item.attrs?.source)) },
+        attributes: carriedAttributes(node),
+        content: { items: (node.content ?? []).map((item) => joinedMarkup(item)) },
       };
     case 'emailButton': {
       const { label, href } = node.attrs ?? {};
       return { ...base, type: 'button', attributes, content: present({ label, href }) };
     }
-    case 'emailCode':
-      return { ...base, type: 'code', attributes, content: { code: textOf(node) } };
+    case 'codeBlock':
+      return { ...base, type: 'code', attributes: carriedAttributes(node), content: { code: str(node.attrs?.code) } };
     case 'emailHtml':
       return { ...base, type: 'html', attributes, content: { html: textOf(node) } };
-    case 'emailDivider':
-      return { ...base, type: 'divider', attributes, content: {} };
+    case 'horizontalRule':
+      return { ...base, type: 'divider', attributes: carriedAttributes(node), content: {} };
     case 'emailColumns':
       return {
         ...base,
@@ -189,24 +215,28 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
     case 'paragraph':
       return nodeOf(block, 'paragraph', withContent(inlineOf(text)), { source: text });
     case 'callout':
-      return nodeOf(block, 'emailCallout', withContent(inlineOf(text)), { source: text });
+      return nodeOf(
+        block,
+        'callout',
+        { content: [{ type: 'paragraph', ...withContent(inlineOf(text)) }] },
+        { variant: 'info', source: text },
+      );
     case 'list': {
       const items = Array.isArray(block.content.items) ? block.content.items : [];
       const content = items.map((item): NodeJSON => ({
-        type: 'emailListItem',
-        attrs: { source: str(item) },
-        ...withContent(inlineOf(str(item))),
+        type: 'listItem',
+        content: [{ type: 'paragraph', attrs: { source: str(item) }, ...withContent(inlineOf(str(item))) }],
       }));
-      return nodeOf(block, 'emailList', { content });
+      return nodeOf(block, 'bulletList', { content });
     }
     case 'button':
       return nodeOf(block, 'emailButton', {}, present({ label: block.content.label, href: block.content.href }));
     case 'code':
-      return nodeOf(block, 'emailCode', withContent(plainContent(str(block.content.code))));
+      return nodeOf(block, 'codeBlock', {}, { language: 'text', code: str(block.content.code) });
     case 'html':
       return nodeOf(block, 'emailHtml', withContent(plainContent(str(block.content.html))));
     case 'divider':
-      return nodeOf(block, 'emailDivider');
+      return nodeOf(block, 'horizontalRule');
     case 'columns': {
       const content = (block.lanes ?? []).map((lane): NodeJSON => ({
         type: 'emailLane',

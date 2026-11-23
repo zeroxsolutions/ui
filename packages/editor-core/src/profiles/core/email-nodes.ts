@@ -1,23 +1,41 @@
 import { z } from 'zod';
 import type { MarkSpec, NodeSpec } from '../../document/core/types/index.js';
 
-/** The email node types that are blocks: each carries `id` and `key` under `blockIdentity`. */
+/**
+ * The block node types, besides the paragraph, that carry `id` and `key` under `blockIdentity`: the
+ * document's own blocks the email reads, the email's own, and the ones the export folds into a
+ * paragraph or a list (`heading`, `orderedList`, `taskList`, `blockquote`) so a pasted one keeps an identity.
+ */
 export const EMAIL_BLOCK_NODES = [
+  'bulletList',
+  'callout',
+  'codeBlock',
+  'horizontalRule',
   'emailButton',
-  'emailCode',
-  'emailList',
-  'emailCallout',
-  'emailDivider',
   'emailColumns',
   'emailHtml',
   'emailUnknown',
+  'heading',
+  'orderedList',
+  'taskList',
+  'blockquote',
 ] as const;
+
+/**
+ * The email attributes each document node carries, by node name, for the document to declare as
+ * global attributes on its own nodes. The export reads only these from a document node.
+ */
+export const EMAIL_GLOBAL_ATTRIBUTES: Record<string, string[]> = {
+  paragraph: ['align', 'spaceAfter', 'tone', 'source'],
+  bulletList: ['align', 'spaceAfter'],
+  callout: ['align', 'spaceAfter', 'source'],
+  codeBlock: ['align', 'spaceAfter'],
+  horizontalRule: ['spaceAfter'],
+};
 
 const ALIGNS = ['left', 'center', 'right'] as const;
 const SPACES = ['small', 'medium', 'large'] as const;
 
-/** The text as stored, kept so an unedited field exports as it was read. */
-const source = z.string().optional();
 const align = z.enum(ALIGNS).optional();
 const spaceAfter = z.enum(SPACES).optional();
 
@@ -34,10 +52,11 @@ function block(name: string, spec: Partial<NodeSpec>, shape: z.ZodRawShape): Nod
 
 /**
  * The email profile's nodes and marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
- * `tone` and `source` as global attributes, so it is not listed here. No node declares `id` or `key`:
+ * `tone` and `source` as global attributes, so it is not listed here; lists, callouts, code and rules
+ * are the document's own nodes, which the codec reads by type name. No node declares `id` or `key`:
  * `blockIdentity` owns them, on the paragraph and on every type in `EMAIL_BLOCK_NODES`, so it can keep
- * them out of HTML, which a node's own attributes cannot. A list item and a lane are in no group, so only a list
- * or a columns block holds one; code and html carry no mark, since the export stores them as plain text.
+ * them out of HTML, which a node's own attributes cannot. A lane is in no group, so only a columns
+ * block holds one; html carries no mark, since the export stores it as plain text.
  */
 export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
   nodes: [
@@ -52,11 +71,6 @@ export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
         width: z.enum(['inline', 'full']).optional(),
       },
     ),
-    block('emailCode', { content: 'text*', marks: '' }, { align, spaceAfter }),
-    block('emailList', { content: 'emailListItem+' }, { align, spaceAfter }),
-    { name: 'emailListItem', content: 'inline*', defining: true, attrs: z.object({ source }) },
-    block('emailCallout', { content: 'inline*' }, { align, spaceAfter, source }),
-    block('emailDivider', { atom: true }, { spaceAfter }),
     block('emailColumns', { content: 'emailLane+' }, { ratio: z.array(z.number()).optional(), spaceAfter }),
     { name: 'emailLane', content: 'block*', defining: true },
     block('emailHtml', { content: 'text*', marks: '' }, { spaceAfter }),
