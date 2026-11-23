@@ -27,7 +27,14 @@ function inlineText(node: NodeJSON): string {
   return node.text ?? '';
 }
 
-/** The runs `nodes` spell; consecutive nodes under one link join into one link run. */
+/** The href a link mark carries; a mark stored before hrefs held text names one url variable instead. */
+function hrefOf(mark: MarkJSON | undefined): string | undefined {
+  const { href, variable } = mark?.attrs ?? {};
+  if (typeof href === 'string') return href;
+  return typeof variable === 'string' ? `{{${variable}}}` : undefined;
+}
+
+/** The runs `nodes` spell; consecutive nodes under one href join into one link run. */
 function runsOf(nodes: readonly NodeJSON[]): InlineRun[] {
   const runs: InlineRun[] = [];
   for (const node of nodes) {
@@ -40,26 +47,26 @@ function runsOf(nodes: readonly NodeJSON[]): InlineRun[] {
       bold: marks.some((mark) => mark.type === 'bold'),
       italic: marks.some((mark) => mark.type === 'italic'),
     };
-    const variable = marks.find((mark) => mark.type === 'emailLink')?.attrs?.variable;
-    if (typeof variable !== 'string') {
+    const href = hrefOf(marks.find((mark) => mark.type === 'emailLink'));
+    if (href === undefined) {
       runs.push(part);
       continue;
     }
     const last = runs.at(-1);
-    if (last?.kind === 'link' && last.variable === variable) {
+    if (last?.kind === 'link' && last.href === href) {
       runs[runs.length - 1] = { ...last, label: [...last.label, part] };
     } else {
-      runs.push({ kind: 'link', variable, label: [part] } satisfies InlineLink);
+      runs.push({ kind: 'link', href, label: [part] } satisfies InlineLink);
     }
   }
   return runs;
 }
 
-function marksOf(part: InlineText, variable?: string): MarkJSON[] {
+function marksOf(part: InlineText, href?: string): MarkJSON[] {
   return [
     ...(part.bold ? [{ type: 'bold' }] : []),
     ...(part.italic ? [{ type: 'italic' }] : []),
-    ...(variable === undefined ? [] : [{ type: 'emailLink', attrs: { variable } }]),
+    ...(href === undefined ? [] : [{ type: 'emailLink', attrs: { href } }]),
   ];
 }
 
@@ -74,7 +81,7 @@ function inlineOf(source: string): NodeJSON[] {
   return parsed.runs.flatMap((run) =>
     run.kind === 'text'
       ? withMarks(run.text, marksOf(run))
-      : run.label.flatMap((part) => withMarks(part.text, marksOf(part, run.variable))),
+      : run.label.flatMap((part) => withMarks(part.text, marksOf(part, run.href))),
   );
 }
 

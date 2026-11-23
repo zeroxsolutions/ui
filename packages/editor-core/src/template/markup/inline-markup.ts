@@ -1,5 +1,6 @@
 /**
- * The inline markup a text field may carry: `**bold**`, `_italic_` and `[label]({{name}})`. A field stays
+ * The inline markup a text field may carry: `**bold**`, `_italic_` and `[label](href)`, the href any text
+ * that may hold `{{name}}` tokens. A field stays
  * a string, so the markup is a grammar over it that a template validates, a renderer draws and a
  * translation is checked against.
  */
@@ -12,9 +13,10 @@ export interface InlineText {
   readonly italic: boolean;
 }
 
+/** A link; `href` is the target as written, tokens unfilled, escapes resolved, and may be empty. */
 export interface InlineLink {
   readonly kind: 'link';
-  readonly variable: string;
+  readonly href: string;
   readonly label: readonly InlineText[];
 }
 
@@ -25,7 +27,7 @@ export type InlineMarkupProblem =
   | 'marker-inside-token'
   | 'marker-ambiguous'
   | 'link-unclosed'
-  | 'link-target-not-one-token'
+  | 'link-target-missing'
   | 'link-label-empty'
   | 'link-nested';
 
@@ -40,7 +42,7 @@ interface DraftText extends InlineText {
   readonly at: readonly number[];
 }
 
-type DraftRun = DraftText | { readonly kind: 'link'; readonly variable: string; readonly label: readonly DraftText[] };
+type DraftRun = DraftText | { readonly kind: 'link'; readonly href: string; readonly label: readonly DraftText[] };
 
 interface Seen {
   readonly tokens: Set<number>;
@@ -51,8 +53,9 @@ type ParsedDraft = { readonly ok: true; readonly runs: readonly DraftRun[] } | R
 
 /** Sticky, so a token is read at one position without scanning ahead; the shared global one cannot be. */
 const TOKEN_HERE = new RegExp(VARIABLE_TOKEN.source, 'y');
-const LINK_TARGET = /^\(\{\{(\w+)\}\}\)/;
 const ESCAPABLE = '*_[]\\';
+/** What a `\\` escapes inside an href: the `)` that would end it, and itself. Every other character there is literal. */
+const HREF_ESCAPABLE = ')\\';
 
 /** Adds a text run, joining it to the one before when their marks match, so merged runs print and parse back unchanged. */
 function pushText<T extends DraftRun>(runs: (DraftText | T)[], run: DraftText): void {
@@ -90,6 +93,26 @@ function labelEnd(source: string, from: number, base: number): number | Refusal 
     else index += 1;
   }
   return refuse('link-unclosed', base + from - 1);
+}
+
+/** The href of a target opening with the `(` at `from`, and the index after its `)`, or the refusal that stops the search. */
+function hrefAt(source: string, from: number, base: number): { href: string; end: number } | Refusal {
+  if (source[from] !== '(') return refuse('link-target-missing', base + from);
+  let href = '';
+  let index = from + 1;
+  while (index < source.length) {
+    const char = source[index];
+    if (char === '\\' && index + 1 < source.length && HREF_ESCAPABLE.includes(source[index + 1])) {
+      href += source[index + 1];
+      index += 2;
+    } else if (char === ')') {
+      return { href, end: index + 1 };
+    } else {
+      href += char;
+      index += 1;
+    }
+  }
+  return refuse('link-unclosed', base + from);
 }
 
 /**
@@ -141,16 +164,16 @@ function parseRuns(source: string, base: number, seen: Seen): ParsedDraft {
       const label = parseRuns(source.slice(index + 1, end), base + index + 1, seen);
       if (!label.ok) return label;
       if (label.runs.length === 0) return refuse('link-label-empty', base + index);
-      const target = LINK_TARGET.exec(source.slice(end + 1));
-      if (!target) return refuse('link-target-not-one-token', base + end + 1);
+      const target = hrefAt(source, end + 1, base);
+      if ('ok' in target) return target;
       flush();
       // A mark opened around the link belongs to the label, the one place a link's text lives.
       const folded: DraftText[] = [];
       for (const run of label.runs as readonly DraftText[]) {
         pushText(folded, { ...run, bold: run.bold || bold >= 0, italic: run.italic || italic >= 0 });
       }
-      runs.push({ kind: 'link', variable: target[1], label: folded });
-      index = end + 1 + target[0].length;
+      runs.push({ kind: 'link', href: target.href, label: folded });
+      index = target.end;
     } else {
       take(char, base + index);
       index += 1;
@@ -192,7 +215,7 @@ function parseOnce(source: string): ParsedInlineMarkup & { readonly markers?: re
     ok: true,
     markers: seen.markers,
     runs: parsed.runs.map((run) =>
-      run.kind === 'text' ? published(run) : { kind: 'link', variable: run.variable, label: run.label.map(published) },
+      run.kind === 'text' ? published(run) : { kind: 'link', href: run.href, label: run.label.map(published) },
     ),
   };
 }
@@ -229,6 +252,11 @@ function escapeText(text: string): string {
     }
   }
   return out;
+}
+
+/** An href with the characters that would end it or read as an escape escaped; its tokens hold neither. */
+function escapeHref(href: string): string {
+  return href.replace(/[)\\]/g, (char) => `\\${char}`);
 }
 
 type Mark = 'bold' | 'italic';
@@ -289,7 +317,7 @@ export function printInlineMarkup(runs: readonly InlineRun[]): string {
     const outer = MARKS.filter((mark) => run.label.every((part) => part[mark]));
     const inside: Mark[] = [];
     const label = printTexts(run.label, inside, outer) + turnTo(inside, []);
-    out += `${turnTo(open, outer)}[${label}]({{${run.variable}}})`;
+    out += `${turnTo(open, outer)}[${label}](${escapeHref(run.href)})`;
   }
   return out + turnTo(open, []);
 }
@@ -316,7 +344,7 @@ function marks(source: string): string | undefined {
   let bold = false;
   let italic = false;
   for (const run of parsed.runs) {
-    if (run.kind === 'link') entries.push(`link:${run.variable}`);
+    if (run.kind === 'link') entries.push(`link:${run.href}`);
     for (const text of run.kind === 'text' ? [run] : run.label) {
       if (text.bold && !bold) entries.push('bold');
       if (text.italic && !italic) entries.push('italic');

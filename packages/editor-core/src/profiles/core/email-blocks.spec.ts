@@ -86,7 +86,7 @@ describe('email blocks', () => {
             { type: 'text', text: ' ' },
             { type: 'text', text: 'b', marks: [{ type: 'italic' }] },
             { type: 'text', text: ' ' },
-            { type: 'text', text: 'c', marks: [{ type: 'emailLink', attrs: { variable: 'u' } }] },
+            { type: 'text', text: 'c', marks: [{ type: 'emailLink', attrs: { href: '{{u}}' } }] },
           ],
         },
       ],
@@ -101,10 +101,44 @@ describe('email blocks', () => {
       { type: 'text', text: ' ' },
       { type: 'text', text: 'b', marks: [{ type: 'italic' }] },
       { type: 'text', text: ' ' },
-      { type: 'text', text: 'c', marks: [{ type: 'emailLink', attrs: { variable: 'u' } }] },
+      { type: 'text', text: 'c', marks: [{ type: 'emailLink', attrs: { href: '{{u}}' } }] },
       { type: 'text', text: ' ' },
       { type: 'variable', attrs: { name: 'n' } },
     ]);
+  });
+
+  it('reads a stored link mark that names a variable as an href holding that token', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { id: null, key: 'p' },
+          content: [{ type: 'text', text: 'c', marks: [{ type: 'emailLink', attrs: { variable: 'u' } }] }],
+        },
+      ],
+    };
+    expect(toEmailBlocks(doc)[0].content).toEqual({ text: '[c]({{u}})' });
+  });
+
+  it('joins the nodes under one fixed href into one link, a token among them', () => {
+    const href = 'https://x.test/?t={{token}}';
+    const blocks = [block({ type: 'paragraph', content: { text: `[Go **now** {{n}}](${href}) [x](https://y.test)` } })];
+    const doc = fromEmailBlocks(blocks);
+    const link = [{ type: 'emailLink', attrs: { href } }];
+    expect(doc.content?.[0].content).toEqual([
+      { type: 'text', text: 'Go ', marks: link },
+      { type: 'text', text: 'now', marks: [{ type: 'bold' }, ...link] },
+      { type: 'text', text: ' ', marks: link },
+      { type: 'variable', attrs: { name: 'n' }, marks: link },
+      { type: 'text', text: ' ' },
+      { type: 'text', text: 'x', marks: [{ type: 'emailLink', attrs: { href: 'https://y.test' } }] },
+    ]);
+    expect(toEmailBlocks(doc)).toEqual(blocks);
+  });
+
+  it('round-trips every travel default byte for byte', () => {
+    expect(toEmailBlocks(fromEmailBlocks(TRAVEL_DEFAULT_BLOCKS))).toEqual(TRAVEL_DEFAULT_BLOCKS);
   });
 
   it('keeps a literal star by escaping it', () => {

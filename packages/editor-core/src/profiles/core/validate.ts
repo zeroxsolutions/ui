@@ -1,4 +1,10 @@
-import { parseInlineMarkup, variableTokens } from '../../template/index.js';
+import {
+  hrefProblem,
+  leadingToken,
+  parseInlineMarkup,
+  variableTokens,
+  type VariableType,
+} from '../../template/index.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
@@ -24,7 +30,7 @@ function text(value: unknown): string {
   return typeof value === 'string' ? value : '';
 }
 
-function declaredType(walk: Walk, name: string): string | undefined {
+function declaredType(walk: Walk, name: string): VariableType | undefined {
   return walk.profile.variables.find((variable) => variable.name === name)?.type;
 }
 
@@ -38,13 +44,13 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
     const parsed = parseInlineMarkup(value);
     if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
     else {
-      const linked = new Set<string>();
+      const flagged = new Set<string>();
       for (const run of parsed.runs) {
-        const type = run.kind === 'link' ? declaredType(walk, run.variable) : undefined;
-        if (run.kind === 'link' && type !== undefined && type !== 'url' && !linked.has(run.variable)) {
-          linked.add(run.variable);
-          walk.problems.push({ kind: 'link-not-url-variable', ...where, name: run.variable });
-        }
+        if (run.kind !== 'link' || flagged.has(run.href)) continue;
+        if (hrefProblem(run.href, (name) => declaredType(walk, name)) === null) continue;
+        flagged.add(run.href);
+        const name = leadingToken(run.href);
+        walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
       }
     }
   }
@@ -62,11 +68,9 @@ function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' |
 function checkHref(walk: Walk, block: string, value: string): void {
   checkField(walk, block, { field: 'href', value, max: walk.profile.bounds.href, marked: false });
   if (value === '') return;
-  const names = variableTokens(value);
-  const exact = names.length === 1 && value === `{{${names[0]}}}`;
-  const type = exact ? declaredType(walk, names[0]) : undefined;
-  if (exact && type === undefined) return;
-  if (type !== 'url') walk.problems.push({ kind: 'href-not-url-variable', block, field: 'href' });
+  if (hrefProblem(value, (name) => declaredType(walk, name)) !== null) {
+    walk.problems.push({ kind: 'href-invalid', block, field: 'href' });
+  }
 }
 
 function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {

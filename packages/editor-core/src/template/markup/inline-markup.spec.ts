@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { variableTokens } from '../variables/variable-tokens.js';
 import {
   type InlineRun,
+  type InlineText,
   parseInlineMarkup,
   plainInlineText,
   printInlineMarkup,
@@ -10,7 +11,7 @@ import {
 } from './inline-markup.js';
 import { markupSamples } from './inline-markup.fixture.js';
 
-const plain = (text: string): InlineRun => ({ kind: 'text', text, bold: false, italic: false });
+const plain = (text: string): InlineText => ({ kind: 'text', text, bold: false, italic: false });
 
 function runsOf(source: string): readonly InlineRun[] {
   const parsed = parseInlineMarkup(source);
@@ -38,7 +39,7 @@ describe('parseInlineMarkup', () => {
     expect(runsOf('[Open **now**]({{trip_url}})')).toEqual([
       {
         kind: 'link',
-        variable: 'trip_url',
+        href: '{{trip_url}}',
         label: [plain('Open '), { kind: 'text', text: 'now', bold: true, italic: false }],
       },
     ]);
@@ -84,8 +85,10 @@ describe('parseInlineMarkup', () => {
     ['{{a**_**b}}', 'marker-unclosed', 5],
     ['{{**_**a}}', 'marker-unclosed', 4],
     ['[a', 'link-unclosed', 0],
-    ['[a](https://x)', 'link-target-not-one-token', 3],
-    ['[a]({{u}} {{v}})', 'link-target-not-one-token', 3],
+    ['[a]', 'link-target-missing', 3],
+    ['[a] ({{u}})', 'link-target-missing', 3],
+    ['[a](https://x', 'link-unclosed', 3],
+    ['[a](https://x\\)', 'link-unclosed', 3],
     ['[]({{u}})', 'link-label-empty', 0],
     ['[[a]({{u}})]({{v}})', 'link-nested', 1],
   ])('refuses %j as %s at %i', (source, problem, offset) => {
@@ -110,8 +113,34 @@ describe('printInlineMarkup', () => {
 
   it("merges the marks folded into a label with the label's own", () => {
     expect(runsOf('**[a **b**]({{u}})**')).toEqual([
-      { kind: 'link', variable: 'u', label: [{ kind: 'text', text: 'a b', bold: true, italic: false }] },
+      { kind: 'link', href: '{{u}}', label: [{ kind: 'text', text: 'a b', bold: true, italic: false }] },
     ]);
+  });
+
+  it.each([
+    ['a fixed href', '[a](https://x.test/a?b=1&c=2)', 'https://x.test/a?b=1&c=2'],
+    ['an href with an inner token', '[a](https://x.test/?t={{token}})', 'https://x.test/?t={{token}}'],
+    ['a single-token href', '[a]({{n}})', '{{n}}'],
+    ['an href with markers, brackets and spaces', '[a](https://x/a_b*c [d] e)', 'https://x/a_b*c [d] e'],
+    ['an escaped close paren and backslash', '[a](https://x/(a\\) \\\\ {{t}})', 'https://x/(a) \\ {{t}}'],
+    ['an empty href', '[a]()', ''],
+  ])('reads %s and prints it back as it came', (_case, source, href) => {
+    expect(runsOf(source)).toEqual([{ kind: 'link', href, label: [plain('a')] }]);
+    expect(printInlineMarkup(runsOf(source))).toBe(source);
+  });
+
+  it('reads a token in a label as text and prints it back as it came', () => {
+    const source = '[Continue {{place}}](https://x.test/{{place_id}})';
+    expect(runsOf(source)).toEqual([
+      { kind: 'link', href: 'https://x.test/{{place_id}}', label: [plain('Continue {{place}}')] },
+    ]);
+    expect(printInlineMarkup(runsOf(source))).toBe(source);
+  });
+
+  it('prints a built href holding a close paren, a backslash and a token to a source that reads it back', () => {
+    const runs: InlineRun[] = [{ kind: 'link', href: 'https://x/a) b\\c {{t}}', label: [plain('a')] }];
+    expect(printInlineMarkup(runs)).toBe('[a](https://x/a\\) b\\\\c {{t}})');
+    expect(runsOf(printInlineMarkup(runs))).toEqual(runs);
   });
 
   it.each([
@@ -207,6 +236,7 @@ describe('sameInlineMarkup', () => {
   it.each([
     ['a dropped bold span', '**a** b', 'a b'],
     ['another link variable', '[a]({{u}})', '[a]({{v}})'],
+    ['another fixed href', '[a](https://x.test/a)', '[a](https://x.test/b)'],
     ['an added italic span', 'a b', 'a _b_'],
     ['a malformed translation', '**a**', '**a'],
   ])('refuses %s', (_case, source, translation) => {

@@ -67,9 +67,10 @@ describe('createRenderContext', () => {
 
   it.each([
     ['prose around the token', 'Go to {{verify_url}}', { verify_url: 'url' as const }],
-    ['two tokens', '{{a}}{{b}}', { a: 'url' as const, b: 'url' as const }],
     ['a token declared string', '{{name}}', { name: 'string' as const }],
-    ['a literal url', 'https://x.test', {}],
+    ['an undeclared leading token', '{{verify_url}}', {}],
+    ['a refused literal scheme', 'javascript:alert(1)', {}],
+    ['an empty href', '  ', {}],
   ])('answers no link for %s', (_case, template, variableTypes) => {
     const problems: RenderProblem[] = [];
     const ctx = createRenderContext(
@@ -82,7 +83,51 @@ describe('createRenderContext', () => {
       NO_LANES,
     );
     expect(ctx.href(template)).toEqual({ html: '', text: '' });
-    expect(problems.map((problem) => problem.kind)).toEqual(['href-not-url-variable']);
+    expect(problems.map((problem) => problem.kind)).toEqual(['href-invalid']);
+  });
+
+  it("encodes an inner token's value and fills a leading url token as it is", () => {
+    const problems: RenderProblem[] = [];
+    const ctx = createRenderContext(
+      state({
+        problems,
+        variables: { verify_url: 'https://x.test/v?a=1&b=2', token: 'a&b c', place: '#"<x>' },
+        variableTypes: { verify_url: 'url', token: 'string', place: 'string' },
+      }),
+      'b1',
+      NO_LANES,
+    );
+    expect(ctx.href('{{verify_url}}&t={{token}}')).toEqual({
+      html: 'https://x.test/v?a=1&amp;b=2&amp;t=a%26b%20c',
+      text: 'https://x.test/v?a=1&b=2&t=a%26b%20c',
+    });
+    expect(ctx.href('https://x.test/p/{{place}}')).toEqual({
+      html: 'https://x.test/p/%23%22%3Cx%3E',
+      text: 'https://x.test/p/%23%22%3Cx%3E',
+    });
+    expect(ctx.href('mailto:a@x.test')).toEqual({ html: 'mailto:a@x.test', text: 'mailto:a@x.test' });
+    expect(problems).toEqual([]);
+  });
+
+  it('encodes a second url token rather than filling it as it is', () => {
+    const ctx = createRenderContext(
+      state({ variables: { a: 'https://a.test', b: 'https://b.test/?x=1' }, variableTypes: { a: 'url', b: 'url' } }),
+      'b1',
+      NO_LANES,
+    );
+    expect(ctx.href('{{a}}/{{b}}').text).toBe('https://a.test/https%3A%2F%2Fb.test%2F%3Fx%3D1');
+  });
+
+  it('fills an inner token with no value as empty and reports it missing', () => {
+    const problems: RenderProblem[] = [];
+    const ctx = createRenderContext(state({ problems }), 'b1', NO_LANES);
+    expect(ctx.href('https://x.test/?t={{token}}').text).toBe('https://x.test/?t=');
+    expect(problems).toEqual([{ blockId: 'b1', kind: 'variable-missing', name: 'token' }]);
+  });
+
+  it('encodes an inner value holding a lone surrogate without throwing', () => {
+    const ctx = createRenderContext(state({ variables: { token: 'a\ud800b' } }), 'b1', NO_LANES);
+    expect(ctx.href('https://x.test/?t={{token}}').text).toBe('https://x.test/?t=a%EF%BF%BDb');
   });
 
   it.each(['javascript:alert(1)', 'data:text/html,x', ' JavaScript:alert(1)'])(

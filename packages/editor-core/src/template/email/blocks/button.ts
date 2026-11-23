@@ -13,7 +13,7 @@ const content = z
   .strict();
 const lenientContent = z.object({ label: z.string().catch(''), href: z.string().catch('') });
 
-/** A label and a link; the link is a url variable, never a url typed into the block. */
+/** A label and a link; the link opens with a literal scheme or a url variable, and may hold any token after it. */
 export const button = defineBlock({
   type: 'button',
   attributes,

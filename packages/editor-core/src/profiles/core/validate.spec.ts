@@ -28,18 +28,30 @@ describe('validate an email', () => {
     ]);
   });
 
-  it('flags a button href that is not one url variable', () => {
-    const href = (value: string) => block('button', { label: 'Go', href: value });
-    const problem = { kind: 'href-not-url-variable', block: 'k1', field: 'href' };
-    expect(validate([href('{{name}}')], profile)).toEqual([problem]);
-    expect(validate([href('https://x')], profile)).toEqual([problem]);
-    expect(validate([href('{{link}}')], profile)).toEqual([]);
+  it.each([
+    ['empty', '', [{ kind: 'text-empty', block: 'k1', field: 'href' }]],
+    ['only spaces', '   ', [{ kind: 'href-invalid', block: 'k1', field: 'href' }]],
+    ['a fixed https url', 'https://x.test/a', []],
+    ['a fixed http url', 'http://x.test/a', []],
+    ['a fixed mailto address', 'mailto:a@x.test', []],
+    ['a leading url token', '{{link}}', []],
+    ['a leading url token with a path after it', ' {{link}}/a?b=1 ', []],
+    ['a leading token that is not a url', '{{name}}', [{ kind: 'href-invalid', block: 'k1', field: 'href' }]],
+    ['text before the scheme', 'Go https://x.test', [{ kind: 'href-invalid', block: 'k1', field: 'href' }]],
+    ['a refused scheme', 'javascript:alert(1)', [{ kind: 'href-invalid', block: 'k1', field: 'href' }]],
+    ['an inner token of any type', 'https://x.test/?n={{name}}&l={{link}}', []],
+    [
+      'an undeclared inner token',
+      'https://x.test/?t={{x}}',
+      [{ kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' }],
+    ],
+  ])('judges a button href that is %s', (_case, href, problems) => {
+    expect(validate([block('button', { label: 'Go', href })], profile)).toEqual(problems);
   });
 
-  it('flags an href that is more than one token, beside an undeclared name', () => {
-    expect(validate([block('button', { label: 'Go', href: 'https://x/{{x}}' })], profile)).toEqual([
-      { kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' },
-      { kind: 'href-not-url-variable', block: 'k1', field: 'href' },
+  it('flags an undeclared token in a button label', () => {
+    expect(validate([block('button', { label: 'Go {{x}}', href: '{{link}}' })], profile)).toEqual([
+      { kind: 'variable-undeclared', block: 'k1', field: 'label', name: 'x' },
     ]);
   });
 
@@ -49,20 +61,30 @@ describe('validate an email', () => {
     ]);
   });
 
-  it('flags a link variable once per field', () => {
-    expect(validate([paragraph('[a]({{name}}) [b]({{name}})')], profile)).toHaveLength(1);
-  });
-
-  it('flags a link whose target is a declared variable that is not a url', () => {
-    expect(validate([paragraph('[a]({{name}})')], profile)).toEqual([
-      { kind: 'link-not-url-variable', block: 'k1', field: 'text', name: 'name' },
+  it('flags an invalid link href once per field', () => {
+    expect(validate([paragraph('[a]({{name}}) [b]({{name}})')], profile)).toEqual([
+      { kind: 'link-invalid', block: 'k1', field: 'text', name: 'name' },
     ]);
   });
 
-  it('reads a link target that is not one token as malformed', () => {
-    expect(validate([paragraph('[a](https://x)')], profile)).toEqual([
-      { kind: 'markup-malformed', block: 'k1', field: 'text', offset: 3 },
-    ]);
+  it.each([
+    [
+      'a leading token that is not a url',
+      '[a]({{name}})',
+      [{ kind: 'link-invalid', block: 'k1', field: 'text', name: 'name' }],
+    ],
+    ['empty', '[a]()', [{ kind: 'link-invalid', block: 'k1', field: 'text' }]],
+    ['a refused scheme', '[a](javascript:x)', [{ kind: 'link-invalid', block: 'k1', field: 'text' }]],
+    ['a fixed url', '[a](https://x.test/a)', []],
+    ['a fixed url with an inner token', '[a](https://x.test/?n={{name}})', []],
+    ['a leading url token', '[Continue {{name}}]({{link}}/a)', []],
+    [
+      'an undeclared inner token',
+      '[a](https://x.test/?t={{x}})',
+      [{ kind: 'variable-undeclared', block: 'k1', field: 'text', name: 'x' }],
+    ],
+  ])('judges a link href that is %s', (_case, text, problems) => {
+    expect(validate([paragraph(text)], profile)).toEqual(problems);
   });
 
   it('flags a required variable no block prints', () => {

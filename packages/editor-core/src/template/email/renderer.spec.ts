@@ -2,7 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { variableTokens } from '../variables/variable-tokens.js';
+import { hrefProblem } from '../markup/href.js';
 import { markupSamples } from '../markup/inline-markup.fixture.js';
+import { parseInlineMarkup } from '../markup/inline-markup.js';
 import { defineBlock, type EmailBlock, type RenderedBlock } from './block.js';
 import { createRenderContext } from './context.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
@@ -400,7 +402,14 @@ describe('inline markup in text blocks', () => {
     expect(scheme.problems).toContainEqual({ blockId: 'b1', kind: 'href-scheme-refused', name: 'u' });
     const notUrl = draw('[open]({{name}})', { name: 'Mai' });
     expect(notUrl.html).not.toContain('<a href');
-    expect(notUrl.problems).toContainEqual({ blockId: 'b1', kind: 'href-not-url-variable', name: 'name' });
+    expect(notUrl.problems).toContainEqual({ blockId: 'b1', kind: 'href-invalid', name: 'name' });
+  });
+
+  it('renders a link with a fixed href and an encoded inner token', () => {
+    const { html, text } = draw('[Continue {{place}}](https://x.test/p?id={{place}})', { place: 'a&b c' });
+    expect(html).toContain('<a href="https://x.test/p?id=a%26b%20c"');
+    expect(html).toContain('>Continue a&amp;b c</a>');
+    expect(text).toContain('Continue a&b c (https://x.test/p?id=a%26b%20c)');
   });
 
   it('renders malformed markup as its literal text without throwing', () => {
@@ -425,8 +434,9 @@ describe('inline markup in text blocks', () => {
     }
   });
 
-  it('fills, on the text arm, only the names a generated source spells as tokens', () => {
+  it('fills, on the text arm, only the names a generated source spells as tokens, bar those in a refused href', () => {
     // Every name has a url value and type, so a link draws its target and a joined name would be filled too.
+    // `~` survives the encoding an inner href token gets, so a filled name reads the same wherever it sits.
     const everyName = <T>(value: (name: string) => T): Record<string, T> =>
       new Proxy({} as Record<string, T>, {
         get: (_target, name) => (typeof name === 'string' ? value(name) : undefined),
@@ -435,7 +445,7 @@ describe('inline markup in text blocks', () => {
             ? { value: value(name), enumerable: true, configurable: true, writable: false }
             : undefined,
       });
-    const variables = everyName((name) => `https://x.test/@${name}@`);
+    const variables = everyName((name) => `https://x.test/~${name}~`);
     const variableTypes = everyName(() => 'url' as const);
     const mismatches: unknown[] = [];
     for (const source of markupSamples(20000)) {
@@ -445,8 +455,16 @@ describe('inline markup in text blocks', () => {
         () => ({ html: '', text: '' }),
       );
       const { text } = ctx.inline(source);
-      const filled = Array.from(text.matchAll(/@(\w+)@/g), (match) => match[1]).sort();
-      if (filled.join() !== variableTokens(source).sort().join()) mismatches.push({ source, text });
+      const filled = Array.from(text.matchAll(/~(\w+)~/g), (match) => match[1]).sort();
+      const parsed = parseInlineMarkup(source);
+      const refused = parsed.ok
+        ? parsed.runs.flatMap((run) =>
+            run.kind === 'link' && hrefProblem(run.href, () => 'url') !== null ? variableTokens(run.href) : [],
+          )
+        : [];
+      const expected = variableTokens(source);
+      for (const name of refused) expected.splice(expected.indexOf(name), 1);
+      if (filled.join() !== expected.sort().join()) mismatches.push({ source, text });
     }
     expect(mismatches.slice(0, 5)).toEqual([]);
   });

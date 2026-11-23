@@ -77,5 +77,5 @@ export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
     block('emailUnknown', { atom: true }, { block: z.unknown().optional() }),
     { name: 'variable', group: 'inline', atom: true, attrs: z.object({ name: z.string() }) },
   ],
-  marks: [{ name: 'emailLink', htmlTag: 'a', inclusive: false, attrs: z.object({ variable: z.string() }) }],
+  marks: [{ name: 'emailLink', htmlTag: 'a', inclusive: false, attrs: z.object({ href: z.string() }) }],
 };

@@ -1,7 +1,8 @@
+import { hrefProblem, leadingToken } from '../markup/href.js';
 import { parseInlineMarkup, type InlineText } from '../markup/inline-markup.js';
 import { escapeHtml, interpolate } from '../variables/interpolate.js';
 import type { VariableType } from '../variables/variable-type.js';
-import { variableTokens } from '../variables/variable-tokens.js';
+import { VARIABLE_TOKEN, variableTokens } from '../variables/variable-tokens.js';
 import type { Variables } from '../variables/variables.js';
 import type { RenderContext, RenderedBlock, RenderProblem } from './block.js';
 import type { Region } from './region.js';
@@ -18,11 +19,11 @@ export interface RenderState {
   readonly region: Region | 'body';
 }
 
-/** A template that is one token and nothing else, whitespace around it aside. */
-const SINGLE_TOKEN = /^\{\{(\w+)\}\}$/;
-
-/** The schemes a link may carry: a page, or an address to write to. A `javascript:` link runs in a webmail tab. */
+/** The schemes a url value may carry: a page, or an address to write to. A `javascript:` link runs in a webmail tab. */
 const LINK_SCHEME = /^(?:https?:|mailto:)/i;
+
+/** A lone surrogate, which `encodeURIComponent` throws on; a value is a person's text and may hold one. */
+const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
 
 const NO_LINK: RenderedBlock = { html: '', text: '' };
 
@@ -45,6 +46,8 @@ export function createRenderContext(
     const held = Object.hasOwn(state.variables, name) ? state.variables[name] : null;
     return typeof held === 'string' ? held : null;
   };
+  const typeOf = (name: string): VariableType | undefined =>
+    Object.hasOwn(state.variableTypes, name) ? state.variableTypes[name] : undefined;
   const reportMissing = (template: string): void => {
     for (const name of variableTokens(template)) {
       if (valueOf(name) === null) report('variable-missing', name);
@@ -67,21 +70,36 @@ export function createRenderContext(
       return interpolate(template, state.variables, 'text');
     },
     href(template): RenderedBlock {
-      const name = SINGLE_TOKEN.exec(template.trim())?.[1];
-      if (name === undefined || !Object.hasOwn(state.variableTypes, name) || state.variableTypes[name] !== 'url') {
-        report('href-not-url-variable', name);
+      const trimmed = template.trim();
+      const name = leadingToken(trimmed);
+      if (hrefProblem(trimmed, typeOf) !== null) {
+        report('href-invalid', name);
         return NO_LINK;
       }
-      const value = valueOf(name);
-      if (value === null) {
-        report('variable-missing', name);
-        return NO_LINK;
+      let head = '';
+      let rest = trimmed;
+      // Filled as it is, so the value supplies the scheme, which is why only a url value may lead.
+      if (name !== undefined) {
+        const value = valueOf(name);
+        if (value === null) {
+          report('variable-missing', name);
+          return NO_LINK;
+        }
+        if (!LINK_SCHEME.test(value.trim())) {
+          report('href-scheme-refused', name);
+          return NO_LINK;
+        }
+        head = value;
+        rest = trimmed.slice(`{{${name}}}`.length);
       }
-      if (!LINK_SCHEME.test(value.trim())) {
-        report('href-scheme-refused', name);
-        return NO_LINK;
-      }
-      return { html: escapeHtml(value), text: value };
+      // Encoded, so a value holding `&`, `?`, `#` or a space stays one part of the link and changes no other.
+      const tail = rest.replace(VARIABLE_TOKEN, (_token, inner: string) => {
+        const value = valueOf(inner);
+        if (value === null) report('variable-missing', inner);
+        return encodeURIComponent((value ?? '').replace(LONE_SURROGATE, '\uFFFD'));
+      });
+      const href = head + tail;
+      return { html: escapeHtml(href), text: href };
     },
     inline(template): RenderedBlock {
       reportMissing(template);
@@ -104,7 +122,7 @@ export function createRenderContext(
         const label = run.label.map(drawText);
         const labelHtml = label.map((part) => part.html).join('');
         const labelText = label.map((part) => part.text).join('');
-        const href = context.href(`{{${run.variable}}}`);
+        const href = context.href(run.href);
         if (href.html === '') return { html: labelHtml, text: labelText };
         return {
           html: `<a href="${href.html}" style="color:${state.theme.colors.primary};">${labelHtml}</a>`,

@@ -5,8 +5,8 @@ export type EmailBlockKind = 'paragraph' | 'button' | 'code' | 'list' | 'callout
 
 export type ProblemKind =
   | 'variable-undeclared'
-  | 'href-not-url-variable'
-  | 'link-not-url-variable'
+  | 'href-invalid'
+  | 'link-invalid'
   | 'required-variable-not-printed'
   | 'markup-malformed'
   | 'block-not-allowed'

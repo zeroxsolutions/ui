@@ -25,7 +25,7 @@ export interface RenderedBlock {
 
 export type RenderProblemKind =
   | 'variable-missing'
-  | 'href-not-url-variable'
+  | 'href-invalid'
   | 'href-scheme-refused'
   | 'unknown-block-type'
   | 'block-nested-too-deep';
