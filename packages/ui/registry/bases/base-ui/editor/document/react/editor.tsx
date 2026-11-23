@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EditorContent } from '@tiptap/react';
 import {
@@ -12,7 +12,9 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { Delta, IEditor, EditorFeature, DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import { createNodeViewRenderer } from '../node-view-adapter';
+import { EditorBlockMenu } from './editor-block-menu';
 
 /**
  * The editable `<Editor/>` surface. It mounts the engine-backed editor into a
@@ -126,6 +128,32 @@ export function Editor({ features, content, editable = true, className, onReady,
       handleEl.removeEventListener('pointerleave', stop);
     };
   }, [handleEl]);
+  // A press that moves under this many pixels is a click on the grip; more is the start of a drag.
+  const [menu, setMenu] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const blockMenuItems = useMemo(() => collectUiContributions(features ?? []).blockMenu, [features]);
+  useEffect(() => {
+    if (!handleEl || blockMenuItems.length === 0) return;
+    let down: { x: number; y: number } | null = null;
+    const press = (event: PointerEvent) => {
+      down = { x: event.clientX, y: event.clientY };
+    };
+    const click = (event: MouseEvent) => {
+      const moved = down ? Math.hypot(event.clientX - down.x, event.clientY - down.y) : 0;
+      down = null;
+      const editor = editorRef.current;
+      if (moved >= 4 || !editor?.isEditable()) return;
+      const rect = handleEl.getBoundingClientRect();
+      if (!editor.run('selectBlockAt', { y: rect.top + rect.height / 2 })) return;
+      setMenu({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+    };
+    handleEl.addEventListener('pointerdown', press);
+    handleEl.addEventListener('click', click);
+    return () => {
+      handleEl.removeEventListener('pointerdown', press);
+      handleEl.removeEventListener('click', click);
+    };
+  }, [handleEl, blockMenuItems]);
+
   useEffect(() => {
     if (!handleEl) {
       setGripHost(null);
@@ -251,6 +279,19 @@ export function Editor({ features, content, editable = true, className, onReady,
           </span>,
           gripHost,
         )}
+      {plusHost && editorRef.current && blockMenuItems.length > 0 && (
+        <EditorBlockMenu
+          editor={editorRef.current}
+          items={blockMenuItems}
+          open={menu !== null}
+          anchor={menu}
+          onOpenChange={(open) => {
+            if (open) return;
+            setMenu(null);
+            editorRef.current?.focus();
+          }}
+        />
+      )}
       {plusHost &&
         plus &&
         !plus.hidden &&

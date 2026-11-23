@@ -79,7 +79,6 @@ const PIECES: Record<string, string[]> = {
     'cn-button cn-button-variant-ghost cn-button-size-icon-sm',
     '<Button',
   ],
-  'document/ui/block-menu.tsx': ['<Button'],
   'document/features/math/math.tsx': ['cn-editor-block', 'cn-editor-inline'],
   'mermaid/react/preview.tsx': ['cn-editor-diagram'],
   'document/features/image/image.tsx': ['cn-editor-block'],

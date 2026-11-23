@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
-import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { page, userEvent } from 'vitest/browser';
+import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../test/nova-style.css';
 // The editor's own sheet, which places the handle in the gutter and takes the pointer from it while it is
 // hidden. Without it the hidden handle sits in the flow under the block, and a pointer an earlier spec
 // file left resting there enters it before the spec hovers it.
 import '../../styles.css';
+import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { standardKit } from '../features/standard/index';
 import { Editor } from './editor';
 
@@ -103,5 +104,103 @@ describe('the block handle of the document editor', () => {
     await userEvent.hover(handle);
     expect(handle.classList.contains('hide')).toBe(false);
     expect(plus()).not.toBeNull();
+  });
+});
+
+const paragraphs = (...texts: string[]): DocJSON => ({
+  type: 'doc',
+  content: texts.map((text) => ({ type: 'paragraph', content: [{ type: 'text', text }] })),
+});
+
+/** Mounts the editor on `texts` and points at the block at `index`, so the handle sits beside it. */
+async function mountBlocks(texts: string[], index: number, extra: EditorFeature[] = []) {
+  let editor: IEditor | undefined;
+  await render(
+    <div className="style-nova" style={{ padding: '0 80px' }}>
+      <Editor
+        features={[standardKit(), ...extra]}
+        content={paragraphs(...texts)}
+        onReady={(ready: IEditor) => (editor = ready)}
+      />
+    </div>,
+  );
+  const blocks = await vi.waitFor(() => {
+    const found = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror p'));
+    if (found.length !== texts.length) throw new Error('the editor is not mounted');
+    return found;
+  });
+  await userEvent.hover(blocks[index]);
+  const handle = await vi.waitFor(() => {
+    const found = document.querySelector<HTMLElement>('.drag-handle');
+    if (!found || found.classList.contains('hide')) throw new Error('the handle is hidden');
+    return found;
+  });
+  const textsNow = () => (editor!.getJSON().content ?? []).map((block) => block.content?.[0]?.text);
+  return { blocks, handle, texts: textsNow, editor: () => editor! };
+}
+
+const types = (editor: IEditor) => (editor.getJSON().content ?? []).map((block) => block.type);
+
+describe('the block menu the grip opens', () => {
+  it('opens a Block actions menu with Duplicate and Delete on a click of the grip', async () => {
+    const { handle } = await mountBlocks(['first', 'second'], 1);
+    await userEvent.click(handle);
+    const menu = page.getByRole('menu', { name: 'Block actions' });
+    await expect.element(menu).toBeVisible();
+    await expect.element(menu.getByRole('menuitem', { name: 'Duplicate' })).toBeVisible();
+    await expect.element(menu.getByRole('menuitem', { name: 'Delete' })).toBeVisible();
+  });
+
+  it('deletes the block under the grip and no other', async () => {
+    const { handle, texts } = await mountBlocks(['first', 'second'], 1);
+    await userEvent.click(handle);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(texts()).toEqual(['first']));
+  });
+
+  it('duplicates the block under the grip below it', async () => {
+    const { handle, texts } = await mountBlocks(['first', 'second'], 1);
+    await userEvent.click(handle);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() => expect(texts()).toEqual(['first', 'second', 'second']));
+  });
+
+  it('turns the block into a heading from Turn into', async () => {
+    const { handle, editor } = await mountBlocks(['first', 'second'], 1);
+    await userEvent.click(handle);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Heading 1' }));
+    await vi.waitFor(() => expect(types(editor()).slice(0, 2)).toEqual(['paragraph', 'heading']));
+  });
+
+  it('moves the block and opens no menu when the grip is pressed and dragged past the next block', async () => {
+    const { handle, blocks, texts } = await mountBlocks(['first', 'second', 'third'], 0);
+    // One jump from the grip to the target starts no drag; the browser needs the pointer to travel.
+    await userEvent.dragAndDrop(handle, blocks[2], { steps: 10 });
+    await vi.waitFor(() => expect(texts()).toEqual(['second', 'third', 'first']));
+    expect(page.getByRole('menu').elements()).toHaveLength(0);
+  });
+
+  it('renders items sharing a group as radios, checks the active one and disables one that names a reason', async () => {
+    const aligns = defineFeature({
+      id: 'aligns',
+      blockMenu: [
+        { id: 'left', title: 'Left', group: 'Align', command: 'focus', active: () => true },
+        {
+          id: 'right',
+          title: 'Right',
+          group: 'Align',
+          command: 'focus',
+          disabledReason: () => 'Locked by the template',
+        },
+      ],
+    });
+    const { handle } = await mountBlocks(['first'], 0, [aligns]);
+    await userEvent.click(handle);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Left' })).toBeChecked();
+    await expect.element(page.getByRole('menuitemradio', { name: 'Right' })).toBeDisabled();
+    await userEvent.hover(page.getByRole('menuitemradio', { name: 'Right' }), { force: true });
+    await expect.element(page.getByText('Locked by the template')).toBeVisible();
   });
 });

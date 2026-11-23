@@ -19,7 +19,6 @@ import {
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../test/nova-style.css';
 import { ArrowUpIcon } from '@/registry/bases/base-ui/icons/lucide/arrow-up-icon';
@@ -43,7 +42,6 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
-import { BlockMenu } from './block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
 import { EditorToolbar } from './editor-toolbar';
@@ -126,33 +124,6 @@ describe('the size of an icon the chrome draws', () => {
     );
     const menu = await vi.waitFor(() => {
       const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
-      return found;
-    });
-    expectSameAsBefore(svgWidths(menu));
-  });
-
-  it('keeps a block menu icon at the size the lucide element had', { timeout: 30_000 }, async () => {
-    const container = document.createElement('div');
-    // The handle sits 28px left of the block, so keep the block inside the viewport.
-    container.style.marginLeft = '100px';
-    container.innerHTML = '<div class="ProseMirror"><p>text</p></div>';
-    document.body.append(container);
-    await render(
-      <Nova>
-        <BlockMenu editor={editor} container={container} items={items} />
-      </Nova>,
-    );
-    const block = container.querySelector('p')!.getBoundingClientRect();
-    container.dispatchEvent(new MouseEvent('mousemove', { clientY: block.top + 1 }));
-    const handle = await vi.waitFor(() => {
-      const found = document.querySelector<HTMLElement>('[aria-label="Block actions"]');
-      if (!found) throw new Error('no handle');
-      return found;
-    });
-    await userEvent.click(handle);
-    const menu = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=dropdown-menu-content]');
       if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
       return found;
     });

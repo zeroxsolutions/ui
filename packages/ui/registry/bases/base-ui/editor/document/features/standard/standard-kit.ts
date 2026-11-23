@@ -22,7 +22,7 @@ export interface StandardKitOptions {
   dragHandle?: boolean;
 }
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
-import { standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
+import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 
 /**
  * The standard block set (L1–L2): headings, bullet/ordered/task lists,
@@ -45,6 +45,7 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
     slash: standardSlashItems,
     toolbar: standardToolbarItems,
     bubble: standardBubbleItems,
+    blockMenu: standardBlockMenuItems,
     advanced: {
       engineExtensions: [
         StarterKit.configure({

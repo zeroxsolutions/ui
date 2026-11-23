@@ -12,7 +12,14 @@ import { MinusIcon } from '@/registry/bases/base-ui/icons/lucide/minus-icon';
 import { StrikethroughIcon } from '@/registry/bases/base-ui/icons/lucide/strikethrough-icon';
 import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
 import { UnderlineIcon } from '@/registry/bases/base-ui/icons/lucide/underline-icon';
-import type { BubbleItem, SlashItem, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
+import { CopyIcon } from '@/registry/bases/base-ui/icons/lucide/copy-icon';
+import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
+import type {
+  BlockMenuItem,
+  BubbleItem,
+  SlashItem,
+  ToolbarItem,
+} from '@zeroxsolutions/editor-core/document/core/index';
 
 /** Slash-menu insert items for the standard blocks. */
 export const standardSlashItems: SlashItem[] = [
@@ -138,3 +145,32 @@ export const standardToolbarItems: ToolbarItem[] = [
 ];
 
 export const standardBubbleItems: BubbleItem[] = standardToolbarItems;
+
+const turnInto = (
+  id: string,
+  title: string,
+  command: string,
+  node: string,
+  args?: Record<string, unknown>,
+): BlockMenuItem => ({
+  id: `turn-into-${id}`,
+  title,
+  group: 'Turn into',
+  command,
+  args,
+  active: (editor) => editor.isActive(node, args),
+});
+
+/** The grip menu of the standard blocks: turn the block into another, copy it, remove it. */
+export const standardBlockMenuItems: BlockMenuItem[] = [
+  turnInto('text', 'Text', 'setParagraph', 'paragraph'),
+  turnInto('heading-1', 'Heading 1', 'toggleHeading', 'heading', { level: 1 }),
+  turnInto('heading-2', 'Heading 2', 'toggleHeading', 'heading', { level: 2 }),
+  turnInto('heading-3', 'Heading 3', 'toggleHeading', 'heading', { level: 3 }),
+  turnInto('bulleted-list', 'Bulleted list', 'toggleBulletList', 'bulletList'),
+  turnInto('numbered-list', 'Numbered list', 'toggleOrderedList', 'orderedList'),
+  turnInto('to-do-list', 'To-do list', 'toggleTaskList', 'taskList'),
+  turnInto('quote', 'Quote', 'toggleBlockquote', 'blockquote'),
+  { id: 'duplicate', title: 'Duplicate', icon: CopyIcon, command: 'duplicateBlock' },
+  { id: 'delete', title: 'Delete', icon: TrashIcon, command: 'deleteBlock', separatorBefore: true },
+];

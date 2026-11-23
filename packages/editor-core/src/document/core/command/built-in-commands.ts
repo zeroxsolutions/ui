@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/core';
+import { NodeSelection } from '@tiptap/pm/state';
 import { z } from 'zod';
 import { CONTENT_LOAD_META } from '../engine/content-load.js';
 import type { EngineHandle } from '../engine/engine-handle.js';
@@ -30,6 +31,22 @@ export function loadContent(handle: EngineHandle, content: unknown): boolean {
     })
     .setContent(content as Parameters<Editor['commands']['setContent']>[0])
     .run();
+}
+
+type PmNode = Editor['state']['doc'];
+
+/** A lane is a column's container: its blocks are the ones the grip reaches inside a columns block. */
+const LANE = 'emailLane';
+
+/** Clears every `id` in a copied block, so the copy is a new block the host has not named. */
+function withoutIds(json: Record<string, unknown>): Record<string, unknown> {
+  const attrs = json.attrs as Record<string, unknown> | undefined;
+  const content = json.content as Record<string, unknown>[] | undefined;
+  return {
+    ...json,
+    ...(attrs && 'id' in attrs ? { attrs: { ...attrs, id: null } } : {}),
+    ...(content ? { content: content.map(withoutIds) } : {}),
+  };
 }
 
 export function makeBuiltInCommands(handle: EngineHandle): Record<string, ResolvedCommand> {
@@ -140,6 +157,53 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
         } catch {
           return false;
         }
+      },
+    },
+    // Select, as a whole, the top-level block or the lane block under viewport `y`: what the grip's
+    // menu acts on. Rects come from the DOM for the reason `insertBlockAt` gives.
+    selectBlockAt: {
+      args: z.object({ y: z.number() }),
+      run: ({ y }) => {
+        try {
+          const { view } = editor;
+          const under = (parent: PmNode, start: number): number | null => {
+            let found: number | null = null;
+            parent.forEach((child, offset) => {
+              const pos = start + offset;
+              const dom = view.nodeDOM(pos);
+              if (found !== null || !(dom instanceof HTMLElement)) return;
+              const rect = dom.getBoundingClientRect();
+              if (y < rect.top || y > rect.bottom) return;
+              found = pos;
+              child.forEach((lane, laneOffset) => {
+                if (lane.type.name !== LANE) return;
+                const inside = under(lane, pos + 1 + laneOffset + 1);
+                if (inside !== null) found = inside;
+              });
+            });
+            return found;
+          };
+          const pos = under(view.state.doc, 0);
+          if (pos === null) return false;
+          view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)));
+          return true;
+        } catch {
+          return false;
+        }
+      },
+    },
+    duplicateBlock: {
+      run: () => {
+        const { selection } = editor.state;
+        if (!(selection instanceof NodeSelection)) return false;
+        const copy = withoutIds(selection.node.toJSON() as Record<string, unknown>);
+        return editor.chain().insertContentAt(selection.to, copy).run();
+      },
+    },
+    deleteBlock: {
+      run: () => {
+        if (!(editor.state.selection instanceof NodeSelection)) return false;
+        return editor.chain().deleteSelection().run();
       },
     },
     deleteNode: {

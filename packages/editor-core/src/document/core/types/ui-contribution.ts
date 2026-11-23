@@ -1,3 +1,5 @@
+import type { IEditor } from './editor.js';
+
 /**
  * UI a feature contributes to the editor chrome (see the `editor-feature-api`
  * spec). Each item is declarative and refers to a command **by name** — it holds
@@ -45,4 +47,10 @@ export interface BlockMenuItem {
   args?: unknown;
   /** Renders a divider before this item. */
   separatorBefore?: boolean;
+  /** Items sharing a group render as one labelled submenu of radio items. */
+  group?: string;
+  /** Whether the item is the block's current choice: its radio is checked. */
+  active?(editor: IEditor): boolean;
+  /** Why the item cannot run now, or `null` when it can: it renders disabled and names the reason. */
+  disabledReason?(editor: IEditor): string | null;
 }

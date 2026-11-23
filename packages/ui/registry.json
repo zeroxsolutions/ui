@@ -1139,6 +1139,7 @@
         "@shadcn/utils",
         "@zui/lucide-letter-b-icon",
         "@zui/lucide-code-icon",
+        "@zui/lucide-copy-icon",
         "@zui/editor-theme",
         "@zui/lucide-grip-vertical-icon",
         "@zui/lucide-heading-1-icon",
@@ -1153,9 +1154,15 @@
         "@zui/lucide-plus-icon",
         "@zui/lucide-strikethrough-icon",
         "@zui/lucide-text-quote-icon",
+        "@zui/lucide-trash-icon",
         "@zui/lucide-underline-icon"
       ],
       "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/react/editor-block-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/react/editor-block-menu.tsx"
+        },
         {
           "path": "registry/bases/base-ui/editor/document/react/editor.tsx",
           "type": "registry:component",
@@ -1210,11 +1217,6 @@
           "path": "registry/bases/base-ui/editor/document/serialize/render-to-react.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/serialize/render-to-react.tsx"
-        },
-        {
-          "path": "registry/bases/base-ui/editor/document/ui/block-menu.tsx",
-          "type": "registry:component",
-          "target": "@components/editor/document/ui/block-menu.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/document/ui/bubble-menu.tsx",
