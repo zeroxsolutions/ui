@@ -8,7 +8,13 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
+import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
+import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 import { TaskItemView } from './task-item-view';
+
+/** The width the drag handle is given. The handle looks this much plus 50px right of the pointer for the node it
+ *  drags, and the grip's menu reads it back from the engine to look at the same point. */
+const DRAG_HANDLE_WIDTH_PX = 24;
 
 /** Options for the standard block set. */
 export interface StandardKitOptions {
@@ -26,15 +32,6 @@ export interface StandardKitOptions {
    */
   trailingNode?: boolean;
 }
-import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
-
-/** The width the drag handle is given, which also sets where it looks for the node beside it. */
-export const DRAG_HANDLE_WIDTH_PX = 24;
-
-/** How far right of the pointer the drag handle looks for the node it shows beside and drags: the extension's
- *  fixed 50px plus the handle's width. */
-export const DRAG_HANDLE_REACH_PX = 50 + DRAG_HANDLE_WIDTH_PX;
-import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 
 /**
  * The standard block set (L1–L2): headings, bullet/ordered/task lists,

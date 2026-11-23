@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DRAG_HANDLE_REACH_PX, DRAG_HANDLE_WIDTH_PX } from './standard-kit';
 
 const require = createRequire(import.meta.url);
 const UI_ROOT = resolve(import.meta.dirname, '../../../../../../..');
@@ -25,12 +24,17 @@ describe('the grip menu and the drag handle extension it follows', () => {
     expect(menu!.split(', ')).toEqual(quoted(extension!));
   });
 
-  it('reaches as far right of the pointer as the extension does', () => {
+  it('reaches as far right of the pointer as the extension does, reading its width under its name', () => {
     const offsets = [...extensionSource.matchAll(/clientX \+ (\d+) \+ options\.dragHandleWidth/g)].map(([, n]) =>
       Number(n),
     );
+    const offset = Number(commandsSource.match(/const DRAG_HANDLE_OFFSET_PX = (\d+);/)?.[1]);
+    const width = Number(commandsSource.match(/const DRAG_HANDLE_DEFAULT_WIDTH_PX = (\d+);/)?.[1]);
     expect(offsets.length).toBeGreaterThan(0);
-    for (const offset of offsets) expect(offset + DRAG_HANDLE_WIDTH_PX).toBe(DRAG_HANDLE_REACH_PX);
+    for (const found of offsets) expect(found).toBe(offset);
+    expect(extensionSource).toMatch(new RegExp(`dragHandleWidth: ${width},`));
+    expect(extensionSource).toContain("name: 'globalDragHandle'");
+    expect(commandsSource).toContain("extension.name === 'globalDragHandle'");
   });
 
   it('lifts a node deeper than a list item to its parent, as dragTargetAt assumes', () => {

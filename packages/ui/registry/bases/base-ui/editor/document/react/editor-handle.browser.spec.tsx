@@ -171,13 +171,13 @@ function holding(selector: string, text: string): HTMLElement {
 }
 
 /** Points at the left of `element`'s first line, as an author reaching for its grip does, and waits for the
- *  handle to sit beside that line. */
-async function gripBeside(element: HTMLElement): Promise<HTMLElement> {
+ *  handle to sit beside that line, or beside `besides` when the handle stands beside a block holding it. */
+async function gripBeside(element: HTMLElement, besides = element): Promise<HTMLElement> {
   await userEvent.hover(element, { position: { x: 4, y: 4 } });
   return vi.waitFor(() => {
     const handle = document.querySelector<HTMLElement>('.drag-handle');
     const top = handle?.getBoundingClientRect().top ?? -1;
-    const rect = element.getBoundingClientRect();
+    const rect = besides.getBoundingClientRect();
     if (!handle || handle.classList.contains('hide') || top < rect.top - 12 || top > rect.bottom) {
       throw new Error('the handle is not beside the element');
     }
@@ -421,29 +421,87 @@ describe('the block a grip addresses inside another block', () => {
     await vi.waitFor(() => expect(lanesOf(editor())).toEqual([['l1', 'l2'], ['r2']]));
   });
 
+  it('drags the whole columns block from the grip beside its first line', async () => {
+    const { blocks, editor } = await mountDocument(laneDoc, 1, [columns]);
+    await userEvent.dragAndDrop(await gripBeside(holding('.ProseMirror p', 'l1')), blocks[1], { steps: 10 });
+    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'emailColumns', 'paragraph']));
+    expect(editor().getJSON().content?.[1]).toEqual(twoLanes(['l1', 'l2'], ['r1', 'r2']));
+  });
+
+  const tableDoc: DocJSON = {
+    type: 'doc',
+    content: [
+      {
+        type: 'table',
+        content: [
+          {
+            type: 'tableRow',
+            content: [
+              { type: 'tableCell', content: [line('c1'), line('c2')] },
+              { type: 'tableCell', content: [line('d1')] },
+            ],
+          },
+        ],
+      },
+      line('after'),
+    ],
+  };
+
   it('deletes only the later paragraph of a table cell whose grip opened the menu', async () => {
-    const doc: DocJSON = {
-      type: 'doc',
-      content: [
-        {
-          type: 'table',
-          content: [
-            {
-              type: 'tableRow',
-              content: [
-                { type: 'tableCell', content: [line('c1'), line('c2')] },
-                { type: 'tableCell', content: [line('d1')] },
-              ],
-            },
-          ],
-        },
-        line('after'),
-      ],
-    };
-    const { editor } = await mountDocument(doc, 1, [table()]);
+    const { editor } = await mountDocument(tableDoc, 1, [table()]);
     await userEvent.click(await gripBeside(holding('.ProseMirror td p', 'c2')));
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(cellsOf(editor())).toEqual([['c1'], ['d1']]));
+  });
+
+  it('duplicates the later paragraph of a table cell inside that cell, adding no cell', async () => {
+    const { editor } = await mountDocument(tableDoc, 1, [table()]);
+    await userEvent.click(await gripBeside(holding('.ProseMirror td p', 'c2')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() => expect(cellsOf(editor())).toEqual([['c1', 'c2', 'c2'], ['d1']]));
+  });
+
+  it('drags the whole table from the grip beside its first line', async () => {
+    const { blocks, editor } = await mountDocument(tableDoc, 1, [table()]);
+    const grip = await gripBeside(holding('.ProseMirror td p', 'c1'), blocks[0]);
+    await userEvent.dragAndDrop(grip, blocks[1], { steps: 10 });
+    // The editor keeps a paragraph below a last block that is not one.
+    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'table', 'paragraph']));
+    expect(editor().getJSON().content?.[1]).toMatchObject({
+      content: [{ content: [{ content: [line('c1'), line('c2')] }, { content: [line('d1')] }] }],
+    });
+  });
+
+  const quoteInItem: DocJSON = {
+    type: 'doc',
+    content: [
+      {
+        type: 'bulletList',
+        content: [
+          { type: 'listItem', content: [line('one'), { type: 'blockquote', content: [line('quoted')] }] },
+          { type: 'listItem', content: [line('two')] },
+        ],
+      },
+      line('after'),
+    ],
+  };
+  const quotesIn = (editor: IEditor) => JSON.stringify(editor.getJSON().content?.[0]).includes('blockquote');
+
+  it('deletes only the quote inside a list item whose grip opened the menu', async () => {
+    const { editor } = await mountDocument(quoteInItem, 1);
+    await userEvent.click(await gripBeside(holding('.ProseMirror li blockquote', 'quoted')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(quotesIn(editor())).toBe(false));
+    expect(itemsOf(editor(), 0)).toEqual(['one', 'two']);
+  });
+
+  it('drags only the quote inside a list item out of it, the list kept', async () => {
+    const { blocks, editor } = await mountDocument(quoteInItem, 1);
+    const grip = await gripBeside(holding('.ProseMirror li blockquote', 'quoted'));
+    await userEvent.dragAndDrop(grip, blocks[1], { steps: 10 });
+    await vi.waitFor(() => expect(types(editor())).toEqual(['bulletList', 'paragraph', 'blockquote', 'paragraph']));
+    expect(itemsOf(editor(), 0)).toEqual(['one', 'two']);
+    expect(quotesIn(editor())).toBe(false);
   });
 
   it('opens the menu with Mod-/ on the list item holding the caret, not its whole list', async () => {

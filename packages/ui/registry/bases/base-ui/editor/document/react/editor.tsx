@@ -13,7 +13,6 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { Delta, IEditor, EditorFeature, DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
-import { DRAG_HANDLE_REACH_PX } from '../features/standard/standard-kit';
 import { createNodeViewRenderer } from '../node-view-adapter';
 import { EditorBlockMenu } from './editor-block-menu';
 
@@ -35,13 +34,6 @@ export interface EditorProps {
   onChange?(delta: Delta): void;
   /** The block menu's accessible name, in the host's words. Default: `Block actions`. */
   blockMenuLabel?: string;
-}
-
-/** The part of the engine's view the grip's drag replaces: what it drags and the clipboard form of that. */
-interface DragView {
-  state: { selection: { from: number; to: number; content(): unknown } };
-  dragging: { slice: unknown; move: boolean } | null;
-  serializeForClipboard(slice: unknown): { dom: HTMLElement; text: string };
 }
 
 /** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
@@ -165,7 +157,7 @@ export function Editor({
       const editor = editorRef.current;
       if (moved >= GRIP_CLICK_SLOP_PX || !editor?.isEditable()) return;
       const rect = handleEl.getBoundingClientRect();
-      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + DRAG_HANDLE_REACH_PX })) return;
+      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX, grip: true })) return;
       setMenu({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
     };
     handleEl.addEventListener('pointerdown', onPress);
@@ -176,30 +168,22 @@ export function Editor({
     };
   }, [handleEl, blockMenuItems]);
 
-  // The extension's `dragstart` listener, added when the editor was built and so run before this one, drags
-  // the node its own lookup lifts to, which beside a later block of a lane or a table cell is the whole lane
-  // or cell. This one puts the block the menu acts on in its place, so a drag moves what a click opens the
-  // menu on. A range the author selected, which the extension drags as it is, is left alone.
+  // The extension's `dragstart` listener was added when the editor was built, so `dragBlockAt` runs after it
+  // and replaces what it dragged with the block the grip's menu acts on.
   useEffect(() => {
-    const view = (engine as { view?: DragView } | null)?.view;
-    if (!handleEl || !view) return;
+    if (!handleEl) return;
     const onDragStart = (event: DragEvent) => {
-      const editor = editorRef.current;
-      const dragged = view.state.selection;
-      if (!event.dataTransfer || !editor || !('node' in dragged)) return;
-      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + DRAG_HANDLE_REACH_PX })) return;
-      const { selection } = view.state;
-      if (selection.from === dragged.from && selection.to === dragged.to) return;
-      const slice = selection.content();
-      const { dom, text } = view.serializeForClipboard(slice);
-      event.dataTransfer.clearData();
-      event.dataTransfer.setData('text/html', dom.innerHTML);
-      event.dataTransfer.setData('text/plain', text);
-      view.dragging = { slice, move: event.ctrlKey };
+      if (!event.dataTransfer) return;
+      editorRef.current?.run('dragBlockAt', { y: event.clientY, x: event.clientX, data: event.dataTransfer });
     };
+    const onDragEnd = () => editorRef.current?.run('endBlockDrag');
     handleEl.addEventListener('dragstart', onDragStart);
-    return () => handleEl.removeEventListener('dragstart', onDragStart);
-  }, [handleEl, engine]);
+    handleEl.addEventListener('dragend', onDragEnd);
+    return () => {
+      handleEl.removeEventListener('dragstart', onDragStart);
+      handleEl.removeEventListener('dragend', onDragEnd);
+    };
+  }, [handleEl]);
 
   // The keyboard way to the same menu: Mod-/ picks what the grip beside the caret would, such as the list item
   // holding it, and opens the menu at that block.
