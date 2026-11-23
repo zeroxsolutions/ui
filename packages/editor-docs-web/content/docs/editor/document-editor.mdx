@@ -394,7 +394,22 @@ interactions a static render cannot give.
 It renders the document with `data-editor="document"` and the `document-editor prose` classes its styles
 key on. Beside each block it draws a grip and an "Insert block below" button, which opens the slash menu on
 a new line. A click on the grip, or Mod-/ in the block, opens the block menu: Turn into, Duplicate and
-Delete. Dragging the grip moves the block.
+Delete. The menu acts on the node a drag of that grip moves, so the grip beside a list item opens it on that
+item. Mod-/ inside a code block's editor stays with the code. Turn into appears only on a block of text.
+
+The menu draws the `blockMenu` items of `features`. Besides `id`, `title`, `icon`, `command`, `args` and
+`separatorBefore`, an item takes these fields:
+
+| Field            | Type                                   | What it does                                                                             |
+| ---------------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `group`          | `string`                               | Items with the same group are one submenu, labelled with the group, holding radio items. |
+| `active`         | `(editor: IEditor) => boolean`         | When it returns true, the item's radio is checked.                                       |
+| `visible`        | `(editor: IEditor) => boolean`         | When it returns false for the selected block, the item is left out. Default: shown.      |
+| `disabledReason` | `(editor: IEditor) => string \| null`  | A string disables the item, and its tooltip shows that string. `null` leaves it enabled. |
+| `items`          | `(editor: IEditor) => BlockMenuItem[]` | Read each time the menu opens; the items it returns are drawn in place of this one.      |
+| `destructive`    | `boolean`                              | Draws the item in the destructive style, as Delete is.                                   |
+
+Each function reads the block the grip selected, which is the editor's selection while the menu is open.
 
 ### Viewer
 
