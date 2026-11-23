@@ -42,6 +42,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import { InputGroupButton } from '@/registry/bases/base-ui/ui/input-group';
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
+import { EditorBlockMenu } from '../react/editor-block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
 import { EditorToolbar } from './editor-toolbar';
@@ -124,6 +125,26 @@ describe('the size of an icon the chrome draws', () => {
     );
     const menu = await vi.waitFor(() => {
       const found = document.querySelector('[data-slot=slash-menu]');
+      if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
+      return found;
+    });
+    expectSameAsBefore(svgWidths(menu));
+  });
+
+  it('keeps a block menu icon at the size the lucide element had', async () => {
+    await render(
+      <Nova>
+        <EditorBlockMenu
+          editor={editor}
+          items={items}
+          open
+          onOpenChange={() => {}}
+          anchor={{ top: 10, left: 100, width: 24, height: 24 }}
+        />
+      </Nova>,
+    );
+    const menu = await vi.waitFor(() => {
+      const found = document.querySelector('[data-slot=dropdown-menu-content]');
       if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
       return found;
     });

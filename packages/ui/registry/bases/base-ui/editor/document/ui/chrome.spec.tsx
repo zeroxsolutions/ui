@@ -4,6 +4,9 @@ import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EditorSelection, IEditor, TriggerQuery } from '@zeroxsolutions/editor-core/document/core/index';
 import { standardKit, callout } from '../features/index';
+import { Heading1Icon } from '@/registry/bases/base-ui/icons/lucide/heading-1-icon';
+import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
+import { EditorBlockMenu } from '../react/editor-block-menu';
 import { BubbleMenu } from './bubble-menu';
 import { EditorToolbar } from './editor-toolbar';
 import { SlashMenu } from './slash-menu';
@@ -342,6 +345,37 @@ describe('SlashMenu icons', () => {
     expect(handles.heading2.startAnimation).not.toHaveBeenCalled();
 
     fireEvent.keyDown(document, { key: 'ArrowDown' });
+    expect(handles.heading2.startAnimation).toHaveBeenCalledTimes(1);
+    expect(handles.heading1.stopAnimation).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('EditorBlockMenu icons', () => {
+  it("starts a row's icon when the arrow keys highlight it, because Base UI moves focus to the highlighted row", async () => {
+    const items = [
+      { id: 'one', title: 'One', icon: Heading1Icon, command: 'x' },
+      { id: 'two', title: 'Two', icon: Heading2Icon, command: 'x' },
+    ];
+    render(
+      <EditorBlockMenu
+        editor={fakeEditor()}
+        items={items}
+        open
+        onOpenChange={() => {}}
+        anchor={{ top: 10, left: 100, width: 24, height: 24 }}
+      />,
+    );
+    await settle();
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-slot="dropdown-menu-item"]'));
+    expect(rows).toHaveLength(2);
+
+    await act(async () => rows[0].focus());
+    expect(handles.heading1.startAnimation).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(rows[0], { key: 'ArrowDown' });
+    await settle();
+    // The highlight is the focus: the second row holds it, its icon started, the first one stopped.
+    expect(document.activeElement).toBe(rows[1]);
+    expect(rows[1].hasAttribute('data-highlighted')).toBe(true);
     expect(handles.heading2.startAnimation).toHaveBeenCalledTimes(1);
     expect(handles.heading1.stopAnimation).toHaveBeenCalledTimes(1);
   });
