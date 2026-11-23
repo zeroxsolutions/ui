@@ -358,9 +358,10 @@ function marks(source: string): string | undefined {
 
 /**
  * Whether `translation` carries the bold spans, italic spans and links `source` does, each link with the
- * tokens its href spells; their order within a text is not compared, and a malformed side is never the same. A list compares item by item, in order,
- * and must have as many items; a string compares as a list of one. Pass only marked text, never a whole
- * block's content: a button label, code or html is plain, and one stray `_` in it would refuse both sides.
+ * tokens its href spells; their order within a text is not compared, and a malformed side is never the
+ * same. A list compares item by item, in order, and must have as many items; a string compares as a list
+ * of one. Pass only marked text, never a whole block's content: a button label, code or html is plain, and
+ * one stray `_` in it would refuse both sides.
  */
 export function sameInlineMarkup(source: string | readonly string[], translation: string | readonly string[]): boolean {
   const left = typeof source === 'string' ? [source] : source;

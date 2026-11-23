@@ -1,3 +1,4 @@
+import { variableTokens } from '../variables/variable-tokens.js';
 import type { VariableType } from '../variables/variable-type.js';
 
 /** The schemes an href may open with as written: a page, or an address to write to. */
@@ -22,4 +23,22 @@ export function hrefProblem(href: string, typeOf: (name: string) => VariableType
   if (FIXED_SCHEME.test(trimmed)) return null;
   const name = leadingToken(trimmed);
   return name !== undefined && typeOf(name) === 'url' ? null : 'href-invalid';
+}
+
+/** A problem an author can fix in an href: a token naming no declaration, or a start that cannot be sent. */
+export type HrefProblem = { kind: 'variable-undeclared'; name: string } | { kind: 'href-invalid' };
+
+/**
+ * What an author is told about `href`: each name its tokens spell that `typeOf` does not know, once, then
+ * `href-invalid` when `hrefProblem` refuses it. An href that opens with an undeclared token gets no
+ * `href-invalid`: its type is unknown until it is declared, which may make it valid. The renderer, which
+ * sends nothing it cannot fill, still refuses such an href through `hrefProblem`.
+ */
+export function hrefProblems(href: string, typeOf: (name: string) => VariableType | undefined): HrefProblem[] {
+  const trimmed = href.trim();
+  const undeclared = [...new Set(variableTokens(trimmed))].filter((name) => typeOf(name) === undefined);
+  const problems: HrefProblem[] = undeclared.map((name) => ({ kind: 'variable-undeclared', name }));
+  const leading = leadingToken(trimmed);
+  if (leading !== undefined && typeOf(leading) === undefined) return problems;
+  return hrefProblem(trimmed, typeOf) === null ? problems : [...problems, { kind: 'href-invalid' }];
 }

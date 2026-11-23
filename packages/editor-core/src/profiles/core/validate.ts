@@ -1,4 +1,4 @@
-import { hrefProblem, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
+import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
 import { leadingToken } from '../../template/markup/href.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
@@ -59,14 +59,9 @@ function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' |
   }
 }
 
-/**
- * Whether `href` is faulty in itself. One that opens with an undeclared token is not: its type is unknown
- * until it is declared, so that token's `variable-undeclared` is its one problem.
- */
+/** Whether `href` cannot be sent as written; an undeclared token is `checkTokens`' to report. */
 function hrefFaulty(walk: Walk, href: string): boolean {
-  const name = leadingToken(href);
-  if (name !== undefined && declaredType(walk, name) === undefined) return false;
-  return hrefProblem(href, (token) => declaredType(walk, token)) !== null;
+  return hrefProblems(href, (name) => declaredType(walk, name)).some((problem) => problem.kind === 'href-invalid');
 }
 
 function checkHref(walk: Walk, block: string, value: string): void {
