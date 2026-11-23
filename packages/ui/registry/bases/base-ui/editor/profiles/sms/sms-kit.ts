@@ -11,7 +11,7 @@ import {
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import type { EditorProfile } from '@zeroxsolutions/editor-core/profiles/index';
 import { standardKit } from '../../document/features/standard/index';
-import { heldMarks } from '../email/email-kit';
+import { heldMarks } from '../held-marks';
 import { variableFeature, type VariableFeature } from '../variables/variable';
 
 /**

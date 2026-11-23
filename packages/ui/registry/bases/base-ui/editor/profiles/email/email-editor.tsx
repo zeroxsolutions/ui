@@ -451,6 +451,7 @@ export function EmailEditor({
           features={setup.features}
           content={initialContent}
           editable={!readOnly}
+          blockMenuLabel={text.blockActions}
           onReady={(ready) => {
             setEditor(ready);
             onReady?.(ready);

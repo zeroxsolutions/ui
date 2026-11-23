@@ -24,6 +24,10 @@ export interface EditorBlockMenuProps {
   onOpenChange(open: boolean): void;
   /** Viewport rectangle of the grip the menu opens from; the menu stays there while the grip hides. */
   anchor: { top: number; left: number; width: number; height: number } | null;
+  /** The menu's accessible name. Default: `Block actions`. */
+  label?: string;
+  /** The element the focus returns to once the menu closes, so typing and undo go on where they were. */
+  returnFocus?(): HTMLElement | null;
 }
 
 /** An item that cannot run is dimmed and names why in a tooltip, which a disabled row cannot raise itself. */
@@ -82,11 +86,21 @@ function EditorBlockMenuGroup({
  * dropdown, run through the façade. The menu hangs off an invisible trigger at `anchor`, because the grip
  * is the drag extension's own node and cannot be a React trigger.
  */
-export function EditorBlockMenu({ editor, items: offered, open, onOpenChange, anchor }: EditorBlockMenuProps) {
+export function EditorBlockMenu({
+  editor,
+  items: offered,
+  open,
+  onOpenChange,
+  anchor,
+  label = 'Block actions',
+  returnFocus,
+}: EditorBlockMenuProps) {
   const run = (item: BlockMenuItem) => editor.run(item.command, item.args);
   const seen = new Set<string>();
   // Read while the menu renders, which is after the grip selected its block.
-  const items = offered.filter((item) => item.visible?.(editor) ?? true);
+  const items = offered
+    .flatMap((item) => (item.items ? item.items(editor) : [item]))
+    .filter((item) => item.visible?.(editor) ?? true);
 
   return (
     <TooltipProvider>
@@ -98,7 +112,13 @@ export function EditorBlockMenu({ editor, items: offered, open, onOpenChange, an
           render={<span className="pointer-events-none fixed" />}
           style={anchor ?? { top: 0, left: 0, width: 0, height: 0 }}
         />
-        <DropdownMenuContent aria-label="Block actions" align="start" side="bottom" className="w-52" finalFocus={false}>
+        <DropdownMenuContent
+          aria-label={label}
+          align="start"
+          side="bottom"
+          className="w-52"
+          finalFocus={() => returnFocus?.() ?? false}
+        >
           {items.map((item) => {
             if (item.group !== undefined) {
               if (seen.has(item.group)) return null;

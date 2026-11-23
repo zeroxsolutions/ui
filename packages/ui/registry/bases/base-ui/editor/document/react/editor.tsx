@@ -32,12 +32,22 @@ export interface EditorProps {
   onReady?(editor: IEditor): void;
   /** Called with each step-sized delta as the document changes. */
   onChange?(delta: Delta): void;
+  /** The block menu's accessible name, in the host's words. Default: `Block actions`. */
+  blockMenuLabel?: string;
 }
 
 /** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
 const GRIP_CLICK_SLOP_PX = 4;
 
-export function Editor({ features, content, editable = true, className, onReady, onChange }: EditorProps) {
+export function Editor({
+  features,
+  content,
+  editable = true,
+  className,
+  onReady,
+  onChange,
+  blockMenuLabel,
+}: EditorProps) {
   // The raw engine instance — needed only to hand to `@tiptap/react`'s
   // `EditorContent`, which hosts the React node-view portals (without it, custom
   // node views never mount and render as bare `<div>`s). Typed `unknown`: no
@@ -309,10 +319,11 @@ export function Editor({ features, content, editable = true, className, onReady,
           items={blockMenuItems}
           open={menu !== null}
           anchor={menu}
+          label={blockMenuLabel}
+          // The text itself, so ProseMirror puts its selection back as the focus arrives.
+          returnFocus={() => (engine as { view?: { dom?: HTMLElement } } | null)?.view?.dom ?? null}
           onOpenChange={(open) => {
-            if (open) return;
-            setMenu(null);
-            editorRef.current?.focus();
+            if (!open) setMenu(null);
           }}
         />
       )}

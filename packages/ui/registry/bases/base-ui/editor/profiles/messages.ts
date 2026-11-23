@@ -78,6 +78,8 @@ export interface ProfileEditorMessages {
   deleteLocked: string;
   /** Why a block menu item is disabled on a block the host requires. */
   deleteRequired: string;
+  /** Why Duplicate is disabled on a block of a kind the profile does not let the author add. */
+  kindNotAllowed: string;
   buttonLabel: string;
   buttonLink: string;
   /** The heading over an HTML block's source. */
@@ -188,6 +190,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   delete: 'Delete',
   deleteLocked: 'The structure is locked: only text and variables change',
   deleteRequired: 'This block is required',
+  kindNotAllowed: 'This kind of block is not allowed here',
   buttonLabel: 'Button label',
   buttonLink: 'Button link',
   htmlBlock: 'HTML',

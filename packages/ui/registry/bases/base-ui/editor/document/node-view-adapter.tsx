@@ -63,6 +63,22 @@ export function createNodeViewRenderer(): NodeViewRenderer {
   return (spec, opts) =>
     ReactNodeViewRenderer(
       buildNodeViewComponent(spec) as Parameters<typeof ReactNodeViewRenderer>[0],
-      opts.as === 'span' ? ({ as: 'span' } as Parameters<typeof ReactNodeViewRenderer>[1]) : undefined,
+      {
+        ...(opts.as === 'span' ? { as: 'span' } : {}),
+        attrs: dataAttributes,
+      } as Parameters<typeof ReactNodeViewRenderer>[1],
     );
+}
+
+/**
+ * The node's `data-*` HTML attributes, which a React node view's host otherwise never carries, so one a feature
+ * adds to another's node (a profile's `data-align`) reaches the styles. The node's own attributes are left off
+ * the host: one can hold a whole block's text, such as a code block's.
+ */
+function dataAttributes({ HTMLAttributes }: { HTMLAttributes: Record<string, unknown> }): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(HTMLAttributes)
+      .filter(([name, value]) => name.startsWith('data-') && value != null)
+      .map(([name, value]) => [name, String(value)]),
+  );
 }

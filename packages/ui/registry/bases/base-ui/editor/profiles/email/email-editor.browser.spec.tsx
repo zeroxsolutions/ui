@@ -184,9 +184,9 @@ async function caretAfter(text: string): Promise<void> {
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
-/** Shows the grip of the paragraph holding `text`, as a pointer over it does. */
-async function gripOf(text: string): Promise<HTMLElement> {
-  await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p', text)));
+/** Shows the grip of the paragraph holding `text`, or of the block `selector` names, as a pointer over it does. */
+async function gripOf(text: string, selector = '[contenteditable=true] p'): Promise<HTMLElement> {
+  await userEvent.hover(await vi.waitFor(() => find(selector, text)));
   return vi.waitFor(() => {
     const grip = find('.drag-handle');
     if (grip.classList.contains('hide')) throw new Error('the grip is hidden');
@@ -194,9 +194,9 @@ async function gripOf(text: string): Promise<HTMLElement> {
   });
 }
 
-/** Opens the block menu from the grip of the paragraph holding `text`. */
-async function openBlockMenu(text: string): Promise<void> {
-  await userEvent.click(await gripOf(text));
+/** Opens the block menu from the grip of the paragraph holding `text`, or of the block `selector` names. */
+async function openBlockMenu(text: string, selector?: string): Promise<void> {
+  await userEvent.click(await gripOf(text, selector));
   await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
 }
 
@@ -388,6 +388,21 @@ describe('EmailEditor', () => {
     await expect.element(page.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
   });
 
+  it('draws an undeclared variable chip in the destructive token, with no underline', async () => {
+    await mount([paragraph('Hi {{ghost}}', 'p1')]);
+
+    const chip = await vi.waitFor(() => find('[contenteditable=true] [data-slot=variable][data-problem]'));
+    const host = await vi.waitFor(() => {
+      const marked = chip.closest<HTMLElement>('[aria-describedby]');
+      if (!marked) throw new Error('the chip is not marked');
+      return marked;
+    });
+    expect(host.className).not.toContain('underline');
+    expect(getComputedStyle(chip).textDecorationLine).toBe('none');
+    const style = getComputedStyle(chip);
+    expect(style.borderTopColor).toBe(style.color);
+  });
+
   it('marks a pasted heading, whose structure the email cannot carry, with one problem', async () => {
     const probe = await mount([paragraph('Body', 'p1')]);
     await caretAfter('Body');
@@ -550,7 +565,7 @@ describe('EmailEditor', () => {
     await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeInTheDocument();
   });
 
-  it("unlocks and locks a button's label and link as read-only turns off and on", async () => {
+  it("unlocks and locks a button's label as read-only turns off and on, its link in the block menu", async () => {
     const button: EditorEmailBlock = {
       id: 'b1',
       key: 'b1',
@@ -560,21 +575,21 @@ describe('EmailEditor', () => {
     };
     const probe = await mount([button], { readOnly: true });
     const field = page.getByRole('textbox', { name: 'Button label' });
-    const picker = () => find('[data-slot=url-variable-picker][data-label="Button link"]');
     await expect.element(field).toHaveAttribute('readonly');
-    await vi.waitFor(() => expect(picker()).toBeDisabled());
 
     probe.lock(false);
     await expect.element(field).not.toHaveAttribute('readonly');
-    await vi.waitFor(() => expect(picker()).toBeEnabled());
     await userEvent.type(field, ' now');
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
     );
+    await openBlockMenu('', '[data-slot=email-button]');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Reset link' })).toBeChecked();
+    await userEvent.keyboard('{Escape}{Escape}');
 
     probe.lock(true);
     await expect.element(field).toHaveAttribute('readonly');
-    await vi.waitFor(() => expect(picker()).toBeDisabled());
   });
 
   it('refuses typing and opens no block menu when read-only', async () => {

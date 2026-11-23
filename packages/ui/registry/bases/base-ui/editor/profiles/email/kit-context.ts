@@ -5,6 +5,7 @@ import {
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 
 export type EngineState = Editor['state'];
@@ -14,6 +15,10 @@ export interface KitContext {
   locked(): boolean;
   required(): readonly string[];
   maxLanes: number;
+  /** The block types an author may add: the profile's kinds and the host's own blocks. */
+  admitted: ReadonlySet<string>;
+  /** The declarations a link is chosen from, read each time the block menu opens. */
+  declarations(): readonly VariableDeclaration[];
   /** The words the kit's views and block menu draw, read each time one renders. */
   messages(): ProfileEditorMessages;
 }
@@ -58,6 +63,25 @@ function nodeAt(state: EngineState, matches: (node: ProseMirrorNode) => boolean)
 export const blockAt = (state: EngineState) => nodeAt(state, carriesKey);
 export const columnsAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailColumns');
 export const laneAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailLane');
+
+/**
+ * Selects the block whose view holds `element`. A field inside a block's view takes the focus without moving
+ * the editor's selection, so Mod-/ would otherwise open the block menu on whatever block the caret last sat in.
+ * The editor does not own the focus then, so the selection changes without taking the focus from the field.
+ */
+export function selectBlockOf(editor: IEditor, element: Element): boolean {
+  const engine = contextOf(editor)?.engine;
+  if (!engine) return false;
+  let found: number | undefined;
+  engine.state.doc.descendants((node, pos) => {
+    if (carriesKey(node) && engine.view.nodeDOM(pos)?.contains(element)) found = pos;
+    return true;
+  });
+  if (found === undefined) return false;
+  const picked = (engine.state.selection as { node?: ProseMirrorNode }).node;
+  if (picked && engine.state.selection.from === found) return true;
+  return engine.chain().setNodeSelection(found).run();
+}
 
 /** The url variable the selection is linked to, or null when it holds no link. */
 export function emailLinkAt(editor: IEditor): string | null {

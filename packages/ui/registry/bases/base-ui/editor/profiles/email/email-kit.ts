@@ -41,7 +41,8 @@ import {
   type EmailBlockAttributeValue,
   type ProfileEditorMessages,
 } from '../messages';
-import { variableFeature, type VariableFeature } from '../variables/variable';
+import { heldMarks } from '../held-marks';
+import { variableFeature, variableLabel, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
   columnsAt,
@@ -406,54 +407,25 @@ function admittedBlocks(admitted: ReadonlySet<string>, carried: ReadonlySet<stri
 }
 
 /**
- * Takes off every mark outside `allowed` as soon as a change puts one on, so a shortcut or a paste of a mark the
- * stored text cannot hold leaves the text plain. A host's load passes.
- */
-export function heldMarks(allowed: ReadonlySet<string>): Plugin {
-  return new Plugin({
-    key: new PluginKey('heldMarks'),
-    appendTransaction(transactions, _before, state) {
-      if (transactions.some((tr) => tr.getMeta(CONTENT_LOAD_META))) return null;
-      if (!transactions.some((tr) => tr.docChanged || tr.storedMarksSet)) return null;
-      const tr = state.tr;
-      const stray = new Set<ProseMirrorNode['marks'][number]['type']>();
-      state.doc.descendants((node) => {
-        for (const mark of node.marks) if (!allowed.has(mark.type.name)) stray.add(mark.type);
-        return true;
-      });
-      for (const type of stray) tr.removeMark(0, state.doc.content.size, type);
-      const stored = state.storedMarks;
-      if (stored?.some((mark) => !allowed.has(mark.type.name))) {
-        tr.setStoredMarks(stored.filter((mark) => allowed.has(mark.type.name)));
-      }
-      return tr.docChanged || tr.storedMarksSet ? tr : null;
-    },
-  });
-}
-
-/**
  * The engine half: the email attributes on the document's nodes, the blocks and marks an author may add, the
- * input rules of only what the email stores, and the context the commands read.
+ * input and paste rules of only what the email stores, and the context the commands read.
  */
-function emailEngine(
-  context: KitContext,
-  admitted: ReadonlySet<string>,
-  carried: ReadonlySet<string>,
-  inputRules: readonly string[],
-): Extension {
+function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: readonly string[]): Extension {
   return Extension.create({
     name: 'emailKit',
     onBeforeCreate() {
       contexts.set(this.editor, context);
-      // The document's rules would turn `# ` into a heading and `1. ` into a numbered list, which the email
-      // folds; the engine reads the option when it builds its plugins, after this.
-      this.editor.options.enableInputRules = [...inputRules];
+      // The document's rules would turn `# ` into a heading, `1. ` into a numbered list and a pasted `~~x~~`
+      // into a strike, which the email folds or drops; the engine reads the options when it builds its plugins,
+      // after this.
+      this.editor.options.enableInputRules = [...rules];
+      this.editor.options.enablePasteRules = [...rules];
     },
     onDestroy() {
       contexts.delete(this.editor);
     },
     addGlobalAttributes: () => emailGlobalAttributes(),
-    addProseMirrorPlugins: () => [admittedBlocks(admitted, carried), heldMarks(EMAIL_MARKS)],
+    addProseMirrorPlugins: () => [admittedBlocks(context.admitted, carried), heldMarks(EMAIL_MARKS)],
   });
 }
 
@@ -481,7 +453,6 @@ export function emailKit(
   const required = () => options.required?.() ?? [];
   const locked = () => options.structure?.() === 'locked';
   const messages = options.messages ?? (() => DEFAULT_PROFILE_MESSAGES);
-  const context: KitContext = { locked, required, maxLanes: profile.bounds.lanes, messages };
 
   const extraBlocks = extra.flatMap((feature) =>
     (feature.nodes ?? []).filter((node) => inGroup(node, 'block')).map((node) => node.name),
@@ -505,7 +476,15 @@ export function emailKit(
       .filter(([, kind]) => admitted.has(EMAIL_KIND_NODES[kind]))
       .map(([name]) => name),
   );
-  const inputRules = [
+  const context: KitContext = {
+    locked,
+    required,
+    maxLanes: profile.bounds.lanes,
+    admitted,
+    declarations,
+    messages,
+  };
+  const rules = [
     'zeroxEditorBehavior',
     'variableEngine',
     'bold',
@@ -525,6 +504,14 @@ export function emailKit(
     if (!found || !block || locked() || isRequired(block.node, required())) return undefined;
     return validAttributes(block.node.type.name, attrs) ? { engine: found.engine, block } : undefined;
   };
+  const linkable = (editor: IEditor, name: string) => {
+    const found = contextOf(editor);
+    const block = found && blockAt(found.engine.state);
+    if (!found || !block || block.node.type.name !== 'emailButton' || locked()) return undefined;
+    if (isRequired(block.node, required())) return undefined;
+    const url = declarations().some((declaration) => declaration.name === name && declaration.type === 'url');
+    return url ? { engine: found.engine, block } : undefined;
+  };
   const columnsOf = (editor: IEditor, ratio: number[]) => {
     const found = contextOf(editor);
     const columns = found && columnsAt(found.engine.state);
@@ -534,7 +521,7 @@ export function emailKit(
 
   const blocks = defineFeature({
     id: 'emailBlocks',
-    nodes: [emailButtonNode(declarations), ...emailColumnsNodes(laneContent), emailHtmlNode(), emailUnknownNode()],
+    nodes: [emailButtonNode(), ...emailColumnsNodes(laneContent), emailHtmlNode(), emailUnknownNode()],
     commands: {
       insertEmailBlock: {
         args: z.object({ kind: z.enum(EMAIL_KINDS as [EmailBlockKind, ...EmailBlockKind[]]) }),
@@ -567,6 +554,18 @@ export function emailKit(
         },
         can: (editor) => emailLinkAt(editor) !== null,
       },
+      setButtonLink: {
+        args: z.object({ name: z.string().regex(/^\w+$/) }),
+        run: (editor, { name }: { name: string }) => {
+          const target = linkable(editor, name);
+          if (!target) return false;
+          const { engine, block } = target;
+          const before = engine.state.doc;
+          engine.view.dispatch(engine.state.tr.setNodeAttribute(block.pos, 'href', `{{${name}}}`));
+          return engine.state.doc !== before;
+        },
+        can: (editor, { name }: { name: string }) => linkable(editor, name) !== undefined,
+      },
       setColumnsRatio: {
         args: z.object({ ratio: z.array(z.number().int().min(1).max(12)).min(2) }),
         run: (editor, { ratio }: { ratio: number[] }) => {
@@ -577,7 +576,7 @@ export function emailKit(
       },
     },
     slash: kinds.flatMap((kind) => OWN_SLASH_ITEMS[kind] ?? []),
-    advanced: { engineExtensions: [emailEngine(context, admitted, carried, inputRules)] },
+    advanced: { engineExtensions: [emailEngine(context, carried, rules)] },
   });
 
   // The document's own block menu, Turn into narrowed to the email's kinds, joins the email's below.
@@ -594,121 +593,137 @@ export function emailKit(
     variables.feature,
     emailMarks(),
     blocks,
-    defineFeature({ id: 'emailBlockMenu', blockMenu: emailBlockMenuItems(kinds, profile.bounds.lanes, messages()) }),
+    defineFeature({
+      id: 'emailBlockMenu',
+      // Drawn when the menu opens, so the words, the declarations and the block's own lanes are the current ones.
+      blockMenu: [
+        { id: 'email-block-menu', title: '', command: '', items: (editor) => emailBlockMenuItems(editor, kinds) },
+      ],
+    }),
     ...extra,
   ];
 }
 
-/** The lane shares offered for each lane count up to `maxLanes`. */
-function ratioChoices(maxLanes: number): number[][] {
+/** The lane shares offered for each lane count up to `maxLanes`, `current` among them when it is none of them. */
+function ratioChoices(maxLanes: number, current: readonly number[] | null): number[][] {
   const choices: number[][] = [];
   for (let lanes = 2; lanes <= maxLanes; lanes += 1) {
     choices.push(Array.from({ length: lanes }, () => 1));
     if (lanes === 2) choices.push([2, 1], [1, 2]);
     if (lanes === 3) choices.push([1, 2, 1]);
   }
-  return choices;
-}
-
-/** The block the grip picked, or the one the caret is in, with what its editor's kit reads. */
-function menuBlock(editor: IEditor): { block: Found; context: KitContext; state: EngineState } | null {
-  const found = contextOf(editor);
-  const block = found && blockAt(found.engine.state);
-  return found && block ? { block, context: found.context, state: found.engine.state } : null;
+  if (!current || choices.some((choice) => choice.join(':') === current.join(':'))) return choices;
+  return [...choices, [...current]];
 }
 
 /** Why a change to `block` is refused: locked structure, or a required block; `whole` counts the blocks inside it. */
-function refusal(context: KitContext, block: Found | undefined, whole: boolean): string | null {
+function refusal(context: KitContext, block: Found, whole: boolean): string | null {
   const words = context.messages();
   if (context.locked()) return words.deleteLocked;
-  if (!block) return null;
   const required = context.required();
   return (whole ? holdsRequired(block.node, required) : isRequired(block.node, required)) ? words.deleteRequired : null;
 }
 
-const typeOf = (editor: IEditor) => menuBlock(editor)?.block.node.type.name;
+const HREF_TOKEN = /^\{\{(\w+)\}\}$/;
 
 /**
- * The email's block menu: Turn into its text kinds, a submenu per attribute the picked block takes, the lanes of
- * the columns it is or sits in, and the document's Duplicate and Delete. Each is disabled, with its reason, in
- * locked structure and on a block the host requires. The titles are `words`'.
+ * The email's block menu for the block the grip picked, or the one the caret is in, read as the menu opens:
+ * Turn into its text kinds, a submenu per attribute the block takes, a button's Link among the declared `url`
+ * variables, the lanes of the columns it is or sits in, and the document's Duplicate and Delete. Each is
+ * disabled, with its reason, in locked structure and on a block the host requires; Duplicate also on a block of
+ * a kind the profile does not let the author add.
  */
-function emailBlockMenuItems(
-  kinds: readonly EmailBlockKind[],
-  maxLanes: number,
-  words: ProfileEditorMessages,
-): BlockMenuItem[] {
-  const own = (editor: IEditor) => {
-    const at = menuBlock(editor);
-    return at ? refusal(at.context, at.block, false) : null;
-  };
-  const whole = (editor: IEditor) => {
-    const at = menuBlock(editor);
-    return at ? refusal(at.context, at.block, true) : null;
-  };
+function emailBlockMenuItems(editor: IEditor, kinds: readonly EmailBlockKind[]): BlockMenuItem[] {
+  const found = contextOf(editor);
+  const block = found && blockAt(found.engine.state);
+  if (!found || !block) return [];
+  const { context } = found;
+  const words = context.messages();
+  const type = block.node.type.name;
+  const own = () => refusal(context, block, false);
+  const whole = () => refusal(context, block, true);
 
-  const turnInto = (['paragraph', 'list'] as const)
-    .filter((kind) => kinds.includes(kind))
-    .map((kind): BlockMenuItem => ({
-      id: `email-turn-into-${kind}`,
-      title: words.blocks[kind].title,
-      group: words.turnInto,
-      command: 'turnBlockInto',
-      args: { name: EMAIL_KIND_NODES[kind] },
-      visible: (editor) => TURNABLE_BLOCKS.has(typeOf(editor) ?? ''),
-      active: (editor) => typeOf(editor) === EMAIL_KIND_NODES[kind],
-      disabledReason: whole,
-    }));
+  const turnInto = TURNABLE_BLOCKS.has(type)
+    ? (['paragraph', 'list'] as const)
+        .filter((kind) => kinds.includes(kind))
+        .map((kind): BlockMenuItem => ({
+          id: `email-turn-into-${kind}`,
+          title: words.blocks[kind].title,
+          group: words.turnInto,
+          command: 'turnBlockInto',
+          args: { name: EMAIL_KIND_NODES[kind] },
+          active: () => type === EMAIL_KIND_NODES[kind],
+          disabledReason: whole,
+        }))
+    : [];
 
-  const attributes = (Object.keys(ATTRIBUTE_VALUES) as EmailBlockAttribute[]).flatMap((attribute) =>
+  const attributes = (BLOCK_ATTRIBUTES[type] ?? []).flatMap((attribute) =>
     ATTRIBUTE_VALUES[attribute].map((value): BlockMenuItem => ({
       id: `email-${attribute}-${value}`,
       title: words.attributeValues[value],
       group: words.attributes[attribute],
       command: 'setBlockAttributes',
       args: { attrs: { [attribute]: value } },
-      visible: (editor) => BLOCK_ATTRIBUTES[typeOf(editor) ?? '']?.includes(attribute) === true,
-      active: (editor) => {
-        const set = menuBlock(editor)?.block.node.attrs[attribute] as string | null | undefined;
-        return (set ?? ATTRIBUTE_DEFAULTS[attribute]) === value;
-      },
+      active: () =>
+        ((block.node.attrs[attribute] as string | null | undefined) ?? ATTRIBUTE_DEFAULTS[attribute]) === value,
       disabledReason: own,
     })),
   );
 
-  const columnsOf = (editor: IEditor) => {
-    const found = contextOf(editor);
-    const columns = found && columnsAt(found.engine.state);
-    return found && columns ? { context: found.context, columns } : null;
-  };
-  const lanes = ratioChoices(maxLanes).map((ratio): BlockMenuItem => ({
-    id: `email-lanes-${ratio.join('-')}`,
-    title: ratio.join(' : '),
-    group: words.columns,
-    command: 'setColumnsRatio',
-    args: { ratio },
-    visible: (editor) => columnsOf(editor) !== null,
-    active: (editor) => {
-      const columns = columnsOf(editor)?.columns.node;
-      if (!columns) return false;
-      const set = columns.attrs.ratio as number[] | null | undefined;
-      const current = set && set.length > 0 ? set : Array.from({ length: columns.childCount }, () => 1);
-      return current.join(':') === ratio.join(':');
-    },
-    disabledReason: (editor) => {
-      const at = columnsOf(editor);
-      return at ? refusal(at.context, at.columns, false) : null;
-    },
-  }));
+  const href = HREF_TOKEN.exec(String(block.node.attrs.href ?? ''))?.[1];
+  const urls = context.declarations().filter((declaration) => declaration.type === 'url');
+  const link: BlockMenuItem[] =
+    type !== 'emailButton'
+      ? []
+      : urls.length === 0
+        ? [
+            {
+              id: 'email-link-none',
+              title: words.noLinkVariables,
+              group: words.link,
+              command: 'setButtonLink',
+              disabledReason: () => words.noLinkVariables,
+            },
+          ]
+        : urls.map((declaration) => ({
+            id: `email-link-${declaration.name}`,
+            title: variableLabel(declaration),
+            group: words.link,
+            command: 'setButtonLink',
+            args: { name: declaration.name },
+            active: () => href === declaration.name,
+            disabledReason: own,
+          }));
 
-  const documentItem = (id: string, title: string): BlockMenuItem[] =>
-    standardBlockMenuItems.filter((item) => item.id === id).map((item) => ({ ...item, title, disabledReason: whole }));
+  const columns = columnsAt(found.engine.state);
+  const stored = columns?.node.attrs.ratio as number[] | null | undefined;
+  const current = columns
+    ? stored && stored.length > 0
+      ? stored
+      : Array.from({ length: columns.node.childCount }, () => 1)
+    : null;
+  const lanes = columns
+    ? ratioChoices(context.maxLanes, current).map((ratio): BlockMenuItem => ({
+        id: `email-lanes-${ratio.join('-')}`,
+        title: ratio.join(' : '),
+        group: words.columns,
+        command: 'setColumnsRatio',
+        args: { ratio },
+        active: () => current?.join(':') === ratio.join(':'),
+        disabledReason: () => refusal(context, columns, false),
+      }))
+    : [];
+
+  const duplicateReason = () => whole() ?? (context.admitted.has(type) ? null : words.kindNotAllowed);
+  const documentItem = (id: string, title: string, disabledReason: () => string | null): BlockMenuItem[] =>
+    standardBlockMenuItems.filter((item) => item.id === id).map((item) => ({ ...item, title, disabledReason }));
 
   return [
     ...turnInto,
     ...attributes,
+    ...link,
     ...lanes,
-    ...documentItem('duplicate', words.duplicate),
-    ...documentItem('delete', words.delete),
+    ...documentItem('duplicate', words.duplicate, duplicateReason),
+    ...documentItem('delete', words.delete, whole),
   ];
 }

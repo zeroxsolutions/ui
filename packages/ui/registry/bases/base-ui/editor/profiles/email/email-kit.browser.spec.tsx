@@ -225,19 +225,41 @@ describe('the email kit', () => {
     expect(document.querySelector('[data-editor-add]')).not.toBeNull();
   });
 
-  it("chooses a button's link from the url variables only", async () => {
-    const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })]);
-    const picker = await vi.waitFor(() => find('[data-slot=email-button] [data-slot=url-variable-picker]'));
-    // Its name is its text, so it names both what it chooses and what it holds.
-    expect([picker.getAttribute('aria-label'), picker.textContent]).toEqual([null, 'Button link: Reset link']);
+  it("chooses a button's link in the block menu from the url variables only, read as it opens", async () => {
+    const declarations = [...declared];
+    const editor = await mount([block({ type: 'button', content: { label: 'Reset', href: '{{resetUrl}}' } })], {
+      options: { declarations: () => declarations },
+    });
+    expect(document.querySelector('[data-slot=email-button] [data-slot=url-variable-picker]')).toBeNull();
+    declarations.push({ name: 'laterUrl', type: 'url', label: 'Later link' });
 
-    const options = await pickOption(picker);
-    expect(options.map((option) => option.textContent)).toEqual(['Reset link', 'Help page']);
-    await userEvent.click(options[1]);
+    await openBlockMenu('', '[data-slot=email-button]');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
+    const choices = page.getByRole('menuitemradio');
+    await expect.element(choices.nth(0)).toBeVisible();
+    expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Reset link', 'Help page', 'Later link']);
+    await expect.element(page.getByRole('menuitemradio', { name: 'Reset link' })).toBeChecked();
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Help page' }));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ label: 'Reset', href: '{{helpUrl}}' }));
   });
 
+  it('opens the block menu of a button whose label field holds the focus with Mod-/', async () => {
+    const editor = await mount([
+      paragraph('Before'),
+      block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
+    ]);
+    await caretAfter('Before');
+    await userEvent.click(find('[aria-label="Button label"]'));
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}');
+    await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
+
+    await userEvent.click(page.getByRole('menuitem', { name: 'Width' }));
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Full width' }));
+
+    await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
+    expect(exported(editor)[0].attributes).toEqual({});
+  });
   it('links text to a url variable through the same picker', async () => {
     const editor = await mount([paragraph('Open the page')]);
     await caretAfter('Open the page');
@@ -331,6 +353,50 @@ describe('the email kit', () => {
     );
     expect(typesOf(editor)).toEqual(['paragraph', 'paragraph']);
     expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
+  });
+
+  it('keeps a pasted `~~x~~` as the text it is', async () => {
+    const editor = await mount([paragraph('Body')]);
+    await caretAfter('Body');
+    const data = new DataTransfer();
+    data.setData('text/plain', ' ~~x~~');
+    find('[contenteditable=true]').dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    );
+
+    await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Body ~~x~~' }));
+  });
+
+  it('draws a callout with the align and the space after it stores', async () => {
+    await mount([
+      block({ type: 'callout', attributes: { align: 'center', spaceAfter: 'large' }, content: { text: 'Note' } }),
+    ]);
+
+    const text = await vi.waitFor(() => find('[contenteditable=true] p', 'Note'));
+    const host = await vi.waitFor(() => {
+      const found = text.closest<HTMLElement>('[data-align=center]');
+      if (!found) throw new Error('the callout carries no align');
+      return found;
+    });
+    expect(getComputedStyle(text).textAlign).toBe('center');
+    expect(host.getAttribute('data-space-after')).toBe('large');
+    expect(getComputedStyle(host).marginBottom).toBe('32px');
+  });
+
+  it('keeps the id and the align of a block turned into a list and back', async () => {
+    const editor = await mount([
+      block({ id: 'p', key: 'p', type: 'paragraph', attributes: { align: 'center' }, content: { text: 'Lines' } }),
+    ]);
+
+    await chooseInBlockMenu('Lines', 'Turn into', 'Bulleted list');
+    await vi.waitFor(() =>
+      expect(exported(editor)[0]).toMatchObject({ id: 'p', type: 'list', attributes: { align: 'center' } }),
+    );
+    await chooseInBlockMenu('Lines', 'Turn into', 'Text');
+
+    await vi.waitFor(() =>
+      expect(exported(editor)[0]).toMatchObject({ id: 'p', type: 'paragraph', attributes: { align: 'center' } }),
+    );
   });
 
   it('keeps a pasted heading as a heading, which exports as its text', async () => {
@@ -441,18 +507,36 @@ describe('the email kit', () => {
     }
   });
 
-  it("turns a text block into the email's text kinds only, and offers no Turn into on a button", async () => {
-    await mount([paragraph('Lines'), block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } })]);
+  it("turns a text block into the email's text kinds only", async () => {
+    await mount([paragraph('Lines')]);
     await openBlockMenu('Lines');
     await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
 
     const choices = page.getByRole('menuitemradio');
     await expect.element(choices.nth(0)).toBeVisible();
     expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Text', 'Bulleted list']);
-    await userEvent.keyboard('{Escape}{Escape}');
+  });
 
-    await openBlockMenu('', '[data-slot=email-button]');
-    expect(page.getByRole('menuitem', { name: 'Turn into' }).elements()).toEqual([]);
+  it('offers no Turn into on a block whose kind is not text', async () => {
+    await mount([
+      block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
+      block({ type: 'code', content: { code: 'abc' } }),
+      block({ type: 'html', content: { html: '<b>x</b>' } }),
+      block({ type: 'divider' }),
+      block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[], []] }),
+    ]);
+
+    for (const slot of ['email-button', 'code-card', 'email-html', 'divider', 'email-columns']) {
+      const selector =
+        slot === 'divider'
+          ? '[contenteditable=true] hr'
+          : slot === 'code-card'
+            ? '[data-code-block]'
+            : `[data-slot=${slot}]`;
+      await openBlockMenu('', selector);
+      expect(page.getByRole('menuitem', { name: 'Turn into' }).elements()).toEqual([]);
+      await userEvent.keyboard('{Escape}');
+    }
   });
   it('keys every block it holds, so an added block exports with a key', async () => {
     const editor = await mount([paragraph('Hi')]);
@@ -482,24 +566,69 @@ describe('the email kit', () => {
   });
   it('changes no attribute and deletes no block in locked structure', async () => {
     const locked = 'The structure is locked: only text and variables change';
-    await mount([paragraph('Hi', 'p')], { options: { structure: () => 'locked' } });
-    await openBlockMenu('Hi');
+    await mount(
+      [
+        paragraph('Hi', 'p'),
+        block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
+        block({
+          id: 'c',
+          key: 'c',
+          type: 'columns',
+          attributes: { ratio: [1, 1] },
+          lanes: [[paragraph('left', 'l')], [paragraph('right', 'r')]],
+        }),
+      ],
+      { options: { structure: () => 'locked' } },
+    );
+    const refusedIn = async (group: string, text: string, selector?: string) => {
+      await openBlockMenu(text, selector);
+      await userEvent.click(page.getByRole('menuitem', { name: group }));
+      const choices = page.getByRole('menuitemradio');
+      await expect.element(choices.nth(0)).toBeVisible();
+      for (const choice of choices.elements()) expect(choice.hasAttribute('data-disabled')).toBe(true);
+      await userEvent.keyboard('{Escape}{Escape}');
+    };
 
+    for (const group of ['Turn into', 'Align', 'Space after', 'Tone']) await refusedIn(group, 'Hi');
+    for (const group of ['Width', 'Link']) await refusedIn(group, '', '[data-slot=email-button]');
+    await refusedIn('Lanes', 'left');
+
+    await openBlockMenu('Hi');
     await expect.element(page.getByRole('menuitem', { name: 'Duplicate' })).toBeDisabled();
     const refused = page.getByRole('menuitem', { name: 'Delete' });
     await expect.element(refused).toBeDisabled();
     await userEvent.hover(refused, { force: true });
     await expect.element(page.getByText(locked)).toBeVisible();
-
-    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
-    for (const choice of ['Left', 'Center', 'Right']) {
-      await expect.element(page.getByRole('menuitemradio', { name: choice })).toBeDisabled();
-    }
   });
 
-  it("disables a required block's attribute items with its reason", async () => {
+  it('includes a stored lane ratio the menu does not offer, checked', async () => {
+    await mount([
+      block({ type: 'columns', attributes: { ratio: [3, 1] }, lanes: [[paragraph('left')], [paragraph('right')]] }),
+    ]);
+    await openBlockMenu('left');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Lanes' }));
+
+    await expect.element(page.getByRole('menuitemradio', { name: '3 : 1' })).toBeChecked();
+  });
+
+  it('gives Duplicate a reason on a stored block of a kind the profile leaves out', async () => {
+    await mount([paragraph('Header'), block({ type: 'button', content: { label: 'Go' } })], {
+      profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }),
+    });
+    await openBlockMenu('', '[data-slot=email-button]');
+
+    const refused = page.getByRole('menuitem', { name: 'Duplicate' });
+    await expect.element(refused).toBeDisabled();
+    await userEvent.hover(refused, { force: true });
+    await expect.element(page.getByText('This kind of block is not allowed here')).toBeVisible();
+  });
+  it("disables a required block's attribute items, Turn into and Duplicate with its reason", async () => {
     await mount([paragraph('Keep me', 'kept')], { options: { required: () => ['kept'] } });
     await openBlockMenu('Keep me');
+    await expect.element(page.getByRole('menuitem', { name: 'Duplicate' })).toBeDisabled();
+    await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Bulleted list' })).toBeDisabled();
+    await userEvent.keyboard('{Escape}');
     await userEvent.click(page.getByRole('menuitem', { name: 'Space after' }));
 
     const large = page.getByRole('menuitemradio', { name: 'Large' });
@@ -526,8 +655,8 @@ describe('the email kit', () => {
     await openBlockMenu('', '[data-slot=email-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(typesOf(editor)).toEqual(['paragraph']));
+    await vi.waitFor(() => expect(document.activeElement?.classList.contains('ProseMirror')).toBe(true));
 
-    await caretAfter('Header');
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
 
     await vi.waitFor(() => expect(exported(editor)).toEqual(stored));

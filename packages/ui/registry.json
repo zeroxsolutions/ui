@@ -3282,6 +3282,11 @@
           "target": "@components/editor/profiles/problem-marker.tsx"
         },
         {
+          "path": "registry/bases/base-ui/editor/profiles/held-marks.ts",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/held-marks.ts"
+        },
+        {
           "path": "registry/bases/base-ui/editor/profiles/messages.ts",
           "type": "registry:component",
           "target": "@components/editor/profiles/messages.ts"
@@ -3304,25 +3309,25 @@
       ],
       "dependencies": ["@zeroxsolutions/editor-core", "lucide-react", "zod"],
       "css": {
-        ".document-editor [data-align='left']": {
+        ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
           "text-align": "left"
         },
-        ".document-editor [data-align='center']": {
+        ".document-editor .ProseMirror [data-align='center'], .document-editor .ProseMirror [data-align='center'] p": {
           "text-align": "center"
         },
-        ".document-editor [data-align='right']": {
+        ".document-editor .ProseMirror [data-align='right'], .document-editor .ProseMirror [data-align='right'] p": {
           "text-align": "right"
         },
-        ".document-editor [data-tone='muted']": {
+        ".document-editor .ProseMirror [data-tone='muted']": {
           "color": "var(--muted-foreground)"
         },
-        ".document-editor [data-space-after='small']": {
+        ".document-editor .ProseMirror [data-space-after='small']": {
           "margin-bottom": "0.5rem"
         },
-        ".document-editor [data-space-after='medium']": {
+        ".document-editor .ProseMirror [data-space-after='medium']": {
           "margin-bottom": "1rem"
         },
-        ".document-editor [data-space-after='large']": {
+        ".document-editor .ProseMirror [data-space-after='large']": {
           "margin-bottom": "2rem"
         },
         ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react]": {

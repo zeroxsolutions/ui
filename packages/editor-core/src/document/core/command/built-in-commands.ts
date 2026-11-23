@@ -213,20 +213,25 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
         if (lines.length === 0) return false;
         const paragraph = schema.nodes.paragraph;
         const item = schema.nodes[name === 'taskList' ? 'taskItem' : 'listItem'];
+        // The first block built takes the attributes of the old one its type also declares, such as a host's
+        // block id, so the block keeps who it is across the change; the rest are new blocks.
+        const declared = target.spec.attrs ?? {};
+        const kept = Object.fromEntries(Object.entries(selection.node.attrs).filter(([key]) => key in declared));
+        const firstAttrs = { ...kept, ...attrsOf(a) };
         let built: PmNode[];
         if (name === 'paragraph' || name === 'heading') {
-          built = lines.map((line) => target.create(attrsOf(a), line.content));
+          built = lines.map((line, index) => target.create(index === 0 ? firstAttrs : attrsOf(a), line.content));
         } else if (name === 'blockquote') {
           built = [
             target.create(
-              null,
+              firstAttrs,
               lines.map((line) => paragraph.create(null, line.content)),
             ),
           ];
         } else if (item && target.contentMatch.matchType(item)) {
           built = [
             target.create(
-              null,
+              firstAttrs,
               lines.map((line) => item.create(null, paragraph.create(null, line.content))),
             ),
           ];

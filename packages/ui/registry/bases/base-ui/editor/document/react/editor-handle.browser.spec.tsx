@@ -173,6 +173,18 @@ describe('the block menu the grip opens', () => {
     await vi.waitFor(() => expect(texts()).toEqual(['first', 'second', 'second']));
   });
 
+  it('gives the text back the focus once a menu item ran, so Mod-Z undoes it at once', async () => {
+    const { handle, texts } = await mountBlocks(['first', 'second'], 0);
+    await userEvent.click(handle);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() => expect(texts()).toEqual(['first', 'first', 'second']));
+
+    await vi.waitFor(() => expect(document.activeElement?.classList.contains('ProseMirror')).toBe(true));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+
+    await vi.waitFor(() => expect(texts()).toEqual(['first', 'second']));
+  });
+
   it('turns the block into a heading from Turn into', async () => {
     const { handle, editor } = await mountBlocks(['first', 'second'], 1);
     await userEvent.click(handle);

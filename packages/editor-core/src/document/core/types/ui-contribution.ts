@@ -57,4 +57,10 @@ export interface BlockMenuItem {
   active?(editor: IEditor): boolean;
   /** Why the item cannot run now, or `null` when it can: it renders disabled and names the reason. */
   disabledReason?(editor: IEditor): string | null;
+  /**
+   * The items drawn in this item's place, read each time the menu opens, for items that follow what changes
+   * while the editor is open, such as a host's declarations or its words. The item itself is not drawn and its
+   * command does not run.
+   */
+  items?(editor: IEditor): BlockMenuItem[];
 }

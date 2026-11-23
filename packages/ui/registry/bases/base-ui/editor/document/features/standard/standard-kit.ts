@@ -42,7 +42,7 @@ import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standa
  * link features own those).
  */
 export function standardKit(options: StandardKitOptions = {}): EditorFeature {
-  const { placeholder = "Type '/' for commands…", dragHandle = true, trailingNode = true } = options;
+  const { placeholder = "Type '/' for commands...", dragHandle = true, trailingNode = true } = options;
   return defineFeature({
     id: 'standard',
     codecs: standardNodeCodecs,

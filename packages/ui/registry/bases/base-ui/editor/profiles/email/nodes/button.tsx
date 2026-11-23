@@ -2,8 +2,7 @@ import { MousePointerClickIcon } from '@/registry/bases/base-ui/icons/lucide/mou
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
-import { messagesOf } from '../kit-context';
-import { UrlVariablePicker, type DeclarationSource } from '../url-variable-picker';
+import { messagesOf, selectBlockOf } from '../kit-context';
 import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { blockClasses, emailSpec, justifyClass, type EmailBlockStyle } from './block-style';
 
@@ -12,8 +11,6 @@ interface EmailButtonAttrs extends EmailBlockStyle {
   href?: string | null;
   width?: 'inline' | 'full' | null;
 }
-
-const HREF_TOKEN = /^\{\{(\w+)\}\}$/;
 
 export const emailButtonSlashItem: SlashItem = {
   id: 'email-button',
@@ -27,12 +24,11 @@ export const emailButtonSlashItem: SlashItem = {
 };
 
 /**
- * The button block. Its label is an attribute, edited in a field, so it carries no mark; its href is chosen
- * from the `url` variables only.
+ * The button block. Its label is an attribute, edited in a field, so it carries no mark; its href, one of the
+ * `url` variables, is chosen in the block menu's Link.
  */
-export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
+export function emailButtonNode(): NodeSpec {
   function EmailButtonView({ attrs, updateAttrs, editable, editor }: NodeViewProps<EmailButtonAttrs>) {
-    const variable = HREF_TOKEN.exec(attrs.href ?? '')?.[1] ?? attrs.href ?? null;
     const full = attrs.width === 'full';
     const messages = messagesOf(editor);
     return (
@@ -40,30 +36,20 @@ export function emailButtonNode(declarations: DeclarationSource): NodeSpec {
         data-slot="email-button"
         data-width={attrs.width ?? 'inline'}
         contentEditable={false}
-        className={cn('flex flex-col gap-2', blockClasses(attrs))}
+        // Its label field takes the focus without moving the selection; Mod-/ acts on the selected block.
+        onFocus={(event) => selectBlockOf(editor, event.currentTarget)}
+        className={cn('flex', justifyClass(attrs.align), blockClasses(attrs))}
       >
-        <div className={cn('flex', justifyClass(attrs.align))}>
-          <span className={cn(buttonVariants({ variant: 'default' }), full && 'w-full')}>
-            <input
-              aria-label={messages.buttonLabel}
-              placeholder={messages.buttonLabel}
-              value={attrs.label ?? ''}
-              readOnly={!editable}
-              onChange={(event) => updateAttrs({ label: event.target.value })}
-              className="field-sizing-content min-w-16 bg-transparent text-center outline-none placeholder:text-current/60"
-            />
-          </span>
-        </div>
-        <div className={cn('flex', justifyClass(attrs.align))}>
-          <UrlVariablePicker
-            declarations={declarations}
-            value={variable}
-            label={messages.buttonLink}
-            messages={messages}
-            disabled={!editable}
-            onValueChange={(name) => updateAttrs({ href: `{{${name}}}` })}
+        <span className={cn(buttonVariants({ variant: 'default' }), full && 'w-full')}>
+          <input
+            aria-label={messages.buttonLabel}
+            placeholder={messages.buttonLabel}
+            value={attrs.label ?? ''}
+            readOnly={!editable}
+            onChange={(event) => updateAttrs({ label: event.target.value })}
+            className="field-sizing-content min-w-16 bg-transparent text-center outline-none placeholder:text-current/60"
           />
-        </div>
+        </span>
       </div>
     );
   }
