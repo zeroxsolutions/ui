@@ -45,6 +45,11 @@ describe('validate an email', () => {
       'https://x.test/?t={{x}}',
       [{ kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' }],
     ],
+    [
+      'an undeclared leading token',
+      '{{x}}/a',
+      [{ kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'x' }],
+    ],
   ])('judges a button href that is %s', (_case, href, problems) => {
     expect(validate([block('button', { label: 'Go', href })], profile)).toEqual(problems);
   });
@@ -81,6 +86,11 @@ describe('validate an email', () => {
     [
       'an undeclared inner token',
       '[a](https://x.test/?t={{x}})',
+      [{ kind: 'variable-undeclared', block: 'k1', field: 'text', name: 'x' }],
+    ],
+    [
+      'an undeclared leading token',
+      '[a]({{x}})',
       [{ kind: 'variable-undeclared', block: 'k1', field: 'text', name: 'x' }],
     ],
   ])('judges a link href that is %s', (_case, text, problems) => {

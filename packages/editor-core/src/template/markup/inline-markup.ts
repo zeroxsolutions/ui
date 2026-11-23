@@ -4,7 +4,7 @@
  * a string, so the markup is a grammar over it that a template validates, a renderer draws and a
  * translation is checked against.
  */
-import { VARIABLE_TOKEN } from '../variables/variable-tokens.js';
+import { VARIABLE_TOKEN, variableTokens } from '../variables/variable-tokens.js';
 
 export interface InlineText {
   readonly kind: 'text';
@@ -335,7 +335,8 @@ export function plainInlineText(source: string): string {
 /**
  * One entry per bold span, italic span and link, or undefined when `source` is malformed. A span is
  * counted where its mark turns on along the flat text, a link's label included, so a span that wraps a
- * link or a word counts once however the runs inside it split.
+ * link or a word counts once however the runs inside it split. A link is entered by the tokens its href
+ * spells, not its fixed text, so a translation may point it at a page in its own language.
  */
 function marks(source: string): string | undefined {
   const parsed = parseInlineMarkup(source);
@@ -344,7 +345,7 @@ function marks(source: string): string | undefined {
   let bold = false;
   let italic = false;
   for (const run of parsed.runs) {
-    if (run.kind === 'link') entries.push(`link:${run.href}`);
+    if (run.kind === 'link') entries.push(`link:${variableTokens(run.href).join(' ')}`);
     for (const text of run.kind === 'text' ? [run] : run.label) {
       if (text.bold && !bold) entries.push('bold');
       if (text.italic && !italic) entries.push('italic');
@@ -356,8 +357,8 @@ function marks(source: string): string | undefined {
 }
 
 /**
- * Whether `translation` carries the bold spans, italic spans and links `source` does; their order within
- * a text is not compared, and a malformed side is never the same. A list compares item by item, in order,
+ * Whether `translation` carries the bold spans, italic spans and links `source` does, each link with the
+ * tokens its href spells; their order within a text is not compared, and a malformed side is never the same. A list compares item by item, in order,
  * and must have as many items; a string compares as a list of one. Pass only marked text, never a whole
  * block's content: a button label, code or html is plain, and one stray `_` in it would refuse both sides.
  */

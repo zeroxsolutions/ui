@@ -1,10 +1,5 @@
-import {
-  hrefProblem,
-  leadingToken,
-  parseInlineMarkup,
-  variableTokens,
-  type VariableType,
-} from '../../template/index.js';
+import { hrefProblem, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
+import { leadingToken } from '../../template/markup/href.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
@@ -46,8 +41,7 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
     else {
       const flagged = new Set<string>();
       for (const run of parsed.runs) {
-        if (run.kind !== 'link' || flagged.has(run.href)) continue;
-        if (hrefProblem(run.href, (name) => declaredType(walk, name)) === null) continue;
+        if (run.kind !== 'link' || flagged.has(run.href) || !hrefFaulty(walk, run.href)) continue;
         flagged.add(run.href);
         const name = leadingToken(run.href);
         walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
@@ -65,10 +59,20 @@ function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' |
   }
 }
 
+/**
+ * Whether `href` is faulty in itself. One that opens with an undeclared token is not: its type is unknown
+ * until it is declared, so that token's `variable-undeclared` is its one problem.
+ */
+function hrefFaulty(walk: Walk, href: string): boolean {
+  const name = leadingToken(href);
+  if (name !== undefined && declaredType(walk, name) === undefined) return false;
+  return hrefProblem(href, (token) => declaredType(walk, token)) !== null;
+}
+
 function checkHref(walk: Walk, block: string, value: string): void {
   checkField(walk, block, { field: 'href', value, max: walk.profile.bounds.href, marked: false });
   if (value === '') return;
-  if (hrefProblem(value, (name) => declaredType(walk, name)) !== null) {
+  if (hrefFaulty(walk, value)) {
     walk.problems.push({ kind: 'href-invalid', block, field: 'href' });
   }
 }

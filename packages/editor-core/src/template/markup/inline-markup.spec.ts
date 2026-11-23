@@ -236,11 +236,16 @@ describe('sameInlineMarkup', () => {
   it.each([
     ['a dropped bold span', '**a** b', 'a b'],
     ['another link variable', '[a]({{u}})', '[a]({{v}})'],
-    ['another fixed href', '[a](https://x.test/a)', '[a](https://x.test/b)'],
+    ['another variable inside a fixed href', '[a](https://x.test/?t={{u}})', '[a](https://x.test/?t={{v}})'],
     ['an added italic span', 'a b', 'a _b_'],
     ['a malformed translation', '**a**', '**a'],
   ])('refuses %s', (_case, source, translation) => {
     expect(sameInlineMarkup(source, translation)).toBe(false);
+  });
+
+  it('lets a translation point a fixed href at another page', () => {
+    expect(sameInlineMarkup('[a](https://x.test/en)', '[b](https://x.test/vi)')).toBe(true);
+    expect(sameInlineMarkup('[a](https://x.test/en?t={{u}})', '[b](https://x.test/vi?t={{u}})')).toBe(true);
   });
 
   it('counts a span that wraps another span or a link once', () => {
