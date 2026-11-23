@@ -38,11 +38,7 @@ import {
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  CodeMirrorPane,
-  codeMirrorVariables,
-  type CodeMirrorVariablesOptions,
-} from '../../../shared/code-mirror/index';
+import { CodeMirrorPane, type CodeMirrorPaneProps } from '../../../shared/code-mirror/index';
 import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu';
 
 /**
@@ -61,6 +57,7 @@ const codeBlockAttrs = z.object({
   code: z.string().default(''),
 });
 type CodeBlockAttrs = z.infer<typeof codeBlockAttrs>;
+type PaneExtensions = NonNullable<CodeMirrorPaneProps['extensions']>;
 
 /** Editing preferences a fresh block opens with — local view-state, never persisted. */
 const DEFAULT_CODE_SETTINGS: CodeMirrorSettings = {
@@ -83,14 +80,14 @@ function EditableCodeBlock({
   attrs,
   updateAttrs,
   languagePicker,
-  variables,
+  extensions,
 }: {
   attrs: CodeBlockAttrs;
   updateAttrs: (patch: Partial<CodeBlockAttrs>) => void;
   languagePicker: boolean;
-  variables?: CodeMirrorVariablesOptions;
+  extensions?: () => PaneExtensions;
 }) {
-  const [extensions] = React.useState(() => (variables ? codeMirrorVariables(variables) : undefined));
+  const [paneExtensions] = React.useState(() => extensions?.());
   const [settings, setSettings] = React.useState<CodeMirrorSettings>(DEFAULT_CODE_SETTINGS);
   const patchSettings = React.useCallback(
     (patch: Partial<CodeMirrorSettings>) => setSettings((prev) => ({ ...prev, ...patch })),
@@ -151,7 +148,7 @@ function EditableCodeBlock({
           showLineNumbers={settings.showLineNumbers}
           wrap={settings.softWrap}
           placeholder="Write code…"
-          extensions={extensions}
+          extensions={paneExtensions}
           className="h-64"
         />
       </CollapsibleCardContent>
@@ -211,8 +208,8 @@ function CodeBlockView({
   updateAttrs,
   editable,
   languagePicker,
-  variables,
-}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean; variables?: CodeMirrorVariablesOptions }) {
+  extensions,
+}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean; extensions?: () => PaneExtensions }) {
   return (
     <div
       data-code-block
@@ -226,7 +223,7 @@ function CodeBlockView({
           attrs={attrs}
           updateAttrs={updateAttrs}
           languagePicker={languagePicker}
-          variables={variables}
+          extensions={extensions}
         />
       ) : (
         <ReadOnlyCodeBlock code={attrs.code} language={attrs.language} />
@@ -278,24 +275,24 @@ export const codeBlockCodec: NodeCodec<CodeBlockAttrs> = {
   },
 };
 
-/** What a profile may narrow: whether the editable block offers a language control, and its variables. */
+/** What a profile may narrow: whether the editable block offers a language control, and what its pane adds. */
 export interface CodeBlockOptions {
   /** Show the language control. When false, a block is plain `text`. Default: true. */
   languagePicker?: boolean;
   /**
-   * The variables the code may hold: each `{{name}}` is drawn as a token, an undeclared one marked, and `{{`
-   * offers the declarations. Absent: the code is plain text.
+   * More CodeMirror behaviour for each editable block's pane, such as a profile's variables. Called once per
+   * pane, so a pane holds an instance of its own.
    */
-  variables?: CodeMirrorVariablesOptions;
+  extensions?: () => PaneExtensions;
 }
 
 export function codeBlock(options: CodeBlockOptions = {}): EditorFeature {
   const languagePicker = options.languagePicker ?? true;
-  const { variables } = options;
+  const { extensions } = options;
   function NarrowedCodeBlockView(props: NodeViewProps<CodeBlockAttrs>) {
-    return <CodeBlockView {...props} languagePicker={languagePicker} variables={variables} />;
+    return <CodeBlockView {...props} languagePicker={languagePicker} extensions={extensions} />;
   }
-  const view = languagePicker && !variables ? CodeBlockNodeView : NarrowedCodeBlockView;
+  const view = languagePicker && !extensions ? CodeBlockNodeView : NarrowedCodeBlockView;
   return defineFeature({
     id: 'code-block',
     nodes: [

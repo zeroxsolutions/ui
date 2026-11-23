@@ -6,5 +6,3 @@
  */
 export { CodeMirrorPane } from './code-mirror-pane';
 export type { CodeMirrorPaneProps } from './code-mirror-pane';
-export { codeMirrorVariables } from './code-mirror-variables';
-export type { CodeMirrorVariablesOptions } from './code-mirror-variables';

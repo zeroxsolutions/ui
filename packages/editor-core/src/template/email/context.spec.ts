@@ -109,6 +109,16 @@ describe('createRenderContext', () => {
     expect(problems).toEqual([]);
   });
 
+  it('encodes the @ of an email token after mailto:, which a mail client reads as the address', () => {
+    const ctx = createRenderContext(
+      state({ variables: { email: 'lan@x.test' }, variableTypes: { email: 'email' } }),
+      'b1',
+      NO_LANES,
+    );
+    // RFC 6068 allows a percent-encoded address; %40 is its @.
+    expect(ctx.href('mailto:{{email}}')).toEqual({ html: 'mailto:lan%40x.test', text: 'mailto:lan%40x.test' });
+  });
+
   it('encodes a second url token rather than filling it as it is', () => {
     const ctx = createRenderContext(
       state({ variables: { a: 'https://a.test', b: 'https://b.test/?x=1' }, variableTypes: { a: 'url', b: 'url' } }),

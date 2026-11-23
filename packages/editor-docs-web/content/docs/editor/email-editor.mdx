@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/email-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @tiptap/react @zeroxsolutions/editor-core@^0.2.0 lucide-react zod
+pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/react @zeroxsolutions/editor-core@^0.2.0 class-variance-authority lucide-react zod
 ```
 
 <Step>Add the components it is built from.</Step>
@@ -146,6 +146,12 @@ pnpm dlx shadcn@latest add badge button combobox field popover resizable tabs to
   name="email-editor"
   file="registry/bases/base-ui/editor/profiles/variables/variable-text-field.tsx"
   title="components/editor/profiles/variables/variable-text-field.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/variables/code-mirror-variables.tsx"
+  title="components/editor/profiles/variables/code-mirror-variables.tsx"
 />
 
 <Step>Update the import paths to match your project.</Step>
@@ -265,9 +271,10 @@ The Link button in the toolbar or the selection bubble opens the link popover on
 link the caret is in. A button's Link, in its block menu, opens the same popover on the button's link. Type
 the link in its field, or click one of the `url` variables listed under it. A link is valid when it starts
 with `https://`, `http://` or `mailto:`, or with a `url` variable. Any variable may follow, as in
-`https://example.com/trip?token={{token}}`, and the renderer URL-encodes its value. A link that starts with a
-`url` variable gets that value as it is, so the value supplies the scheme. In locked structure, a button's
-link field is read-only.
+`https://example.com/trip?token={{token}}`, and the renderer URL-encodes its value, so `mailto:{{email}}`
+writes the address's `@` as `%40`, which mail clients read as `@`. A link that starts with a `url` variable
+gets that value as it is, so the value supplies the scheme. In locked structure, or on a required button, a
+button's link field is disabled, with the reason shown under it.
 
 To change the variables, pass a new profile. If you change the declarations in place instead, call
 `refreshVariables(editor)` from `variables/variable.tsx`.
@@ -311,4 +318,5 @@ A paragraph, a callout and a list item store their text in this markup:
 | `**bold**`             | bold                                               |
 | `_italic_`             | italic                                             |
 | `[label](href)`        | a link to `href`, which may hold `{{name}}` tokens |
-| `\*`, `\_`, `\[`, `\\` | the character itself                               |
+| `\*`, `\_`, `\[`, `\\` | the character itself, outside an href              |
+| `\)`, `\\` in an href  | the character itself; any other `\` there is text  |

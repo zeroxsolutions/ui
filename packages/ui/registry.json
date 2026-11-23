@@ -1063,13 +1063,11 @@
       "description": "The CodeMirror pane the code and diagram editors type into, highlighted by Shiki in the editor theme.",
       "categories": ["editor"],
       "dependencies": [
-        "@codemirror/autocomplete",
         "@codemirror/commands",
         "@codemirror/language",
         "@codemirror/state",
         "@codemirror/view",
         "@shikijs/langs",
-        "@zeroxsolutions/editor-core",
         "class-variance-authority",
         "shiki"
       ],
@@ -1089,11 +1087,6 @@
           "path": "registry/bases/base-ui/editor/shared/code-mirror/code-syntax.ts",
           "type": "registry:lib",
           "target": "@components/editor/shared/code-mirror/code-syntax.ts"
-        },
-        {
-          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-mirror-variables.tsx",
-          "type": "registry:lib",
-          "target": "@components/editor/shared/code-mirror/code-mirror-variables.tsx"
         },
         {
           "path": "registry/bases/base-ui/lib/code-theme.ts",
@@ -3334,9 +3327,17 @@
           "path": "registry/bases/base-ui/editor/profiles/variables/variable-text-field.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/variables/variable-text-field.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/variables/code-mirror-variables.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/variables/code-mirror-variables.tsx"
         }
       ],
       "dependencies": [
+        "@codemirror/autocomplete",
+        "@codemirror/state",
+        "@codemirror/view",
         "@tiptap/react",
         "@zeroxsolutions/editor-core@^0.2.0",
         "class-variance-authority",

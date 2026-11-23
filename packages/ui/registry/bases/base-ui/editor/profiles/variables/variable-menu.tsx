@@ -10,12 +10,14 @@ import {
   ComboboxList,
 } from '@/registry/bases/base-ui/ui/combobox';
 import { useRef } from 'react';
+import type { EditorView } from '@codemirror/view';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { EditorToolbarComboboxTrigger } from '../../document/ui/editor-toolbar-combobox-trigger';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { insertVariable, matchesVariable, variableIcon, variableLabel } from './variable';
 import { variableTextFieldOf } from './variable-text-field';
+import { insertPaneVariable, variablePaneOf } from './code-mirror-variables';
 
 export interface VariableMenuProps {
   editor: IEditor;
@@ -43,8 +45,11 @@ export function VariableMenu({
   // from, the keyboard the element it came from. Forgotten after a pick and once the list has closed, so a later
   // pick never lands in a field the author has since left.
   const field = useRef<IEditor | null>(null);
+  // The same, for a code block's pane, whose selection the document does not hold.
+  const pane = useRef<EditorView | null>(null);
   const reach = (from: Element | null) => {
     field.current = variableTextFieldOf(from);
+    pane.current = variablePaneOf(from);
   };
   return (
     <Combobox
@@ -54,13 +59,24 @@ export function VariableMenu({
       disabled={disabled}
       onValueChange={(declaration: VariableDeclaration | null) => {
         if (!declaration) return;
+        const code = pane.current && variablePaneOf(pane.current.dom);
+        pane.current = null;
+        if (code) {
+          field.current = null;
+          insertPaneVariable(code, declaration.name);
+          code.focus();
+          return;
+        }
         const target = field.current?.status === 'destroyed' ? editor : (field.current ?? editor);
         field.current = null;
         insertVariable(target, declaration.name);
         target.focus();
       }}
       onOpenChangeComplete={(open) => {
-        if (!open) field.current = null;
+        if (!open) {
+          field.current = null;
+          pane.current = null;
+        }
       }}
       itemToStringLabel={variableLabel}
       // The same match as the `{{` menu: a label or a name.

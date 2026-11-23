@@ -867,6 +867,20 @@ describe('EmailEditor variables in code and html', () => {
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ code: 'Hi {{name}}' }));
   });
 
+  it("inserts the toolbar's variable into the code block that held the focus, keeping the other blocks", async () => {
+    const probe = await mount([paragraph('Hello', 'p1'), code('Hi ')]);
+    await userEvent.click(await vi.waitFor(() => find('[data-code-block] .cm-content')));
+    await userEvent.keyboard('{ControlOrMeta>}{End}{/ControlOrMeta}');
+    await pickVariable('Name');
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.map(({ type, content }) => [type, content])).toEqual([
+        ['paragraph', { text: 'Hello' }],
+        ['code', { code: 'Hi {{name}}' }],
+      ]),
+    );
+  });
+
   it('inserts a variable into an html block as its token, so the export is the text as written', async () => {
     const probe = await mount([html('<b>')]);
     await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));

@@ -4,7 +4,7 @@ import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import '../../../../../../test/nova-style.css';
-import { CodeMirrorPane } from './code-mirror-pane';
+import { CodeMirrorPane } from '../../shared/code-mirror/index';
 import { codeMirrorVariables } from './code-mirror-variables';
 
 const declared: VariableDeclaration[] = [
@@ -78,6 +78,16 @@ function content(): HTMLElement {
 const tokens = () => [...content().querySelectorAll<HTMLElement>('[data-variable]')];
 const optionLabels = () => [...document.querySelectorAll('[role=option]')].map((option) => option.textContent);
 
+/**
+ * `@codemirror/autocomplete` hands no key to a list in its first moments open (its `interactionDelay`, 75 ms by
+ * default), and nothing on the page shows when that ends; a key pressed sooner moves the caret and closes the
+ * list, as it would under an author who had not seen it yet.
+ */
+async function waitOutTheOpeningDelay(): Promise<void> {
+  const shown = performance.now();
+  await vi.waitFor(() => expect(performance.now() - shown).toBeGreaterThan(150));
+}
+
 async function typeAtEnd(text: string): Promise<void> {
   await userEvent.click(content());
   await userEvent.keyboard('{ControlOrMeta>}{End}{/ControlOrMeta}');
@@ -99,17 +109,27 @@ describe('variables in a code pane', () => {
     await vi.waitFor(() => expect(optionLabels()).toEqual(['Reset link']));
   });
 
-  it('inserts the highlighted {{name}} on Enter', async () => {
+  it('moves the highlight with the arrows and inserts the highlighted {{name}} on Enter', async () => {
     const probe = await mount('Hi ');
     await typeAtEnd('{{{{');
-    // The list takes no key in the moment after it opens, so a key pressed before it shows types as text.
     await expect.element(page.getByRole('option', { name: 'Name' })).toBeVisible();
-    await userEvent.keyboard('reset');
-    await vi.waitFor(() => expect(optionLabels()).toEqual(['Reset link']));
+    await waitOutTheOpeningDelay();
+    await userEvent.keyboard('{ArrowDown}');
+    await vi.waitFor(() =>
+      expect(document.querySelector('[role=option][aria-selected=true]')?.textContent).toBe('Reset link'),
+    );
     await userEvent.keyboard('{Enter}');
 
     await vi.waitFor(() => expect(probe.value).toBe('Hi {{resetUrl}}'));
     await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('takes in a }} already after the caret, so the token is not closed twice', async () => {
+    const probe = await mount('Hi }}');
+    await typeAtEnd('{ArrowLeft}{ArrowLeft}{{{{');
+    await userEvent.click(page.getByRole('option', { name: 'Name' }));
+
+    await vi.waitFor(() => expect(probe.value).toBe('Hi {{name}}'));
   });
 
   it('inserts the option pressed with the pointer', async () => {

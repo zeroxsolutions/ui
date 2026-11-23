@@ -233,7 +233,14 @@ function EmailEditorPane({ surface, onRelease, onAdopt }: EmailEditorPaneProps) 
     handlers.current.onAdopt();
     return () => handlers.current.onRelease();
   }, [surface]);
-  return <div ref={pane} data-slot="email-editor-pane" className="h-full overflow-y-auto py-2" />;
+  // The thin rail in the border token, as the code pane draws it, rather than the browser's light default in dark mode.
+  return (
+    <div
+      ref={pane}
+      data-slot="email-editor-pane"
+      className="h-full [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto py-2"
+    />
+  );
 }
 
 interface EmailEditorBubbleMenuProps {

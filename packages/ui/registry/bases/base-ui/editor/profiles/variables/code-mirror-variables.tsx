@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import {
   autocompletion,
+  pickedCompletion,
   type Completion,
   type CompletionContext,
   type CompletionResult,
@@ -79,6 +80,33 @@ function staticNode(node: ReactNode): HTMLElement {
   return host;
 }
 
+/** Each live pane with variables, by its `.cm-editor` element. */
+const panes = new WeakMap<Element, EditorView>();
+
+/**
+ * The pane with variables `element` is in, while it takes typing, or null. A variable menu outside the pane
+ * reads it off the element that held the focus before the menu took it, so the variable lands in the code
+ * rather than in the document around it.
+ */
+export function variablePaneOf(element: Element | null): EditorView | null {
+  const root = element?.closest('.cm-editor');
+  const view = root ? panes.get(root) : undefined;
+  return view && view.dom.isConnected && !view.state.readOnly ? view : null;
+}
+
+/** The change that writes `{{name}}` over `from`..`to`, taking in a `}}` already right after it. */
+function tokenChange(view: EditorView, from: number, to: number, name: string) {
+  const token = `{{${name}}}`;
+  const end = view.state.sliceDoc(to, to + 2) === '}}' ? to + 2 : to;
+  return { changes: { from, to: end, insert: token }, selection: { anchor: from + token.length } };
+}
+
+/** Writes `{{name}}` over the pane's selection. */
+export function insertPaneVariable(view: EditorView, name: string): void {
+  const { from, to } = view.state.selection.main;
+  view.dispatch({ ...tokenChange(view, from, to, name), userEvent: 'input' });
+}
+
 /**
  * Variables in a CodeMirror pane: every `{{name}}` drawn as a token, the ones the declarations do not name
  * marked as undeclared (`data-problem="variable-undeclared"`), and typing `{{` lists the declarations, filtered
@@ -91,7 +119,15 @@ export function codeMirrorVariables({ declarations, subscribe, icon }: CodeMirro
     const typed = context.matchBefore(/\{\{\w*/);
     if (!typed) return null;
     const options = matching(declarations(), typed.text.slice(2)).map((declaration) => {
-      const completion: Completion = { label: labelOf(declaration), apply: `{{${declaration.name}}}` };
+      const completion: Completion = {
+        label: labelOf(declaration),
+        apply: (view, picked, from, to) =>
+          view.dispatch({
+            ...tokenChange(view, from, to, declaration.name),
+            annotations: pickedCompletion.of(picked),
+            userEvent: 'input.complete',
+          }),
+      };
       declarationOf.set(completion, declaration);
       return completion;
     });
@@ -120,9 +156,10 @@ export function codeMirrorVariables({ declarations, subscribe, icon }: CodeMirro
     class {
       decorations: DecorationSet;
       private readonly stop: (() => void) | undefined;
-      constructor(view: EditorView) {
+      constructor(private readonly view: EditorView) {
         this.decorations = tokens.createDeco(view);
         this.stop = subscribe?.(() => view.dispatch({ effects: redraw.of(null) }));
+        panes.set(view.dom, view);
       }
       update(update: ViewUpdate) {
         const asked = update.transactions.some((tr) => tr.effects.some((effect) => effect.is(redraw)));
@@ -130,6 +167,7 @@ export function codeMirrorVariables({ declarations, subscribe, icon }: CodeMirro
       }
       destroy() {
         this.stop?.();
+        panes.delete(this.view.dom);
       }
     },
     { decorations: (plugin) => plugin.decorations },

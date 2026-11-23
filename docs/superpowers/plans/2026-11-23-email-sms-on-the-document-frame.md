@@ -222,11 +222,11 @@
 
 ### Task 11: Variables in code and HTML blocks
 
-**Files:** create `packages/ui/registry/bases/base-ui/editor/shared/code-mirror/variable-tokens.ts` (CodeMirror extension); modify `document/features/code-block/code-block.tsx` (an option `variables?: () => VariableDeclaration[]`), `profiles/email/nodes/html.tsx`, `profiles/email/email-kit.ts`, the email docs page's Variables section; specs.
+**Files:** create `packages/ui/registry/bases/base-ui/editor/profiles/variables/code-mirror-variables.tsx` (CodeMirror extension, in the `email-editor` item); modify `document/features/code-block/code-block.tsx` (an option `extensions?: () => Extension`, built once per pane), `profiles/variables/variable.tsx` (the HTML block's tokens and text insert), `profiles/variables/variable-menu.tsx` (a focused code pane takes the toolbar's pick), `profiles/email/email-kit.ts`, the email docs page's Variables section; specs.
 
 **Interfaces:**
 
-- Produces: `variableTokens(declarations: () => VariableDeclaration[]): Extension` for CodeMirror: highlights `{{name}}`, marks undeclared names, and completes on `{{` from the declarations. The HTML block's text gets the same highlight and `{{` menu through a ProseMirror decoration plus the variable trigger inserting literal `{{name}}` text (its content stays plain text, so the export is unchanged).
+- Produces: `codeMirrorVariables({ declarations, subscribe?, icon? }): Extension`: highlights `{{name}}`, marks undeclared names, redraws when `subscribe` signals (the variable feature's `watchDeclarations`), and completes on `{{` through `@codemirror/autocomplete`, taking in a `}}` already after the caret. `variablePaneOf(element)` and `insertPaneVariable(view, name)` let the toolbar's variable menu write into a focused pane. The HTML block keeps plain text: `variable.tsx` draws its tokens with a ProseMirror decoration and `insertVariable` writes literal `{{name}}` text there, so the export is unchanged.
 
 - [ ] Step 1: failing browser specs: `{{` in a code block offers the declarations and inserts `{{name}}`; an undeclared token in code and in HTML is marked; exports unchanged.
 - [ ] Step 2-4: run, FAIL then PASS, plus lint/typecheck and the docs zone build.

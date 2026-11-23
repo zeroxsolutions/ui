@@ -269,6 +269,18 @@ describe('a variable in a block that holds text only', () => {
     expect(chips()).toEqual([]);
   });
 
+  it('takes in a }} already after the caret, so the token is not closed twice', async () => {
+    const editor = await mount(html('<p>}}'));
+    await userEvent.click(htmlBlock());
+    await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{{{{na');
+    await openMenu();
+    await userEvent.keyboard('{Enter}');
+
+    await vi.waitFor(() =>
+      expect(htmlText(editor)).toEqual(expect.objectContaining({ content: [text('<p>{{name}}')] })),
+    );
+  });
+
   it("inserts the toolbar's variable as its {{name}} text", async () => {
     const editor = await mount(html('<p>'));
     await userEvent.click(htmlBlock());

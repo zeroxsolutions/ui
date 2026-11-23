@@ -353,13 +353,22 @@ function variableEngine(
 export function variableFeature(getDeclarations: () => readonly VariableDeclaration[]): VariableFeature {
   const version = declarationsVersion();
   const engines = new Set<Editor>();
-  // A text-only block, such as html, is stored as its text, so a variable goes in as its `{{name}}` token.
-  const holdsTextOnly = (editor: IEditor): boolean => {
-    const engine = [...engines].find((candidate) => facadeFor(candidate as unknown as EngineHandle) === editor);
+  const engineOf = (editor: IEditor) =>
+    [...engines].find((candidate) => facadeFor(candidate as unknown as EngineHandle) === editor);
+  // A text-only block, such as html, is stored as its text, so a variable goes in as its `{{name}}` token, taking
+  // in a `}}` the author already typed after the caret.
+  const insertTokenText = (editor: IEditor, name: string): boolean | undefined => {
+    const engine = engineOf(editor);
     const variable = engine?.state.schema.nodes.variable;
-    if (!engine || !variable) return false;
-    const { $from } = engine.state.selection;
-    return $from.parent.isTextblock && !takesVariable($from.parent.type, variable);
+    if (!engine || !variable) return undefined;
+    const { $from, from, to } = engine.state.selection;
+    if (!$from.parent.isTextblock || takesVariable($from.parent.type, variable)) return undefined;
+    const end = engine.state.doc.textBetween(to, Math.min(to + 2, $from.end())) === '}}' ? to + 2 : to;
+    return engine
+      .chain()
+      .focus()
+      .insertContentAt({ from, to: end }, { type: 'text', text: `{{${name}}}` })
+      .run();
   };
 
   function VariableChip({ name, contentEditable }: { name: string; contentEditable?: boolean }) {
@@ -416,11 +425,8 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
       insertVariable: {
         args: z.object({ name: z.string().regex(/^\w+$/) }),
         run: (editor, args) =>
-          editor.run('insertContent', {
-            content: holdsTextOnly(editor)
-              ? { type: 'text', text: `{{${args.name}}}` }
-              : { type: 'variable', attrs: { name: args.name } },
-          }),
+          insertTokenText(editor, args.name) ??
+          editor.run('insertContent', { content: { type: 'variable', attrs: { name: args.name } } }),
       },
       refreshVariables: {
         run: () => {

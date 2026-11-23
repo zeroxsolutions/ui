@@ -42,6 +42,7 @@ import {
   type ProfileEditorMessages,
 } from '../messages';
 import { heldMarks } from '../held-marks';
+import { codeMirrorVariables } from '../variables/code-mirror-variables';
 import { variableFeature, variableIcon, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
@@ -609,11 +610,12 @@ export function emailKit(
     callout({ variants: ['info'] }),
     codeBlock({
       languagePicker: false,
-      variables: {
-        declarations,
-        subscribe: variables.watchDeclarations,
-        icon: (declaration) => variableIcon(declaration.type),
-      },
+      extensions: () =>
+        codeMirrorVariables({
+          declarations,
+          subscribe: variables.watchDeclarations,
+          icon: (declaration) => variableIcon(declaration.type),
+        }),
     }),
     blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
