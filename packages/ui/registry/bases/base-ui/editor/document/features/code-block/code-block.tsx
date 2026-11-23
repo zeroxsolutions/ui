@@ -32,14 +32,17 @@ import {
 } from '@/registry/bases/base-ui/ui/combobox';
 import type { LanguageOption } from '@/registry/bases/base-ui/types/language-option';
 import { z } from 'zod';
-import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import {
   defineFeature,
   type EditorFeature,
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import { CodeMirrorPane, variableTokens } from '../../../shared/code-mirror/index';
+import {
+  CodeMirrorPane,
+  codeMirrorVariables,
+  type CodeMirrorVariablesOptions,
+} from '../../../shared/code-mirror/index';
 import { CodeSettingsMenu, type CodeMirrorSettings } from './code-settings-menu';
 
 /**
@@ -85,10 +88,9 @@ function EditableCodeBlock({
   attrs: CodeBlockAttrs;
   updateAttrs: (patch: Partial<CodeBlockAttrs>) => void;
   languagePicker: boolean;
-  variables?: () => readonly VariableDeclaration[];
+  variables?: CodeMirrorVariablesOptions;
 }) {
-  // One per pane, so each pane's `{{` list has an id of its own.
-  const [extensions] = React.useState(() => (variables ? variableTokens(variables) : undefined));
+  const [extensions] = React.useState(() => (variables ? codeMirrorVariables(variables) : undefined));
   const [settings, setSettings] = React.useState<CodeMirrorSettings>(DEFAULT_CODE_SETTINGS);
   const patchSettings = React.useCallback(
     (patch: Partial<CodeMirrorSettings>) => setSettings((prev) => ({ ...prev, ...patch })),
@@ -210,7 +212,7 @@ function CodeBlockView({
   editable,
   languagePicker,
   variables,
-}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean; variables?: () => readonly VariableDeclaration[] }) {
+}: NodeViewProps<CodeBlockAttrs> & { languagePicker: boolean; variables?: CodeMirrorVariablesOptions }) {
   return (
     <div
       data-code-block
@@ -282,9 +284,9 @@ export interface CodeBlockOptions {
   languagePicker?: boolean;
   /**
    * The variables the code may hold: each `{{name}}` is drawn as a token, an undeclared one marked, and `{{`
-   * offers these. Read as the author types. Absent: the code is plain text.
+   * offers the declarations. Absent: the code is plain text.
    */
-  variables?: () => readonly VariableDeclaration[];
+  variables?: CodeMirrorVariablesOptions;
 }
 
 export function codeBlock(options: CodeBlockOptions = {}): EditorFeature {

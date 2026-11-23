@@ -1063,6 +1063,7 @@
       "description": "The CodeMirror pane the code and diagram editors type into, highlighted by Shiki in the editor theme.",
       "categories": ["editor"],
       "dependencies": [
+        "@codemirror/autocomplete",
         "@codemirror/commands",
         "@codemirror/language",
         "@codemirror/state",
@@ -1090,9 +1091,9 @@
           "target": "@components/editor/shared/code-mirror/code-syntax.ts"
         },
         {
-          "path": "registry/bases/base-ui/editor/shared/code-mirror/variable-tokens.ts",
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/code-mirror-variables.tsx",
           "type": "registry:lib",
-          "target": "@components/editor/shared/code-mirror/variable-tokens.ts"
+          "target": "@components/editor/shared/code-mirror/code-mirror-variables.tsx"
         },
         {
           "path": "registry/bases/base-ui/lib/code-theme.ts",

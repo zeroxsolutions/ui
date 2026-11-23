@@ -54,7 +54,7 @@ export interface CodeMirrorPaneProps
   useTabs?: boolean;
   /** Show the line-number gutter. Defaults to true. */
   showLineNumbers?: boolean;
-  /** More CodeMirror behaviour, such as `variableTokens`. Read once, when the pane mounts. */
+  /** More CodeMirror behaviour, such as `codeMirrorVariables`. Read once, when the pane mounts. */
   extensions?: Extension;
   ref?: React.Ref<HTMLDivElement>;
 }

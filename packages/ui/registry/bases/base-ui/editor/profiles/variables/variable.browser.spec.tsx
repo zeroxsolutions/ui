@@ -300,6 +300,30 @@ describe('a variable in a block that holds text only', () => {
     );
   });
 
+  it('draws a token typed into the block, and leaves the tokens of the other blocks drawn', async () => {
+    await mount({
+      type: 'doc',
+      content: [
+        { type: 'emailHtml', content: [text('{{name}}')] },
+        { type: 'emailHtml', content: [text('<i>')] },
+      ],
+    });
+    await userEvent.click(document.querySelectorAll<HTMLElement>('[data-type=emailHtml]')[1]);
+    await userEvent.keyboard('{End}{{{{ghost}}');
+
+    await vi.waitFor(() =>
+      expect(
+        [...document.querySelectorAll<HTMLElement>('[data-type=emailHtml] [data-variable]')].map((token) => [
+          token.textContent,
+          token.dataset.problem,
+        ]),
+      ).toEqual([
+        ['{{name}}', undefined],
+        ['{{ghost}}', 'variable-undeclared'],
+      ]),
+    );
+  });
+
   it('marks a token again once the host says the declarations changed', async () => {
     const declarations = [...declared];
     const editor = await mount(html('{{later}}'), declarations);

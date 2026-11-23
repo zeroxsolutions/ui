@@ -14,6 +14,7 @@ import {
   PluginKey,
   Slice,
   type Editor,
+  type EditorView,
   type EngineHandle,
   type NodeType,
   type ProseMirrorNode,
@@ -42,6 +43,11 @@ export interface VariableRef {
 export interface VariableFeature {
   feature: EditorFeature;
   token: TriggerToken<'variable', VariableRef>;
+  /**
+   * Calls `listener` each time `refreshVariables` runs, for a surface outside the document that draws the
+   * variables, such as a code pane. Returns the call that stops it.
+   */
+  watchDeclarations(listener: () => void): () => void;
 }
 
 /** The glyph a variable's type shows, in a menu and on its chip. */
@@ -174,6 +180,7 @@ function declarationsVersion() {
 }
 
 type DeclarationsVersion = ReturnType<typeof declarationsVersion>;
+type Transaction = EditorView['state']['tr'];
 
 const TOKEN_TEXT_KEY = new PluginKey<DecorationSet>('variableTokenText');
 // cva rather than plain strings, so `shadcn add` writes the slot as the installing project's style draws it.
@@ -183,47 +190,91 @@ const tokenTextVariants = cva('cn-editor-inline', {
   },
 });
 
-/** The `{{name}}` tokens written as text in the blocks that hold text only, each drawn as a token in place. */
-function tokenTextDecorations(doc: ProseMirrorNode, declared: ReadonlySet<string>): DecorationSet {
-  const variable = doc.type.schema.nodes.variable;
+/** The `{{name}}` tokens of `block`, a text-only block at `pos`, each drawn as a token in place. */
+function blockTokens(block: ProseMirrorNode, pos: number, declared: ReadonlySet<string>): Decoration[] {
   const decorations: Decoration[] = [];
-  doc.descendants((node, pos) => {
-    if (!node.isTextblock) return true;
-    if (variable && takesVariable(node.type, variable)) return false;
-    node.forEach((child, offset) => {
-      for (const match of (child.text ?? '').matchAll(VARIABLE_TOKEN)) {
-        const from = pos + 1 + offset + match.index;
-        const name = match[1];
-        decorations.push(
-          Decoration.inline(
-            from,
-            from + match[0].length,
-            declared.has(name)
-              ? { class: tokenTextVariants({ declared: true }), 'data-variable': name }
-              : {
-                  class: tokenTextVariants({ declared: false }),
-                  'data-variable': name,
-                  'data-problem': 'variable-undeclared',
-                  'aria-invalid': 'true',
-                },
-          ),
-        );
-      }
-    });
-    return false;
+  block.forEach((child, offset) => {
+    for (const match of (child.text ?? '').matchAll(VARIABLE_TOKEN)) {
+      const from = pos + 1 + offset + match.index;
+      const name = match[1];
+      decorations.push(
+        Decoration.inline(
+          from,
+          from + match[0].length,
+          declared.has(name)
+            ? { class: tokenTextVariants({ declared: true }), 'data-variable': name }
+            : {
+                class: tokenTextVariants({ declared: false }),
+                'data-variable': name,
+                'data-problem': 'variable-undeclared',
+                'aria-invalid': 'true',
+              },
+        ),
+      );
+    }
   });
-  return DecorationSet.create(doc, decorations);
+  return decorations;
 }
 
-/** Draws {@link tokenTextDecorations} again on each edit and each time the host says the declarations changed. */
+/** Calls `visit` on each block between `from` and `to` that holds text only; a block that takes a chip is skipped. */
+function eachTextOnlyBlock(
+  doc: ProseMirrorNode,
+  from: number,
+  to: number,
+  visit: (block: ProseMirrorNode, pos: number) => void,
+): void {
+  const variable = doc.type.schema.nodes.variable;
+  doc.nodesBetween(from, to, (node, pos) => {
+    if (!node.isTextblock) return true;
+    if (!variable || !takesVariable(node.type, variable)) visit(node, pos);
+    return false;
+  });
+}
+
+/** Where `tr` changed its document, as ranges of the document after it. */
+function changedRanges(tr: Transaction): { from: number; to: number }[] {
+  const ranges: { from: number; to: number }[] = [];
+  tr.mapping.maps.forEach((map, index) => {
+    const after = tr.mapping.slice(index + 1);
+    map.forEach((_oldFrom, _oldTo, from, to) => ranges.push({ from: after.map(from, -1), to: after.map(to, 1) }));
+  });
+  return ranges;
+}
+
+/**
+ * Draws the tokens of the text-only blocks: all of them when the host says the declarations changed, and on an
+ * edit only the blocks the edit touched, the rest mapped across it.
+ */
 function tokenText(getDeclarations: () => readonly VariableDeclaration[], version: DeclarationsVersion): Plugin {
-  const build = (doc: ProseMirrorNode) =>
-    tokenTextDecorations(doc, new Set(getDeclarations().map((declaration) => declaration.name)));
+  const declared = () => new Set(getDeclarations().map((declaration) => declaration.name));
+  const build = (doc: ProseMirrorNode) => {
+    const names = declared();
+    const decorations: Decoration[] = [];
+    eachTextOnlyBlock(doc, 0, doc.content.size, (block, pos) => decorations.push(...blockTokens(block, pos, names)));
+    return DecorationSet.create(doc, decorations);
+  };
+  const redrawTouched = (tr: Transaction, drawn: DecorationSet) => {
+    const names = declared();
+    let next = drawn.map(tr.mapping, tr.doc);
+    const size = tr.doc.content.size;
+    const seen = new Set<number>();
+    for (const { from, to } of changedRanges(tr)) {
+      eachTextOnlyBlock(tr.doc, Math.max(0, from - 1), Math.min(size, to + 1), (block, pos) => {
+        if (seen.has(pos)) return;
+        seen.add(pos);
+        next = next.remove(next.find(pos, pos + block.nodeSize)).add(tr.doc, blockTokens(block, pos, names));
+      });
+    }
+    return next;
+  };
   return new Plugin<DecorationSet>({
     key: TOKEN_TEXT_KEY,
     state: {
       init: (_config, state) => build(state.doc),
-      apply: (tr, drawn) => (tr.docChanged || tr.getMeta(TOKEN_TEXT_KEY) ? build(tr.doc) : drawn),
+      apply: (tr, drawn) => {
+        if (tr.getMeta(TOKEN_TEXT_KEY)) return build(tr.doc);
+        return tr.docChanged ? redrawTouched(tr, drawn) : drawn;
+      },
     },
     props: { decorations: (state) => TOKEN_TEXT_KEY.getState(state) },
     view: (view) => ({
@@ -400,5 +451,5 @@ export function variableFeature(getDeclarations: () => readonly VariableDeclarat
     emptyText: DEFAULT_PROFILE_MESSAGES.noVariables,
   });
 
-  return { feature, token };
+  return { feature, token, watchDeclarations: version.subscribe };
 }

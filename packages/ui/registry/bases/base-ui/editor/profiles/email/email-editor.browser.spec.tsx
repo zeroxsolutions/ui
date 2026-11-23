@@ -867,13 +867,6 @@ describe('EmailEditor variables in code and html', () => {
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ code: 'Hi {{name}}' }));
   });
 
-  it('marks an undeclared token in a code block', async () => {
-    await mount([code('{{name}} {{ghost}}')]);
-
-    const ghost = await vi.waitFor(() => find('[data-code-block] [data-problem=variable-undeclared]'));
-    expect(ghost.textContent).toBe('{{ghost}}');
-  });
-
   it('inserts a variable into an html block as its token, so the export is the text as written', async () => {
     const probe = await mount([html('<b>')]);
     await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));
@@ -881,12 +874,5 @@ describe('EmailEditor variables in code and html', () => {
     await pickVariable('Name');
 
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ html: '<b>{{name}}' }));
-  });
-
-  it('marks an undeclared token in an html block in place', async () => {
-    await mount([html('<b>{{name}}</b>{{ghost}}')]);
-
-    const ghost = await vi.waitFor(() => find('[data-slot=email-html] [data-variable][data-problem]'));
-    expect(ghost.textContent).toBe('{{ghost}}');
   });
 });

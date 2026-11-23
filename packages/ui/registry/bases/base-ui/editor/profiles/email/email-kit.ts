@@ -42,7 +42,7 @@ import {
   type ProfileEditorMessages,
 } from '../messages';
 import { heldMarks } from '../held-marks';
-import { variableFeature, type VariableFeature } from '../variables/variable';
+import { variableFeature, variableIcon, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
   columnsAt,
@@ -607,7 +607,14 @@ export function emailKit(
   return [
     standard,
     callout({ variants: ['info'] }),
-    codeBlock({ languagePicker: false, variables: declarations }),
+    codeBlock({
+      languagePicker: false,
+      variables: {
+        declarations,
+        subscribe: variables.watchDeclarations,
+        icon: (declaration) => variableIcon(declaration.type),
+      },
+    }),
     blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
     emailMarks(),
