@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/core';
+import { Fragment } from '@tiptap/pm/model';
 import { NodeSelection, type Transaction } from '@tiptap/pm/state';
 import { z } from 'zod';
 import { CONTENT_LOAD_META } from '../engine/content-load.js';
@@ -70,11 +71,18 @@ function holdsOnlyText(node: PmNode): boolean {
   return only;
 }
 
+/** Whether `nodes` may stand in place of the node at `pos`, which a lane or a table cell may refuse. */
+function fitsAt(doc: PmNode, pos: number, nodes: PmNode[]): boolean {
+  const $pos = doc.resolve(pos);
+  return $pos.parent.canReplace($pos.index(), $pos.index() + 1, Fragment.from(nodes));
+}
+
 /**
  * The transaction that turns the selected block into `name`, or `null` when the selection is not a whole block
- * of text or the schema has no such type. A list item leaves its list: the list splits around it, and the item
- * becomes the target, so turning it into the list type it is already in changes nothing. The only item of a
- * list turns the whole list, which keeps the list's attributes, such as its id, on what replaces it.
+ * of text, the schema has no such type, its parent may not hold what it would become, or the block is a list
+ * item and `name` is its own list's type, which would change nothing. A list item leaves its list: the list splits around it, and the item becomes the
+ * target. The only item of a list turns the whole list, which keeps the list's attributes, such as its id,
+ * on what replaces it.
  */
 function turnInto(state: Editor['state'], name: string, a: Record<string, unknown>): Transaction | null {
   const { selection, schema } = state;
@@ -85,6 +93,7 @@ function turnInto(state: Editor['state'], name: string, a: Record<string, unknow
   const from = alone ? $picked.before() : selection.from;
   const target = schema.nodes[name];
   if (!target || !holdsOnlyText(source)) return null;
+  if (LIST_ITEMS.has(selection.node.type.name) && $picked.parent.type === target) return null;
   const lines: PmNode[] = [];
   if (source.isTextblock) lines.push(source);
   else source.descendants((node) => (node.isTextblock ? (lines.push(node), false) : true));
@@ -117,29 +126,39 @@ function turnInto(state: Editor['state'], name: string, a: Record<string, unknow
     return null;
   }
   if (!LIST_ITEMS.has(source.type.name)) {
+    if (!fitsAt(state.doc, from, built)) return null;
     const tr = state.tr.replaceWith(from, from + source.nodeSize, built);
     return tr.setSelection(NodeSelection.create(tr.doc, from));
   }
   const list = $picked.parent;
-  if (list.type === target) return state.tr;
   const listStart = $picked.before();
   const offset = selection.from - listStart - 1;
   const before = offset > 0 ? list.copy(list.content.cut(0, offset)) : null;
   const rest = list.content.cut(offset + source.nodeSize);
   const after = rest.size > 0 ? list.copy(rest) : null;
   const pieces = [before, ...built, after].filter((piece): piece is PmNode => piece !== null);
+  if (!fitsAt(state.doc, listStart, pieces)) return null;
   const tr = state.tr.replaceWith(listStart, listStart + list.nodeSize, pieces);
   return tr.setSelection(NodeSelection.create(tr.doc, listStart + (before?.nodeSize ?? 0)));
 }
 
-/** The elements `tiptap-extension-global-drag-handle` puts its handle beside, besides a top-level block. */
+/** The elements `tiptap-extension-global-drag-handle` puts its handle beside, besides a top-level block. Its
+ *  `nodeDOMAtCoords` holds the same list unexported; `packages/ui`'s `grip-target.spec.ts` reads both. */
 const DRAG_HANDLE_TARGETS = 'li, p:not(:first-child), pre, blockquote, h1, h2, h3, h4, h5, h6';
 
+/** Whether a node is a lane or a table cell, whose blocks the grip addresses one by one. */
+function holdsLaneBlocks(node: PmNode): boolean {
+  const role = node.type.spec.tableRole as string | undefined;
+  return Boolean(node.type.spec.container) || role === 'cell' || role === 'header_cell';
+}
+
 /**
- * The position of the node nested in a top-level block that a drag from the handle beside the point moves, or
- * `null` when that is a top-level block itself. It follows the handle's own lookup: the first element under the
- * point that is a block of the text or one of its targets, then the node at that element's first line, lifted to
- * the node holding it when deeper than a list item.
+ * The position of the node nested in a top-level block that the grip beside the point addresses, or `null` when
+ * that is a top-level block, which the caller finds by `y`. It finds the element as the drag handle does: the
+ * first one under the point that is a block of the text or one of its targets. The handle then lifts the node at
+ * that element's first line to its parent when deeper than a list item, which inside a lane or a table cell is
+ * the lane or the cell. So the handle's node is kept only when it is a list item or a line of a quote, callout
+ * or list item; inside a lane or a cell it is the lane's or the cell's own block holding the point.
  */
 function dragTargetAt(view: Editor['view'], x: number, y: number): number | null {
   const element = document
@@ -148,12 +167,21 @@ function dragTargetAt(view: Editor['view'], x: number, y: number): number | null
   if (!element || element.parentElement === view.dom || !view.dom.contains(element)) return null;
   const inside = view.posAtCoords({ left: x, top: element.getBoundingClientRect().top + 1 })?.inside;
   if (inside === undefined || inside < 0) return null;
-  const $pos = view.state.doc.resolve(inside);
-  if ($pos.depth === 0) return null;
-  let pos = $pos.depth > 1 ? $pos.before($pos.depth) : inside;
-  const node = view.state.doc.nodeAt(pos);
-  if (node?.isInline || node?.type.name === 'tableRow') pos = view.state.doc.resolve(pos).before();
-  return pos;
+  const { doc } = view.state;
+  const $inside = doc.resolve(inside);
+  if ($inside.depth === 0) return null;
+  let pos = $inside.depth > 1 ? $inside.before($inside.depth) : inside;
+  const lifted = doc.nodeAt(pos);
+  if (lifted?.isInline || lifted?.type.name === 'tableRow') pos = doc.resolve(pos).before();
+  const node = doc.nodeAt(pos);
+  const parent = doc.resolve(pos).parent;
+  if (node && (LIST_ITEMS.has(node.type.name) || (node.isTextblock && TEXT_HOLDERS.has(parent.type.name)))) {
+    return pos;
+  }
+  for (let depth = $inside.depth; depth > 0; depth--) {
+    if (holdsLaneBlocks($inside.node(depth))) return depth === $inside.depth ? inside : $inside.before(depth + 1);
+  }
+  return null;
 }
 
 export function makeBuiltInCommands(handle: EngineHandle): Record<string, ResolvedCommand> {
@@ -266,14 +294,16 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
         }
       },
     },
-    // Select, as a whole, the block the grip's menu acts on. Rects come from the DOM for the reason
-    // `insertBlockAt` gives. With `x`, a point in the text right of the grip, a node the drag handle
-    // addresses on its own inside another (a list item, a quote's later paragraph) is the one selected,
-    // resolved as the handle resolves the node it drags, so the menu acts on what a drag would move.
-    // Otherwise, and for a top-level block, it is the top-level block or the lane block under `y`.
+    // Select, as a whole, the block the grip's menu acts on and its drag moves. Rects come from the DOM
+    // for the reason `insertBlockAt` gives. `x` is a point in the text right of the grip, or the caret's
+    // with `caret`. There, the node `dragTargetAt` names is the one selected: a list item, a quote's later
+    // line, a later block of a lane or a table cell. Otherwise the grip's is the top-level block under `y`,
+    // whose first line it stands beside even in a columns block or a table. Without `x`, or with `caret`,
+    // a block of a lane under `y` is selected instead of its columns block: in the lane holding `x` when
+    // given, else in the last lane with a block there.
     selectBlockAt: {
-      args: z.object({ y: z.number(), x: z.number().optional() }),
-      run: ({ y, x }) => {
+      args: z.object({ y: z.number(), x: z.number().optional(), caret: z.boolean().optional() }),
+      run: ({ y, x, caret }) => {
         try {
           const { view } = editor;
           const select = (pos: number) => {
@@ -282,6 +312,7 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
           };
           const nested = x === undefined ? null : dragTargetAt(view, x, y);
           if (nested !== null) return select(nested);
+          const intoLanes = x === undefined || caret === true;
           const under = (parent: PmNode, start: number): number | null => {
             let found: number | null = null;
             parent.forEach((child, offset) => {
@@ -291,8 +322,14 @@ export function makeBuiltInCommands(handle: EngineHandle): Record<string, Resolv
               const rect = dom.getBoundingClientRect();
               if (y < rect.top || y > rect.bottom) return;
               found = pos;
+              if (!intoLanes) return;
               child.forEach((lane, laneOffset) => {
                 if (!lane.type.spec.container) return;
+                const laneDom = view.nodeDOM(pos + 1 + laneOffset);
+                if (x !== undefined && laneDom instanceof HTMLElement) {
+                  const box = laneDom.getBoundingClientRect();
+                  if (x < box.left || x > box.right) return;
+                }
                 const inside = under(lane, pos + 1 + laneOffset + 1);
                 if (inside !== null) found = inside;
               });

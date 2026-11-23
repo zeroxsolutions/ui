@@ -1549,7 +1549,7 @@ importers:
         specifier: 'catalog:'
         version: 4.3.5
       tiptap-extension-global-drag-handle:
-        specifier: ^0.1.18
+        specifier: 0.1.18
         version: 0.1.18
       unified:
         specifier: 'catalog:'

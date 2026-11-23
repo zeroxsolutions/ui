@@ -1122,7 +1122,7 @@
         "@tiptap/react",
         "@tiptap/starter-kit",
         "@zeroxsolutions/editor-core@^0.2.0",
-        "tiptap-extension-global-drag-handle"
+        "tiptap-extension-global-drag-handle@0.1.18"
       ],
       "devDependencies": ["@tailwindcss/typography"],
       "registryDependencies": [

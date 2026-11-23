@@ -83,7 +83,7 @@
     "rough-notation": "^0.5.1",
     "shiki": "catalog:",
     "sonner": "^2.0.8",
-    "tiptap-extension-global-drag-handle": "^0.1.18",
+    "tiptap-extension-global-drag-handle": "0.1.18",
     "unified": "catalog:",
     "vaul": "^1.1.2",
     "zod": "catalog:"

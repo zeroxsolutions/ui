@@ -27,6 +27,13 @@ export interface StandardKitOptions {
   trailingNode?: boolean;
 }
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
+
+/** The width the drag handle is given, which also sets where it looks for the node beside it. */
+export const DRAG_HANDLE_WIDTH_PX = 24;
+
+/** How far right of the pointer the drag handle looks for the node it shows beside and drags: the extension's
+ *  fixed 50px plus the handle's width. */
+export const DRAG_HANDLE_REACH_PX = 50 + DRAG_HANDLE_WIDTH_PX;
 import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 
 /**
@@ -78,7 +85,7 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
           placeholder: ({ node }) =>
             node.type.name === 'heading' ? `Heading ${node.attrs.level as number}` : placeholder,
         }),
-        ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: 24 })] : []),
+        ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: DRAG_HANDLE_WIDTH_PX })] : []),
       ],
     },
   });

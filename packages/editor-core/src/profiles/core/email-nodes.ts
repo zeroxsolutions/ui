@@ -51,12 +51,12 @@ function block(name: string, spec: Partial<NodeSpec>, shape: z.ZodRawShape): Nod
 }
 
 /**
- * The email profile's nodes and its link mark; bold and italic are the document's own marks. The paragraph is the core's own, carrying `align`, `spaceAfter`,
- * `tone` and `source` as global attributes, so it is not listed here; lists, callouts, code and rules
- * are the document's own nodes, which the codec reads by type name. No node declares `id` or `key`:
- * `blockIdentity` owns them, on the paragraph and on every type in `EMAIL_BLOCK_NODES`, so it can keep
- * them out of HTML, which a node's own attributes cannot. A lane is in no group, so only a columns
- * block holds one; html carries no mark, since the export stores it as plain text.
+ * The email profile's nodes and its link mark; bold and italic are the document's own marks. The paragraph
+ * is the core's own, carrying `align`, `spaceAfter`, `tone` and `source` as global attributes, so it is not
+ * listed here; lists, callouts, code and rules are the document's own nodes, which the codec reads by type
+ * name. No node declares `id` or `key`: `blockIdentity` owns them, on the paragraph and on every type in
+ * `EMAIL_BLOCK_NODES`, so it can keep them out of HTML, which a node's own attributes cannot. A lane is in
+ * no group, so only a columns block holds one; html carries no mark, since the export stores it as plain text.
  */
 export const emailNodeSpecs: { nodes: NodeSpec[]; marks: MarkSpec[] } = {
   nodes: [

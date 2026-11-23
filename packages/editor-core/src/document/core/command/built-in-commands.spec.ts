@@ -23,7 +23,8 @@ const person: EditorFeature = {
   nodes: [{ name: 'person', group: 'inline', atom: true, attrs: z.object({ id: z.string() }) }],
 };
 
-// Stand in for the document's lists and its image, so Turn into has a list item and a block of no text to act on.
+// Stand in for the document's lists, its image and a lane, so Turn into has a list item, a block of no text and
+// a parent that refuses a list to act on.
 const lists: EditorFeature = {
   id: 'lists',
   nodes: [
@@ -31,6 +32,7 @@ const lists: EditorFeature = {
     { name: 'orderedList', group: 'block', content: 'listItem+' },
     { name: 'listItem', content: 'paragraph+' },
     { name: 'image', group: 'block', atom: true },
+    { name: 'lane', group: 'block', content: 'paragraph+', container: true },
   ],
 };
 
@@ -137,6 +139,17 @@ describe('a list item selected on its own', () => {
     expect(shapeOf(editor)).toEqual(['bulletList:a,b', 'orderedList:c']);
   });
 
+  it('cannot turn into the list type it is already in, so a menu leaves that choice out', () => {
+    for (const item of [0, 1]) {
+      const editor = mountSelecting([listOf('bulletList', 'a', 'b')], 0, item);
+      expect(editor.can('turnBlockInto', { name: 'bulletList' })).toBe(false);
+      expect(editor.run('turnBlockInto', { name: 'bulletList' })).toBe(false);
+    }
+    const alone = mountSelecting([listOf('bulletList', 'a')], 0, 0);
+    expect(alone.can('turnBlockInto', { name: 'bulletList' })).toBe(false);
+    expect(alone.can('turnBlockInto', { name: 'orderedList' })).toBe(true);
+  });
+
   it('is deleted alone, the rest of its list kept', () => {
     const editor = mountSelecting([listOf('bulletList', 'a', 'b', 'c')], 0, 2);
     expect(editor.run('deleteBlock')).toBe(true);
@@ -147,6 +160,15 @@ describe('a list item selected on its own', () => {
     const editor = mountSelecting([listOf('bulletList', 'a', 'b')], 0, 0);
     expect(editor.run('duplicateBlock')).toBe(true);
     expect(shapeOf(editor)).toEqual(['bulletList:a,a,b']);
+  });
+});
+
+describe('turnBlockInto on a block whose parent holds only paragraphs', () => {
+  it('cannot turn it into a list, so a menu leaves that choice out', () => {
+    const editor = mountSelecting([{ type: 'lane', content: [paragraph('a'), paragraph('b')] }], 0, 1);
+    expect(editor.can('turnBlockInto', { name: 'bulletList' })).toBe(false);
+    expect(editor.run('turnBlockInto', { name: 'bulletList' })).toBe(false);
+    expect(editor.can('turnBlockInto', { name: 'paragraph' })).toBe(true);
   });
 });
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -9,8 +9,10 @@ import '../../../../../../test/nova-style.css';
 // file left resting there enters it before the spec hovers it.
 import '../../styles.css';
 import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
+import { emailColumnsNodes } from '../../profiles/email/nodes/columns';
 import { codeBlock } from '../features/code-block/index';
 import { standardKit } from '../features/standard/index';
+import { table } from '../features/table/index';
 import { Editor } from './editor';
 
 const handles = vi.hoisted(() => {
@@ -159,22 +161,33 @@ const bullets = (...texts: string[]) => ({
 const itemsOf = (editor: IEditor, index: number) =>
   (editor.getJSON().content?.[index]?.content ?? []).map((item) => item.content?.[0]?.content?.[0]?.text);
 
-/** Points at the list item holding `text`, so the handle sits beside that item rather than its list. */
-async function gripBesideItem(text: string): Promise<HTMLElement> {
-  const item = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror li')).find(
+/** The element `selector` matches whose text is `text`. */
+function holding(selector: string, text: string): HTMLElement {
+  const found = Array.from(document.querySelectorAll<HTMLElement>(selector)).find(
     (candidate) => candidate.textContent === text,
   );
-  if (!item) throw new Error(`no item holds ${text}`);
-  await userEvent.hover(item);
+  if (!found) throw new Error(`no ${selector} holds ${text}`);
+  return found;
+}
+
+/** Points at the left of `element`'s first line, as an author reaching for its grip does, and waits for the
+ *  handle to sit beside that line. */
+async function gripBeside(element: HTMLElement): Promise<HTMLElement> {
+  await userEvent.hover(element, { position: { x: 4, y: 4 } });
   return vi.waitFor(() => {
     const handle = document.querySelector<HTMLElement>('.drag-handle');
     const top = handle?.getBoundingClientRect().top ?? -1;
-    const rect = item.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
     if (!handle || handle.classList.contains('hide') || top < rect.top - 12 || top > rect.bottom) {
-      throw new Error('the handle is not beside the item');
+      throw new Error('the handle is not beside the element');
     }
     return handle;
   });
+}
+
+/** Points at the list item holding `text`, so the handle sits beside that item rather than its list. */
+function gripBesideItem(text: string): Promise<HTMLElement> {
+  return gripBeside(holding('.ProseMirror li', text));
 }
 
 describe('the block menu the grip opens', () => {
@@ -342,5 +355,112 @@ describe('the block menu the grip opens', () => {
     await expect.element(page.getByRole('menuitemradio', { name: 'Right' })).toBeDisabled();
     await userEvent.hover(page.getByRole('menuitemradio', { name: 'Right' }), { force: true });
     await expect.element(page.getByText('Locked by the template')).toBeVisible();
+  });
+});
+
+// The email profile's columns block, whose lanes hold their own blocks.
+const columns = defineFeature({ id: 'columns', nodes: emailColumnsNodes('paragraph+') });
+const twoLanes = (left: string[], right: string[]) => ({
+  type: 'emailColumns',
+  attrs: { ratio: [1, 1] },
+  content: [left, right].map((texts) => ({ type: 'emailLane', content: texts.map(line) })),
+});
+const lanesOf = (editor: IEditor) =>
+  (editor.getJSON().content?.[0]?.content ?? []).map((lane) =>
+    (lane.content ?? []).map((block) => block.content?.[0]?.text),
+  );
+const cellsOf = (editor: IEditor) =>
+  (editor.getJSON().content?.[0]?.content?.[0]?.content ?? []).map((cell) =>
+    (cell.content ?? []).map((block) => block.content?.[0]?.text),
+  );
+
+describe('the block a grip addresses inside another block', () => {
+  // Wide enough that a lane holds the point the grip looks at, right of the pointer.
+  beforeAll(async () => {
+    await page.viewport(1200, 800);
+  });
+
+  const laneDoc: DocJSON = { type: 'doc', content: [twoLanes(['l1', 'l2'], ['r1', 'r2']), line('after')] };
+
+  it('duplicates a later block of a lane inside that lane, the lanes left as they are', async () => {
+    const { editor } = await mountDocument(laneDoc, 1, [columns]);
+    await userEvent.click(await gripBeside(holding('.ProseMirror p', 'r2')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() =>
+      expect(lanesOf(editor())).toEqual([
+        ['l1', 'l2'],
+        ['r1', 'r2', 'r2'],
+      ]),
+    );
+  });
+
+  it('drags a later block of a lane out of it, the lane kept, as its menu would act on it', async () => {
+    const { blocks, editor } = await mountDocument(laneDoc, 1, [columns]);
+    await userEvent.dragAndDrop(await gripBeside(holding('.ProseMirror p', 'l2')), blocks[1], { steps: 10 });
+    await vi.waitFor(() => expect(lanesOf(editor())).toEqual([['l1'], ['r1', 'r2']]));
+    expect(
+      editor()
+        .getJSON()
+        .content?.slice(1)
+        .map((block) => block.content?.[0]?.text),
+    ).toContain('l2');
+  });
+
+  it('acts on the whole columns block from the grip beside its first line', async () => {
+    const { editor } = await mountDocument(laneDoc, 1, [columns]);
+    await userEvent.click(await gripBeside(holding('.ProseMirror p', 'l1')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
+    await vi.waitFor(() => expect(types(editor())).toEqual(['emailColumns', 'emailColumns', 'paragraph']));
+  });
+
+  it("opens the menu with Mod-/ on a lane's first block holding the caret, not on its columns block", async () => {
+    const { editor } = await mountDocument(laneDoc, 1, [columns]);
+    await userEvent.click(holding('.ProseMirror p', 'r1'));
+    await userEvent.keyboard('{Control>}/{/Control}');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(lanesOf(editor())).toEqual([['l1', 'l2'], ['r2']]));
+  });
+
+  it('deletes only the later paragraph of a table cell whose grip opened the menu', async () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'table',
+          content: [
+            {
+              type: 'tableRow',
+              content: [
+                { type: 'tableCell', content: [line('c1'), line('c2')] },
+                { type: 'tableCell', content: [line('d1')] },
+              ],
+            },
+          ],
+        },
+        line('after'),
+      ],
+    };
+    const { editor } = await mountDocument(doc, 1, [table()]);
+    await userEvent.click(await gripBeside(holding('.ProseMirror td p', 'c2')));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(cellsOf(editor())).toEqual([['c1'], ['d1']]));
+  });
+
+  it('opens the menu with Mod-/ on the list item holding the caret, not its whole list', async () => {
+    const doc: DocJSON = { type: 'doc', content: [bullets('one', 'two', 'three'), line('after')] };
+    const { editor } = await mountDocument(doc, 1);
+    await userEvent.click(holding('.ProseMirror li p', 'two'));
+    await userEvent.keyboard('{Control>}/{/Control}');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
+    await vi.waitFor(() => expect(itemsOf(editor(), 0)).toEqual(['one', 'three']));
+  });
+
+  it("leaves the list item's own list type out of Turn into", async () => {
+    const doc: DocJSON = { type: 'doc', content: [bullets('one', 'two'), line('after')] };
+    await mountDocument(doc, 1);
+    await userEvent.click(await gripBesideItem('two'));
+    await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Numbered list' })).toBeVisible();
+    expect(page.getByRole('menuitemradio', { name: 'Bulleted list' }).elements()).toHaveLength(0);
   });
 });

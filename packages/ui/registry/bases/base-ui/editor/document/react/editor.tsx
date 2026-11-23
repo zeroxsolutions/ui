@@ -13,6 +13,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { createDocumentEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { Delta, IEditor, EditorFeature, DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
+import { DRAG_HANDLE_REACH_PX } from '../features/standard/standard-kit';
 import { createNodeViewRenderer } from '../node-view-adapter';
 import { EditorBlockMenu } from './editor-block-menu';
 
@@ -36,12 +37,15 @@ export interface EditorProps {
   blockMenuLabel?: string;
 }
 
+/** The part of the engine's view the grip's drag replaces: what it drags and the clipboard form of that. */
+interface DragView {
+  state: { selection: { from: number; to: number; content(): unknown } };
+  dragging: { slice: unknown; move: boolean } | null;
+  serializeForClipboard(slice: unknown): { dom: HTMLElement; text: string };
+}
+
 /** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
 const GRIP_CLICK_SLOP_PX = 4;
-
-/** How far right of the pointer the drag handle looks for the node it drags: its own 50px plus the standard
- *  kit's 24px handle width. The menu looks at the same point, so it acts on the node a drag would move. */
-const GRIP_REACH_PX = 74;
 
 export function Editor({
   features,
@@ -161,7 +165,7 @@ export function Editor({
       const editor = editorRef.current;
       if (moved >= GRIP_CLICK_SLOP_PX || !editor?.isEditable()) return;
       const rect = handleEl.getBoundingClientRect();
-      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + GRIP_REACH_PX })) return;
+      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + DRAG_HANDLE_REACH_PX })) return;
       setMenu({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
     };
     handleEl.addEventListener('pointerdown', onPress);
@@ -172,7 +176,33 @@ export function Editor({
     };
   }, [handleEl, blockMenuItems]);
 
-  // The keyboard way to the same menu: Mod-/ picks the block holding the caret and opens it at that block.
+  // The extension's `dragstart` listener, added when the editor was built and so run before this one, drags
+  // the node its own lookup lifts to, which beside a later block of a lane or a table cell is the whole lane
+  // or cell. This one puts the block the menu acts on in its place, so a drag moves what a click opens the
+  // menu on. A range the author selected, which the extension drags as it is, is left alone.
+  useEffect(() => {
+    const view = (engine as { view?: DragView } | null)?.view;
+    if (!handleEl || !view) return;
+    const onDragStart = (event: DragEvent) => {
+      const editor = editorRef.current;
+      const dragged = view.state.selection;
+      if (!event.dataTransfer || !editor || !('node' in dragged)) return;
+      if (!editor.run('selectBlockAt', { y: event.clientY, x: event.clientX + DRAG_HANDLE_REACH_PX })) return;
+      const { selection } = view.state;
+      if (selection.from === dragged.from && selection.to === dragged.to) return;
+      const slice = selection.content();
+      const { dom, text } = view.serializeForClipboard(slice);
+      event.dataTransfer.clearData();
+      event.dataTransfer.setData('text/html', dom.innerHTML);
+      event.dataTransfer.setData('text/plain', text);
+      view.dragging = { slice, move: event.ctrlKey };
+    };
+    handleEl.addEventListener('dragstart', onDragStart);
+    return () => handleEl.removeEventListener('dragstart', onDragStart);
+  }, [handleEl, engine]);
+
+  // The keyboard way to the same menu: Mod-/ picks what the grip beside the caret would, such as the list item
+  // holding it, and opens the menu at that block.
   useEffect(() => {
     if (!rootEl || blockMenuItems.length === 0) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -191,7 +221,7 @@ export function Editor({
       const caret = editor.caretRect();
       if (!caret || !editor.isEditable()) return;
       event.preventDefault();
-      if (!editor.run('selectBlockAt', { y: (caret.top + caret.bottom) / 2 })) return;
+      if (!editor.run('selectBlockAt', { y: (caret.top + caret.bottom) / 2, x: caret.left, caret: true })) return;
       const block = view.nodeDOM(editor.getSelection().from);
       if (!(block instanceof HTMLElement)) return;
       const rect = block.getBoundingClientRect();

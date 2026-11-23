@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/document-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @base-ui/react @tiptap/extension-highlight @tiptap/extension-placeholder @tiptap/extension-subscript @tiptap/extension-superscript @tiptap/extension-task-item @tiptap/extension-task-list @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core@^0.2.0 tiptap-extension-global-drag-handle
+pnpm add @base-ui/react @tiptap/extension-highlight @tiptap/extension-placeholder @tiptap/extension-subscript @tiptap/extension-superscript @tiptap/extension-task-item @tiptap/extension-task-list @tiptap/react @tiptap/starter-kit @zeroxsolutions/editor-core@^0.2.0 tiptap-extension-global-drag-handle@0.1.18
 ```
 
 <Step>Install the Tailwind plugin its styles load.</Step>
@@ -394,8 +394,12 @@ interactions a static render cannot give.
 It renders the document with `data-editor="document"` and the `document-editor prose` classes its styles
 key on. Beside each block it draws a grip and an "Insert block below" button, which opens the slash menu on
 a new line. A click on the grip, or Mod-/ in the block, opens the block menu: Turn into, Duplicate and
-Delete. The menu acts on the node a drag of that grip moves, so the grip beside a list item opens it on that
-item. Mod-/ inside a code block's editor stays with the code. Turn into appears only on a block of text.
+Delete. The menu acts on the node a drag of that grip moves. Beside a list item, a later line of a quote, or a
+later block of a column or a table cell, that is the item, the line or the block. Beside the first line of a
+columns block or a table, it is the whole columns block or table. Mod-/ opens the menu on what the grip
+beside the caret would, except that on a column's first block it opens on that block. Mod-/ inside a code
+block's editor stays with the code. Turn into appears only on a block of text, and on a list item it leaves
+out the list type the item is already in.
 
 The menu draws the `blockMenu` items of `features`. Besides `id`, `title`, `icon`, `command`, `args` and
 `separatorBefore`, an item takes these fields:
