@@ -7,11 +7,12 @@ import { Index } from '@zeroxsolutions/ui/registry/bases/base-ui/examples/__inde
 import { publishedBlocks } from '../../lib/published-items';
 import { viewRoute } from '../../routes';
 import { ExampleSource } from '@zeroxsolutions/ui/site/components/data-display/example-source';
+import { EMBED_PARAM } from '@zeroxsolutions/ui/site/lib/view-params';
 
 interface BlockPreviewProps {
   /** The demo whose source shows under the frame. */
   name: string;
-  /** The published block the frame shows, on its own page, so it lays out at the frame's width. */
+  /** The published block the frame shows, on its own page embedded, so it lays out at the frame's width. */
   block: string;
   code?: string;
   language?: string;
@@ -25,7 +26,7 @@ function BlockPreview({ name, block, ...source }: BlockPreviewProps): ReactNode 
   if (!item) throw new Error(`BlockPreview: "${block}" is not a published block`);
   return (
     <ComponentPreview className="mt-4 mb-12">
-      <BlockFrame src={viewRoute.build({ name: item.name })} title={item.title} />
+      <BlockFrame src={`${viewRoute.build({ name: item.name })}?${EMBED_PARAM}=1`} title={item.title} />
       <ExampleSource name={name} {...source} />
     </ComponentPreview>
   );

@@ -4,15 +4,11 @@ import { useState, type ReactNode } from 'react';
 import { useTheme } from 'next-themes';
 
 import { useHydrated } from '../../hooks/use-hydrated';
-import { THEME_PARAM, type PageTheme } from '../../lib/theme-param';
-import { BlockFrame } from './block-frame';
+import type { PageTheme } from '../../lib/view-params';
 import { ComponentPreviewStage } from './component-preview';
+import { ExampleFrame } from './example-frame';
 import { ExamplePreviewToolbar, type ExamplePreviewDevice } from './example-preview-toolbar';
 import { ExampleViewLink } from './example-view-link';
-import { ScrollArea, ScrollBar } from '../../../../registry/bases/base-ui/ui/scroll-area';
-
-/** The frame's width per device; a desktop frame takes the stage's. */
-const DEVICE_WIDTHS: Record<Exclude<ExamplePreviewDevice, 'desktop'>, number> = { tablet: 768, mobile: 375 };
 
 interface ExamplePreviewStageProps {
   /** The demo's name in the examples index. */
@@ -50,19 +46,13 @@ function ExamplePreviewStage({ name, viewHref, children }: ExamplePreviewStagePr
         <ExampleViewLink name={name} href={viewHref} />
       </div>
       {framed ? (
-        // A frame wider than the stage scrolls sideways inside it, as a demo on the inline stage does.
-        <ScrollArea className="bg-muted/40 in-data-[device=desktop]:bg-transparent">
-          <div className="min-w-fit p-4 in-data-[device=desktop]:p-0">
-            <BlockFrame
-              src={`${viewHref}?${new URLSearchParams({ [THEME_PARAM]: theme })}`}
-              title={`${name}, ${device}, ${theme}`}
-              fit
-              className="ring-foreground/10 mx-auto block h-72 ring-1 in-data-[device=desktop]:ring-0"
-              style={device === 'desktop' ? undefined : { width: DEVICE_WIDTHS[device] }}
-            />
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <ExampleFrame
+          name={name}
+          viewHref={viewHref}
+          device={device}
+          theme={theme}
+          className="bg-muted/40 data-[device=desktop]:bg-transparent"
+        />
       ) : (
         <ComponentPreviewStage>{children}</ComponentPreviewStage>
       )}
