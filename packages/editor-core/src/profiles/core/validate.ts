@@ -81,8 +81,13 @@ const MAIL = /^mailto:/i;
  * body as a paragraph's text, each other field's size, each link and image address, and the lane count.
  * Each field's tokens are checked under its name.
  */
-function checkOwnBlock(walk: Walk, own: EmailBlockEditor, block: EditorEmailBlock, id: string): void {
-  const { content } = block;
+function checkOwnBlock(
+  walk: Walk,
+  own: EmailBlockEditor,
+  block: EditorEmailBlock,
+  content: Record<string, unknown>,
+  id: string,
+): void {
   for (const name of [...(own.body === null ? [] : [own.body.name]), ...own.fields.map((field) => field.name)]) {
     checkTokens(walk, { block: id, field: name }, text(content[name]));
   }
@@ -117,16 +122,55 @@ function checkOwnBlock(walk: Walk, own: EmailBlockEditor, block: EditorEmailBloc
     if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
   }
   if (own.lanes !== null) {
-    const count = block.lanes?.length ?? 0;
+    const count = Array.isArray(block.lanes) ? block.lanes.length : 0;
     if (count < own.lanes.min || count > own.lanes.max) {
-      walk.problems.push({ kind: 'lanes-mismatch', block: id, field: own.lanes.name });
+      walk.problems.push({ kind: 'lanes-count', block: id, field: own.lanes.name });
     }
   }
 }
 
+/** The keys each default kind's strict content schema has. */
+const CONTENT_KEYS: Readonly<Record<string, readonly string[]>> = {
+  paragraph: ['text'],
+  callout: ['text'],
+  list: ['items'],
+  button: ['label', 'href'],
+  code: ['code'],
+  html: ['html'],
+  divider: [],
+  columns: [],
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The block's content as the checks read it, with what the write check refuses for its shape reported as
+ * `content-invalid`: content that is not an object, and each key the type's content does not have. A kind
+ * named only through `extraKinds` has no known keys, so only its shape is checked.
+ */
+function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<string, unknown> {
+  const raw: unknown = block.content;
+  if (!isRecord(raw)) {
+    walk.problems.push({ kind: 'content-invalid', block: id });
+    return {};
+  }
+  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  const keys = own
+    ? [...(own.body === null ? [] : [own.body.name]), ...own.fields.map((field) => field.name)]
+    : CONTENT_KEYS[block.type];
+  if (keys !== undefined) {
+    for (const key of Object.keys(raw)) {
+      if (!keys.includes(key)) walk.problems.push({ kind: 'content-invalid', block: id, field: key });
+    }
+  }
+  return raw;
+}
+
 function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {
-  const lanes = block.lanes ?? [];
-  const ratio = block.attributes.ratio;
+  const lanes = Array.isArray(block.lanes) ? block.lanes : [];
+  const ratio = isRecord(block.attributes) ? block.attributes.ratio : undefined;
   const valid =
     Array.isArray(ratio) &&
     ratio.length === lanes.length &&
@@ -156,7 +200,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
     return;
   }
 
-  const { content } = block;
+  const content = contentOf(walk, block, id);
   switch (block.type) {
     case 'paragraph':
     case 'callout':
@@ -188,7 +232,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       break;
     default: {
       const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
-      if (own) checkOwnBlock(walk, own, block, id);
+      if (own) checkOwnBlock(walk, own, block, content, id);
       else {
         for (const name of new Set(variableTokens(content))) {
           walk.printed.add(name);
@@ -198,13 +242,15 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
         }
       }
       // A product's lanes block: its lanes' blocks are checked as a columns block's are.
-      for (const lane of block.lanes ?? []) walkBlocks(walk, lane, depth + 1);
+      for (const lane of Array.isArray(block.lanes) ? block.lanes : []) walkBlocks(walk, lane, depth + 1);
     }
   }
 }
 
 function walkBlocks(walk: Walk, blocks: readonly EditorEmailBlock[], depth: number): void {
-  for (const block of blocks) checkBlock(walk, block, depth);
+  // Stored JSON is read, not trusted: a lane or an entry of another shape is passed over rather than thrown on.
+  if (!Array.isArray(blocks)) return;
+  for (const block of blocks) if (isRecord(block)) checkBlock(walk, block as unknown as EditorEmailBlock, depth);
 }
 
 function checkSms(walk: Walk, body: string): void {

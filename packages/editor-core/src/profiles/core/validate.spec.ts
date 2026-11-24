@@ -312,15 +312,52 @@ describe('validate an SMS body', () => {
     it('flags a lanes block holding fewer or more lanes than it takes', () => {
       expect(validate([block('pair', {}, { lanes: [[], []] })], owned)).toEqual([]);
       expect(validate([block('pair', {}, { lanes: [[], [], []] })], owned)).toEqual([
-        { kind: 'lanes-mismatch', block: 'k1', field: 'sides' },
+        { kind: 'lanes-count', block: 'k1', field: 'sides' },
       ]);
       expect(validate([block('pair', {}, { lanes: [[]] })], owned)).toEqual([
-        { kind: 'lanes-mismatch', block: 'k1', field: 'sides' },
+        { kind: 'lanes-count', block: 'k1', field: 'sides' },
       ]);
     });
 
     it('refuses two blocks of one type', () => {
       expect(() => emailProfile({ blocks: [card, card] })).toThrow(/declared twice/);
+    });
+  });
+
+  describe("validate a block's content shape as the write check reads it", () => {
+    it.each([
+      [
+        'an unknown key',
+        { label: 'a', href: '{{link}}', extra: 'b' },
+        [{ kind: 'content-invalid', block: 'k1', field: 'extra' }],
+      ],
+      ['an array', [], [{ kind: 'content-invalid', block: 'k1' }]],
+      ['null', null, [{ kind: 'content-invalid', block: 'k1' }]],
+      [
+        'a parsed __proto__ key',
+        JSON.parse('{"label":"a","href":"{{link}}","__proto__":"x"}') as Record<string, unknown>,
+        [{ kind: 'content-invalid', block: 'k1', field: '__proto__' }],
+      ],
+    ])('reports %s on a button, and does not throw', (_case, content, expected) => {
+      const button = { id: null, key: 'k1', type: 'button', attributes: {}, content } as unknown as EditorEmailBlock;
+      expect(validate([button], profile).filter((problem) => problem.kind === 'content-invalid')).toEqual(expected);
+    });
+
+    it("reports a key a product block's fields do not name", () => {
+      const owned = emailProfile({
+        blocks: [
+          defineEmailBlock({
+            type: 'card',
+            label: 'Card',
+            fields: { text: richText() },
+            render: (_view, h) => h.divider(),
+            sample: { fields: { text: 'x' }, variableTypes: {} },
+          }),
+        ],
+      });
+      expect(validate([block('card', { text: 'Hi', extra: 1 })], owned)).toEqual([
+        { kind: 'content-invalid', block: 'k1', field: 'extra' },
+      ]);
     });
   });
 });

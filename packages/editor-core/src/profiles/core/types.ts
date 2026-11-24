@@ -14,6 +14,8 @@ export type ProblemKind =
   | 'unknown-block-type'
   | 'block-nested-too-deep'
   | 'lanes-mismatch'
+  | 'lanes-count'
+  | 'content-invalid'
   | 'text-empty'
   | 'text-too-long'
   | 'list-too-long'
