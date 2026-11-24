@@ -140,6 +140,8 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
           walk.problems.push({ kind: 'variable-undeclared', block: id, name });
         }
       }
+      // A product's lanes block: its lanes' blocks are checked as a columns block's are.
+      for (const lane of block.lanes ?? []) walkBlocks(walk, lane, depth + 1);
   }
 }
 

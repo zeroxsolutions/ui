@@ -20,6 +20,39 @@ export {
 } from './blocks/shared.js';
 export { MAX_LANES } from './blocks/columns.js';
 export { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './blocks/index.js';
+export {
+  defineEmailBlock,
+  EmailBlockDefinitionInvalid,
+  type EmailBlockAttributes,
+  type EmailBlockContent,
+  type EmailBlockDefinition,
+  type EmailBlockEditor,
+  type EmailBlockEditorAttribute,
+  type EmailBlockEditorField,
+  type EmailBlockFields,
+  type EmailBlockOptions,
+  type EmailBlockView,
+} from './define-email-block.js';
+export {
+  choice,
+  imageUrl,
+  lanes,
+  link,
+  number,
+  plainText,
+  richText,
+  toggle,
+  type ChoiceAttribute,
+  type EmailBlockAttribute,
+  type EmailBlockField,
+  type ImageUrlField,
+  type LanesField,
+  type LinkField,
+  type NumberAttribute,
+  type PlainTextField,
+  type RichTextField,
+  type ToggleAttribute,
+} from './fields.js';
 export { defaultLayout, type DefaultLayoutProps, type EmailLayout, type LayoutInput } from './layout.js';
 export { REGIONS, type Region, type RegionInput } from './region.js';
 export {

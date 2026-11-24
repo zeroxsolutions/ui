@@ -75,7 +75,7 @@ function withMarks(text: string, marks: MarkJSON[]): NodeJSON[] {
 }
 
 /** The inline nodes `source` reads as. A source that is not valid markup is kept as plain text, for the author to fix. */
-function inlineOf(source: string): NodeJSON[] {
+export function inlineOf(source: string): NodeJSON[] {
   const parsed = parseInlineMarkup(source);
   if (!parsed.ok) return withMarks(source, []);
   return parsed.runs.flatMap((run) =>
@@ -94,7 +94,7 @@ function printed(nodes: readonly NodeJSON[]): string {
  * canonical print. Printing is canonical, so a stored text that spells the same runs another way would
  * otherwise change, and a translation of it would go stale, with no edit.
  */
-function markupOf(nodes: readonly NodeJSON[], source: unknown): string {
+export function markupOf(nodes: readonly NodeJSON[], source: unknown): string {
   const current = printed(nodes);
   return typeof source === 'string' && printed(inlineOf(source)) === current ? source : current;
 }
@@ -210,9 +210,15 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         ...(node.attrs && 'id' in node.attrs ? { id: base.id } : {}),
         ...(node.attrs && 'key' in node.attrs ? { key: base.key } : {}),
       };
-    default:
-      if (custom?.toEmailBlock) return custom.toEmailBlock(node);
-      return { ...base, type: node.type, attributes, content: {} };
+    default: {
+      if (!custom?.toEmailBlock) return { ...base, type: node.type, attributes, content: {} };
+      const exported = custom.toEmailBlock(node);
+      // A codec's node that holds lanes, as a product's lanes block does, exports them as a columns block does.
+      const lanes = node.content ?? [];
+      return lanes.length > 0 && lanes.every((lane) => lane.type === 'emailLane')
+        ? { ...exported, lanes: lanes.map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs))) }
+        : exported;
+    }
   }
 }
 
@@ -254,6 +260,13 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
     default:
       for (const codec of codecs) {
         const node = codec.fromEmailBlock?.(block);
+        if (node && block.lanes !== undefined) {
+          const content = block.lanes.map((lane): NodeJSON => ({
+            type: 'emailLane',
+            content: lane.map((child) => importBlock(child, codecs)),
+          }));
+          return { ...node, content };
+        }
         if (node) return node;
       }
       return { type: 'emailUnknown', attrs: { id: block.id, key: block.key, block } };

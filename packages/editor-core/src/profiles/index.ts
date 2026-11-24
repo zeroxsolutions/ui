@@ -2,6 +2,7 @@ export {
   docProblems,
   EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,
+  emailBlockCodec,
   emailNodeSpecs,
   emailProfile,
   fromEmailBlocks,
