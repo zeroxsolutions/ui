@@ -63,7 +63,7 @@
     "remark-gfm": "catalog:",
     "remark-parse": "catalog:",
     "shiki": "catalog:",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.7.1",
     "unified": "catalog:"
   },
   "devDependencies": {
