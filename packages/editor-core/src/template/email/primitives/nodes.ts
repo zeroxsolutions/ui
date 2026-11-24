@@ -133,17 +133,43 @@ export const layoutReader: PrimitiveReader = {
   imageSrc: (template) => (LAYOUT_IMAGE.test(template.trim()) ? template.trim() : null),
 };
 
+/** The named entities markup commonly holds; another is left as written. */
 const ENTITIES: Readonly<Record<string, string>> = {
-  '&amp;': '&',
-  '&lt;': '<',
-  '&gt;': '>',
-  '&quot;': '"',
-  '&#39;': "'",
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: '\u00a0',
+  copy: '\u00a9',
+  reg: '\u00ae',
+  trade: '\u2122',
+  hellip: '\u2026',
+  ndash: '\u2013',
+  mdash: '\u2014',
+  lsquo: '\u2018',
+  rsquo: '\u2019',
+  ldquo: '\u201c',
+  rdquo: '\u201d',
+  laquo: '\u00ab',
+  raquo: '\u00bb',
+  middot: '\u00b7',
+  bull: '\u2022',
+  euro: '\u20ac',
+  pound: '\u00a3',
+  yen: '\u00a5',
+  cent: '\u00a2',
+  deg: '\u00b0',
+  times: '\u00d7',
 };
 
-/** `html`'s text, its tags dropped and the entities `escapeHtml` writes read back. */
+/** `html`'s text: its tags dropped, and its numbered entities and the named ones of `ENTITIES` read back. */
 function textOf(html: string): string {
-  return withoutTags(html).replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity]);
+  return withoutTags(html).replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (entity, decimal, hex, name) => {
+    if (name !== undefined) return ENTITIES[name] ?? entity;
+    const code = decimal === undefined ? Number.parseInt(hex, 16) : Number.parseInt(decimal, 10);
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : entity;
+  });
 }
 
 interface Classed {
@@ -184,10 +210,12 @@ export interface EmailPrimitives {
    */
   raw(options: { readonly markup: string }): EmailNode;
   /**
-   * Markup from a tagged template, ``h.raw`<td title="${subject}">` ``: the literal parts as written, every
-   * interpolated value escaped, so a person's value, such as the subject, is safe in text and in an attribute.
+   * Markup from a tagged template, ``h.raw`<td title="${subject}">` ``: the literal parts as `raw` writes its
+   * markup, each `{{name}}` in them filled escaped in a block, and every interpolated value escaped and never
+   * filled, so a person's value, such as the subject, is safe in text and in an attribute. A null or undefined
+   * value prints nothing.
    */
-  raw(strings: TemplateStringsArray, ...values: readonly unknown[]): EmailNode;
+  raw(strings: TemplateStringsArray, ...values: readonly (string | number | null | undefined)[]): EmailNode;
   /** The inbox line a client shows after the subject, hidden in the email. */
   preheader(options: { readonly text: string }): EmailNode;
   /** The email's card, at most 600px wide, centred on the page. */
@@ -281,17 +309,20 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       text: reader.text(options.text),
     }),
     spacer: (options) => ({ kind: 'spacer', classes: classesOf(options.class, 'zx-spacer'), height: options.height }),
-    raw: ((first: { readonly markup: string } | TemplateStringsArray, ...values: readonly unknown[]): EmailNode => {
+    raw: ((
+      first: { readonly markup: string } | TemplateStringsArray,
+      ...values: readonly (string | number | null | undefined)[]
+    ): EmailNode => {
       if ('markup' in first) {
-        return {
-          kind: 'raw',
-          html: reader.markup(first.markup),
-          text: `${reader.text(withoutTags(first.markup))}\n\n`,
-        };
+        return { kind: 'raw', html: reader.markup(first.markup), text: `${reader.text(textOf(first.markup))}\n\n` };
       }
-      const html = first.reduce((written, part, index) =>
-        index === 0 ? part : `${written}${escapeHtml(String(values[index - 1]))}${part}`,
-      );
+      // Each literal part is filled on its own, so a value never becomes a template.
+      const html = first
+        .slice(1)
+        .reduce(
+          (written, part, index) => `${written}${escapeHtml(String(values[index] ?? ''))}${reader.markup(part)}`,
+          reader.markup(first[0]),
+        );
       return { kind: 'raw', html, text: `${textOf(html)}\n\n` };
     }) as EmailPrimitives['raw'],
     preheader: (options) => ({ kind: 'preheader', text: reader.text(options.text) }),

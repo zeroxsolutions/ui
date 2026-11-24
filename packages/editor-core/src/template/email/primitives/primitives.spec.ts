@@ -132,6 +132,25 @@ describe('the primitives', () => {
     });
   });
 
+  it("fill a tagged raw's own {{name}} escaped in a block, and print each interpolated value escaped", () => {
+    expect(draw((h) => h.raw`<p title="${'{{name}}'}">Hi {{name}} ${'a<b'}</p>`)).toMatchObject({
+      html: '<p title="{{name}}">Hi &lt;Mai&gt; a&lt;b</p>',
+      text: 'Hi <Mai> a<b\n\n',
+    });
+  });
+
+  it('print nothing for an interpolated null or undefined', () => {
+    const missing = null as unknown as string;
+    expect(draw((h) => h.raw`<b>${missing}${undefined as unknown as string}</b>`).html).toBe('<b></b>');
+  });
+
+  it('read the entities of raw markup back on the text arm, named and numbered', () => {
+    const expected = 'a\u00a0b \u00a9 \u00a9 \u00a9 & \u2014 &bogus;\n\n';
+    const markup = '<p>a&nbsp;b &copy; &#169; &#xA9; &amp; &mdash; &bogus;</p>';
+    expect(draw((h) => h.raw({ markup })).text).toBe(expected);
+    expect(draw((h) => h.raw`<p>a&nbsp;b &copy; &#169; &#xA9; &amp; &mdash; &bogus;</p>`).text).toBe(expected);
+  });
+
   it('draw a section as a table of one cell, and as its own row among a stack of rows', () => {
     const section = (h: EmailPrimitives) => h.section({ class: 'row' }, [h.text({ text: 'x' })]);
     expect(draw(section).html).toBe(
