@@ -51,9 +51,11 @@ export interface BlockMenuItem {
   separatorBefore?: boolean;
   /** Items sharing a group render as one labelled submenu of radio items. */
   group?: string;
+  /** Draws an item outside a group as a checkbox, checked while `active`. */
+  checkbox?: boolean;
   /** Whether the item applies to the selected block; one that does not is left out of the menu. Default: it does. */
   visible?(editor: IEditor): boolean;
-  /** Whether the item is the block's current choice: its radio is checked. */
+  /** Whether the item is the block's current choice: its radio, or its checkbox, is checked. */
   active?(editor: IEditor): boolean;
   /** Why the item cannot run now, or `null` when it can: it renders disabled and names the reason. */
   disabledReason?(editor: IEditor): string | null;

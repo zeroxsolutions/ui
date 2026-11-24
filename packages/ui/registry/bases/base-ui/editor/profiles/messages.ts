@@ -31,6 +31,20 @@ export interface SmsMeterReading {
  * Every string the email and SMS editors draw. A host passes some of them as `messages`, in its own catalogue's
  * words, and the rest stay `DEFAULT_PROFILE_MESSAGES`'s English.
  */
+/** The words of a product's own block; its definition's labels where one is absent. */
+export interface CustomBlockMessages {
+  /** Its name in the slash menu and over its view. */
+  title?: string;
+  /** Its line in the slash menu. */
+  description?: string;
+  /** Each field's name, by the field's name in the definition. */
+  fields?: Readonly<Record<string, string>>;
+  /** Each attribute's name, by the attribute's name in the definition. */
+  attributes?: Readonly<Record<string, string>>;
+  /** Each choice's value's name, by the value. */
+  values?: Readonly<Record<string, string>>;
+}
+
 export interface ProfileEditorMessages {
   /** What a problem says to the author, naming the variable it is about. */
   problem(problem: ProfileProblem): string;
@@ -95,6 +109,8 @@ export interface ProfileEditorMessages {
   htmlBlock: string;
   /** What a stored block of a type no feature reads shows in its place. */
   unknownBlock(type: string): string;
+  /** The words of the product's own blocks, by type. */
+  customBlocks?: Readonly<Record<string, CustomBlockMessages>>;
 }
 
 const PROBLEMS: Readonly<Record<ProblemKind, string>> = {

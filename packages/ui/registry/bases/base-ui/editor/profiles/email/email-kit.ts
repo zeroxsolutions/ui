@@ -54,6 +54,8 @@ import {
   emailLinkTarget,
   laneAt,
   hasEmailLinkPopover,
+  ownBlockMenus,
+  type OwnBlockMenu,
   requestEmailLink,
   type EngineState,
   type Found,
@@ -463,6 +465,7 @@ export function emailKit(
   const locked = () => options.structure?.() === 'locked';
   const messages = options.messages ?? (() => DEFAULT_PROFILE_MESSAGES);
 
+  const ownMenus = extra.flatMap((feature) => ownBlockMenus.get(feature) ?? []);
   const extraBlocks = extra.flatMap((feature) =>
     (feature.nodes ?? []).filter((node) => inGroup(node, 'block')).map((node) => node.name),
   );
@@ -627,7 +630,12 @@ export function emailKit(
       id: 'emailBlockMenu',
       // Drawn when the menu opens, so the words, the declarations and the block's own lanes are the current ones.
       blockMenu: [
-        { id: 'email-block-menu', title: '', command: '', items: (editor) => emailBlockMenuItems(editor, kinds) },
+        {
+          id: 'email-block-menu',
+          title: '',
+          command: '',
+          items: (editor) => emailBlockMenuItems(editor, kinds, ownMenus),
+        },
       ],
     }),
     ...extra,
@@ -656,12 +664,16 @@ function refusal(context: KitContext, block: Found, whole: boolean): string | nu
 
 /**
  * The email's block menu for the block the grip picked, or the one the caret is in, read as the menu opens:
- * Turn into its text kinds, a submenu per attribute the block takes, a button's Link, which opens the link
- * popover on it, the lanes of the columns it is or sits in, and the document's Duplicate and Delete. Each is
- * disabled, with its reason, in locked structure and on a block the host requires; Duplicate also on a block of
+ * Turn into its text kinds, a submenu per attribute the block takes, a product block's own items, a button's
+ * Link, which opens the link popover on it, the lanes of the columns it is or sits in, and the document's
+ * Duplicate and Delete. Each is disabled, with its reason, in locked structure and on a block the host requires; Duplicate also on a block of
  * a kind the profile does not let the author add.
  */
-function emailBlockMenuItems(editor: IEditor, kinds: readonly EmailBlockKind[]): BlockMenuItem[] {
+function emailBlockMenuItems(
+  editor: IEditor,
+  kinds: readonly EmailBlockKind[],
+  ownMenus: readonly OwnBlockMenu[],
+): BlockMenuItem[] {
   const found = contextOf(editor);
   const block = found && blockAt(found.engine.state);
   if (!found || !block) return [];
@@ -725,9 +737,12 @@ function emailBlockMenuItems(editor: IEditor, kinds: readonly EmailBlockKind[]):
   const documentItem = (id: string, title: string, disabledReason: () => string | null): BlockMenuItem[] =>
     standardBlockMenuItems.filter((item) => item.id === id).map((item) => ({ ...item, title, disabledReason }));
 
+  const product = ownMenus.flatMap((menu) => menu(editor, block, own));
+
   return [
     ...turnInto,
     ...attributes,
+    ...product,
     ...link,
     ...lanes,
     ...documentItem('duplicate', words.duplicate, duplicateReason),

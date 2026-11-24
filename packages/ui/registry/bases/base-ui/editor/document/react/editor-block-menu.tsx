@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuRadioGroup,
@@ -134,6 +135,23 @@ export function EditorBlockMenu({
               );
             }
             const reason = item.disabledReason?.(editor) ?? null;
+            if (item.checkbox) {
+              return (
+                <span key={item.id} className="contents">
+                  {item.separatorBefore && <DropdownMenuSeparator />}
+                  <EditorBlockMenuReason reason={reason}>
+                    <DropdownMenuCheckboxItem
+                      checked={item.active?.(editor) ?? false}
+                      disabled={reason !== null}
+                      closeOnClick
+                      onCheckedChange={() => run(item)}
+                    >
+                      {item.title}
+                    </DropdownMenuCheckboxItem>
+                  </EditorBlockMenuReason>
+                </span>
+              );
+            }
             return (
               <span key={item.id} className="contents">
                 {item.separatorBefore && <DropdownMenuSeparator />}

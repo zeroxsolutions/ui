@@ -4,7 +4,7 @@ import {
   type EngineHandle,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import type { VariableFeature } from '../variables/variable';
@@ -49,6 +49,15 @@ export type EmailLinkTarget =
       linked: boolean;
       reason: null;
     };
+
+/**
+ * The block menu items of a product block's feature, for the block the menu opened on: `own` says why a change
+ * to that block is refused, or null. The kit lists them after the attributes it sets itself.
+ */
+export type OwnBlockMenu = (editor: IEditor, block: Found, own: () => string | null) => BlockMenuItem[];
+
+/** The block menus of the features `emailBlockFeature` built, which `emailKit` reads off the features it is given. */
+export const ownBlockMenus = new WeakMap<object, OwnBlockMenu>();
 
 // The kit's commands and views receive the facade; this is how they reach the engine and the options behind it.
 export const contexts = new Map<Editor, KitContext>();

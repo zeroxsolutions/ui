@@ -160,9 +160,10 @@
   margin-bottom: 2rem;
 }
 
-/* An email columns block's lanes are the children of its content element, which its view cannot class. The
+/* An email columns block's lanes, and a product block's, are the children of its content element, which its view cannot class. The
  * lanes share the width by the block's ratio, or equally without one. */
-.document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react] {
+.document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react],
+.document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react] {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);

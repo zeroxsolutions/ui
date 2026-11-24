@@ -3219,6 +3219,7 @@
         "@shadcn/button",
         "@shadcn/combobox",
         "@shadcn/field",
+        "@shadcn/input",
         "@shadcn/popover",
         "@shadcn/tabs",
         "@shadcn/tooltip",
@@ -3227,6 +3228,7 @@
         "@zui/document-editor",
         "@zui/editor-callout",
         "@zui/editor-code-block",
+        "@zui/lucide-blocks-icon",
         "@zui/lucide-braces-icon",
         "@zui/lucide-eye-icon",
         "@zui/lucide-layout-grid-icon",
@@ -3246,6 +3248,11 @@
           "path": "registry/bases/base-ui/editor/profiles/email/email-preview.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/email-preview.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-block-feature.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-block-feature.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/email/email-kit.ts",

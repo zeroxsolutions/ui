@@ -40,6 +40,7 @@ import {
 } from '@zeroxsolutions/editor-core/profiles/index';
 import {
   sameBlockContent,
+  type EmailBlockDefinition,
   type RenderedEmail,
   type RenderEmailInput,
 } from '@zeroxsolutions/editor-core/template/email/index';
@@ -55,6 +56,7 @@ import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
+import { emailBlockFeature } from './email-block-feature';
 import { emailKit, emailUi, type EmailUi } from './email-kit';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
@@ -101,7 +103,15 @@ interface EmailEditorBaseProps {
   sender?: string;
   /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
   readOnly?: boolean;
-  /** Features of the host's own blocks, each with an email codec. Read once: a change needs a remount. */
+  /**
+   * The product's own blocks, from `defineEmailBlock`: each is offered, edited and exported, and its type joins
+   * the profile's kinds. Read once: a change needs a remount.
+   */
+  blocks?: readonly EmailBlockDefinition[];
+  /**
+   * Features of the host's own, each block in them with an email codec; a block from `defineEmailBlock` goes in
+   * `blocks`. Read once: a change needs a remount.
+   */
   features?: EditorFeature[];
   /** The ids of the blocks the author may not remove. */
   required?: readonly string[];
@@ -294,12 +304,13 @@ function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMe
  * gave it without moving the caret.
  */
 export function EmailEditor({
-  profile,
+  profile: given,
   value,
   label,
   messages,
   readOnly = false,
-  features: extra,
+  features: hosted,
+  blocks,
   required = [],
   structure = 'free',
   renderer,
@@ -314,6 +325,14 @@ export function EmailEditor({
 }: EmailEditorProps) {
   const idBase = useId();
   const text = useMemo(() => profileMessages(messages), [messages]);
+  const [types] = useState(() => (blocks ?? []).map((definition) => definition.editor.type));
+  const profile = useMemo(
+    () =>
+      types.every((type) => given.kinds.includes(type))
+        ? given
+        : { ...given, kinds: [...given.kinds, ...types.filter((type) => !given.kinds.includes(type))] },
+    [given, types],
+  );
   const live = useRef({ profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur });
   live.current = { profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur };
 
@@ -333,7 +352,11 @@ export function EmailEditor({
   const overlay = useRef<Overlay>({ marks: [], host, label });
 
   const [setup] = useState(() => {
-    const codecs = (extra ?? []).flatMap((feature) => feature.codecs ?? []);
+    const extra = [
+      ...(blocks ?? []).map((definition) => emailBlockFeature(definition, { messages: () => live.current.text })),
+      ...(hosted ?? []),
+    ];
+    const codecs = extra.flatMap((feature) => feature.codecs ?? []);
     const declarations = () => live.current.profile.variables;
     const variables = variableFeature(declarations);
     const kit = emailKit(profile, extra, {
