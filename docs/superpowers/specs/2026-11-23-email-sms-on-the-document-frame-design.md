@@ -131,6 +131,8 @@ side with the Document Editor it reads as a different product.
   theme's background, with the docs frames' 1px border and no radius; the theme toggle rewrites `?theme=`
   in place without writing the stored theme. A docs preview's frame loads the page with `?embed=1`, which
   an inline script reads before the first paint to leave the controls out, as the stage has its own.
+- Revised 2026-11-24 after the owner's fifth review: a Tablet or Mobile frame draws no border, in the docs
+  preview and on the view page; the frame's page and the stage share one background.
 - Revised 2026-11-24 after the owner's third review: the email's callout has no left accent stripe. It is
   drawn as the Document Editor's callout reads: the muted background inside a 1px border in the theme's
   border colour, at the theme's radius.

@@ -18,18 +18,17 @@ interface ExampleFrameProps {
   className?: string;
 }
 
-/** The framed page's background and border tokens, for the address they were read from. */
+/** The framed page's background token, for the address it was read from. */
 interface ExampleFrameSurface {
   src: string;
   background: string;
-  border: string;
 }
 
 /**
  * A demo's view page in a frame at `device`'s width, centred and as tall as the demo, in `theme`, on a stage
  * painted with that theme's background. The frame is a viewport of its own, so the demo's breakpoints and media
- * queries answer to the device's width; a frame wider than the stage scrolls sideways inside it. A tablet's or
- * a phone's frame shows its edges as a 1px border in the theme's border colour.
+ * queries answer to the device's width; a frame wider than the stage scrolls sideways inside it. The frame draws
+ * no edge: its page and the stage share one background.
  */
 function ExampleFrame({ name, viewHref, device, theme, className }: ExampleFrameProps): ReactNode {
   const src = embeddedViewHref(viewHref, theme);
@@ -43,7 +42,6 @@ function ExampleFrame({ name, viewHref, device, theme, className }: ExampleFrame
     setSurface({
       src,
       background: tokens.getPropertyValue('--background').trim(),
-      border: tokens.getPropertyValue('--border').trim(),
     });
   };
   const painted = surface?.src === src ? surface : null;
@@ -61,12 +59,8 @@ function ExampleFrame({ name, viewHref, device, theme, className }: ExampleFrame
           title={`${name}, ${device}, ${theme}`}
           fit
           onLoad={read}
-          // Sized inside its border, so the framed window is the device's width and the demo's height.
-          className="mx-auto box-content block h-72 border in-data-[device=desktop]:border-0"
-          style={{
-            width: device === 'desktop' ? undefined : DEVICE_WIDTHS[device],
-            borderColor: painted?.border,
-          }}
+          className="mx-auto block h-72"
+          style={{ width: device === 'desktop' ? undefined : DEVICE_WIDTHS[device] }}
         />
       </div>
       <ScrollBar orientation="horizontal" />

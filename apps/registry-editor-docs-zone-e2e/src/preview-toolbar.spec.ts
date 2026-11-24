@@ -36,7 +36,7 @@ for (const [name, width] of [
   ['Tablet', 768],
   ['Mobile', 375],
 ] as const) {
-  test(`${name} frames the demo's page in a ${width}px wide window as tall as the demo, edged by a border`, async ({
+  test(`${name} frames the demo's page in a ${width}px wide window as tall as the demo, with no edge`, async ({
     page,
   }) => {
     test.setTimeout(90_000);
@@ -47,7 +47,7 @@ for (const [name, width] of [
     const frame = page.getByTitle(`${DEMO}, ${name.toLowerCase()}, light`);
     await expect(frame).toBeVisible();
     await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
-    // The frame's window, inside its border, is the device's width and the demo's height, so nothing scrolls.
+    // The frame's window is the device's width and the demo's height, so nothing scrolls.
     expect(await frame.evaluate((element: { clientWidth: number }) => element.clientWidth)).toBe(width);
     const demo = frame.contentFrame().locator('[data-slot=example-view]');
     await expect
@@ -57,7 +57,7 @@ for (const [name, width] of [
           Math.ceil((await demo.boundingBox())?.height ?? 0),
       )
       .toBe(0);
-    await expect(frame).toHaveCSS('border-top-width', '1px');
+    await expect(frame).toHaveCSS('border-top-width', '0px');
     await expect(frame).toHaveCSS('border-radius', '0px');
   });
 }
@@ -115,12 +115,12 @@ test('a view page opened alone floats its device and theme controls over its dem
   await expect(page).toHaveURL(/[?&]theme=dark/);
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
 
-  // Mobile frames the page itself at 375px, in its theme, edged by a border, with no controls of its own.
+  // Mobile frames the page itself at 375px, in its theme, with no edge and no controls of its own.
   await device(page, 'Mobile').click();
   const frame = page.getByTitle(`${DEMO}, mobile, dark`);
   await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
   expect(await frame.evaluate((element: { clientWidth: number }) => element.clientWidth)).toBe(375);
-  await expect(frame).toHaveCSS('border-top-width', '1px');
+  await expect(frame).toHaveCSS('border-top-width', '0px');
   await expect(frame.contentFrame().locator('[data-slot=example-view-controls]')).toBeHidden();
 });
 
