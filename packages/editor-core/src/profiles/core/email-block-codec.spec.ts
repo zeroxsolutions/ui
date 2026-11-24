@@ -50,6 +50,19 @@ describe("a product block's email codec", () => {
     ]);
   });
 
+  it('keeps the body of a block of no lanes that a stored copy gives lanes', () => {
+    const stored: EditorEmailBlock = {
+      id: 'q1',
+      key: 'q1',
+      type: 'quote',
+      attributes: {},
+      content: { text: 'Hi', author: '', href: '' },
+      lanes: [],
+    };
+    const { lanes: _dropped, ...kept } = stored;
+    expect(toEmailBlocks(fromEmailBlocks([stored], codecs), codecs)).toEqual([kept]);
+  });
+
   it('carries the lanes of a lanes block both ways', () => {
     const stored: EditorEmailBlock[] = [
       {

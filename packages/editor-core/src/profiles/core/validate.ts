@@ -90,7 +90,8 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
   const { bounds, kinds } = walk.profile;
   walk.count += 1;
 
-  if (depth > 0 && block.type === 'columns') {
+  // A lane holds no block of lanes: the renderer draws a columns block, or a product's lanes block, at the top only.
+  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined)) {
     walk.problems.push({ kind: 'block-nested-too-deep', block: id });
     return;
   }

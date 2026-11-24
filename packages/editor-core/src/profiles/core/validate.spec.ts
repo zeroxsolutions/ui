@@ -146,6 +146,15 @@ describe('validate an email', () => {
     expect(validate([outer], profile)).toEqual([{ kind: 'block-nested-too-deep', block: 'k1' }]);
   });
 
+  it("flags a product's lanes block inside a lane, and checks the blocks in its own lanes", () => {
+    const pairs = emailProfile({ variables: VARIABLES, extraKinds: ['pair'] });
+    const inner = block('pair', {}, { lanes: [[], []] });
+    const outer = block('columns', {}, { attributes: { ratio: [1, 1] }, lanes: [[inner], []] });
+    expect(validate([outer], pairs)).toEqual([{ kind: 'block-nested-too-deep', block: 'k1' }]);
+    const top = block('pair', {}, { lanes: [[block('video', {})], []] });
+    expect(validate([top], pairs)).toEqual([{ kind: 'unknown-block-type', block: 'k1' }]);
+  });
+
   it('flags a ratio that does not match the lanes', () => {
     const columns = block('columns', {}, { attributes: { ratio: [1, 1, 1] }, lanes: [[], []] });
     expect(validate([columns], profile)).toEqual([{ kind: 'lanes-mismatch', block: 'k1', field: 'ratio' }]);

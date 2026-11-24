@@ -54,6 +54,8 @@ describe('defineEmailBlock', () => {
     expect(quote.content.safeParse({ text: '**Hi', author: 'Lan' }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: 'x'.repeat(121) }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: 'Lan', extra: 'x' }).success).toBe(false);
+    expect(quote.content.safeParse({ text: 'Hi', author: '' }).success).toBe(true);
+    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(false);
     expect(quote.attributes.safeParse({}).success).toBe(true);
     expect(quote.attributes.safeParse({ tone: 'brand', boxed: true, size: 3 }).success).toBe(true);
     expect(quote.attributes.safeParse({ tone: 'loud' }).success).toBe(false);
@@ -79,6 +81,9 @@ describe('defineEmailBlock', () => {
         variableTypes: { name: 'string', u: 'url' },
       },
     });
+    expect(banner.content.safeParse({ title: 'x', href: 'mailto:a@b.test', image: '{{u}}' }).success).toBe(true);
+    expect(banner.content.safeParse({ title: 'x', href: 'javascript:alert(1)', image: '{{u}}' }).success).toBe(false);
+    expect(banner.content.safeParse({ title: 'x', href: '{{u}}', image: 'mailto:a@b.test' }).success).toBe(false);
     await expect(
       banner.translate({ title: 'Hello', href: '{{u}}', image: '{{u}}' }, async (sentence) => `[${sentence}]`),
     ).resolves.toEqual({ title: '[Hello]', href: '{{u}}', image: '{{u}}' });
@@ -188,6 +193,7 @@ describe('defineEmailBlock', () => {
     ],
     [{ attributes: { tone: choice(['a', 'b'], 'c' as 'a') } }, '"tone" defaults to a value it does not offer'],
     [{ attributes: { size: number({ min: 1, max: 3, default: 5 }) } }, '"size" defaults outside its range'],
+    [{ fields: { sides: lanes({ min: 5, max: 9 }) } }, '"sides" holds at most 4 lanes'],
   ])('refuses %o at definition', (overrides, reason) => {
     expect(() =>
       defineEmailBlock({

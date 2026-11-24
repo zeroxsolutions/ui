@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { parseInlineMarkup } from '../markup/inline-markup.js';
 import type { VariableType } from '../variables/variable-type.js';
 import type { BlockDefinition, EmailBlock, RenderContext } from './block.js';
+import { MAX_LANES } from './blocks/columns.js';
 import { defaultBlocks } from './blocks/index.js';
 import { readOr } from './blocks/shared.js';
 import type {
@@ -167,6 +168,7 @@ function assertOptions(options: EmailBlockOptions<string, FieldMap, AttributeMap
     refuse('a lanes block holds no rich text field');
   }
   for (const [name, field] of fields) {
+    if (field.kind === 'lanes' && field.max > MAX_LANES) refuse(`"${name}" holds at most ${MAX_LANES} lanes`);
     if (field.kind === 'lanes' && !(field.min >= 1 && field.min <= field.max))
       refuse(`"${name}" needs 1 <= min <= max`);
     if (field.kind !== 'lanes' && !(field.max >= 1)) refuse(`"${name}" needs a max of at least 1`);
@@ -184,12 +186,31 @@ function assertOptions(options: EmailBlockOptions<string, FieldMap, AttributeMap
   }
 }
 
+/** An address a link field may open with: a literal web or mail one, or a variable, whose type the profile checks. */
+const LINK_START = /^(?:https?:\/\/|mailto:|\{\{)/i;
+/** An address an image field may open with: a literal web one, or a variable. */
+const IMAGE_START = /^(?:https?:\/\/|\{\{)/i;
+
+/**
+ * The body holds text, as a paragraph does; another field may be left empty, as the editor exports it while the
+ * author has not filled it.
+ */
 function textSchema(field: Exclude<EmailBlockField, LanesField>): z.ZodType<string> {
-  const text = z.string().min(1).max(field.max);
-  // Refused where it is saved rather than drawn as a literal `**`.
-  return field.kind === 'richText'
-    ? text.refine((value) => parseInlineMarkup(value).ok, { message: 'malformed inline markup' })
-    : text;
+  if (field.kind === 'richText') {
+    // Refused where it is saved rather than drawn as a literal `**`.
+    return z
+      .string()
+      .min(1)
+      .max(field.max)
+      .refine((value) => parseInlineMarkup(value).ok, { message: 'malformed inline markup' });
+  }
+  const line = z
+    .string()
+    .max(field.max)
+    .refine((value) => !/[\r\n]/.test(value), { message: 'one line' });
+  if (field.kind === 'plainText') return line;
+  const start = field.kind === 'link' ? LINK_START : IMAGE_START;
+  return line.refine((value) => value === '' || start.test(value.trim()), { message: 'an address a client opens' });
 }
 
 function attributeSchema(attribute: EmailBlockAttribute): z.ZodType<string | boolean | number> {

@@ -2,7 +2,6 @@
  * The kinds of field and attribute a product's own email block declares. A field holds text the author writes,
  * stored in the block's content; an attribute holds a choice the author makes, stored in its attributes.
  */
-import { MAX_LANES } from './blocks/columns.js';
 import { BLOCK_TEXT_MAX_LENGTH, BUTTON_HREF_MAX_LENGTH } from './blocks/shared.js';
 
 interface Labelled {
@@ -63,7 +62,7 @@ export function imageUrl(options: Labelled = {}): ImageUrlField {
 
 /** `min` at least 1, `max` at most 4. */
 export function lanes(options: { readonly min: number; readonly max: number } & Labelled): LanesField {
-  return { kind: 'lanes', min: options.min, max: Math.min(options.max, MAX_LANES), ...labelOf(options) };
+  return { kind: 'lanes', min: options.min, max: options.max, ...labelOf(options) };
 }
 
 /** One of `values`; `valueLabels` names each in the editor, the value capitalised where absent. */

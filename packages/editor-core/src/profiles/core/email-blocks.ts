@@ -260,7 +260,9 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
     default:
       for (const codec of codecs) {
         const node = codec.fromEmailBlock?.(block);
-        if (node && block.lanes !== undefined) {
+        const lanes = node?.content ?? [];
+        // A codec's node that holds lanes, as a product's lanes block does, takes them as a columns block does.
+        if (node && block.lanes !== undefined && lanes.length > 0 && lanes.every((lane) => lane.type === 'emailLane')) {
           const content = block.lanes.map((lane): NodeJSON => ({
             type: 'emailLane',
             content: lane.map((child) => importBlock(child, codecs)),
