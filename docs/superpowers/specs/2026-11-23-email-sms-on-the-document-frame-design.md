@@ -118,6 +118,9 @@ side with the Document Editor it reads as a different product.
   while the demo is dark; revised after the owner's third review, it was a switch), and a view page opened directly has a bar (back to the
   docs, the demo's name, the device and theme controls) over a muted stage; `?embed=1` draws the demo alone
   for a docs preview's frame.
+- Revised 2026-11-24 after the owner's third review: the email's callout has no left accent stripe. It is
+  drawn as the Document Editor's callout reads: the muted background inside a 1px border in the theme's
+  border colour, at the theme's radius.
 - Before hydration the editor draws its starting document from the JSON, with no engine, so the page does
   not show an empty stage until the client has loaded the editor.
 - The frame runs scripts at an opaque origin under a nonce policy that admits only its height report.

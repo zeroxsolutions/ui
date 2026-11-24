@@ -56,7 +56,7 @@ export function textClassAttribute(
   theme: EmailTheme,
   region: Region | 'body',
   tone?: 'foreground' | 'mutedForeground',
-  ...extra: readonly ('muted' | 'accent')[]
+  ...extra: readonly ('muted' | 'border')[]
 ): string {
   const footer = region === 'footer';
   return classAttribute(

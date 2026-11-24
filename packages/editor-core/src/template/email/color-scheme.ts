@@ -13,7 +13,6 @@ export const PAINT = {
   primary: 'zx-primary-bg',
   primaryForeground: 'zx-primary-fg',
   link: 'zx-link',
-  accent: 'zx-accent',
   border: 'zx-border',
 } as const;
 
@@ -53,7 +52,6 @@ export function darkSchemeStyle(theme: EmailTheme): string {
     `.${PAINT.primary}{background:${dark.primary} !important;}` +
     `.${PAINT.primaryForeground}{color:${dark.primaryForeground} !important;}` +
     `.${PAINT.link}{color:${dark.primary} !important;}` +
-    `.${PAINT.accent}{border-left-color:${dark.primary} !important;}` +
     `.${PAINT.border}{border-color:${dark.border} !important;}` +
     '}'
   );

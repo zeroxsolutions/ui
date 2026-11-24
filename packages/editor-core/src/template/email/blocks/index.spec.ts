@@ -110,10 +110,10 @@ describe('the default blocks', () => {
     expect(text).toBe('- One\n- Two 2\n\n');
   });
 
-  it('render a callout boxed in the muted colour with a primary edge', () => {
+  it('render a callout boxed in the muted colour inside a border all round, with no accent edge', () => {
     const { html } = render('callout', {}, { text: 'Road closed' });
-    expect(html).toContain('background:#F4F4F5');
-    expect(html).toContain('border-left:4px solid #007A55');
+    expect(html).toContain('background:#F4F4F5;border:1px solid #E4E4E7;border-radius:10px;');
+    expect(html).not.toContain('border-left');
   });
 
   it('render a divider as a rule in the border colour and a blank text line', () => {
