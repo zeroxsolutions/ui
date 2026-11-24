@@ -24,14 +24,16 @@ class UrlValue extends MarkupValue {}
 
 /**
  * Builds a block's HTML. Every value is escaped and drawn as text; a `MarkupValue` is written as it is, and a
- * list of them one after another. A link goes through `markup.url`, which takes a web or mail address and turns
- * any other into an empty one.
+ * list of them one after another. A value goes in text or in a quoted `class`, `id`, `title`, `alt`, `lang`,
+ * `dir`, `role`, `width`, `height`, `colspan`, `rowspan`, `headers`, `scope`, `target`, `rel`, `download`,
+ * `datetime`, `name`, `data-*` or `aria-*` value. A link goes through `markup.url`, which takes a web or mail
+ * address and turns any other into an empty one, and only in `href` of `a`, `src` of `img`, `video`, `audio` and
+ * `source`, and `poster` of `video`.
  *
- * @throws {BlockDefinitionInvalid} for a value the escape cannot keep inert: in an event handler, a style, a
- * frame's document, an animation or a `meta` element, in a link or source attribute other than `markup.url`'s,
- * unquoted or loose inside a tag, or inside a script, style or other raw text element; for a fragment holding a
- * value anywhere but in text; and for a value that is not text, a number, a boolean, null, undefined or a list
- * of fragments
+ * @throws {BlockDefinitionInvalid} for a value anywhere else: naming a tag, loose inside one, in another
+ * attribute, or after a comment, a declaration or an element that runs, styles, frames or loads, such as
+ * `script`, `style`, `textarea`, `svg` or `link`; for a fragment holding a value anywhere but in text; and for a
+ * value that is not text, a number, a boolean, null, undefined or a list of fragments
  */
 export interface Markup {
   (strings: TemplateStringsArray, ...values: readonly unknown[]): MarkupValue;
@@ -61,97 +63,133 @@ function unescaped(value: string): string {
 }
 
 const ADDRESS = /^(?:https?:|mailto:)/i;
-/** Attributes whose value a browser loads or follows. */
-const LINK_ATTRIBUTE =
-  /^(?:href|src|srcset|imagesrcset|poster|action|formaction|xlink:href|data|background|cite|ping|codebase|archive|classid|lowsrc|dynsrc|manifest|icon|longdesc|usemap|profile)$/;
-/** Attributes whose value a browser runs, applies as style, loads as a document or animates into another. */
-const ACTIVE_ATTRIBUTE = /^(?:on\w+|style|srcdoc|values|to|from|by|attributename)$/;
-/** Elements whose text a browser reads as code or as markup of its own, never as the escaped text it is. */
-const RAW_TEXT = new Set(['script', 'style', 'xmp', 'iframe', 'noembed', 'noframes', 'noscript', 'plaintext']);
+/**
+ * Elements whose content a browser reads as code, style or a document, or which load or redirect what the page
+ * loads; with a comment or a declaration, a template that has opened one takes no value after it.
+ */
+const CLOSED_ELEMENTS: ReadonlySet<string> = new Set([
+  'script',
+  'style',
+  'textarea',
+  'title',
+  'iframe',
+  'noscript',
+  'xmp',
+  'noembed',
+  'noframes',
+  'plaintext',
+  'template',
+  'svg',
+  'math',
+  'base',
+  'link',
+  'meta',
+  'object',
+  'embed',
+  'param',
+  'applet',
+  'frame',
+  'frameset',
+]);
+/** Attributes an escaped value stays inert in. */
+const TEXT_ATTRIBUTE =
+  /^(?:class|id|title|alt|lang|dir|role|width|height|colspan|rowspan|headers|scope|target|rel|download|datetime|name|data-[a-z0-9-]+|aria-[a-z-]+)$/;
+/** The link and source attributes a `markup.url` value may go in, by element. */
+const LINK_ATTRIBUTES: Readonly<Record<string, readonly string[]>> = {
+  a: ['href'],
+  img: ['src'],
+  video: ['src', 'poster'],
+  audio: ['src'],
+  source: ['src'],
+};
+/** What HTML counts as space, narrower than a regular expression's `\s`. */
+const SPACE = /[\t\n\f\r ]/;
 
 /** Where the next character of some HTML lands, as a browser's tokenizer reads it. */
 type Place =
   | { readonly kind: 'text' }
-  | { readonly kind: 'comment' }
-  | { readonly kind: 'declaration' }
-  | { readonly kind: 'raw'; readonly element: string }
-  | { readonly kind: 'tag'; readonly tag: string; readonly closing: boolean }
-  | { readonly kind: 'unquoted'; readonly tag: string; readonly closing: boolean }
+  /** Right after `<` or `</`, where a value would name a tag. */
+  | { readonly kind: 'opening' }
+  /** After a comment, a declaration or a closed element, where no value goes. */
+  | { readonly kind: 'closed'; readonly reason: string }
+  | { readonly kind: 'tag'; readonly tag: string }
+  | { readonly kind: 'unquoted'; readonly tag: string }
   | { readonly kind: 'value'; readonly tag: string; readonly attribute: string; readonly quote: string };
-
-const TEXT: Place = { kind: 'text' };
 
 /** Where a character appended to `html` lands. Escaped values hold no `<`, `>` or quote, so they never move it. */
 function placeAfter(html: string): Place {
-  let place: Place = TEXT;
+  let place: Place = { kind: 'text' };
   let at = 0;
   while (at < html.length) {
     const character = html[at];
     if (place.kind === 'text') {
-      if (html.startsWith('<!--', at)) {
-        place = { kind: 'comment' };
-        at += 4;
+      if (character !== '<') {
+        at += 1;
         continue;
       }
-      const opened = /^<(\/?)([a-zA-Z][^\s/>]*)/.exec(html.slice(at, at + 64));
-      if (opened !== null) {
-        place = { kind: 'tag', tag: opened[2].toLowerCase(), closing: opened[1] === '/' };
-        at += opened[0].length;
+      const rest = html.slice(at + 1);
+      if (rest === '' || rest === '/') return { kind: 'opening' };
+      if (rest.startsWith('!') || rest.startsWith('?')) {
+        return { kind: 'closed', reason: 'no value goes after a comment or a declaration' };
+      }
+      const opened = /^\/?([a-zA-Z][^\t\n\f\r />]*)/.exec(rest);
+      if (opened === null) {
+        at += 1;
         continue;
       }
-      if (character === '<' && /[!?/]/.test(html[at + 1] ?? '')) place = { kind: 'declaration' };
-    } else if (place.kind === 'comment') {
-      if (html.startsWith('-->', at)) {
-        place = TEXT;
-        at += 3;
-        continue;
-      }
-    } else if (place.kind === 'declaration') {
-      if (character === '>') place = TEXT;
-    } else if (place.kind === 'raw') {
-      if (html.slice(at, at + place.element.length + 2).toLowerCase() === `</${place.element}`) {
-        place = { kind: 'tag', tag: place.element, closing: true };
-        at += place.tag.length + 2;
-        continue;
-      }
+      const tag = opened[1].toLowerCase();
+      if (CLOSED_ELEMENTS.has(tag)) return { kind: 'closed', reason: `no value goes after a ${tag} element` };
+      place = { kind: 'tag', tag };
+      at += 1 + opened[0].length;
     } else if (place.kind === 'value') {
-      if (character === place.quote) place = { kind: 'tag', tag: place.tag, closing: false };
-    } else if (character === '>') {
-      place = !place.closing && RAW_TEXT.has(place.tag) ? { kind: 'raw', element: place.tag } : TEXT;
+      if (character === place.quote) place = { kind: 'tag', tag: place.tag };
+      at += 1;
     } else if (place.kind === 'unquoted') {
-      if (/\s/.test(character)) place = { kind: 'tag', tag: place.tag, closing: place.closing };
-    } else if (!/[\s/]/.test(character)) {
-      const attribute = /^([^\s"'>/=]+)\s*(=\s*(["']?))?/.exec(html.slice(at))!;
-      at += attribute[0].length;
-      if (attribute[2] !== undefined) {
-        place =
-          attribute[3] === ''
-            ? { kind: 'unquoted', tag: place.tag, closing: place.closing }
-            : { kind: 'value', tag: place.tag, attribute: attribute[1].toLowerCase(), quote: attribute[3] };
+      if (character === '>') place = { kind: 'text' };
+      else if (SPACE.test(character)) place = { kind: 'tag', tag: place.tag };
+      at += 1;
+    } else if (place.kind === 'tag') {
+      const tag: string = place.tag;
+      if (character === '>' || character === '/' || SPACE.test(character)) {
+        if (character === '>') place = { kind: 'text' };
+        at += 1;
+        continue;
       }
-      continue;
-    }
-    at += 1;
+      const attribute = /^([^\t\n\f\r "'<>/=]+)[\t\n\f\r ]*(?:=[\t\n\f\r ]*(["']?))?/.exec(html.slice(at));
+      if (attribute === null) return { kind: 'closed', reason: `the template's <${tag}> tag cannot be read` };
+      at += attribute[0].length;
+      if (attribute[2] === '') place = { kind: 'unquoted', tag };
+      else if (attribute[2] !== undefined) {
+        place = { kind: 'value', tag, attribute: attribute[1].toLowerCase(), quote: attribute[2] };
+      }
+    } else return place;
   }
   return place;
 }
 
 /** Why `value` cannot be placed where `place` is, or null where it can. */
 function placementRefusal(place: Place, value: unknown): string | null {
-  const fragment = value instanceof MarkupValue && !(value instanceof UrlValue);
+  const url = value instanceof UrlValue;
+  const fragment = value instanceof MarkupValue && !url;
   // A fragment of the definition's own markup alone holds no value, so it may go wherever the definition puts it.
   if (fragment && !value.holdsValues) return null;
-  if (place.kind === 'text') return null;
-  if (fragment) return 'a fragment holding a value goes in text, where its values were checked';
-  if (place.kind === 'raw') return `a value cannot go inside a ${place.element} element`;
-  if (place.kind === 'comment' || place.kind === 'declaration') return null;
-  if (place.kind !== 'value') return 'a value inside a tag goes in a quoted attribute value';
-  if (place.tag === 'meta') return 'a value cannot go in a meta element';
-  if (ACTIVE_ATTRIBUTE.test(place.attribute)) return `a value cannot go in ${place.attribute}`;
-  if (LINK_ATTRIBUTE.test(place.attribute) && !(value instanceof UrlValue)) {
-    return `a value in ${place.attribute} goes through markup.url`;
+  switch (place.kind) {
+    case 'text':
+      return null;
+    case 'opening':
+      return 'a value cannot name a tag';
+    case 'closed':
+      return place.reason;
+    case 'tag':
+    case 'unquoted':
+      return 'a value inside a tag goes in a quoted attribute value';
+    case 'value':
+      if (fragment) return 'a fragment holding a value goes in text, where its values were checked';
+      if (LINK_ATTRIBUTES[place.tag]?.includes(place.attribute)) {
+        return url ? null : `a value in ${place.attribute} goes through markup.url`;
+      }
+      return TEXT_ATTRIBUTE.test(place.attribute) ? null : `a value cannot go in ${place.attribute} of <${place.tag}>`;
   }
-  return null;
 }
 
 /** The `markup` template of block `type`, recording whether `body` was placed. */

@@ -55,6 +55,18 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'emailLane',
   'emailHtml',
   'emailUnknown',
+  // The marks' names, which the engine keeps in the same namespace as the nodes'.
+  'link',
+  'emailLink',
+  'bold',
+  'italic',
+  'strike',
+  'code',
+  'underline',
+  'highlight',
+  'subscript',
+  'superscript',
+  'textStyle',
 ]);
 
 /** How a block draws in a document's exports: its HTML, which Markdown also carries. */

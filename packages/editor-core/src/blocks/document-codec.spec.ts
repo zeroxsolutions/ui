@@ -105,6 +105,20 @@ describe("a defined block's document codec", () => {
     ['a meta element', (value: string) => `<meta http-equiv="refresh" content="0;url=${value}">`],
     ['a noscript element', (value: string) => `<noscript>${value}`],
     ['a script in an svg', (value: string) => `<svg><script>${value}`],
+    ['a tag name', (value: string) => `<${value}>`],
+    ['an end tag name', (value: string) => `</${value}>`],
+    ['a link after a short comment', (value: string) => `<!--><a href="${value}">`],
+    ['a link after a comment ended with a bang', (value: string) => `<!-- a --!><a href="${value}">`],
+    ['a link after a comment in a textarea', (value: string) => `<textarea><!--</textarea><a href="${value}">`],
+    ['a link after a comment in a title', (value: string) => `<title>a <!-- b</title><a href="${value}">`],
+    ['an attribute after a no-break space', (value: string) => `<a title=x\u00a0data-y="${value}">`],
+    ['a style after an end tag lookalike', (value: string) => `<style>a{}</stylex>${value}</style>`],
+    ['a script source', (value: string) => `<script src="${value}">`],
+    ['a stylesheet link', (value: string) => `<link rel="stylesheet" href="${value}">`],
+    ['a base address', (value: string) => `<base href="${value}">`],
+    ['an attribute no allow-list names', (value: string) => `<b formtarget="${value}">`],
+    ['a conditional comment', (value: string) => `<!--[if mso]><a href="${value}"><![endif]-->`],
+    ['a tag the tokenizer cannot read', (value: string) => `<div =x title="${value}">`],
   ])('refuses a value placed in %s', (_where, place) => {
     const [before, after] = place('\u0000').split('\u0000');
     const unsafe = defineBlock({
@@ -182,5 +196,51 @@ describe("a defined block's body", () => {
   it('keeps an item that leaves a field out', () => {
     const html = '<div data-block="note" data-block-attrs="{&quot;tags&quot;:[{}]}"></div>';
     expect(importHTML(html, registry).doc).toEqual(docOf({ tags: [{}] }));
+  });
+});
+
+describe('markup.url', () => {
+  it.each([
+    ['a tag name', (url: string) => `<${url}>`],
+    ['a script source', (url: string) => `<script src="${url}">`],
+    ['a stylesheet link', (url: string) => `<link rel="stylesheet" href="${url}">`],
+    ['a base address', (url: string) => `<base href="${url}">`],
+  ])('is refused in %s', (_where, place) => {
+    const [before, after] = place('\u0000').split('\u0000');
+    const block = defineBlock({
+      type: 'linked',
+      label: 'Linked',
+      fields: { url: link() },
+      document: {
+        html: (view, markup) =>
+          markup(Object.assign([before, after], { raw: [before, after] }), markup.url(view.fields.url)),
+      },
+    });
+    expect(() =>
+      serialize(docOf({ url: 'https://x.test/ onmouseover=alert(1)' }, undefined, 'linked'), 'html', registryOf(block)),
+    ).toThrow(BlockDefinitionInvalid);
+  });
+
+  it.each([
+    ['a link', (url: string) => `<a href="${url}">x</a>`],
+    ['an image', (url: string) => `<img src="${url}" alt="">`],
+    ['a video poster', (url: string) => `<video poster="${url}"></video>`],
+    ['a media source', (url: string) => `<audio><source src="${url}"></audio>`],
+    ['text', (url: string) => `<p>${url}</p>`],
+    ['a title', (url: string) => `<p title="${url}">x</p>`],
+  ])('is taken in %s', (_where, place) => {
+    const [before, after] = place('\u0000').split('\u0000');
+    const block = defineBlock({
+      type: 'linked',
+      label: 'Linked',
+      fields: { url: link() },
+      document: {
+        html: (view, markup) =>
+          markup(Object.assign([before, after], { raw: [before, after] }), markup.url(view.fields.url)),
+      },
+    });
+    expect(serialize(docOf({ url: 'https://x.test/a' }, undefined, 'linked'), 'html', registryOf(block))).toContain(
+      'https://x.test/a',
+    );
   });
 });

@@ -371,6 +371,28 @@ describe('the write check and translate on edge values', () => {
     await expect(listed.translate(parsed, async (sentence) => `[${sentence}]`)).resolves.toEqual({ title: '[T]' });
   });
 
+  it('translates no field the content leaves out, at the top or in an item', async () => {
+    const seen: string[] = [];
+    const parsed = listed.content.parse({ title: 'T', links: [{ label: 'L' }] });
+    const translated = await listed.translate(parsed, async (sentence) => {
+      seen.push(sentence);
+      return `[${sentence}]`;
+    });
+    expect(seen).toEqual(['T', 'L']);
+    expect(translated).toEqual({ title: '[T]', links: [{ label: '[L]' }] });
+    const optional = defineEmailBlock({
+      type: 'optional',
+      label: 'Optional',
+      fields: { title: plainText(), links: items({ fields: { label: plainText(), url: link() }, max: 2 }) },
+      render: (_view, h) => h.divider(),
+      sample: { fields: { title: '{{name}}', links: [] }, variableTypes: { name: 'string' } },
+    });
+    const sparse = optional.content.parse({ links: [{ url: 'https://a.test' }] });
+    await expect(optional.translate(sparse, async (sentence) => `[${sentence}]`)).resolves.toEqual({
+      links: [{ url: 'https://a.test' }],
+    });
+  });
+
   it('refuses a required field holding only spaces, at the top and in an item', () => {
     expect(listed.content.safeParse({ title: '   ' }).success).toBe(false);
     expect(listed.content.safeParse({ title: 'T', links: [{ label: ' ' }] }).success).toBe(false);

@@ -84,6 +84,7 @@ describe('defineBlock', () => {
     [{ type: 'variable' }, 'the type names a Document Editor node'],
     [{ type: 'emailButton' }, 'the type names a Document Editor node'],
     [{ type: 'mathBlock' }, 'the type names a Document Editor node'],
+    [{ type: 'link' }, 'the type names a Document Editor node'],
     [{ type: 'Card' }, 'the type must be a lower-case letter, then letters and digits'],
     [{ fields: { id: plainText() } }, '"id" cannot name a field or an attribute'],
     [{ fields: { a: richText(), b: richText() } }, 'it holds more than one rich text field'],

@@ -436,10 +436,10 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
     async translate(source, translateOne) {
       const stored = source as Record<string, unknown>;
       const translated: Record<string, unknown> = { ...stored };
-      // In order rather than at once: a provider limits translations per minute.
+      // In order rather than at once: a provider limits translations per minute. A field left out stays out.
       for (const [name, field] of textFields) {
-        if (field.kind === 'richText' || field.kind === 'plainText') {
-          translated[name] = await translateOne(stored[name] as string);
+        if ((field.kind === 'richText' || field.kind === 'plainText') && typeof stored[name] === 'string') {
+          translated[name] = await translateOne(stored[name]);
         }
       }
       for (const [name, field] of itemsFields) {
@@ -449,7 +449,9 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
         for (const entry of stored[name] as readonly Record<string, string>[]) {
           const next = { ...entry };
           for (const [part, partField] of Object.entries(field.fields)) {
-            if (partField.kind === 'plainText') next[part] = await translateOne(entry[part]);
+            if (partField.kind === 'plainText' && typeof entry[part] === 'string') {
+              next[part] = await translateOne(entry[part]);
+            }
           }
           entries.push(next);
         }
