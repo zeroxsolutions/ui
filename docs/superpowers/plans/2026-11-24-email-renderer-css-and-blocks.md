@@ -339,9 +339,9 @@ Each kept the design's intent; the reason follows it.
   `BlockRendering`; `color-scheme`, `narrow-screen` and the row and text-style helpers of `blocks/shared` are
   gone); `0a08760d`'s body records them.
 - **After the final review.** A plain text field may hold a stored newline (it draws as a space), and a field
-  but the body may be left out, so the write check refuses nothing `validate` lets pass; a block's attribute
-  values are not checked by `validate`, as a default block's are not. `extraKinds` stays, for blocks of
+  but the body may be left out, so the write check refuses no content `validate` lets pass: `validate` reports
+  content that is not an object, and each key the type's content does not have, as `content-invalid`. A
+  block's attribute values are not checked by `validate`, as a default block's are not. `extraKinds` stays, for blocks of
   hand-written features, but `EmailEditor` needs a `blocks` definition in the profile's own `blocks`. A
-  query that redefines `:root`'s variables redraws every product rule of each property that changes,
-  before the query's own rules. A layout's raw markup escapes a filled subject or preheader only when it
-  opens a tag, and its images may also be `data:image/` and `cid:`.
+  product's queries are computed per element (see the spec's Revisions), and a layout's person values go
+  through a tagged `raw`, which escapes them; its images may also be `data:image/` and `cid:`.

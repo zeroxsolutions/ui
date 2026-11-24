@@ -187,3 +187,18 @@ owner's review.
 
 - Module layout inside `template/email/`, primitive option names beyond those above, the exact base sheet.
 - How the editor's node view lays out several plain fields.
+
+## Revisions
+
+- **2026-11-24, product queries.** The renderer no longer adds `!important` to every declaration of a product's
+  `@media` or `@supports` rule. Copied into the head, those rules approximated the cascade and got it wrong:
+  they beat a product's own later query, ignored `!important`, let a shorthand beat a more specific longhand,
+  and missed a `:root` inside a nested query. For each query chain (nested queries flattened into it) the
+  renderer now computes each element's style with the top-level rules and the chain's class-only rules, the
+  chain's custom properties over the sheets', and where it differs from the inlined style gives the element a
+  class (`zx-q<query>-<n>`) whose differing declarations are written under the chain, `!important`. Queries keep
+  source order. A query selector that is not class-only is kept in the head as written, `!important`; the base
+  sheet's head rules are unchanged.
+- **2026-11-24, layout markup.** `h.raw` is also a tagged template that escapes every interpolated value; the
+  options form writes trusted markup as given. A layout puts a person's value, such as the subject, only in
+  text or in a tagged `raw`.
