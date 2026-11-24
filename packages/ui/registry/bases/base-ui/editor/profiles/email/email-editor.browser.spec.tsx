@@ -807,11 +807,11 @@ describe('EmailEditor frame', () => {
         preview: { renderer: createEmailRenderer({ theme: { ...theme, dark } }), input: previewInput },
       });
       await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-bg{background:#18181B'));
+      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-body{background:#18181B'));
       expect(frame().style.colorScheme).toBe('dark');
 
       root.classList.remove('dark');
-      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-bg{background:#18181B'));
+      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-body{background:#18181B'));
       expect(frame().style.colorScheme).toBe('light');
     } finally {
       root.classList.remove('dark');
