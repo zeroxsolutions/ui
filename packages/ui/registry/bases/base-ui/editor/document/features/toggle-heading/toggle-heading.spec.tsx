@@ -102,4 +102,25 @@ describe('toggleHeading', () => {
       'H1',
     ]);
   });
+
+  it('reads no toggle heading from Markdown HTML holding more than the opening it writes', () => {
+    const markdown =
+      '<details data-toggle-heading open>\n<summary><h2>T</h2></summary>\nBody text that matters\n</details>';
+    expect(importMarkdown(markdown, registry).doc.content?.[0]?.type).not.toBe('toggleHeading');
+  });
+
+  it("decodes a summary's character references", () => {
+    const markdown = '<details data-toggle-heading open>\n<summary><h2>Tom&#39;s &#x26; &amp; Co</h2></summary>';
+    expect(importMarkdown(markdown, registry).doc.content?.[0]?.content?.[0]).toEqual(heading(2, "Tom's & & Co"));
+  });
+
+  it('writes a heading holding line breaks on one line, so the opening stays one HTML block', () => {
+    const doc = docOf(true, heading(2, 'a\n\n<b>x</b>'), paragraph('Walk'));
+    const read = importMarkdown(serialize(doc, 'markdown', registry), registry).doc;
+    expect(read.content?.[0]).toEqual({
+      type: 'toggleHeading',
+      attrs: { open: true },
+      content: [heading(2, 'a <b>x</b>')],
+    });
+  });
 });

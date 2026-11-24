@@ -101,13 +101,28 @@ function levelOf(heading: NodeJSON | undefined): number {
   return Math.min(6, Math.max(1, Number(heading?.attrs?.level) || 1));
 }
 
-const ENTITIES: Readonly<Record<string, string>> = { amp: '&', lt: '<', gt: '>', quot: '"' };
+const ENTITIES: Readonly<Record<string, string>> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 
-/** The heading a Markdown export wrote into a toggle heading's opening, or null for any other HTML. */
+/** `text` with its character references decoded: the named ones an export writes, and numeric ones. */
+function decoded(text: string): string {
+  return text.replace(
+    /&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi,
+    (reference, decimal?: string, hex?: string, name?: string) => {
+      if (name !== undefined) return ENTITIES[name.toLowerCase()] ?? reference;
+      const code = decimal !== undefined ? Number(decimal) : parseInt(hex ?? '', 16);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : reference;
+    },
+  );
+}
+
+/**
+ * The toggle heading a Markdown export's opening reads as, or null for any other HTML: one holding more than the
+ * opening is someone else's, which the import reports as dropped rather than losing what it holds.
+ */
 function headingOfMarkdown(html: string): NodeJSON<ToggleHeadingAttrs> | null {
-  const match = /^<details data-toggle-heading( open)?>\s*<summary><h([1-6])>([^<]*)<\/h\2><\/summary>/.exec(html);
+  const match = /^<details data-toggle-heading( open)?>\s*<summary><h([1-6])>([^<]*)<\/h\2><\/summary>\s*$/.exec(html);
   if (match === null) return null;
-  const text = match[3].replace(/&(amp|lt|gt|quot);/g, (_entity, name: string) => ENTITIES[name]);
+  const text = decoded(match[3]);
   return {
     type: 'toggleHeading',
     attrs: { open: match[1] !== undefined },
@@ -157,7 +172,9 @@ const toggleHeadingCodec: ReactNodeCodec<ToggleHeadingAttrs> = {
   toMarkdown: (node, ctx: SerializeContext) => {
     const [heading, ...rest] = node.content ?? [];
     const level = levelOf(heading);
-    const summary = `<summary><h${level}>${escaped(heading === undefined ? '' : textOf(heading))}</h${level}></summary>`;
+    // On one line, since a blank line would end the HTML block the opening is.
+    const text = heading === undefined ? '' : textOf(heading).replace(/\s+/g, ' ').trim();
+    const summary = `<summary><h${level}>${escaped(text)}</h${level}></summary>`;
     return [
       `<details data-toggle-heading${node.attrs?.open === false ? '' : ' open'}>`,
       summary,
