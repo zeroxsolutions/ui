@@ -4,10 +4,10 @@ import type { ReactNode } from 'react';
 import { MonitorIcon, SmartphoneIcon, TabletIcon } from 'lucide-react';
 
 import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
-import { MoonIcon } from '../../../../registry/bases/base-ui/icons/lucide/moon-icon';
+import { SunMoonIcon } from '../../../../registry/bases/base-ui/icons/lucide/sun-moon-icon';
 import { cn } from '../../../../registry/bases/base-ui/lib/utils';
+import { Button } from '../../../../registry/bases/base-ui/ui/button';
 import { Separator } from '../../../../registry/bases/base-ui/ui/separator';
-import { Switch } from '../../../../registry/bases/base-ui/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '../../../../registry/bases/base-ui/ui/toggle-group';
 import {
   Tooltip,
@@ -25,7 +25,7 @@ const DEVICE_WIDTHS: Record<Exclude<ExamplePreviewDevice, 'desktop'>, number> = 
 
 interface ExamplePreviewToolbarProps {
   device: ExamplePreviewDevice;
-  /** The theme chosen; the switch is off and disabled while it is not known yet, before the page has hydrated. */
+  /** The theme chosen; the toggle is unpressed and disabled while it is not known yet, before the page has hydrated. */
   theme: PageTheme | undefined;
   onDeviceChange(device: ExamplePreviewDevice): void;
   onThemeChange(theme: PageTheme): void;
@@ -67,25 +67,31 @@ interface ExamplePreviewToolbarThemeProps {
   onThemeChange(theme: PageTheme): void;
 }
 
-/** The dark theme's switch, the moon beside it; the moon plays while the switch holds the pointer or the focus. */
+/**
+ * The preview's theme toggle, drawn as the site header's `ModeSwitcher`: pressed while the demo is dark. Its
+ * icon plays on the button's hover or focus.
+ */
 function ExamplePreviewToolbarTheme({ theme, onThemeChange }: ExamplePreviewToolbarThemeProps): ReactNode {
   const icon = useAnimatedIcon();
   return (
     <Tooltip>
       <TooltipTrigger
-        render={<label data-slot="example-preview-toolbar-theme" className="flex items-center gap-1.5 px-1" />}
-        {...icon.handlers}
+        render={
+          <Button
+            data-slot="example-preview-toolbar-theme"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Toggle preview theme"
+            aria-pressed={theme === 'dark'}
+            disabled={theme === undefined}
+            onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
+            {...icon.handlers}
+          />
+        }
       >
-        <MoonIcon ref={icon.ref} aria-hidden className="text-muted-foreground flex size-4 [&_svg]:size-4" />
-        <Switch
-          size="sm"
-          aria-label="Dark theme"
-          checked={theme === 'dark'}
-          disabled={theme === undefined}
-          onCheckedChange={(dark) => onThemeChange(dark ? 'dark' : 'light')}
-        />
+        <SunMoonIcon ref={icon.ref} aria-hidden />
       </TooltipTrigger>
-      <TooltipContent>Dark theme</TooltipContent>
+      <TooltipContent>Toggle preview theme</TooltipContent>
     </Tooltip>
   );
 }

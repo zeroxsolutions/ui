@@ -17,9 +17,9 @@ function device(page: Page, name: string) {
   return page.getByRole('group', { name: 'Device' }).first().getByRole('button', { name, exact: true });
 }
 
-/** The first preview's dark theme switch. */
+/** The first preview's theme toggle, pressed while its demo is dark. */
 function darkTheme(page: Page) {
-  return page.getByRole('switch', { name: 'Dark theme' }).first();
+  return page.getByRole('button', { name: 'Toggle preview theme' }).first();
 }
 
 test('a preview draws its demo inline at the desktop width in the site theme', async ({ page }) => {
@@ -27,7 +27,7 @@ test('a preview draws its demo inline at the desktop width in the site theme', a
   await openPreview(page);
 
   await expect(device(page, 'Desktop')).toHaveAttribute('aria-pressed', 'true');
-  await expect(darkTheme(page)).not.toBeChecked();
+  await expect(darkTheme(page)).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
   await expect(page.locator('iframe[data-slot=block-frame]')).toHaveCount(0);
 });
@@ -53,12 +53,12 @@ for (const [name, width] of [
   });
 }
 
-test("the dark theme switch frames the demo dark, leaving the page's theme and its stored choice", async ({ page }) => {
+test("the theme toggle frames the demo dark, leaving the page's theme and its stored choice", async ({ page }) => {
   test.setTimeout(90_000);
   await openPreview(page);
 
   await darkTheme(page).click();
-  await expect(darkTheme(page)).toBeChecked();
+  await expect(darkTheme(page)).toHaveAttribute('aria-pressed', 'true');
 
   const frame = page.getByTitle(`${DEMO}, desktop, dark`);
   await expect(frame.contentFrame().locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);

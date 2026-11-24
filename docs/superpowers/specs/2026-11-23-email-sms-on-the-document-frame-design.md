@@ -114,7 +114,8 @@ side with the Document Editor it reads as a different product.
   is gone; the subject, sender and preheader are plain lines over a hairline, as a mail client heads an
   open message, and the email's frame follows edge to edge with no padding, ring, radius or background of
   its own. Under 600px the default layout is full-bleed: no gutter around the card, no border or radius on
-  it. The docs preview's theme control is a switch, and a view page opened directly has a bar (back to the
+  it. The docs preview's theme control is the site header's theme toggle (a sun-moon icon button, pressed
+  while the demo is dark; revised after the owner's third review, it was a switch), and a view page opened directly has a bar (back to the
   docs, the demo's name, the device and theme controls) over a muted stage; `?embed=1` draws the demo alone
   for a docs preview's frame.
 - Before hydration the editor draws its starting document from the JSON, with no engine, so the page does
