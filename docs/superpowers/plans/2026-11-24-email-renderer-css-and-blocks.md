@@ -300,4 +300,41 @@ overriding `.zx-callout`'s border colour, the quote in the initial blocks).
 
 ## Deviations from the spec
 
-Recorded here as they are made.
+Each kept the design's intent; the reason follows it.
+
+- **Lockfile.** `node_modules` was installed by a newer pnpm than the pinned 10.33.0, so `pnpm add` refused
+  the store and a lockfile-only install rewrote unrelated lines. The `postcss` importer entry was added to
+  `pnpm-lock.yaml` by hand and checked with `pnpm install --lockfile-only --frozen-lockfile` under 10.33.0;
+  the local `packages/editor-core/node_modules/postcss` link was made by hand and is not tracked.
+- **Template fence.** `fence.spec.ts` now admits `postcss` among the template's imports, since the parser is
+  the template's.
+- **Primitives drawn for the old pixels.** `text` and `code` draw a `div` (not `p` or `pre`), `heading` carries
+  no `zx-text`, and `button` is the anchor alone with no extra cell. Each matches what the old blocks wrote, so
+  the default look stays pixel-identical.
+- **The block row is the renderer's.** Each block's primitives go in a row whose classes are `zx-block`,
+  `zx-block-<type>`, `zx-align-<align>` and `zx-space-<spaceAfter>`, read from any block's attributes, with
+  `left` and `medium` when unset. The default classes (`zx-tone-default`, `zx-width-inline`) are always written,
+  so a product sheet can select them.
+- **Regions and the text arm.** `region` takes a `textEnd` (paragraph or line), and the default footer's
+  region ends each line with one newline, so the text arm is unchanged. An image is on the text arm only
+  when it is linked, as before.
+- **Layout input.** It carries `h` and no `theme`: the theme reaches the email through the base sheet.
+- **Warnings.** caniemail.com has no `color-mix()` entry; it takes the modern colour functions' clients.
+  Rules under `@supports` and cascade keywords (`inherit`, `initial`, `unset`) do not warn.
+- **CSS cycles.** A `var()` whose variable is in a cycle takes its own fallback, and is refused without one,
+  as a browser reads it, rather than refusing every cycle.
+- **defineEmailBlock.** A block holds either a rich text body or lanes, not both, since its editor node holds
+  one kind of content. A field but the body may be empty, as the editor exports it. `link` and `imageUrl` are
+  checked by scheme in the strict schema (web or mail address, or a variable); whether a variable is a url is
+  checked where it is rendered, since `validate()` does not know a product block's fields. A lanes block is
+  refused inside a lane, as columns are.
+- **Where the codec lives.** The editor codec is `emailBlockCodec(definition.editor)` in `profiles/core`, since
+  template code may not import the document's types.
+- **Block menu.** A `number` attribute is a field in the block's view, not a block menu item, since the menu
+  draws no input. A product block's items reach the kit's menu through a registry the feature fills, so they
+  sit before Duplicate and Delete. Its commands are per type: `insertEmailBlock:<type>` and
+  `setEmailBlockAttribute:<type>`. A product block has no Align or Space after item; it renders `left` and
+  `medium`.
+- **Commit messages.** `4d8faebf` did not name two of its breaking changes (a block render returns
+  `BlockRendering`; `color-scheme`, `narrow-screen` and the row and text-style helpers of `blocks/shared` are
+  gone); `0a08760d`'s body records them.
