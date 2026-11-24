@@ -197,7 +197,7 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
     }),
     heading: (options) => ({
       kind: 'heading',
-      classes: classesOf(options.class, 'zx-text', 'zx-heading', `zx-heading-${options.level}`),
+      classes: classesOf(options.class, 'zx-heading', `zx-heading-${options.level}`),
       level: options.level,
       runs: runsOf(options),
     }),

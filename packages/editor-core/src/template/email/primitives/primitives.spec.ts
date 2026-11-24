@@ -118,7 +118,7 @@ describe('the primitives', () => {
 
   it('draw a heading at its level', () => {
     expect(draw((h) => h.heading({ level: 2, text: 'Title' }))).toMatchObject({
-      html: '<h2 class="zx-text zx-heading zx-heading-2">Title</h2>',
+      html: '<h2 class="zx-heading zx-heading-2">Title</h2>',
       text: 'Title\n\n',
     });
   });

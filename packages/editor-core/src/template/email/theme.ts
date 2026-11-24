@@ -58,3 +58,27 @@ export function assertEmailTheme(theme: EmailTheme): void {
 export function fontStack(theme: EmailTheme): string {
   return `${theme.font.family}, ${theme.font.fallback}`;
 }
+
+/** The ZUI palette, light and dark, that a renderer composed with no theme draws with. */
+export const DEFAULT_EMAIL_THEME: EmailTheme = {
+  colors: {
+    background: '#FFFFFF',
+    foreground: '#09090B',
+    primary: '#007A55',
+    primaryForeground: '#ECFDF5',
+    muted: '#F4F4F5',
+    mutedForeground: '#63636D',
+    border: '#E4E4E7',
+  },
+  dark: {
+    background: '#0A0A0A',
+    foreground: '#FAFAFA',
+    primary: '#00BC7D',
+    primaryForeground: '#022C22',
+    muted: '#262626',
+    mutedForeground: '#A1A1A1',
+    border: '#262626',
+  },
+  radius: 10,
+  font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
+};
