@@ -287,20 +287,13 @@ column and the reason. So do `@import`, a `var()` with no value and CSS that doe
 custom properties of a top-level `:root` or `.zx-root` rule and is resolved before the value is inlined.
 
 Your `@media` and `@supports` rules hold in a query, so they cannot be inlined. For each query the renderer
-computes every element's style as a browser would while the query holds: your top-level rules and the query's
-own, by importance, specificity and order, with the custom properties the query's `:root` redefines. The element
-gets a class of its own, such as `zx-q0-3`, and the head gets, under the query, `!important` to beat the
-inlined style, each declaration that differs from the inlined style and each one the query's own rules set.
-Each keeps its rule's specificity, its class written once per class of the rule, and the head writes them in the
-order of their rules, so when two queries hold at once, such as a narrow screen in dark mode, the more specific
-rule wins a property both set, and at equal specificity the later one, a nested query's included. A selector in
-a query that is not class-only, such as `p`, is kept in the head as written, made `!important`, as is a query
-inside another at-rule, such as `@layer`. A `:root` in a query holds custom properties only; a declaration there
-throws, as it does at the top.
-
-The base sheet's own dark and narrow-screen rules stay in the head as they are, before yours. A query's own
-declaration still beats them at equal specificity, so a value your query sets holds even where it equals the
-inlined one, such as a light colour kept in dark mode:
+computes every element's style as a browser would while the query holds: your top-level rules, the rules of
+each query around it and its own, by importance, specificity and order, with the custom properties those
+queries' `:root` redefine. The element gets one class of its own for the query, such as `zx-q0-3`, and the head
+gets, under the query, each declaration that differs from the inlined style and each one the query's rules set,
+made `!important`. The class is written once more than the classes of the base sheet's widest rule, as in
+`.zx-q0-3.zx-q0-3.zx-q0-3`, so your query's style beats the base sheet's dark and narrow-screen rules on that
+element, even where it keeps the inlined value, such as a light colour kept in dark mode:
 
 ```css
 @media (prefers-color-scheme: dark) {
@@ -310,7 +303,11 @@ inlined one, such as a light colour kept in dark mode:
 }
 ```
 
-A base rule of two classes, such as `.zx-region-footer .zx-text`, needs two in yours to beat it.
+When two of your queries hold at once, a property both set on one element is decided by their order in your
+sheet, not by selector specificity: the later query wins. A nested query is computed with the rules of the
+queries around it, so inside it the cascade is a browser's. A selector in a query that is not class-only, such
+as `p`, is kept in the head as written, made `!important`, as is a query inside another at-rule, such as
+`@layer`. A `:root` in a query holds custom properties only; a declaration there throws, as it does at the top.
 
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
@@ -402,7 +399,11 @@ The primitives a `render` uses are on `h`: `section`, `columns`, `column`, `text
 text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does.
 ``h.raw`<td title="${subject}">` `` escapes every value it interpolates and never fills one, and fills each
 `{{name}}` in its own text, escaped, in a block; `h.raw({ markup })` writes trusted markup as given, so in a
-layout a person's value, such as the subject, never goes in it. A null or undefined value prints nothing. It places the result in the block's own row, and writes the
+layout a person's value, such as the subject, never goes in it. A null or undefined value prints nothing; any
+other value but text or a number throws `EmailMarkupInvalid`. Escaping keeps a value inside its attribute, but it
+does not make a link safe: a `javascript:` address escapes to itself. So a link or an image goes through
+`h.button`, `h.image` or a link in `h.text`'s markup, which check the scheme, and a tagged `raw` throws
+`EmailMarkupInvalid` for a value inside an `href`, `src` or other attribute that takes a link. It places the result in the block's own row, and writes the
 plain-text twin from the same primitives. `defineEmailBlock` throws `EmailBlockDefinitionInvalid` for a type
 that is a default one or not a lower-case word, a field or attribute named `id`, `key` or `source`, two rich
 text or lanes fields, or a default outside its attribute's values. Run `checkEmailRenderer(renderer,

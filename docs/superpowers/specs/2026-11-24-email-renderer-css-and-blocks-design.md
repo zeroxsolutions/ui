@@ -208,3 +208,12 @@ owner's review.
   so queries that hold at once cascade together, a nested query's rules included. In a block, a tagged `raw`
   fills each `{{name}}` in its literal parts, escaped. `validate` reports attributes the write check refuses
   as `attributes-invalid`.
+- **2026-11-24, query cascade simplified.** The per-declaration specificity weighting above is withdrawn: it let
+  an email's size grow with a selector's class count and let a one-class `!important` beat a two-class base
+  rule. An element gets at most one class per query chain, holding that chain's style where it differs or the
+  chain's rules set it, under a selector that repeats the class once more than the base sheet's widest rule, so
+  a product query always beats the base's head rules on its element. A nested chain is computed from the
+  top-level rules, every enclosing chain's rules and variables, and its own, outer to inner. Limitation: when
+  two of your queries hold at once, a property both set on one element is decided by their order in your sheet,
+  not by selector specificity. A tagged `raw` throws `EmailMarkupInvalid` for a value that is not text, a number,
+  null or undefined, and for one inside an attribute that takes a link.

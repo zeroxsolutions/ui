@@ -355,3 +355,10 @@ Each kept the design's intent; the reason follows it.
   `raw` fills its literal parts through the reader, so a block's `{{name}}` is filled there too, prints a
   null or undefined value as nothing, and its text arm and the options form's read numbered and common named
   entities back.
+- **Third batch.** The specificity weighting of the second review is withdrawn for one class per element per
+  chain at a fixed weight, one more than the base sheet's widest rule (see the spec's Revisions). An HTML
+  block's text arm is read from its filled markup, so a token spelled with entities, `&#123;&#123;otp&#125;&#125;`,
+  is literal on both arms. The brief asked that `validate` not report `required-variable-not-printed` for it;
+  it still does when `otp` is required, because neither arm prints `otp`, so that report is now true rather
+  than a disagreement with the text arm. Upper-case named entities decode only where HTML defines them (`AMP`,
+  `LT`, `GT`, `QUOT`, `COPY`, `REG`).
