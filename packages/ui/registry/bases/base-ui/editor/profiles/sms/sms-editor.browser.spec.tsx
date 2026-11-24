@@ -182,6 +182,38 @@ describe('SmsEditor', () => {
     expect(last(probe.reported)).toBe('Hello /');
   });
 
+  it('takes End after a chip to the end of the line, scrolling nothing, and Shift+End selects up to it', async () => {
+    // A page taller than the window, which End would scroll were the key left to the browser, as on macOS.
+    document.body.style.minHeight = '300vh';
+    try {
+      await mount('Hi {{a}} there');
+      const editable = find('[contenteditable=true]');
+      await vi.waitFor(() => find('[contenteditable=true] [data-variable=a]'));
+      // The text right after the chip.
+      const walker = document.createTreeWalker(editable, NodeFilter.SHOW_TEXT);
+      let after: Node | null = walker.nextNode();
+      while (after && after.textContent !== ' there') after = walker.nextNode();
+      if (!after) throw new Error('nothing follows the chip');
+      editable.focus();
+      document.getSelection()?.collapse(after, 0);
+
+      await userEvent.keyboard('{End}');
+      await vi.waitFor(() => {
+        const selection = document.getSelection();
+        expect(selection?.focusNode?.textContent).toBe(' there');
+        expect(selection?.focusOffset).toBe(' there'.length);
+      });
+      expect(window.scrollY).toBe(0);
+
+      document.getSelection()?.collapse(after, 0);
+      await userEvent.keyboard('{Shift>}{End}{/Shift}');
+      await vi.waitFor(() => expect(document.getSelection()?.toString()).toBe(' there'));
+      expect(window.scrollY).toBe(0);
+    } finally {
+      document.body.style.minHeight = '';
+    }
+  });
+
   it('keeps a typed heading or list shortcut, and a pasted heading, as text', async () => {
     const probe = await mount('');
     await caretAtEnd(probe);

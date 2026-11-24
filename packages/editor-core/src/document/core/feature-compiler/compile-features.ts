@@ -1,5 +1,6 @@
 import { Extension, InputRule, Mark, Node, markInputRule, mergeAttributes, nodeInputRule } from '@tiptap/core';
 import type { Plugin } from '@tiptap/pm/state';
+import type { EditorView } from '@tiptap/pm/view';
 import { facadeFor } from '../engine/facade-registry.js';
 import type { EngineExtensions, EngineHandle } from '../engine/engine-handle.js';
 import type { EditorFeature } from '../types/feature.js';
@@ -118,6 +119,20 @@ function buildInputRule(rule: InputRuleSpec, editor: unknown): InputRule {
   });
 }
 
+/**
+ * Moves the caret to the start or the end of its line as drawn, or with `extend` moves the selection's head
+ * there. ProseMirror leaves Home and End to the browser, and Chrome and Safari on macOS read them as keys that
+ * scroll the nearest scroller, which on a page is the whole page, without moving the caret. The browser's own
+ * line motion keeps a wrapped line and a chip at its edge as the reader sees them; the editor reads the moved
+ * selection back as it does any other.
+ */
+function toLineBoundary(view: EditorView, direction: 'backward' | 'forward', extend: boolean): boolean {
+  const selection = (view.root as Document).getSelection?.();
+  if (!selection || selection.rangeCount === 0 || !view.hasFocus()) return false;
+  selection.modify(extend ? 'extend' : 'move', direction, 'lineboundary');
+  return true;
+}
+
 function compileBehavior(features: EditorFeature[]): Extension {
   const inputRules = features.flatMap((feature) => feature.inputRules ?? []);
   const shortcuts: Record<string, string> = {};
@@ -129,7 +144,14 @@ function compileBehavior(features: EditorFeature[]): Extension {
       return inputRules.map((rule) => buildInputRule(rule, this.editor));
     },
     addKeyboardShortcuts() {
-      const handlers: Record<string, () => boolean> = {};
+      // First, so a feature's own binding for one of these keys wins.
+      const view = () => this.editor.view;
+      const handlers: Record<string, () => boolean> = {
+        Home: () => toLineBoundary(view(), 'backward', false),
+        End: () => toLineBoundary(view(), 'forward', false),
+        'Shift-Home': () => toLineBoundary(view(), 'backward', true),
+        'Shift-End': () => toLineBoundary(view(), 'forward', true),
+      };
       for (const [combo, command] of Object.entries(shortcuts)) {
         handlers[combo] = () => {
           const facade = facadeFor(this.editor as unknown as EngineHandle);
