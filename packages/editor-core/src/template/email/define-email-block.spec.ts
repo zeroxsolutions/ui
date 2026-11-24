@@ -50,11 +50,13 @@ function render(block: Omit<EmailBlock, 'id'>, variables: Record<string, string>
 describe('defineEmailBlock', () => {
   it('derives the strict write check from the fields and attributes', () => {
     expect(quote.content.safeParse({ text: 'Hi', author: 'Lan' }).success).toBe(true);
-    expect(quote.content.safeParse({ text: 'Hi' }).success).toBe(false);
     expect(quote.content.safeParse({ text: '**Hi', author: 'Lan' }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: 'x'.repeat(121) }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: 'Lan', extra: 'x' }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: '' }).success).toBe(true);
+    // A field but the body left out reads as empty, as `validate` reads it.
+    expect(quote.content.safeParse({ text: 'Hi' }).success).toBe(true);
+    expect(quote.content.safeParse({ text: 'Hi', author: 5 }).success).toBe(false);
     // The editor's field holds one line; a stored newline draws as a space, and no check refuses it.
     expect(quote.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(true);
     expect(quote.attributes.safeParse({}).success).toBe(true);

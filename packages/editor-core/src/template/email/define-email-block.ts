@@ -192,8 +192,8 @@ const LINK_START = /^(?:https?:\/\/|mailto:|\{\{)/i;
 const IMAGE_START = /^(?:https?:\/\/|\{\{)/i;
 
 /**
- * The body holds text, as a paragraph does; another field may be left empty, as the editor exports it while the
- * author has not filled it.
+ * The body holds text, as a paragraph does; another field may be empty, as the editor exports it while the author
+ * has not filled it, or left out, which reads as empty.
  */
 function textSchema(field: Exclude<EmailBlockField, LanesField>): z.ZodType<string> {
   if (field.kind === 'richText') {
@@ -206,11 +206,13 @@ function textSchema(field: Exclude<EmailBlockField, LanesField>): z.ZodType<stri
   }
   const text = z.string().max(field.max);
   // A plain field may hold a stored newline, which draws as a space; an address may not.
-  if (field.kind === 'plainText') return text;
+  if (field.kind === 'plainText') return text.optional() as z.ZodType<string>;
   const start = field.kind === 'link' ? LINK_START : IMAGE_START;
-  return text.refine((value) => value === '' || (!/[\r\n]/.test(value) && start.test(value.trim())), {
-    message: 'an address a client opens',
-  });
+  return text
+    .refine((value) => value === '' || (!/[\r\n]/.test(value) && start.test(value.trim())), {
+      message: 'an address a client opens',
+    })
+    .optional() as z.ZodType<string>;
 }
 
 function attributeSchema(attribute: EmailBlockAttribute): z.ZodType<string | boolean | number> {

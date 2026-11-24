@@ -87,8 +87,29 @@ describe('inlining a stylesheet', () => {
       ':root{--bg:#fff}@media (prefers-color-scheme:dark){:root{--bg:#000}}.a{background:var(--bg);padding:4px}';
     expect(styleOf('', [css], element(['a']))).toBe('background:#fff;padding:4px;');
     expect(composeStylesheets('', [css]).head).toMatch(
-      /@media \(prefers-color-scheme:dark\)\{.*\.a\{background:#000 !important\}\}$/,
+      /^@media \(prefers-color-scheme:dark\)\{\.a\{background:#000 !important\}\}@media/,
     );
+  });
+
+  it("lets a query's own rule for a selector beat the redraw of its variable", () => {
+    const css = ':root{--c:#111}.a{color:var(--c)}@media (prefers-color-scheme:dark){:root{--c:#eee}.a{color:red}}';
+    expect(composeStylesheets('', [css]).head).toBe(
+      '@media (prefers-color-scheme:dark){.a{color:#eee !important}}' +
+        '@media (prefers-color-scheme:dark){:root{--c:#eee !important}.a{color:red !important}}',
+    );
+  });
+
+  it('redraws every rule of a property a query changes, so a more specific one still wins', () => {
+    const css = ':root{--c:#111}@media (prefers-color-scheme:dark){:root{--c:#eee}}.a{color:var(--c)}.a.b{color:green}';
+    expect(composeStylesheets('', [css]).head).toMatch(
+      /^@media \(prefers-color-scheme:dark\)\{\.a\{color:#eee !important\}\.a\.b\{color:green !important\}\}/,
+    );
+  });
+
+  it('reads the custom properties of every query a declaration sits in, the innermost last', () => {
+    const css =
+      ':root{--c:#111}@supports (display:grid){@media (prefers-color-scheme:dark){:root{--c:#eee}.x{color:var(--c)}}}';
+    expect(composeStylesheets('', [css]).head).toContain('.x{color:#eee !important}');
   });
 
   it('reads a custom property an @media redefines first inside that query', () => {

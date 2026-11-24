@@ -121,16 +121,18 @@ export const literalReader: PrimitiveReader = {
 
 /** A link a client opens: a page, or an address to write to. */
 const LAYOUT_LINK = /^(?:https?:|mailto:)/i;
-/** An image a client loads: a page's, or one written into the address, as a preview's logo is. */
-const LAYOUT_IMAGE = /^(?:https?:|data:image\/)/i;
-const MARKUP_CHARACTER = /[<>&"']/;
+/** An image a client loads: a page's, one written into the address, as a preview's logo is, or a part of the mail. */
+const LAYOUT_IMAGE = /^(?:https?:|data:image\/|cid:)/i;
+/** A value that opens a tag; one that does not, such as a lone quote, is left alone in the layout's own markup. */
+const OPENS_TAG = /</;
 
 /**
  * The layout's reader: it prints the product's own props as given, checks each link's and image's scheme as a
- * block's are checked, and escapes `personal`, the filled subject and preheader, wherever raw markup holds one.
+ * block's are checked, and escapes `personal`, the filled subject and preheader, wherever raw markup holds one
+ * that opens a tag.
  */
 export function layoutReader(personal: readonly string[]): PrimitiveReader {
-  const escaped = personal.filter((value) => MARKUP_CHARACTER.test(value));
+  const escaped = personal.filter((value) => OPENS_TAG.test(value));
   return {
     ...literalReader,
     href: (template) => (LAYOUT_LINK.test(template.trim()) ? template.trim() : null),

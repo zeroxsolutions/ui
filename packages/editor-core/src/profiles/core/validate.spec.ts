@@ -300,6 +300,10 @@ describe('validate an SMS body', () => {
       expect(validate([cardOf({ image: 'mailto:a@b.test' })], owned)).toEqual([
         { kind: 'href-invalid', block: 'k1', field: 'image' },
       ]);
+      expect(validate([cardOf({ text: '[a](javascript:x) [b](javascript:x)' })], owned)).toEqual([
+        { kind: 'link-invalid', block: 'k1', field: 'text' },
+      ]);
+      expect(validate([cardOf({ author: 5 })], owned)).toEqual([{ kind: 'text-empty', block: 'k1', field: 'author' }]);
       expect(validate([cardOf({ href: '{{nobody}}' })], owned)).toEqual([
         { kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'nobody' },
       ]);

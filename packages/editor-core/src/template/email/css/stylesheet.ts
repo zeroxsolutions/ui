@@ -157,6 +157,17 @@ function createScope(custom: CustomProperties) {
   };
 }
 
+/** The nearest `@media` or `@supports` around `node`, or null at the top of its sheet. */
+function enclosingQuery(node: ChildNode): AtRule | null {
+  // The root has no parent, so the walk ends there.
+  let parent = node.parent as ChildNode | undefined;
+  while (parent !== undefined) {
+    if (parent.type === 'atrule' && ['media', 'supports'].includes(parent.name.toLowerCase())) return parent;
+    parent = parent.parent as ChildNode | undefined;
+  }
+  return null;
+}
+
 /** The custom properties a query's own `:root` or `.zx-root` rules declare, by name. */
 function queryProperties(source: Source, rule: AtRule): CustomProperties {
   const found: CustomProperties = new Map();
@@ -267,26 +278,44 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   };
 
   const queries: { readonly at: number; readonly rule: AtRule; readonly scope: ReturnType<typeof createScope> }[] = [];
+  const scopes = new Map<AtRule, ReturnType<typeof createScope>>();
+  /** The scope of `query`: each enclosing query's own custom properties over the sheets', the innermost last. */
+  const scopeOf = (source: Source, query: AtRule | null): ReturnType<typeof createScope> => {
+    if (query === null) return global;
+    const held = scopes.get(query);
+    if (held) return held;
+    const chain: AtRule[] = [];
+    for (let node: AtRule | null = query; node !== null; node = enclosingQuery(node)) chain.unshift(node);
+    const own = chain.map((node) => queryProperties(source, node));
+    const scope = own.every((properties) => properties.size === 0)
+      ? global
+      : createScope(new Map([...globalProperties, ...own.flatMap((properties) => [...properties])]));
+    scopes.set(query, scope);
+    return scope;
+  };
   const headRule = (source: Source, rule: AtRule): void => {
     const name = rule.name.toLowerCase();
     if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
     const conditional = name === 'media' || name === 'supports';
-    // A query's own custom properties hold inside it, over the sheets' top-level ones.
-    const own = conditional ? queryProperties(source, rule) : new Map();
-    const scope = own.size === 0 ? global : createScope(new Map([...globalProperties, ...own]));
-    // A rule under `@supports` is the author's own guard for the clients that lack the feature.
-    if (name !== 'supports') {
-      rule.walkDecls((declaration) =>
-        warn(source, declaration, scope.resolveIn(source, declaration, declaration.value)),
-      );
-    }
+    // Each declaration reads the custom properties of every query around it, over the sheets' top-level ones.
+    const values: string[] = [];
+    rule.walkDecls((declaration) => {
+      const value = scopeOf(source, enclosingQuery(declaration)).resolveIn(source, declaration, declaration.value);
+      values.push(value);
+      // A rule under `@supports` is the author's own guard for the clients that lack the feature.
+      if (name !== 'supports') warn(source, declaration, value);
+    });
     const copy = rule.clone();
+    let index = 0;
     copy.walkDecls((declaration) => {
-      declaration.value = scope.resolveIn(source, declaration, declaration.value);
+      declaration.value = values[index];
+      index += 1;
       if (conditional && source.sheet !== null) declaration.important = true;
     });
     head.push(copy.toString());
-    if (own.size > 0) queries.push({ at: head.length, rule, scope });
+    if (conditional && queryProperties(source, rule).size > 0) {
+      queries.push({ at: head.length - 1, rule, scope: scopeOf(source, rule) });
+    }
   };
 
   for (const source of sources) {
@@ -301,17 +330,29 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   }
 
-  // An inlined rule whose variables a query gives other values is drawn again under that query, after the
-  // query's own rules, as a dark theme that redefines `:root`'s colours expects.
+  // An inlined rule whose variables a query gives other values is drawn again under that query, as a dark theme
+  // that redefines `:root`'s colours expects. Every product rule setting a property that changes is drawn, in its
+  // order, so the head's cascade picks the rule the inline one picked; and it goes before the query's own rules,
+  // so a rule the author wrote in the query still wins.
+  const product = written.filter(({ source }) => source.sheet !== null);
   for (const { at, rule, scope } of [...queries].reverse()) {
-    const redrawn = written.flatMap(({ source, selector, declarations }) => {
-      const changed = declarations.flatMap((declaration) => {
-        const value = scope.resolveIn(source, declaration, declaration.value.trim());
-        return value === resolveIn(source, declaration, declaration.value.trim())
-          ? []
-          : [`${declaration.prop.toLowerCase()}:${value} !important`];
-      });
-      return changed.length === 0 ? [] : [`${selector}{${changed.join(';')}}`];
+    const resolved = (source: Source, declaration: Declaration) =>
+      scope.resolveIn(source, declaration, declaration.value.trim());
+    const changed = new Set(
+      product.flatMap(({ source, declarations }) =>
+        declarations
+          .filter(
+            (declaration) => resolved(source, declaration) !== resolveIn(source, declaration, declaration.value.trim()),
+          )
+          .map((declaration) => declaration.prop.toLowerCase()),
+      ),
+    );
+    const redrawn = product.flatMap(({ source, selector, declarations }) => {
+      const kept = declarations.filter((declaration) => changed.has(declaration.prop.toLowerCase()));
+      const body = kept.map(
+        (declaration) => `${declaration.prop.toLowerCase()}:${resolved(source, declaration)} !important`,
+      );
+      return body.length === 0 ? [] : [`${selector}{${body.join(';')}}`];
     });
     if (redrawn.length > 0) head.splice(at, 0, `@${rule.name} ${rule.params}{${redrawn.join('')}}`);
   }

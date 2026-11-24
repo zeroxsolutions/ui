@@ -94,8 +94,10 @@ function checkOwnBlock(walk: Walk, own: EmailBlockEditor, block: EditorEmailBloc
     const parsed = parseInlineMarkup(value);
     if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
     else {
+      const flagged = new Set<string>();
       for (const run of parsed.runs) {
-        if (run.kind === 'link' && hrefFaulty(walk, run.href)) {
+        if (run.kind === 'link' && !flagged.has(run.href) && hrefFaulty(walk, run.href)) {
+          flagged.add(run.href);
           const name = leadingToken(run.href);
           walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
         }
@@ -103,8 +105,11 @@ function checkOwnBlock(walk: Walk, own: EmailBlockEditor, block: EditorEmailBloc
     }
   }
   for (const field of own.fields) {
-    const value = text(content[field.name]);
+    const stored = content[field.name];
+    const value = text(stored);
     const where = { block: id, field: field.name };
+    // Left out, a field reads as empty; a value that is not text cannot be read at all.
+    if (stored !== undefined && typeof stored !== 'string') walk.problems.push({ kind: 'text-empty', ...where });
     if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
     if (field.kind === 'plainText' || value === '') continue;
     const faulty =

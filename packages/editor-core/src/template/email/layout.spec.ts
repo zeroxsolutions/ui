@@ -118,6 +118,8 @@ describe('defaultLayout', () => {
         h.button({ href: 'https://example.test/', label: 'Good' }),
         h.image({ src: 'javascript:alert(1)', alt: 'x', width: 10 }),
         h.image({ src: 'data:image/png;base64,AAAA', alt: 'logo', width: 10 }),
+        h.image({ src: 'cid:logo', alt: 'logo', width: 10 }),
+        h.raw({ markup: '<a href="https://example.test/">home</a>' }),
         h.raw({ markup: `<p class="s">${subject}</p>` }),
         h.region('body', body),
       ],
@@ -139,6 +141,11 @@ describe('defaultLayout', () => {
       expect(html).toContain('href="https://example.test/"');
       expect(html).not.toContain('javascript:');
       expect(html).toContain('src="data:image/png;base64,AAAA"');
+      expect(html).toContain('src="cid:logo"');
+    });
+
+    it("leaves the layout's own markup as written for a subject of no markup", () => {
+      expect(drawn('"').html).toContain('<a href="https://example.test/">home</a>');
     });
 
     it("escapes a person's value that reaches raw markup through the subject", () => {
