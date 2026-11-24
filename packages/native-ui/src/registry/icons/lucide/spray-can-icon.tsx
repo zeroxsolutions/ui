@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Animated, { Easing, Extrapolation, interpolate, useAnimatedProps } from 'react-native-reanimated';
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { useIconMotion, type AnimatedIconProps, type IconHandle, type IconTiming } from '../../lib/icon-motion';
 
 /** The handle a control starts and stops {@link SprayCanIcon} through. */
@@ -45,7 +45,6 @@ function SprayCanIcon({
   const dot2 = useAnimatedProps(() => fadeIn(progress.value, 2 * STAGGER, 2 * STAGGER + FADE));
   const dot3 = useAnimatedProps(() => fadeIn(progress.value, 3 * STAGGER, 3 * STAGGER + FADE));
   const dot4 = useAnimatedProps(() => fadeIn(progress.value, 4 * STAGGER, 4 * STAGGER + FADE));
-  const dot5 = useAnimatedProps(() => fadeIn(progress.value, 5 * STAGGER, 5 * STAGGER + FADE));
 
   return (
     <Svg
@@ -61,16 +60,16 @@ function SprayCanIcon({
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Rect width="4" height="4" x="15" y="5" />
-      <Path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" />
-      <Path d="m13 14 8-2" />
-      <Path d="m13 19 8-2" />
-      <AnimatedPath d="M11 7h.01" animatedProps={dot0} />
-      <AnimatedPath d="M7 5h.01" animatedProps={dot1} />
-      <AnimatedPath d="M7 9h.01" animatedProps={dot2} />
-      <AnimatedPath d="M3 3h.01" animatedProps={dot3} />
-      <AnimatedPath d="M3 7h.01" animatedProps={dot4} />
-      <AnimatedPath d="M3 11h.01" animatedProps={dot5} />
+      <Path d="M18 8.172V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v3.172" />
+      <Path d="M14 6h-2" />
+      <Path d="M20 20a2 2 0 01-2 2h-4a2 2 0 01-2-2v-9a3 3 0 013-3h2a3 3 0 013 3z" />
+      <Path d="m20 11-8 3" />
+      <Path d="m12 19 8-3" />
+      <AnimatedPath d="M8 4h.01" animatedProps={dot0} />
+      <AnimatedPath d="M8 8h.01" animatedProps={dot1} />
+      <AnimatedPath d="M4 2h.01" animatedProps={dot2} />
+      <AnimatedPath d="M4 6h.01" animatedProps={dot3} />
+      <AnimatedPath d="M4 10h.01" animatedProps={dot4} />
     </Svg>
   );
 }
