@@ -1,6 +1,15 @@
 'use client';
 
-import { getCoreRowModel, getSortedRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import {
+  columnVisibilityFeature,
+  createColumnHelper,
+  createSortedRowModel,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
+  useTable,
+} from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
 import {
@@ -19,19 +28,25 @@ interface FileRow {
   size: string;
 }
 
-const COLUMNS: ColumnDef<FileRow>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+});
+
+const COLUMN = createColumnHelper<typeof FEATURES, FileRow>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', { header: 'Name' }),
+  COLUMN.accessor('size', { header: 'Size' }),
+]);
+
+const DATA: FileRow[] = [];
 
 /** A table's header row, its "Name" column opening a sort-and-hide menu from the column header. */
 function DataTableColumnHeaderDemo(): ReactNode {
-  const table = useReactTable({
-    data: [],
-    columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+  const table = useTable({ features: FEATURES, data: DATA, columns: COLUMNS });
   const column = table.getColumn('name');
 
   return (

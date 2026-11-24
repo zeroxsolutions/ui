@@ -29,9 +29,10 @@ import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 ```
 
 ```tsx
-const columns: ColumnDef<FileRow>[] = [
-  {
-    accessorKey: 'name',
+const helper = createColumnHelper<typeof features, FileRow>();
+
+const columns = helper.columns([
+  helper.accessor('name', {
     header: ({ column }) => (
       <DataTableColumnHeader column={column}>
         <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
@@ -43,12 +44,14 @@ const columns: ColumnDef<FileRow>[] = [
         </DataTableColumnHeaderContent>
       </DataTableColumnHeader>
     ),
-  },
-];
+  }),
+]);
 ```
 
 Render it from a column's `header`. It takes the `column` directly, since column definitions live outside the
-render tree. A column that neither sorts nor hides takes its title as plain `children`, with no menu:
+render tree. The sort actions and the trigger's sort icon call `rowSortingFeature`'s APIs and Hide calls
+`columnVisibilityFeature`'s, so the column's table registers the features its menu uses. A column that neither
+sorts nor hides takes its title as plain `children`, with no menu:
 
 ```tsx
 <DataTableColumnHeader column={column}>Size</DataTableColumnHeader>

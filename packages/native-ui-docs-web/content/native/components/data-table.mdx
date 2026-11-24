@@ -32,10 +32,17 @@ import {
 } from '@/components/data-display/data-table';
 ```
 
-You own `useReactTable` and the column definitions; these parts only render the table they are given:
+You own `useTable`, its features and the column definitions; these parts only render the table they are given.
+The pager's steps call `rowPaginationFeature`'s APIs and `DataTableViewOptions` calls `columnVisibilityFeature`'s,
+so the table registers the features of the parts it renders:
 
 ```tsx
-const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+const features = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+});
+const table = useTable({ features, data, columns });
 
 <DataTable table={table}>
   <DataTableToolbar>

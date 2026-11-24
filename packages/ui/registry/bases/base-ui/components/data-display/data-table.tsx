@@ -2,7 +2,7 @@
 
 import { mergeProps } from '@base-ui/react/merge-props';
 import * as React from 'react';
-import { type Table as TanstackTable, flexRender } from '@tanstack/react-table';
+import { type RowData, type Table as TanstackTable, type TableFeatures, flexRender } from '@tanstack/react-table';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { Button } from '@/registry/bases/base-ui/ui/button';
@@ -29,32 +29,40 @@ interface DataTableIconHandle {
 type DataTableIcon = React.ComponentType<{ ref?: React.Ref<DataTableIconHandle>; 'aria-hidden'?: boolean }>;
 
 interface DataTableContextValue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- one context holds a table of any row type; useDataTable narrows it
-  table: TanstackTable<any>;
+  // One context holds a table of any features and row type, and a table type is invariant in both; useDataTable narrows it.
+  table: unknown;
 }
 
 const DataTableContext = React.createContext<DataTableContextValue | null>(null);
 
 /** Read the @tanstack/react-table instance shared by the surrounding <DataTable>. */
-function useDataTable<TData>(): TanstackTable<TData> {
+function useDataTable<TFeatures extends TableFeatures, TData extends RowData>(): TanstackTable<TFeatures, TData> {
   const ctx = React.useContext(DataTableContext);
   if (!ctx) {
     throw new Error('DataTable parts must be used within <DataTable>');
   }
-  return ctx.table as TanstackTable<TData>;
+  return ctx.table as TanstackTable<TFeatures, TData>;
 }
 
-interface DataTableProps<TData> extends React.ComponentProps<'div'> {
-  table: TanstackTable<TData>;
+interface DataTableProps<TFeatures extends TableFeatures, TData extends RowData> extends React.ComponentProps<'div'> {
+  table: TanstackTable<TFeatures, TData>;
 }
 
 /**
  * Root of the data-table compound. Holds the table instance in context so every
  * part (toolbar, view, view-options, pagination) reads it without prop-drilling.
- * The consumer owns `useReactTable` + the column defs; the SDK ships only the
+ * The consumer owns `useTable` + the column defs; the SDK ships only the
  * composable parts (shadcn data-table is a recipe, not a packaged component).
+ * The parts call the APIs of the features they drive, so the table registers
+ * `rowPaginationFeature` for the pagination steps and `columnVisibilityFeature`
+ * for `DataTableViewOptions`.
  */
-function DataTable<TData>({ table, className, children, ...props }: DataTableProps<TData>): React.ReactNode {
+function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
+  table,
+  className,
+  children,
+  ...props
+}: DataTableProps<TFeatures, TData>): React.ReactNode {
   const value = React.useMemo(() => ({ table }), [table]);
   return (
     <DataTableContext.Provider value={value}>
