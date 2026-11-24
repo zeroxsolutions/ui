@@ -28,6 +28,13 @@ function written(
     [...after].filter(([property, value]) => before.get(property) !== value).map(([property]) => property),
   );
   for (const { declaration, rule } of active) if (own.has(rule)) kept.add(declaration.property);
+  // A longhand the cascade put before its own shorthand is reset by it, as the inline style already holds.
+  active.forEach(({ declaration: { property } }, index) => {
+    const reset = active
+      .slice(index + 1)
+      .some(({ declaration }) => !NOT_LONGHANDS.has(property) && property.startsWith(`${declaration.property}-`));
+    if (reset) kept.delete(property);
+  });
   const seen: string[] = [];
   return active.filter(({ declaration: { property } }) => {
     const longhand = !NOT_LONGHANDS.has(property) && seen.some((shorthand) => property.startsWith(`${shorthand}-`));

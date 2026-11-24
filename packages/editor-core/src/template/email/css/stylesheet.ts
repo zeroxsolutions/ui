@@ -184,6 +184,14 @@ function createScope(custom: CustomProperties) {
   };
 }
 
+/** Whether `later` is written after `earlier`, in a later sheet or further on in the same one. */
+function writtenAfter(sources: readonly Source[], later: ChildNode, earlier: ChildNode): boolean {
+  const sheetOf = (node: ChildNode): number => sources.findIndex((source) => source.root === node.root());
+  const [laterSheet, earlierSheet] = [sheetOf(later), sheetOf(earlier)];
+  if (laterSheet !== earlierSheet) return laterSheet > earlierSheet;
+  return (later.source?.start?.offset ?? 0) > (earlier.source?.start?.offset ?? 0);
+}
+
 /** The nearest `@media` or `@supports` around `node`, or null at the top of its sheet. */
 function enclosingQuery(node: ChildNode): AtRule | null {
   // The root has no parent, so the walk ends there.
@@ -193,6 +201,42 @@ function enclosingQuery(node: ChildNode): AtRule | null {
     parent = parent.parent as ChildNode | undefined;
   }
   return null;
+}
+
+/**
+ * `selector` with the first class of its last compound repeated `times` more, which selects the same elements; one
+ * whose last compound has no class is returned as it is.
+ */
+function weighted(selector: string, times: number): string {
+  let depth = 0;
+  let quote: string | null = null;
+  let last = 0;
+  for (let index = 0; index < selector.length; index += 1) {
+    const char = selector[index];
+    if (quote !== null) {
+      if (char === '\\') index += 1;
+      else if (char === quote) quote = null;
+    } else if (char === '"' || char === "'") quote = char;
+    else if (char === '\\') index += 1;
+    else if (char === '(' || char === '[') depth += 1;
+    else if (char === ')' || char === ']') depth -= 1;
+    else if (depth === 0 && /[\s>+~]/.test(char)) last = index + 1;
+  }
+  const compound = selector.slice(last);
+  depth = 0;
+  for (let index = 0; index < compound.length; index += 1) {
+    const char = compound[index];
+    if (char === '\\') index += 1;
+    else if (char === '(' || char === '[') depth += 1;
+    else if (char === ')' || char === ']') depth -= 1;
+    else if (depth === 0 && char === '.') {
+      const name = /^\.(?:[-\w]|\\.)+/.exec(compound.slice(index))?.[0];
+      if (name === undefined) return selector;
+      const end = last + index + name.length;
+      return selector.slice(0, end) + name.repeat(times) + selector.slice(end);
+    }
+  }
+  return selector;
 }
 
 /** The custom properties a query's own `:root` or `.zx-root` rules declare, by name. */
@@ -250,6 +294,16 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   });
 
+  // The base sheet's widest rule, wherever it stands: a query class must outweigh its head rules.
+  let widest = 0;
+  sources[0].root.walkRules((rule) => {
+    for (const text of rule.selectors) {
+      const selector = parseClassSelector(text);
+      if (!('refused' in selector)) widest = Math.max(widest, selector.specificity);
+    }
+  });
+  const queryWeight = widest + 1;
+
   const globalProperties = customProperties(sources);
   const global = createScope(globalProperties);
   const scopes = new Map<AtRule, Scope>();
@@ -261,9 +315,13 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     const chain: AtRule[] = [];
     for (let node: AtRule | null = query; node !== null; node = enclosingQuery(node)) chain.unshift(node);
     const own = chain.map((node) => queryProperties(source, node));
-    const scope = own.every((properties) => properties.size === 0)
-      ? global
-      : createScope(new Map([...globalProperties, ...own.flatMap((properties) => [...properties])]));
+    const merged = new Map(globalProperties);
+    // A query's property holds over a top-level one written before it; one written after it wins, as in a browser.
+    for (const [name, declared] of own.flatMap((properties) => [...properties])) {
+      const top = merged.get(name);
+      if (top === undefined || !writtenAfter(sources, top.node, declared.node)) merged.set(name, declared);
+    }
+    const scope = own.every((properties) => properties.size === 0) ? global : createScope(merged);
     scopes.set(query, scope);
     return scope;
   };
@@ -426,6 +484,13 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         if (kept.length === 0) inner.remove();
         else inner.selectors = kept;
       });
+      // A query's rule the renderer cannot compute, such as `.a:hover`, stays over the query classes it shares an
+      // element with: its last part's first class is repeated as many times as a query class is.
+      for (const inner of copies) {
+        if (inner.parent && enclosingQuery(inner) !== null) {
+          inner.selectors = inner.selectors.map((text) => weighted(text, queryWeight));
+        }
+      }
       // Innermost first, so a query left empty by its own rules' removal empties the one around it too.
       const queries: AtRule[] = [];
       copy.walkAtRules((nested) => {
@@ -465,21 +530,12 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     };
   });
 
-  // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.
-  // The base sheet's widest rule, wherever it stands: a query class must outweigh its head rules.
-  let widest = 0;
-  sources[0].root.walkRules((rule) => {
-    for (const text of rule.selectors) {
-      const selector = parseClassSelector(text);
-      if (!('refused' in selector)) widest = Math.max(widest, selector.specificity);
-    }
-  });
-
   return {
     rules,
+    // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.
     head: head.join('').replaceAll('</', '<\\/'),
     queries,
-    queryWeight: widest + 1,
+    queryWeight,
     darkScheme,
     warnings,
   };

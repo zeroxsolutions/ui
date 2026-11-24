@@ -110,13 +110,13 @@ describe('inlining a stylesheet', () => {
 
   it('keeps a query inside another at-rule, such as @layer, in the head as written', () => {
     const { head, queries } = composeStylesheets('', ['@layer x{@media (max-width:600px){.b{color:blue}}}']);
-    expect(head).toBe('@layer x{@media (max-width:600px){.b{color:blue !important}}}');
+    expect(head).toBe('@layer x{@media (max-width:600px){.b.b{color:blue !important}}}');
     expect(queries).toEqual([]);
   });
 
   it('keeps an at-rule inside a product query, with its rules, which the renderer does not compute', () => {
     const { head } = composeStylesheets('', ['@media (max-width:600px){@layer x{.b{color:blue}}.c{color:red}}']);
-    expect(head).toBe('@media (max-width:600px){@layer x{.b{color:blue !important}}}');
+    expect(head).toBe('@media (max-width:600px){@layer x{.b.b{color:blue !important}}}');
   });
 
   it("computes a query's .zx-root rule as any class rule, and refuses a :root one that styles", () => {

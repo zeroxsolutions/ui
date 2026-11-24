@@ -150,6 +150,26 @@ describe("a product's query rules, drawn per element", () => {
     expect(ruleOf(head, dark)).toBe('border-color:#00BC7D !important');
   });
 
+  it("lets a query's rule that is not class-only win over the computed class, as its specificity would", () => {
+    const { head } = render(
+      '@media (min-width:1px){.zx-text{color:red} .zx-text:hover{color:blue} div.zx-text{color:green} p{margin:0}}',
+    );
+    expect(head).toContain(
+      '@media (min-width:1px){ .zx-text.zx-text.zx-text.zx-text:hover{color:blue !important}' +
+        ' div.zx-text.zx-text.zx-text.zx-text{color:green !important} p{margin:0 !important}}',
+    );
+  });
+
+  it("lets a later top-level shorthand reset a query's longhand, as a browser does", () => {
+    const { html } = render('@media (min-width:1px){.zx-text{border-color:blue}} .zx-text{border:1px solid red}');
+    expect(queryClassesOf(html, 'zx-text zx-tone-default')).toEqual([]);
+  });
+
+  it("lets a later top-level :root beat a query's variable, as a browser does", () => {
+    const { html } = render('@media (min-width:1px){:root{--c:blue}} :root{--c:red} .zx-text{color:var(--c)}');
+    expect(queryClassesOf(html, 'zx-text zx-tone-default')).toEqual([]);
+  });
+
   it('gives no element a query class without a product sheet', () => {
     expect(render('').html).not.toContain('zx-q');
   });
