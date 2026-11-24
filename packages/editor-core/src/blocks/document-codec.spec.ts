@@ -96,6 +96,15 @@ describe("a defined block's document codec", () => {
     ['a style', (value: string) => `<b style="${value}">`],
     ['an unquoted attribute', (value: string) => `<b title=${value}>`],
     ['a script', (value: string) => `<script>${value}`],
+    ['a link after a closing bracket in an earlier value', (value: string) => `<a title="1 > 0" href="${value}">`],
+    ['a link after a comment opener in an earlier value', (value: string) => `<a title="<!--" href="${value}">`],
+    ['a frame document', (value: string) => `<iframe srcdoc="${value}">`],
+    ['an animation value', (value: string) => `<svg><a><animate attributeName="href" values="${value}"/>`],
+    ['an animation target', (value: string) => `<svg><set attributeName="onmouseover" to="${value}"/>`],
+    ['an animated attribute name', (value: string) => `<svg><set attributeName="${value}" to="x"/>`],
+    ['a meta element', (value: string) => `<meta http-equiv="refresh" content="0;url=${value}">`],
+    ['a noscript element', (value: string) => `<noscript>${value}`],
+    ['a script in an svg', (value: string) => `<svg><script>${value}`],
   ])('refuses a value placed in %s', (_where, place) => {
     const [before, after] = place('\u0000').split('\u0000');
     const unsafe = defineBlock({
@@ -109,5 +118,69 @@ describe("a defined block's document codec", () => {
     expect(() => serialize(docOf({ title: 'x' }, undefined, 'unsafe'), 'html', registryOf(unsafe))).toThrow(
       BlockDefinitionInvalid,
     );
+  });
+});
+
+describe("a defined block's markup fragments", () => {
+  const tagged = (html: Parameters<typeof defineBlock>[0]['document']) =>
+    defineBlock({
+      type: 'tagged',
+      label: 'Tagged',
+      fields: { title: plainText(), url: link(), tags: items({ fields: { name: plainText() }, max: 3 }) },
+      document: html,
+    });
+  const exported = (block: Block, attrs: Record<string, unknown>) =>
+    serialize(docOf(attrs, undefined, block.type), 'html', registryOf(block));
+
+  it('reads a tag opened in a fragment, so a value after it is checked in the tag', () => {
+    const block = tagged({
+      html: (view, markup) => markup`${markup`<a class="c"`} href="${view.fields.url}">x</a>`,
+    });
+    expect(() => exported(block, { url: 'javascript:alert(1)' })).toThrow(BlockDefinitionInvalid);
+  });
+
+  it('refuses a fragment holding a value where only text was checked for it', () => {
+    const block = tagged({
+      html: (view, markup) => markup`<a title="${markup`${view.fields.title}`}">x</a>`,
+    });
+    expect(() => exported(block, { title: 'x' })).toThrow(BlockDefinitionInvalid);
+  });
+
+  it('draws a list of fragments, as an items field is drawn', () => {
+    const block = tagged({
+      html: (view, markup) =>
+        markup`<ul>${(view.fields.tags as readonly { name: string }[]).map((tag) => markup`<li>${tag.name}</li>`)}</ul>`,
+    });
+    expect(exported(block, { tags: [{ name: '<b>' }, { name: 'c' }] })).toContain(
+      '<ul><li>&lt;b&gt;</li><li>c</li></ul>',
+    );
+  });
+
+  it('keeps a template line break out of Markdown, however the template ends its lines', () => {
+    const block = tagged({ html: (view, markup) => markup`<p>${view.fields.title}</p>\r\n\r\n<p>end</p>` });
+    const markdown = serialize(docOf({ title: 'x' }, undefined, 'tagged'), 'markdown', registryOf(block));
+    expect(markdown).not.toMatch(/\n\s*\n/);
+  });
+});
+
+describe("a defined block's body", () => {
+  it('escapes its text in HTML, and reads it back as written', () => {
+    const doc = docOf(attrs, [{ type: 'text', text: '</div><img src=x onerror=alert(1)> & more' }]);
+    const html = serialize(doc, 'html', registry);
+    expect(html).not.toContain('<img');
+    expect(importHTML(html, registry).doc).toEqual(doc);
+  });
+
+  it('drops a link a reader would not open from a Markdown body, keeping its text', () => {
+    const markdown = serialize(docOf(attrs, [{ type: 'text', text: 'x' }]), 'markdown', registry).replace(
+      '&quot;text&quot;:&quot;x&quot;',
+      '&quot;text&quot;:&quot;[go](javascript:void0)&quot;',
+    );
+    expect(importMarkdown(markdown, registry).doc).toEqual(docOf(attrs, [{ type: 'text', text: 'go' }]));
+  });
+
+  it('keeps an item that leaves a field out', () => {
+    const html = '<div data-block="note" data-block-attrs="{&quot;tags&quot;:[{}]}"></div>';
+    expect(importHTML(html, registry).doc).toEqual(docOf({ tags: [{}] }));
   });
 });

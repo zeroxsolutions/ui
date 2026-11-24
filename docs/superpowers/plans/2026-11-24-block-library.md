@@ -267,7 +267,8 @@ Decisions: built-ins in `template/email/blocks/{heading,quote,image,table}.ts`, 
   lacks `heading` or `quote`, as now; an image or table the profile lacks stays a `block-not-carried` problem.
   The email kit includes `image()` and `table()` when allowed; the block menu gains Level for a heading.
 - The demo's product `quote` block is renamed `testimonial` (the type is now reserved); docs' "Your own blocks"
-  example follows.
+  example follows, and so do the specs that declare a product `quote`: `define-email-block.spec.ts`,
+  `email-blocks.spec.ts`, `email-block-codec.spec.ts` and the registry's `email-block-feature.browser.spec.tsx`.
 - Close: pixel diff (existing blocks 0 pixels), screenshots of each new block, review.
 
 ## Phase (d): spacer, social links, hero, card, legal footer (group: email)
@@ -333,3 +334,9 @@ builds node (`content: 'inline*'` for a body, else atom), view (editor and Viewe
 - **Toggle heading is not on `defineBlock`**: it holds nested blocks, which no field kind declares and an email
   cannot store.
 - **The demo's `quote` block** is renamed `testimonial`, since `quote` becomes a built-in type.
+- **After the phase (a) review.** `markup` reads where a value lands with a small HTML tokenizer over what it has
+  written, fragments included, and refuses values in `srcdoc`, SVG animation attributes and `meta`; a fragment
+  holding a value goes only in text. A list of fragments draws an items field. A Markdown body keeps a link only
+  to a web or mail address. A required field refuses a blank of spaces, and a link or image field opens with a
+  literal address or a whole variable token, as `validate` reads it. The document serializer now escapes text in
+  HTML, which it never did: a document's `<` or `&` reached every HTML export as markup.

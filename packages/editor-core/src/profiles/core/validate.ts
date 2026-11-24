@@ -92,7 +92,7 @@ function checkOwnField(
   const value = text(stored);
   // Left out, a field reads as empty; a value that is not text cannot be read at all.
   if (stored !== undefined && typeof stored !== 'string') walk.problems.push({ kind: 'text-empty', ...where });
-  else if (field.required && value === '') walk.problems.push({ kind: 'text-empty', ...where });
+  else if (field.required && value.trim() === '') walk.problems.push({ kind: 'text-empty', ...where });
   if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
   if (field.kind === 'plainText' || value === '') return;
   const faulty =
@@ -107,8 +107,8 @@ function checkOwnField(
  */
 function checkItems(walk: Walk, items: BlockEditorItems, stored: unknown, id: string): void {
   const where = { block: id, field: items.name };
-  // Left out, an items field reads as none.
-  const entries: unknown = stored ?? [];
+  // Left out, an items field reads as none; null is a value, which the write check refuses.
+  const entries: unknown = stored === undefined ? [] : stored;
   if (!Array.isArray(entries)) {
     walk.problems.push({ kind: 'content-invalid', ...where });
     return;

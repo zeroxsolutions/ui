@@ -400,6 +400,11 @@ describe('validate an SMS body', () => {
         { title: 'T', links: [{ ...entry, extra: 'x' }] },
         { title: 'T', links: [{ ...entry, label: 5 }] },
         { links: [entry] },
+        { title: 'T', links: null },
+        { title: '   ', links: [entry] },
+        { title: 'T', links: [{ ...entry, label: '  ' }] },
+        { title: 'T', links: [{ ...entry, href: '{{link' }] },
+        { title: 'T', links: [{ ...entry, href: '{{ link }}' }] },
       ])('agrees with the write check on %o', (content) => {
         const clean = validate([block('social', content)], withSocial).length === 0;
         expect(clean).toBe(social.content.safeParse(content).success);

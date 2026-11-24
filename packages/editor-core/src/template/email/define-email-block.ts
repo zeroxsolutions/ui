@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { leadingToken } from '../markup/href.js';
 import { parseInlineMarkup } from '../markup/inline-markup.js';
 import type { VariableType } from '../variables/variable-type.js';
 import type { BlockDefinition, EmailBlock, RenderContext } from './block.js';
@@ -227,10 +228,10 @@ export function assertBlockShape(options: BlockShape<string, FieldMap, Attribute
   }
 }
 
-/** An address a link field may open with: a literal web or mail one, or a variable, whose type `validate` checks. */
-const LINK_START = /^(?:https?:\/\/|mailto:|\{\{)/i;
-/** An address an image field may open with: a literal web one, or a variable. */
-const IMAGE_START = /^(?:https?:\/\/|\{\{)/i;
+/** A literal address a link field may open with; a whole variable token may open it too, its type `validate`'s to check. */
+const LINK_START = /^(?:https?:\/\/|mailto:)/i;
+/** A literal address an image field may open with, beside a whole variable token. */
+const IMAGE_START = /^(?:https?:\/\/)/i;
 
 /**
  * The body holds text, as a paragraph does; another field may be empty, as the editor exports it while the author
@@ -247,14 +248,16 @@ function textSchema(field: Exclude<EmailBlockField, LanesField | ItemsField>): z
   }
   const text = z
     .string()
-    .min(field.required ? 1 : 0)
-    .max(field.max);
+    .max(field.max)
+    .refine((value) => !field.required || value.trim() !== '', { message: 'required' });
   // A plain field may hold a stored newline, which draws as a space; an address may not.
   if (field.kind === 'plainText') return (field.required ? text : text.optional()) as z.ZodType<string>;
   const start = field.kind === 'link' ? LINK_START : IMAGE_START;
-  const address = text.refine((value) => value === '' || (!/[\r\n]/.test(value) && start.test(value.trim())), {
-    message: 'an address a client opens',
-  });
+  const address = text.refine(
+    (value) =>
+      value === '' || (!/[\r\n]/.test(value) && (start.test(value.trim()) || leadingToken(value) !== undefined)),
+    { message: 'an address a client opens' },
+  );
   return (field.required ? address : address.optional()) as z.ZodType<string>;
 }
 
@@ -441,6 +444,8 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
       }
       for (const [name, field] of itemsFields) {
         const entries: Record<string, string>[] = [];
+        // Left out, an items field of no minimum holds none, and stays left out.
+        if (!Array.isArray(stored[name])) continue;
         for (const entry of stored[name] as readonly Record<string, string>[]) {
           const next = { ...entry };
           for (const [part, partField] of Object.entries(field.fields)) {

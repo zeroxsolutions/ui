@@ -352,3 +352,33 @@ describe('a required field', () => {
     expect(banner(true).editor.fields.every((field) => field.required)).toBe(true);
   });
 });
+
+describe('the write check and translate on edge values', () => {
+  const listed = defineEmailBlock({
+    type: 'listed',
+    label: 'Listed',
+    fields: {
+      title: plainText({ required: true }),
+      href: link(),
+      links: items({ fields: { label: plainText({ required: true }) }, max: 3 }),
+    },
+    render: (_view, h) => h.divider(),
+    sample: { fields: { title: '{{name}}', href: '', links: [] }, variableTypes: { name: 'string' } },
+  });
+
+  it('translates content that leaves out an items field of no minimum', async () => {
+    const parsed = listed.content.parse({ title: 'T' });
+    await expect(listed.translate(parsed, async (sentence) => `[${sentence}]`)).resolves.toEqual({ title: '[T]' });
+  });
+
+  it('refuses a required field holding only spaces, at the top and in an item', () => {
+    expect(listed.content.safeParse({ title: '   ' }).success).toBe(false);
+    expect(listed.content.safeParse({ title: 'T', links: [{ label: ' ' }] }).success).toBe(false);
+  });
+
+  it('refuses a link opening with anything but a whole variable token', () => {
+    expect(listed.content.safeParse({ title: 'T', href: '{{u' }).success).toBe(false);
+    expect(listed.content.safeParse({ title: 'T', href: '{{ u }}' }).success).toBe(false);
+    expect(listed.content.safeParse({ title: 'T', href: '{{u}}/path?a={{name}}' }).success).toBe(true);
+  });
+});

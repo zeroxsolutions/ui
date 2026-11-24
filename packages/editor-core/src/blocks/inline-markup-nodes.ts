@@ -38,11 +38,14 @@ export function markupOfNodes(nodes: readonly NodeJSON[]): string {
   return printInlineMarkup(runs);
 }
 
+/** A link a reader opens: a web or mail address. Any other keeps its text and loses the link. */
+const ADDRESS = /^(?:https?:|mailto:)/i;
+
 function nodesOfText(part: InlineText, href?: string): NodeJSON[] {
   const marks: MarkJSON[] = [
     ...(part.bold ? [{ type: 'bold' }] : []),
     ...(part.italic ? [{ type: 'italic' }] : []),
-    ...(href === undefined ? [] : [{ type: 'link', attrs: { href } }]),
+    ...(href === undefined || !ADDRESS.test(href.trim()) ? [] : [{ type: 'link', attrs: { href } }]),
   ];
   return part.text
     .split('\n')

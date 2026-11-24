@@ -16,7 +16,7 @@ import {
 import { documentAttributes, documentCodecOf, type DocumentBlockHtml } from './document-codec.js';
 
 /**
- * The node names the Document Editor's own blocks and the library's take. A defined block's node beside one of
+ * The node names the Document Editor's own blocks, the email editor's and the library's take. A defined block's node beside one of
  * them would be a second node of that name in one schema.
  */
 const DOCUMENT_NODES: ReadonlySet<string> = new Set([
@@ -47,6 +47,14 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'button',
   'columns',
   'column',
+  'mathBlock',
+  'mathInline',
+  'variable',
+  'emailButton',
+  'emailColumns',
+  'emailLane',
+  'emailHtml',
+  'emailUnknown',
 ]);
 
 /** How a block draws in a document's exports: its HTML, which Markdown also carries. */
