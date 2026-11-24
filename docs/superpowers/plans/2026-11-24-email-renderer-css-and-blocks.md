@@ -338,3 +338,10 @@ Each kept the design's intent; the reason follows it.
 - **Commit messages.** `4d8faebf` did not name two of its breaking changes (a block render returns
   `BlockRendering`; `color-scheme`, `narrow-screen` and the row and text-style helpers of `blocks/shared` are
   gone); `0a08760d`'s body records them.
+- **After the final review.** A plain text field may hold a stored newline (it draws as a space), and a field
+  but the body may be left out, so the write check refuses nothing `validate` lets pass; a block's attribute
+  values are not checked by `validate`, as a default block's are not. `extraKinds` stays, for blocks of
+  hand-written features, but `EmailEditor` needs a `blocks` definition in the profile's own `blocks`. A
+  query that redefines `:root`'s variables redraws every product rule of each property that changes,
+  before the query's own rules. A layout's raw markup escapes a filled subject or preheader only when it
+  opens a tag, and its images may also be `data:image/` and `cid:`.
