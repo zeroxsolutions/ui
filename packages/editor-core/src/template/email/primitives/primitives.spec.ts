@@ -5,7 +5,7 @@ import { createRenderContext } from '../context.js';
 import { composeStylesheets } from '../css/stylesheet.js';
 import { FIXTURE_THEME } from '../fixtures.fixture.js';
 import { expandNodes } from './elements.js';
-import { createPrimitives, literalReader, type EmailNode, type EmailPrimitives } from './nodes.js';
+import { createPrimitives, EmailMarkupInvalid, literalReader, type EmailNode, type EmailPrimitives } from './nodes.js';
 import { plainTextOf } from './plain-text.js';
 import { serialiseElements } from './serialise.js';
 
@@ -142,6 +142,39 @@ describe('the primitives', () => {
   it('print nothing for an interpolated null or undefined', () => {
     const missing = null as unknown as string;
     expect(draw((h) => h.raw`<b>${missing}${undefined as unknown as string}</b>`).html).toBe('<b></b>');
+  });
+
+  it("write raw markup's entities into the text arm after filling, so an entity-spelled token stays literal", () => {
+    const markup = '<p>Code: &#123;&#123;name&#125;&#125; {{name}}</p>';
+    expect(draw((h) => h.raw({ markup }))).toMatchObject({
+      html: '<p>Code: &#123;&#123;name&#125;&#125; &lt;Mai&gt;</p>',
+      text: 'Code: {{name}} <Mai>\n\n',
+    });
+  });
+
+  it('read the upper-case named entities HTML allows, and a numbered one outside Unicode as U+FFFD', () => {
+    const { text } = draw((h) => h.raw`<p>&AMP; &LT; &GT; &QUOT; &COPY; &REG; &NBSP; &#xD800; &#x110000; &#0;</p>`);
+    expect(text).toBe('& < > " \u00a9 \u00ae &NBSP; \ufffd \ufffd \ufffd\n\n');
+  });
+
+  it('refuse a tagged raw value that is not text, a number, null or undefined', () => {
+    const value = { a: 1 } as unknown as string;
+    expect(() => draw((h) => h.raw`<b>${value}</b>`)).toThrow(EmailMarkupInvalid);
+  });
+
+  it.each([
+    ['a quoted href', (h: EmailPrimitives, v: string) => h.raw`<a href="${v}">x</a>`],
+    ['a single-quoted src', (h: EmailPrimitives, v: string) => h.raw`<img src='https://x.test/${v}'>`],
+    ['an unquoted href', (h: EmailPrimitives, v: string) => h.raw`<a class="l" HREF=${v}>x</a>`],
+    ['a srcset', (h: EmailPrimitives, v: string) => h.raw`<img srcset="${v} 2x">`],
+  ])('refuse a tagged raw value inside %s, where escaping does not make a link safe', (_case, build) => {
+    expect(() => draw((h) => build(h, 'javascript:alert(1)'))).toThrow(EmailMarkupInvalid);
+  });
+
+  it('take a tagged raw value in another attribute, and in text after a link', () => {
+    expect(draw((h) => h.raw`<a href="https://x.test/" title="${'t'}">${'x'}</a> href=${'y'}`).html).toBe(
+      '<a href="https://x.test/" title="t">x</a> href=y',
+    );
   });
 
   it('read the entities of raw markup back on the text arm, named and numbered', () => {

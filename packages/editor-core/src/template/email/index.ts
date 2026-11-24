@@ -77,7 +77,9 @@ export type {
   TextRun,
   TextRunLink,
   TextRunText,
+  MarkupRefusal,
 } from './primitives/nodes.js';
+export { EmailMarkupInvalid } from './primitives/nodes.js';
 export {
   assertEmailTheme,
   DEFAULT_EMAIL_THEME,

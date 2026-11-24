@@ -324,6 +324,12 @@ describe('validate an SMS body', () => {
     });
   });
 
+  it('counts a token an html block spells with entities as not printed, as neither arm of the render prints it', () => {
+    const required = emailProfile({ variables: [{ name: 'otp', type: 'string', required: true }] });
+    const html = block('html', { html: '<p>Code: &#123;&#123;otp&#125;&#125;</p>' });
+    expect(validate([html], required)).toEqual([{ kind: 'required-variable-not-printed', block: null, name: 'otp' }]);
+  });
+
   describe("validate a block's content and attributes as the write check reads them", () => {
     it.each([
       [

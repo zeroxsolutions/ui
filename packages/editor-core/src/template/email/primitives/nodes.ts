@@ -166,10 +166,48 @@ const ENTITIES: Readonly<Record<string, string>> = {
 /** `html`'s text: its tags dropped, and its numbered entities and the named ones of `ENTITIES` read back. */
 function textOf(html: string): string {
   return withoutTags(html).replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (entity, decimal, hex, name) => {
-    if (name !== undefined) return ENTITIES[name] ?? entity;
+    if (name !== undefined) return ENTITIES[UPPER_CASE_ENTITIES.has(name) ? name.toLowerCase() : name] ?? entity;
     const code = decimal === undefined ? Number.parseInt(hex, 16) : Number.parseInt(decimal, 10);
-    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : entity;
+    // As HTML reads it: no character, a surrogate, or one past Unicode is the replacement character.
+    const replaced = code === 0 || (code >= 0xd800 && code <= 0xdfff) || !(code <= 0x10ffff);
+    return replaced ? '\ufffd' : String.fromCodePoint(code);
   });
+}
+
+/** The named entities HTML also reads in upper case; no other is. */
+const UPPER_CASE_ENTITIES = new Set(['AMP', 'LT', 'GT', 'QUOT', 'COPY', 'REG']);
+
+/** Why a tagged `raw` refused a value. */
+export type MarkupRefusal = 'value-refused' | 'url-attribute';
+
+/**
+ * A tagged `raw` value the renderer will not write: one that is not text, a number, null or undefined, or one
+ * inside an attribute that takes a link, where escaping keeps it in the attribute but does not make it safe.
+ */
+export class EmailMarkupInvalid extends Error {
+  constructor(
+    readonly reason: MarkupRefusal,
+    readonly detail: string,
+  ) {
+    super(`Email markup: ${reason} (${detail})`);
+    this.name = 'EmailMarkupInvalid';
+  }
+}
+
+/** An open value, quoted or not, of an attribute that takes a link, at the end of an open tag. */
+const URL_ATTRIBUTE =
+  /[\s"'](href|src|srcset|background|action|formaction|poster|data|xlink:href)\s*=\s*(?:"[^"]*|'[^']*|[^\s"'>]*)$/i;
+
+/** `value` as a tagged `raw` writes it after `before`, the markup written so far. */
+function interpolated(before: string, value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    throw new EmailMarkupInvalid('value-refused', typeof value);
+  }
+  const tag = before.slice(before.lastIndexOf('<'));
+  const attribute = before.lastIndexOf('<') > before.lastIndexOf('>') ? URL_ATTRIBUTE.exec(tag) : null;
+  if (attribute !== null) throw new EmailMarkupInvalid('url-attribute', attribute[1].toLowerCase());
+  return escapeHtml(String(value));
 }
 
 interface Classed {
@@ -212,8 +250,11 @@ export interface EmailPrimitives {
   /**
    * Markup from a tagged template, ``h.raw`<td title="${subject}">` ``: the literal parts as `raw` writes its
    * markup, each `{{name}}` in them filled escaped in a block, and every interpolated value escaped and never
-   * filled, so a person's value, such as the subject, is safe in text and in an attribute. A null or undefined
-   * value prints nothing.
+   * filled, so a person's value, such as the subject, stays text, or stays inside its attribute. Escaping does not
+   * make a link safe, so a link or an image goes through `button`, `image` or `text`.
+   *
+   * @throws {EmailMarkupInvalid} for a value that is not text, a number, null or undefined (which prints nothing),
+   * or one inside an attribute that takes a link, such as `href` or `src`
    */
   raw(strings: TemplateStringsArray, ...values: readonly (string | number | null | undefined)[]): EmailNode;
   /** The inbox line a client shows after the subject, hidden in the email. */
@@ -314,13 +355,15 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       ...values: readonly (string | number | null | undefined)[]
     ): EmailNode => {
       if ('markup' in first) {
-        return { kind: 'raw', html: reader.markup(first.markup), text: `${reader.text(textOf(first.markup))}\n\n` };
+        // The text is read from the filled markup, so an entity that spells `{{` is never filled on either arm.
+        const html = reader.markup(first.markup);
+        return { kind: 'raw', html, text: `${textOf(html)}\n\n` };
       }
       // Each literal part is filled on its own, so a value never becomes a template.
       const html = first
         .slice(1)
         .reduce(
-          (written, part, index) => `${written}${escapeHtml(String(values[index] ?? ''))}${reader.markup(part)}`,
+          (written, part, index) => `${written}${interpolated(written, values[index])}${reader.markup(part)}`,
           reader.markup(first[0]),
         );
       return { kind: 'raw', html, text: `${textOf(html)}\n\n` };
