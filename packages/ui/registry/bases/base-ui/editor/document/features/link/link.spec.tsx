@@ -165,7 +165,8 @@ describe("a link's address in a Markdown export", () => {
     'https://a.com/a b(c)',
   ])('cannot end the link and write markup or another link: %j', (href) => {
     const markdown = serialize(linked(href), 'markdown', registry);
-    expect(markdown).not.toMatch(/<img|<script/i);
+    // An escaped bracket is part of the destination, never a tag.
+    expect(markdown).not.toMatch(/(^|[^\\])<(img|script)/i);
     const read = importMarkdown(markdown, registry).doc;
     expect(read.content).toHaveLength(1);
     const hrefs = (read.content?.[0]?.content ?? []).flatMap((node) =>
@@ -175,8 +176,34 @@ describe("a link's address in a Markdown export", () => {
     for (const written of hrefs) expect(written.startsWith('https://a.com/')).toBe(true);
   });
 
+  it.each(['&#106;avascript&#58;alert&#40;1&#41;', '&#x6A;avascript:alert(1)'])(
+    'writes a character reference as text, which no reader decodes into a scheme: %j',
+    (href) => {
+      // Another reader of the Markdown, which takes any address the parser decodes.
+      const trusting = createCodecRegistry([
+        standardKit(),
+        {
+          id: 'trusting-link',
+          markCodecs: [
+            { mark: 'link', fromMarkdown: (token) => ({ type: 'link', attrs: { href: String(token.url ?? '') } }) },
+          ],
+        },
+      ]);
+      const read = importMarkdown(serialize(linked(href), 'markdown', registry), trusting);
+      expect(linkOf(read.doc)).toBeDefined();
+      expect(String(linkOf(read.doc)).toLowerCase()).not.toContain('javascript:');
+    },
+  );
+
   it('reads back as the address it was written from', () => {
-    for (const href of ['https://a.com/x?q=(1)', 'https://a.com/a b', '/trips/hoi-an#day-one']) {
+    for (const href of [
+      'https://a.com/x?q=(1)',
+      '/trips/hoi-an#day-one',
+      'https://a.com/&#41;',
+      'https://a.com/a\\b',
+      'https://a.com/a<b>',
+      'https://a.com/?a=1&b=2',
+    ]) {
       expect(linkOf(importMarkdown(serialize(linked(href), 'markdown', registry), registry).doc)).toBe(href);
     }
   });
