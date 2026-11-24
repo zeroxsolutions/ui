@@ -9,7 +9,7 @@ import { defineBlock, type EmailBlock } from './block.js';
 import { createRenderContext } from './context.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
 import { EmailStylesheetInvalid } from './css/stylesheet.js';
-import type { DefaultLayoutProps, LayoutInput } from './layout.js';
+import type { DefaultLayoutProps, EmailLayout, LayoutInput } from './layout.js';
 import type { EmailNode } from './primitives/nodes.js';
 import type { RegionInput } from './region.js';
 import {
@@ -130,6 +130,11 @@ describe('createEmailRenderer', () => {
     );
     expect(rendered.html).not.toContain('class="zx-card"');
     expect(rendered.text).toBe('x');
+  });
+
+  it('names the change when a layout still returns HTML and text', () => {
+    const layout = (() => ({ html: '<p>x</p>', text: 'x' })) as unknown as EmailLayout<DefaultLayoutProps>;
+    expect(() => createEmailRenderer({ layout }).render(input([paragraph('p1', 'x')]))).toThrow(/returns primitives/);
   });
 
   it("level 1: lets a product's rule beat the base sheet's by coming later", () => {

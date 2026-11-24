@@ -15,15 +15,26 @@ export interface UnsupportedCss {
   readonly clients: readonly string[];
 }
 
-const DISPLAY = (values: readonly string[]) => (property: string, value: string) =>
-  property === 'display' && values.includes(value.trim().toLowerCase());
+/** A `display` whose words, vendor prefix dropped, name `layout`: `flex`, `inline-flex`, `-webkit-flex`, `inline flex`. */
+const DISPLAY = (layout: string) => (property: string, value: string) =>
+  property === 'display' &&
+  value
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.replace(/^-(?:webkit|moz|ms)-/, ''))
+    .some((word) => word === layout || word === `inline-${layout}`);
 
-/** A property set to anything but the value that turns it off. */
-const SET = (name: string, off: string) => (property: string, value: string) =>
-  property === name && value.trim().toLowerCase() !== off;
+/** Values that hand a property back to the cascade rather than set one. */
+const CASCADE = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
+
+/** One of `names` set to anything but the value that turns it off. */
+const SET = (names: readonly string[], off: string) => (property: string, value: string) => {
+  const word = value.trim().toLowerCase();
+  return names.includes(property) && word !== off && !CASCADE.has(word);
+};
 
 const IN_BACKGROUND = (pattern: RegExp) => (property: string, value: string) =>
-  (property === 'background' || property === 'background-image') && pattern.test(value);
+  (property === 'background' || property === 'background-image' || property === 'border-image') && pattern.test(value);
 
 const MODERN_COLOR_CLIENTS = [
   'Gmail Desktop Webmail',
@@ -57,11 +68,11 @@ const FLEX_AND_GRID_CLIENTS = [
 ];
 
 export const UNSUPPORTED_CSS: readonly UnsupportedCss[] = [
-  { feature: 'css-display-flex', matches: DISPLAY(['flex', 'inline-flex']), clients: FLEX_AND_GRID_CLIENTS },
-  { feature: 'css-display-grid', matches: DISPLAY(['grid', 'inline-grid']), clients: FLEX_AND_GRID_CLIENTS },
+  { feature: 'css-display-flex', matches: DISPLAY('flex'), clients: FLEX_AND_GRID_CLIENTS },
+  { feature: 'css-display-grid', matches: DISPLAY('grid'), clients: FLEX_AND_GRID_CLIENTS },
   {
     feature: 'css-position',
-    matches: SET('position', 'static'),
+    matches: SET(['position'], 'static'),
     clients: [
       'Gmail Desktop Webmail',
       'Gmail iOS',
@@ -73,10 +84,10 @@ export const UNSUPPORTED_CSS: readonly UnsupportedCss[] = [
       'Mail.ru Desktop Webmail',
     ],
   },
-  { feature: 'css-float', matches: SET('float', 'none'), clients: ['Outlook Windows', 'Outlook Windows Mail'] },
+  { feature: 'css-float', matches: SET(['float'], 'none'), clients: ['Outlook Windows', 'Outlook Windows Mail'] },
   {
     feature: 'css-transform',
-    matches: SET('transform', 'none'),
+    matches: SET(['transform', 'translate', 'rotate', 'scale'], 'none'),
     clients: [
       'Gmail Desktop Webmail',
       'Gmail iOS',
@@ -175,7 +186,8 @@ export interface StylesheetWarning {
   readonly clients: readonly string[];
 }
 
-/** The table's entries a declaration uses. */
+/** The table's entries a declaration uses, one per feature. */
 export function unsupportedBy(property: string, value: string): UnsupportedCss[] {
-  return UNSUPPORTED_CSS.filter((entry) => entry.matches(property.toLowerCase(), value));
+  const found = UNSUPPORTED_CSS.filter((entry) => entry.matches(property.toLowerCase(), value));
+  return found.filter((entry, index) => found.findIndex((other) => other.feature === entry.feature) === index);
 }

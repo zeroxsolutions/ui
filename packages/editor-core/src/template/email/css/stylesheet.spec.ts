@@ -127,6 +127,15 @@ describe('inlining a stylesheet', () => {
     expect(() => composeStylesheets('', ['@media (max-width:600px){p, .a:hover{color:red}}'])).not.toThrow();
   });
 
+  it('takes the fallback of a var() whose variable is in a cycle, as a browser does', () => {
+    const css =
+      ':root{--a:var(--b, red);--b:var(--a, blue);--c:var(--a)}.x{color:var(--a, green);border-color:var(--c, gray)}';
+    expect(composeStylesheets('', [css]).rules[0].declarations.map((declaration) => declaration.value)).toEqual([
+      'green',
+      'gray',
+    ]);
+  });
+
   it('refuses @import, a var() with no value and CSS that does not parse', () => {
     expect(refusal(['@import url(x.css);'])).toMatchObject({ sheet: 0, reason: 'import-refused' });
     expect(refusal(['.a{color:var(--missing)}'])).toMatchObject({ reason: 'variable-undefined', detail: '--missing' });

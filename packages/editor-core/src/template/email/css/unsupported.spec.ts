@@ -23,6 +23,10 @@ describe('CSS that common mail clients drop', () => {
 
   it.each([
     ['display:inline-grid', 'css-display-grid'],
+    ['display:-webkit-flex', 'css-display-flex'],
+    ['display:inline flex', 'css-display-flex'],
+    ['translate:4px', 'css-transform'],
+    ['border-image:linear-gradient(red, blue) 1', 'css-linear-gradient'],
     ['position:absolute', 'css-position'],
     ['float:left', 'css-float'],
     ['transform:rotate(2deg)', 'css-transform'],
@@ -35,6 +39,10 @@ describe('CSS that common mail clients drop', () => {
     expect(warningsOf(`.a{${declaration}}`).map((warning) => warning.feature)).toEqual([feature]);
   });
 
+  it('warns once of a feature a declaration uses twice', () => {
+    expect(warningsOf('.a{color:color-mix(in srgb, oklch(0.5 0.1 1), white)}')).toHaveLength(1);
+  });
+
   it('warns of a value a variable gives, and of a head rule', () => {
     expect(warningsOf(':root{--d:flex}.a{display:var(--d)}')).toHaveLength(1);
     expect(warningsOf('@media (max-width:600px){.a{position:fixed}}')).toHaveLength(1);
@@ -42,6 +50,8 @@ describe('CSS that common mail clients drop', () => {
 
   it('does not warn of what clients read, or of the base sheet', () => {
     expect(warningsOf('.a{display:block;position:static;float:none;color:#fff;background:#000}')).toEqual([]);
+    expect(warningsOf('.a{position:inherit;float:initial;transform:unset}')).toEqual([]);
+    expect(warningsOf('@supports (display:grid){.a{display:grid}}')).toEqual([]);
     expect(composeStylesheets(baseStylesheet(DEFAULT_EMAIL_THEME), []).warnings).toEqual([]);
   });
 });

@@ -69,6 +69,9 @@ function refuse(source: Source, node: ChildNode, reason: StylesheetRefusal, deta
 }
 
 /** The text of `value` with each `var(--name, fallback)` replaced; `missing` is called for one with no value. */
+/** Thrown inside a custom property's own value for a `var()` with nothing to stand for it; the property is then invalid. */
+const UNRESOLVED = Symbol('unresolved');
+
 function substitute(
   value: string,
   lookup: (name: string) => string | undefined,
@@ -139,25 +142,35 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
 
   const custom = customProperties(sources);
   const resolving = new Set<string>();
-  const resolved = new Map<string, string>();
+  const cyclic = new Set<string>();
+  // Undefined for a property a browser reads as invalid, so the `var()` that asked for it takes its fallback.
+  const resolved = new Map<string, string | undefined>();
+  const lookup = (name: string): string | undefined => {
+    if (resolved.has(name)) return resolved.get(name);
+    const declared = custom.get(name);
+    if (declared === undefined) return undefined;
+    if (resolving.has(name)) {
+      // A browser reads every property in a cycle as invalid, whatever fallbacks the cycle's own values hold.
+      const stack = [...resolving];
+      for (const member of stack.slice(stack.indexOf(name))) cyclic.add(member);
+      return undefined;
+    }
+    resolving.add(name);
+    let value: string | undefined;
+    try {
+      value = substitute(declared.value, lookup, () => {
+        throw UNRESOLVED;
+      });
+    } catch (error) {
+      if (error !== UNRESOLVED) throw error;
+    }
+    resolving.delete(name);
+    if (cyclic.has(name)) value = undefined;
+    resolved.set(name, value);
+    return value;
+  };
   const resolveIn = (source: Source, node: ChildNode, value: string): string =>
-    substitute(
-      value,
-      (name) => {
-        const held = resolved.get(name);
-        if (held !== undefined) return held;
-        const declared = custom.get(name);
-        if (declared === undefined) return undefined;
-        // A browser reads every property in a cycle as invalid, its fallback included.
-        if (resolving.has(name)) refuse(declared.source, declared.node, 'variable-undefined', name);
-        resolving.add(name);
-        const value = resolveIn(declared.source, declared.node, declared.value);
-        resolving.delete(name);
-        resolved.set(name, value);
-        return value;
-      },
-      (name) => refuse(source, node, 'variable-undefined', name),
-    );
+    substitute(value, lookup, (name) => refuse(source, node, 'variable-undefined', name));
 
   const rules: InlineRule[] = [];
   const head: string[] = [];
@@ -206,7 +219,10 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     const name = rule.name.toLowerCase();
     if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
     const conditional = name === 'media' || name === 'supports';
-    rule.walkDecls((declaration) => warn(source, declaration, resolveIn(source, declaration, declaration.value)));
+    // A rule under `@supports` is the author's own guard for the clients that lack the feature.
+    if (name !== 'supports') {
+      rule.walkDecls((declaration) => warn(source, declaration, resolveIn(source, declaration, declaration.value)));
+    }
     const copy = rule.clone();
     copy.walkDecls((declaration) => {
       declaration.value = resolveIn(source, declaration, declaration.value);
