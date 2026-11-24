@@ -118,7 +118,7 @@ function ExamplePreviewToolbar({
             <SmartphoneIcon aria-hidden />
           </ExamplePreviewToolbarDevice>
         </ToggleGroup>
-        <Separator orientation="vertical" className="mx-1 h-5" />
+        <Separator orientation="vertical" className="mx-1 h-5 data-vertical:self-center" />
         <ExamplePreviewToolbarTheme theme={theme} onThemeChange={onThemeChange} />
       </div>
     </TooltipProvider>
