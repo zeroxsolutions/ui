@@ -1,8 +1,9 @@
 import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
 import { leadingToken } from '../../template/markup/href.js';
+import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
-import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
+import type { EmailBlockEditor, EmailBlockEditorAttribute } from '../../template/email/define-email-block.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
@@ -168,6 +169,47 @@ function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<stri
   return raw;
 }
 
+/** Whether `value` is one the product attribute takes. */
+function attributeTakes(attribute: EmailBlockEditorAttribute, value: unknown): boolean {
+  if (attribute.kind === 'choice') return attribute.values.some((option) => option.value === value);
+  if (attribute.kind === 'toggle') return typeof value === 'boolean';
+  return typeof value === 'number' && value >= attribute.min && value <= attribute.max;
+}
+
+/**
+ * What the write check refuses in a block's attributes, as `attributes-invalid`: attributes that are not an
+ * object, and each key its type does not have or whose value it does not take, the key as `field`. A columns
+ * block's ratio is `checkColumns`' to report. A kind named only through `extraKinds` has no known attributes,
+ * so only its shape is checked.
+ */
+function checkAttributes(walk: Walk, block: EditorEmailBlock, id: string): void {
+  const raw: unknown = block.attributes;
+  if (!isRecord(raw)) {
+    walk.problems.push({ kind: 'attributes-invalid', block: id });
+    return;
+  }
+  const fields = new Set<string>();
+  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  if (own) {
+    for (const attribute of own.attributes) {
+      if (raw[attribute.name] !== undefined && !attributeTakes(attribute, raw[attribute.name])) {
+        fields.add(attribute.name);
+      }
+    }
+    for (const key of Object.keys(raw)) {
+      if (!own.attributes.some((attribute) => attribute.name === key)) fields.add(key);
+    }
+  } else if (Object.hasOwn(defaultBlocks, block.type)) {
+    const parsed = defaultBlocks[block.type as DefaultBlockType].attributes.safeParse(raw);
+    for (const issue of parsed.error?.issues ?? []) {
+      const keys = issue.code === 'unrecognized_keys' ? issue.keys : [issue.path[0]];
+      for (const key of keys) if (typeof key === 'string') fields.add(key);
+    }
+  }
+  if (block.type === 'columns') fields.delete('ratio');
+  for (const field of fields) walk.problems.push({ kind: 'attributes-invalid', block: id, field });
+}
+
 function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {
   const lanes = Array.isArray(block.lanes) ? block.lanes : [];
   const ratio = isRecord(block.attributes) ? block.attributes.ratio : undefined;
@@ -201,6 +243,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
   }
 
   const content = contentOf(walk, block, id);
+  checkAttributes(walk, block, id);
   switch (block.type) {
     case 'paragraph':
     case 'callout':

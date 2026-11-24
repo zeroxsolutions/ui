@@ -16,6 +16,7 @@ export type ProblemKind =
   | 'lanes-mismatch'
   | 'lanes-count'
   | 'content-invalid'
+  | 'attributes-invalid'
   | 'text-empty'
   | 'text-too-long'
   | 'list-too-long'

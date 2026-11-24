@@ -3,7 +3,7 @@ import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
 import type { EditorEmailBlock, VariableDeclaration } from './types.js';
 import { validate } from './validate.js';
 import { defineEmailBlock } from '../../template/email/define-email-block.js';
-import { imageUrl, lanes, link, plainText, richText } from '../../template/email/fields.js';
+import { choice, imageUrl, lanes, link, number, plainText, richText, toggle } from '../../template/email/fields.js';
 
 const VARIABLES: VariableDeclaration[] = [
   { name: 'name', type: 'string' },
@@ -324,7 +324,7 @@ describe('validate an SMS body', () => {
     });
   });
 
-  describe("validate a block's content shape as the write check reads it", () => {
+  describe("validate a block's content and attributes as the write check reads them", () => {
     it.each([
       [
         'an unknown key',
@@ -341,6 +341,51 @@ describe('validate an SMS body', () => {
     ])('reports %s on a button, and does not throw', (_case, content, expected) => {
       const button = { id: null, key: 'k1', type: 'button', attributes: {}, content } as unknown as EditorEmailBlock;
       expect(validate([button], profile).filter((problem) => problem.kind === 'content-invalid')).toEqual(expected);
+    });
+
+    it.each([
+      ['a value its type does not take', { align: 'middle' }, [{ field: 'align' }]],
+      ['a key its type does not have', { align: 'left', tone: 'muted' }, [{ field: 'tone' }]],
+      ['attributes that are not an object', [], [{}]],
+      ['no attributes', undefined, [{}]],
+      ['attributes its type takes', { align: 'center', spaceAfter: 'large' }, []],
+    ])("reports %s in a callout's attributes", (_case, attributes, expected) => {
+      const callout = block('callout', { text: 'Hi' }, { attributes: attributes as Record<string, unknown> });
+      expect(validate([callout], profile)).toEqual(
+        expected.map((where) => ({ kind: 'attributes-invalid', block: 'k1', ...where })),
+      );
+    });
+
+    it("leaves a columns block's ratio to lanes-mismatch", () => {
+      const columns = block('columns', {}, { attributes: { ratio: [1, 99] }, lanes: [[], []] });
+      expect(validate([columns], profile).map((problem) => problem.kind)).toEqual(['lanes-mismatch']);
+    });
+
+    it("reports a product block's attribute outside what it declares", () => {
+      const owned = emailProfile({
+        blocks: [
+          defineEmailBlock({
+            type: 'card',
+            label: 'Card',
+            fields: { text: richText() },
+            attributes: {
+              tone: choice(['neutral', 'brand'], 'neutral'),
+              bold: toggle(false),
+              size: number({ min: 1, max: 3, default: 2 }),
+            },
+            render: (_view, h) => h.divider(),
+            sample: { fields: { text: 'x' }, variableTypes: {} },
+          }),
+        ],
+      });
+      const card = (attributes: Record<string, unknown>) => block('card', { text: 'Hi' }, { attributes });
+      expect(validate([card({ tone: 'brand', bold: true, size: 2.5 })], owned)).toEqual([]);
+      expect(validate([card({ tone: 'loud', bold: 'yes', size: 4, extra: 1 })], owned)).toEqual([
+        { kind: 'attributes-invalid', block: 'k1', field: 'tone' },
+        { kind: 'attributes-invalid', block: 'k1', field: 'bold' },
+        { kind: 'attributes-invalid', block: 'k1', field: 'size' },
+        { kind: 'attributes-invalid', block: 'k1', field: 'extra' },
+      ]);
     });
 
     it("reports a key a product block's fields do not name", () => {
