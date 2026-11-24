@@ -54,3 +54,9 @@ export function address(start: RegExp, max: number): z.ZodType<string> {
 export const LINK_START = /^(?:https?:\/\/|mailto:)/i;
 /** An image a client loads over a secure connection. */
 export const IMAGE_START = /^https:\/\//i;
+
+/**
+ * The width a block's content is drawn at in the default card: 600px less its 1px border and 16px padding at each
+ * side. An image drawn wider pushes Outlook on Windows, which reads no `max-width`, past the card's edge.
+ */
+export const CONTENT_WIDTH = 566;

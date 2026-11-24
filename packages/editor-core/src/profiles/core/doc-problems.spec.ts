@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeJSON } from '../../document/core/types/index.js';
 import { docProblems } from './doc-problems.js';
 import { fromEmailBlocks } from './email-blocks.js';
+import { MAIL_LAYOUT_KINDS } from './profile.js';
 import { TRAVEL_DEFAULT_BLOCKS } from './fixtures/travel-defaults.fixture.js';
 
 const para = (text: string): NodeJSON => ({
@@ -13,6 +14,8 @@ const item = (...content: NodeJSON[]): NodeJSON => ({
   content,
 });
 const docOf = (...content: NodeJSON[]): DocJSON => ({ type: 'doc', content });
+/** A mail layout's kinds, which carry no heading or quote. */
+const LAYOUT = { kinds: MAIL_LAYOUT_KINDS };
 const keyed = (node: NodeJSON, id: string | null = null): NodeJSON => ({
   ...node,
   attrs: { ...node.attrs, id, key: 'k1' },
@@ -54,12 +57,12 @@ describe('docProblems', () => {
       },
     ],
   ])('flags %s as not carried', (_, node) => {
-    expect(docProblems(docOf(keyed(node)))).toEqual([{ kind: 'block-not-carried', block: 'k1' }]);
+    expect(docProblems(docOf(keyed(node)), LAYOUT)).toEqual([{ kind: 'block-not-carried', block: 'k1' }]);
   });
 
   it('names the block by its id when it has one', () => {
     const quote = keyed({ type: 'blockquote', content: [para('a')] }, 'b1');
-    expect(docProblems(docOf(quote))).toEqual([{ kind: 'block-not-carried', block: 'b1' }]);
+    expect(docProblems(docOf(quote), LAYOUT)).toEqual([{ kind: 'block-not-carried', block: 'b1' }]);
   });
 
   it('flags a block inside a lane', () => {

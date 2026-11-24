@@ -448,10 +448,8 @@ describe('EmailEditor', () => {
 
     await vi.waitFor(() => expect(last(probe.validated)?.map(({ kind }) => kind)).toEqual(['block-not-carried']));
     await vi.waitFor(() => expect(document.querySelectorAll('[data-slot=email-problem-marker]')).toHaveLength(1));
-    expect(exportedOf(probe.editor).map(({ type, content }) => [type, content])).toContainEqual([
-      'paragraph',
-      { text: 'Hi' },
-    ]);
+    const exported = toEmailBlocks(probe.editor.getJSON(), [], { kinds: MAIL_LAYOUT_KINDS });
+    expect(exported.map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
   });
 
   it("previews the renderer's HTML for the blocks, keys standing in for ids, with the sample values", async () => {

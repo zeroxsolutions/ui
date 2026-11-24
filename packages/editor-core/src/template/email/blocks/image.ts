@@ -4,6 +4,7 @@ import {
   address,
   align,
   BUTTON_HREF_MAX_LENGTH,
+  CONTENT_WIDTH,
   IMAGE_MAX_WIDTH,
   IMAGE_START,
   LINK_START,
@@ -24,7 +25,8 @@ const content = z
       .max(IMAGE_TEXT_MAX_LENGTH)
       .refine((value) => value.trim() !== '', { message: 'required' }),
     caption: z.string().max(IMAGE_TEXT_MAX_LENGTH).optional(),
-    href: address(LINK_START, BUTTON_HREF_MAX_LENGTH).optional(),
+    // An empty link is no link, as the editor stores one it never had.
+    href: z.literal('').or(address(LINK_START, BUTTON_HREF_MAX_LENGTH)).optional(),
   })
   .strict();
 const lenientAttributes = z.object({
@@ -41,7 +43,9 @@ const lenientContent = z.object({
 
 /**
  * A hosted image, its alt text read where images are off, optionally linked and captioned. It is drawn at its
- * width, the card's by default, and shrinks to a narrow screen; an address that is not `https:` draws nothing.
+ * width, at most the card's content width and that by default, and shrinks to a narrow screen. The write check
+ * takes an `https:` address or a url variable; drawn, any address but an `http:` or `https:` one draws nothing,
+ * as for a product block's image, so a stored `http:` address or a variable filled with one still draws.
  */
 export const image = defineBlockType({
   type: 'image',
@@ -65,7 +69,7 @@ export const image = defineBlockType({
         class: 'zx-image-fluid',
         src: c.src,
         alt: c.alt,
-        width: a.width ?? IMAGE_MAX_WIDTH,
+        width: Math.min(a.width ?? CONTENT_WIDTH, CONTENT_WIDTH),
         ...(c.href ? { href: c.href } : {}),
       }),
       caption !== '' && h.text({ class: ['zx-caption', 'zx-tone-muted'], text: caption }),

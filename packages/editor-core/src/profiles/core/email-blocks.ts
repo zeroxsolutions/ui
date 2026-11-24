@@ -8,12 +8,13 @@ import {
 } from '../../template/index.js';
 import { IMAGE_MAX_WIDTH } from '../../template/email/blocks/shared.js';
 import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
+import { EMAIL_KINDS } from './profile.js';
 import { splitVariables } from './sms-text.js';
 import type { EditorEmailBlock } from './types.js';
 
 /** What an export reads off the profile: the kinds it carries, which decide what folds into a paragraph. */
 export interface EmailExportOptions {
-  /** The profile's kinds; without them a heading and a quote fold into a paragraph, as a mail layout's do. */
+  /** The profile's kinds, which a heading or a quote folds into a paragraph without; every email kind when absent. */
   readonly kinds?: readonly string[];
 }
 
@@ -119,13 +120,14 @@ function attributesOf(node: NodeJSON): Record<string, unknown> {
   void id;
   void key;
   delete rest.source;
+  delete rest.stored;
   for (const name of CONTENT_ATTRIBUTES[node.type] ?? []) delete rest[name];
   return present(rest);
 }
 
 /** The email attributes a document node carries, by `EMAIL_GLOBAL_ATTRIBUTES`; the rest of its attributes are the document's own. */
 function carriedAttributes(node: NodeJSON): Record<string, unknown> {
-  const names = (EMAIL_GLOBAL_ATTRIBUTES[node.type] ?? []).filter((name) => name !== 'source');
+  const names = (EMAIL_GLOBAL_ATTRIBUTES[node.type] ?? []).filter((name) => name !== 'source' && name !== 'stored');
   return present(Object.fromEntries(names.map((name) => [name, node.attrs?.[name]])));
 }
 
@@ -165,17 +167,80 @@ function withContent(content: NodeJSON[] | undefined): Partial<NodeJSON> {
   return content === undefined || content.length === 0 ? {} : { content };
 }
 
-/** The rows a document table holds as text: a merged cell padded with empty ones, each row to the widest. */
+/** A cell's span along one axis: a whole number of at least 1. */
+function spanOf(cell: NodeJSON, name: 'colspan' | 'rowspan'): number {
+  const span = Number(cell.attrs?.[name]);
+  return Number.isInteger(span) && span > 1 ? span : 1;
+}
+
+/**
+ * The rows a document table holds as text: a merged cell's text in its first place and empty ones in the rest of
+ * the places it spans, across and down, so each cell keeps its column; each row padded to the widest.
+ */
 function rowsOf(table: NodeJSON): string[][] {
-  const rows = (table.content ?? []).map((row) =>
-    (row.content ?? []).flatMap((cell) => {
-      const span = Number(cell.attrs?.colspan);
-      const padding = Number.isInteger(span) && span > 1 ? Array<string>(span - 1).fill('') : [];
-      return [joinedMarkup(cell), ...padding];
-    }),
-  );
+  const rows: string[][] = [];
+  // The places a cell from a row above still covers: for each column, the rows it spans below its own.
+  const covered: number[] = [];
+  for (const row of table.content ?? []) {
+    const drawn: string[] = [];
+    const take = () => {
+      while ((covered[drawn.length] ?? 0) > 0) {
+        covered[drawn.length] -= 1;
+        drawn.push('');
+      }
+    };
+    for (const cell of row.content ?? []) {
+      take();
+      const across = spanOf(cell, 'colspan');
+      const down = spanOf(cell, 'rowspan');
+      for (let offset = 0; offset < across; offset += 1) {
+        covered[drawn.length] = down - 1;
+        drawn.push(offset === 0 ? joinedMarkup(cell) : '');
+      }
+    }
+    take();
+    rows.push(drawn);
+  }
   const widest = Math.max(0, ...rows.map((row) => row.length));
   return rows.map((row) => [...row, ...Array<string>(widest - row.length).fill('')]);
+}
+
+/** The defaults a stored block may leave out or write, which read back the same: by type, the value each holds. */
+const STORED_DEFAULTS: Readonly<
+  Record<string, { attributes: Record<string, unknown>; content: Record<string, unknown> }>
+> = {
+  heading: { attributes: { level: 2 }, content: {} },
+  image: { attributes: {}, content: { caption: '', href: '' } },
+  table: { attributes: { header: false }, content: {} },
+};
+
+/** `values` without the entries that hold their default, keys in order, as text to compare. */
+function withoutDefaults(values: unknown, defaults: Record<string, unknown>): string {
+  const entries = Object.entries(typeof values === 'object' && values !== null ? values : {})
+    .filter(([name, value]) => value !== undefined && defaults[name] !== value)
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+  return JSON.stringify(entries);
+}
+
+/**
+ * `exported` as the block stored in `node`'s `stored` attribute where the two differ only by a default one
+ * leaves out and the other writes, so a block opened and saved unedited is saved as it came.
+ */
+function asStored(node: NodeJSON, exported: EditorEmailBlock): EditorEmailBlock {
+  const stored = node.attrs?.stored as { attributes?: unknown; content?: unknown } | null | undefined;
+  const defaults = STORED_DEFAULTS[exported.type];
+  if (!stored || !defaults) return exported;
+  const same =
+    withoutDefaults(stored.attributes, defaults.attributes) ===
+      withoutDefaults(exported.attributes, defaults.attributes) &&
+    withoutDefaults(stored.content, defaults.content) === withoutDefaults(exported.content, defaults.content);
+  return same
+    ? {
+        ...exported,
+        attributes: stored.attributes as EditorEmailBlock['attributes'],
+        content: stored.content as EditorEmailBlock['content'],
+      }
+    : exported;
 }
 
 /** The image's width as an email draws it: a whole number of pixels up to the card's, or none. */
@@ -201,16 +266,21 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
         return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
       }
       const level = Math.min(Math.max(Number(node.attrs?.level) || 2, 1), EMAIL_HEADING_LEVEL_MAX);
-      return {
+      return asStored(node, {
         ...base,
         type: 'heading',
         attributes: { level, ...carriedAttributes(node) },
         content: { text: markupOf(node.content ?? [], node.attrs?.source) },
-      };
+      });
     }
     case 'blockquote':
       if (!kinds.has('quote')) {
-        return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
+        return {
+          ...base,
+          type: 'paragraph',
+          attributes: {},
+          content: { text: joinedMarkup(node, node.attrs?.source) },
+        };
       }
       return {
         ...base,
@@ -220,7 +290,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       };
     case 'image': {
       const { src, alt, caption, href } = node.attrs ?? {};
-      return {
+      return asStored(node, {
         ...base,
         type: 'image',
         attributes: { ...carriedAttributes(node), ...imageWidth(node.attrs?.width) },
@@ -230,12 +300,12 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
           ...(str(caption) === '' ? {} : { caption: str(caption) }),
           ...(str(href) === '' ? {} : { href: str(href) }),
         },
-      };
+      });
     }
     case 'table': {
       const rows = node.content ?? [];
       const header = rows.length > 0 && (rows[0].content ?? []).every((cell) => cell.type === 'tableHeader');
-      return {
+      return asStored(node, {
         ...base,
         type: 'table',
         attributes: {
@@ -243,7 +313,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
           ...carriedAttributes(node),
         },
         content: { rows: rowsOf(node) },
-      };
+      });
     }
     case 'callout':
       return {
@@ -302,6 +372,11 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
   }
 }
 
+/** What an unedited export of `block` saves it back as. */
+function storedOf(block: EmailBlockJSON): { attributes: unknown; content: unknown } {
+  return { attributes: block.attributes, content: block.content };
+}
+
 function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJSON {
   const text = str(block.content.text);
   switch (block.type) {
@@ -327,6 +402,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
       return nodeOf(block, 'heading', withContent(inlineOf(text)), {
         level: level === 1 || level === 3 ? level : 2,
         source: text,
+        stored: storedOf(block),
       });
     }
     case 'quote':
@@ -349,6 +425,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
           width: typeof block.attributes.width === 'number' ? block.attributes.width : null,
           caption: str(caption),
           href: str(href),
+          stored: storedOf(block),
         },
       );
     }
@@ -362,7 +439,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
           content: [{ type: 'paragraph', attrs: { source: str(cell) }, ...withContent(inlineOf(str(cell))) }],
         })),
       }));
-      return nodeOf(block, 'table', withContent(content));
+      return nodeOf(block, 'table', withContent(content), { stored: storedOf(block) });
     }
     case 'button':
       return nodeOf(block, 'button', {}, present({ label: block.content.label, href: block.content.href }));
@@ -400,14 +477,15 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
 /**
  * The email blocks `doc` holds, in order. A node `codecs` have an email codec for exports through it; an
  * `emailUnknown` atom exports its block as it came. A heading or a blockquote the profile's `kinds` do not carry
- * folds into a paragraph.
+ * folds into a paragraph; without `kinds` every email kind is carried. A stored heading, image or table opened
+ * and saved unedited is saved as it came.
  */
 export function toEmailBlocks(
   doc: DocJSON,
   codecs: readonly NodeCodec[] = [],
   options: EmailExportOptions = {},
 ): EditorEmailBlock[] {
-  const kinds = new Set(options.kinds ?? []);
+  const kinds = new Set<string>(options.kinds ?? EMAIL_KINDS);
   return (doc.content ?? []).map((node) => exportBlock(node, codecs, kinds));
 }
 

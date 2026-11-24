@@ -643,15 +643,20 @@ describe('the email kit', () => {
     );
   });
 
-  it('keeps a pasted heading as a heading, which exports as its text', async () => {
-    const editor = await mount([paragraph('Body')]);
+  it('keeps a pasted heading as a heading, which a mail layout exports as its text', async () => {
+    const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
+    const editor = await mount([paragraph('Body')], { profile: layout });
     await caretAfter('Body');
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
     pasteHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
 
     await vi.waitFor(() => expect(typesOf(editor)).toContain('heading'));
-    expect(exported(editor).map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
+    expect(exportedFor(editor, layout).map(({ type, content }) => [type, content])).toContainEqual([
+      'paragraph',
+      { text: 'Hi' },
+    ]);
   });
+
   it('sets align, space after and tone on a paragraph from the block menu', async () => {
     const editor = await mount([paragraph('Hi there', 'p')]);
 
@@ -749,6 +754,17 @@ describe('the email kit', () => {
     for (const lane of lanes) {
       expect((lane.content ?? []).map((child) => child.type)).not.toContain('columns');
     }
+  });
+
+  it('keeps every block but a line out of a table cell, where the export would lose it', async () => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })]);
+    await caretAfter('cellA');
+
+    for (const kind of ['image', 'columns', 'table', 'button', 'divider', 'heading', 'quote', 'list'] as const) {
+      expect(editor.can('insertEmailBlock', { kind })).toBe(false);
+      expect(editor.run('insertEmailBlock', { kind })).toBe(false);
+    }
+    expect(editor.can('insertEmailBlock', { kind: 'paragraph' })).toBe(true);
   });
 
   it("offers no way around the kit's own insert for a button or columns", async () => {

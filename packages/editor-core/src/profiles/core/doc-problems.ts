@@ -1,5 +1,6 @@
 import type { DocJSON, NodeJSON } from '../../document/core/types/index.js';
 import type { EmailExportOptions } from './email-blocks.js';
+import { EMAIL_KINDS } from './profile.js';
 import type { ProfileProblem } from './types.js';
 
 /** The lists the export always folds into a bulleted one. */
@@ -14,17 +15,21 @@ function isLone(children: readonly NodeJSON[] | undefined, type: string): boolea
 }
 
 /** Whether the email export keeps this block's structure, not only its text. */
-function isCarried(node: NodeJSON, kinds: ReadonlySet<string> | null): boolean {
+function isCarried(node: NodeJSON, kinds: ReadonlySet<string>): boolean {
   if (FOLDED.has(node.type)) return false;
-  if (Object.hasOwn(CARRIED_AS, node.type) && (kinds === null || !kinds.has(CARRIED_AS[node.type]))) return false;
+  if (Object.hasOwn(CARRIED_AS, node.type) && !kinds.has(CARRIED_AS[node.type])) return false;
   if (node.type === 'blockquote') return isLone(node.content, 'paragraph');
-  if (Object.hasOwn(WRITTEN_AS, node.type)) return kinds === null || kinds.has(WRITTEN_AS[node.type]);
+  if (Object.hasOwn(WRITTEN_AS, node.type) && !kinds.has(WRITTEN_AS[node.type])) return false;
+  // A cell is written as one line of text, so a second paragraph or any other block in it is lost.
+  if (node.type === 'table') {
+    return (node.content ?? []).every((row) => (row.content ?? []).every((cell) => isLone(cell.content, 'paragraph')));
+  }
   if (node.type === 'callout') return isLone(node.content, 'paragraph');
   if (node.type === 'bulletList') return (node.content ?? []).every((item) => isLone(item.content, 'paragraph'));
   return true;
 }
 
-function problemsIn(blocks: readonly NodeJSON[], kinds: ReadonlySet<string> | null, problems: ProfileProblem[]): void {
+function problemsIn(blocks: readonly NodeJSON[], kinds: ReadonlySet<string>, problems: ProfileProblem[]): void {
   for (const node of blocks) {
     if (node.type === 'columns') {
       for (const lane of node.content ?? []) problemsIn(lane.content ?? [], kinds, problems);
@@ -40,12 +45,12 @@ function problemsIn(blocks: readonly NodeJSON[], kinds: ReadonlySet<string> | nu
 /**
  * The blocks of `doc`, top-level and in a lane, that the email export folds into a paragraph or a list and so
  * loses structure from, or that the profile cannot hold: a heading or a blockquote where `kinds` lack `heading`
- * or `quote` (always, without `kinds`), an image or a table where they lack `image` or `table`, an ordered or
- * task list, a list item holding more than one paragraph or a nested list, and a callout holding more than one
- * paragraph. Their text is kept; the problem is for the author to see, never a refusal.
+ * or `quote`, an image or a table where they lack `image` or `table`, a table whose cell holds more than one
+ * paragraph or another block, an ordered or task list, a list item holding more than one paragraph or a nested
+ * list, and a callout holding more than one paragraph. Without `kinds`, every email kind is carried. Their text is kept; the problem is for the author to see, never a refusal.
  */
 export function docProblems(doc: DocJSON, options: EmailExportOptions = {}): ProfileProblem[] {
   const problems: ProfileProblem[] = [];
-  problemsIn(doc.content ?? [], options.kinds === undefined ? null : new Set(options.kinds), problems);
+  problemsIn(doc.content ?? [], new Set<string>(options.kinds ?? EMAIL_KINDS), problems);
   return problems;
 }

@@ -25,7 +25,7 @@ import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorM
 import type { VariableFeature } from '../variables/variable';
 import { VariableTextField } from '../variables/variable-text-field';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
-import { blockAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
+import { blockAt, cellAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
 import { blockClasses } from './nodes/block-style';
 
 export interface EmailBlockFeatureOptions {
@@ -262,6 +262,7 @@ export function emailBlockFeature(
   const insertable = (editor: IEditor): boolean => {
     const found = contextOf(editor);
     if (!found || found.context.locked() || !found.context.admitted.has(block.node)) return false;
+    if (cellAt(found.engine.state) !== undefined) return false;
     // A lane holds no block of lanes, as it holds no columns block.
     return block.lanes === null || laneAt(found.engine.state) === undefined;
   };

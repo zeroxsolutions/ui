@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
 import { sameBlockContent } from '../../template/email/index.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
+import { MAIL_LAYOUT_KINDS } from './profile.js';
 import { TRAVEL_DEFAULT_BLOCKS } from './fixtures/travel-defaults.fixture.js';
 import type { EditorEmailBlock } from './types.js';
+
+/** A mail layout's kinds, which carry no heading or quote. */
+const LAYOUT = { kinds: MAIL_LAYOUT_KINDS };
 
 function block(overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'type'>): EditorEmailBlock {
   return { id: null, key: 'k', attributes: {}, content: {}, ...overrides };
@@ -248,14 +252,21 @@ describe('email blocks', () => {
       expect(fromEmailBlocks([block({ type: 'divider' })]).content?.[0].type).toBe('horizontalRule');
     });
 
-    it('exports a heading as a paragraph keeping its text', () => {
+    it('exports a heading as a paragraph keeping its text where the kinds hold no heading', () => {
       const heading: NodeJSON = { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Hi' }] };
-      expect(only(docOf(heading))).toMatchObject({ type: 'paragraph', attributes: {}, content: { text: 'Hi' } });
+      expect(toEmailBlocks(docOf(heading), [], LAYOUT)[0]).toMatchObject({
+        type: 'paragraph',
+        attributes: {},
+        content: { text: 'Hi' },
+      });
     });
 
-    it('exports a blockquote as a paragraph joining its paragraphs with a space', () => {
+    it('exports a blockquote as a paragraph joining its paragraphs with a space where the kinds hold no quote', () => {
       const testimonial: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
-      expect(only(docOf(testimonial))).toMatchObject({ type: 'paragraph', content: { text: 'a b' } });
+      expect(toEmailBlocks(docOf(testimonial), [], LAYOUT)[0]).toMatchObject({
+        type: 'paragraph',
+        content: { text: 'a b' },
+      });
     });
 
     it('exports an orderedList as a list', () => {

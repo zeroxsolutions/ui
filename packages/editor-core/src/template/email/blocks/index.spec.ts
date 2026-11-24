@@ -352,9 +352,10 @@ describe('an image', () => {
     expect(text).toBe('A bay: https://x.test/go\n\nMorning');
   });
 
-  it('draws at the card width by default, and centred when its row is', () => {
+  it("draws at the card's content width by default and at most, and centred when its row is", () => {
     const { html } = render('image', { align: 'center' }, { src, alt: 'A bay' });
-    expect(html).toContain('width="600"');
+    expect(html).toContain('width="566"');
+    expect(render('image', { width: 600 }, { src, alt: 'A bay' }).html).toContain('width="566"');
     expect(html).toMatch(/class="zx-image zx-image-fluid" style="[^"]*margin:0 auto;/);
   });
 

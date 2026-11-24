@@ -55,7 +55,10 @@ describe('a heading through the email codec', () => {
       attributes: {},
       content: { text: 'Hi' },
     });
-    expect(toEmailBlocks(docOf(heading(1)))[0].type).toBe('paragraph');
+  });
+
+  it('stays a heading where the export names no kinds, as a stored one is', () => {
+    expect(toEmailBlocks(docOf(heading(1)))[0].type).toBe('heading');
   });
 
   it('round-trips a stored heading', () => {
@@ -288,5 +291,65 @@ describe('validate the content kinds', () => {
   ])('passes no %s the write check refuses', (_case, type, content) => {
     expect(validate([block({ type, content })], profile)).toEqual([]);
     expect(defaultBlocks[type as keyof typeof defaultBlocks].content.safeParse(content).success).toBe(true);
+  });
+});
+
+describe('a stored block of the content kinds, opened and saved unedited', () => {
+  it.each([
+    ['a heading naming no level', block({ type: 'heading', content: { text: 'Hi' } })],
+    ['a heading at level 2', block({ type: 'heading', attributes: { level: 2 }, content: { text: 'Hi' } })],
+    [
+      'an image with an empty caption and link',
+      block({ type: 'image', content: { src: 'https://x.test/a.png', alt: 'a', caption: '', href: '' } }),
+    ],
+    ['a table with no header row', block({ type: 'table', attributes: { header: false }, content: { rows: [['a']] } })],
+    ['a quote whose markup reads back escaped', block({ type: 'quote', content: { text: 'Q *i*' } })],
+  ])('saves %s as it was stored, with and without kinds', (_case, stored) => {
+    const doc = fromEmailBlocks([stored]);
+    expect(toEmailBlocks(doc, [], ALL)).toEqual([stored]);
+    expect(toEmailBlocks(doc)).toEqual([stored]);
+  });
+
+  it('keeps a quote folded into a paragraph as its stored markup', () => {
+    const doc = fromEmailBlocks([block({ type: 'quote', content: { text: 'Q *i*' } })]);
+    expect(toEmailBlocks(doc, [], { kinds: ['paragraph'] })[0].content).toEqual({ text: 'Q *i*' });
+  });
+});
+
+describe('a table cell spanning rows', () => {
+  it('keeps the next row in its own columns, the spanned cell padded', () => {
+    const spanning: NodeJSON = { type: 'tableCell', attrs: { rowspan: 2 }, content: [para('A')] };
+    const table: NodeJSON = {
+      type: 'table',
+      content: [row(spanning, cell('tableCell', 'B')), row(cell('tableCell', 'C'))],
+    };
+    expect(toEmailBlocks(docOf(table), [], ALL)[0].content).toEqual({
+      rows: [
+        ['A', 'B'],
+        ['', 'C'],
+      ],
+    });
+  });
+});
+
+describe('docProblems for a table cell', () => {
+  it('flags a table whose cell holds a block the export cannot write in a cell', () => {
+    const holding = (...content: NodeJSON[]): NodeJSON => ({
+      type: 'table',
+      attrs: { key: 't' },
+      content: [row({ type: 'tableCell', content })],
+    });
+    const image: NodeJSON = { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a' } };
+    expect(docProblems(docOf(holding(para('a'), image)), ALL)).toEqual([{ kind: 'block-not-carried', block: 't' }]);
+    expect(docProblems(docOf(holding(para('a'), para('b'))), ALL)).toEqual([{ kind: 'block-not-carried', block: 't' }]);
+    expect(docProblems(docOf(holding(para('a'))), ALL)).toEqual([]);
+  });
+});
+
+describe('validate an image', () => {
+  it('takes an empty caption and link as the write check does', () => {
+    const stored = block({ type: 'image', content: { src: 'https://x.test/a.png', alt: 'a', caption: '', href: '' } });
+    expect(validate([stored], emailProfile())).toEqual([]);
+    expect(defaultBlocks.image.content.safeParse(stored.content).success).toBe(true);
   });
 });

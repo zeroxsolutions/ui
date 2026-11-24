@@ -52,6 +52,7 @@ import { codeMirrorVariables } from '../variables/code-mirror-variables';
 import { variableFeature, variableIcon, type VariableFeature } from '../variables/variable';
 import {
   blockAt,
+  cellAt,
   columnsAt,
   contexts,
   contextOf,
@@ -441,7 +442,7 @@ const dataAttribute = (attribute: string) => ({
     attrs[attribute] ? { [`data-${DATA_NAMES[attribute]}`]: attrs[attribute] } : {},
 });
 
-// The stored text an import keeps beside the nodes; a copy must not carry it to another block.
+// The stored text, or the stored block, an import keeps beside the nodes; a copy must not carry it to another block.
 const sourceAttribute = { default: null, rendered: false, keepOnSplit: false, parseHTML: () => null };
 
 /** The attributes each document node carries for the email, as global attributes on the document's own nodes. */
@@ -449,7 +450,7 @@ function emailGlobalAttributes() {
   return Object.entries(EMAIL_GLOBAL_ATTRIBUTES).map(([type, names]) => ({
     types: [type],
     attributes: Object.fromEntries(
-      names.map((name) => [name, name === 'source' ? sourceAttribute : dataAttribute(name)]),
+      names.map((name) => [name, name === 'source' || name === 'stored' ? sourceAttribute : dataAttribute(name)]),
     ),
   }));
 }
@@ -580,6 +581,7 @@ export function emailKit(
   const insertable = (editor: IEditor, kind: EmailBlockKind): boolean => {
     const found = contextOf(editor);
     if (!found || locked() || !kinds.includes(kind)) return false;
+    if (kind !== 'paragraph' && cellAt(found.engine.state) !== undefined) return false;
     return kind !== 'columns' || laneAt(found.engine.state) === undefined;
   };
   const attributable = (editor: IEditor, attrs: Record<string, string>) => {

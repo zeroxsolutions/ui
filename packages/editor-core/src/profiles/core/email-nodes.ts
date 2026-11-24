@@ -33,10 +33,10 @@ export const EMAIL_GLOBAL_ATTRIBUTES: Record<string, string[]> = {
   callout: ['align', 'spaceAfter', 'source'],
   codeBlock: ['align', 'spaceAfter'],
   horizontalRule: ['spaceAfter'],
-  heading: ['align', 'spaceAfter', 'source'],
+  heading: ['align', 'spaceAfter', 'source', 'stored'],
   blockquote: ['align', 'spaceAfter', 'source'],
-  image: ['align', 'spaceAfter'],
-  table: ['spaceAfter'],
+  image: ['align', 'spaceAfter', 'stored'],
+  table: ['spaceAfter', 'stored'],
 };
 
 const ALIGNS = ['left', 'center', 'right'] as const;
