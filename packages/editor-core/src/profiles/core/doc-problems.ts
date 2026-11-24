@@ -17,7 +17,7 @@ function isCarried(node: NodeJSON): boolean {
 
 function problemsIn(blocks: readonly NodeJSON[], problems: ProfileProblem[]): void {
   for (const node of blocks) {
-    if (node.type === 'emailColumns') {
+    if (node.type === 'columns') {
       for (const lane of node.content ?? []) problemsIn(lane.content ?? [], problems);
       continue;
     }

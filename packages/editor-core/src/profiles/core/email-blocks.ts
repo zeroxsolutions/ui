@@ -11,7 +11,7 @@ import { splitVariables } from './sms-text.js';
 import type { EditorEmailBlock } from './types.js';
 
 /** Attributes a kind keeps out of `attributes` because its content lives in them: a button's label and href. */
-const CONTENT_ATTRIBUTES: Readonly<Record<string, readonly string[]>> = { emailButton: ['label', 'href'] };
+const CONTENT_ATTRIBUTES: Readonly<Record<string, readonly string[]>> = { button: ['label', 'href'] };
 
 function str(value: unknown): string {
   return typeof value === 'string' ? value : '';
@@ -186,7 +186,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         attributes: carriedAttributes(node),
         content: { items: (node.content ?? []).map((item) => joinedMarkup(item)) },
       };
-    case 'emailButton': {
+    case 'button': {
       const { label, href } = node.attrs ?? {};
       return { ...base, type: 'button', attributes, content: present({ label, href }) };
     }
@@ -196,7 +196,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
       return { ...base, type: 'html', attributes, content: { html: textOf(node) } };
     case 'horizontalRule':
       return { ...base, type: 'divider', attributes: carriedAttributes(node), content: {} };
-    case 'emailColumns':
+    case 'columns':
       return {
         ...base,
         type: 'columns',
@@ -215,7 +215,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
       const exported = custom.toEmailBlock(node);
       // A codec's node that holds lanes, as a product's lanes block does, exports them as a columns block does.
       const lanes = node.content ?? [];
-      return lanes.length > 0 && lanes.every((lane) => lane.type === 'emailLane')
+      return lanes.length > 0 && lanes.every((lane) => lane.type === 'column')
         ? { ...exported, lanes: lanes.map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs))) }
         : exported;
     }
@@ -243,7 +243,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
       return nodeOf(block, 'bulletList', { content });
     }
     case 'button':
-      return nodeOf(block, 'emailButton', {}, present({ label: block.content.label, href: block.content.href }));
+      return nodeOf(block, 'button', {}, present({ label: block.content.label, href: block.content.href }));
     case 'code':
       return nodeOf(block, 'codeBlock', {}, { language: 'text', code: str(block.content.code) });
     case 'html':
@@ -252,19 +252,19 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
       return nodeOf(block, 'horizontalRule');
     case 'columns': {
       const content = (block.lanes ?? []).map((lane): NodeJSON => ({
-        type: 'emailLane',
+        type: 'column',
         content: lane.map((child) => importBlock(child, codecs)),
       }));
-      return nodeOf(block, 'emailColumns', { content });
+      return nodeOf(block, 'columns', { content });
     }
     default:
       for (const codec of codecs) {
         const node = codec.fromEmailBlock?.(block);
         const lanes = node?.content ?? [];
         // A codec's node that holds lanes, as a product's lanes block does, takes them as a columns block does.
-        if (node && block.lanes !== undefined && lanes.length > 0 && lanes.every((lane) => lane.type === 'emailLane')) {
+        if (node && block.lanes !== undefined && lanes.length > 0 && lanes.every((lane) => lane.type === 'column')) {
           const content = block.lanes.map((lane): NodeJSON => ({
-            type: 'emailLane',
+            type: 'column',
             content: lane.map((child) => importBlock(child, codecs)),
           }));
           return { ...node, content };

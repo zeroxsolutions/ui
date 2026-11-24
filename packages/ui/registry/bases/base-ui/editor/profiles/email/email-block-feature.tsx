@@ -388,7 +388,7 @@ export function emailBlockFeature(
         ...(block.body !== null
           ? { content: 'inline*' }
           : block.lanes !== null
-            ? { content: `emailLane{${block.lanes.min},${block.lanes.max}}` }
+            ? { content: `column{${block.lanes.min},${block.lanes.max}}` }
             : { atom: true }),
         render: EmailBlockView,
       },
@@ -398,7 +398,7 @@ export function emailBlockFeature(
       [insertCommand]: {
         run: (editor) => {
           if (!insertable(editor)) return false;
-          const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph' }] });
+          const lane = (): NodeJSON => ({ type: 'column', content: [{ type: 'paragraph' }] });
           const content =
             block.lanes === null ? {} : { content: Array.from({ length: block.lanes.min }, () => lane()) };
           return editor.run('insertContent', { content: { type: block.node, ...content } });

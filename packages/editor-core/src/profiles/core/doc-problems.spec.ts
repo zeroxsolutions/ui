@@ -64,10 +64,10 @@ describe('docProblems', () => {
 
   it('flags a block inside a lane', () => {
     const lane: NodeJSON = {
-      type: 'emailLane',
+      type: 'column',
       content: [keyed({ type: 'orderedList', content: [item(para('a'))] })],
     };
-    const columns = keyed({ type: 'emailColumns', content: [lane] });
+    const columns = keyed({ type: 'columns', content: [lane] });
     expect(docProblems(docOf(columns)).map((problem) => problem.kind)).toEqual(['block-not-carried']);
   });
 

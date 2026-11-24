@@ -15,7 +15,6 @@ import {
   type BlockMenuItem,
   type EditorFeature,
   type IEditor,
-  type NodeCodec,
   type NodeJSON,
   type SlashItem,
   type ToolbarItem,
@@ -62,20 +61,22 @@ import {
   type KitContext,
 } from './kit-context';
 import { emailMarks, LINK_ITEM_ID, UNLINK_ITEM_ID } from './marks';
-import { emailButtonCodec, emailButtonNode, emailButtonSlashItem } from './nodes/button';
-import { emailColumnsCodecs, emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
+import { button } from '../../document/features/button/index';
+import { columns } from '../../document/features/columns/index';
+import { EmailButtonLabelField, emailButtonSlashItem } from './nodes/button';
+import { emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
 import { emailUnknownNode } from './nodes/unknown';
 
 /** The node each email kind is: the document's own block, or the email profile's where the document has none. */
 export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
   paragraph: 'paragraph',
-  button: 'emailButton',
+  button: 'button',
   code: 'codeBlock',
   list: 'bulletList',
   callout: 'callout',
   divider: 'horizontalRule',
-  columns: 'emailColumns',
+  columns: 'columns',
   html: 'emailHtml',
 };
 
@@ -104,13 +105,13 @@ const ATTRIBUTE_VALUES: Readonly<Record<EmailBlockAttribute, readonly EmailBlock
 /** The attributes the block menu sets on each block node. */
 const BLOCK_ATTRIBUTES: Readonly<Record<string, readonly EmailBlockAttribute[]>> = {
   paragraph: ['align', 'spaceAfter', 'tone'],
-  emailButton: ['align', 'spaceAfter', 'width'],
+  button: ['align', 'spaceAfter', 'width'],
   codeBlock: ['align', 'spaceAfter'],
   bulletList: ['align', 'spaceAfter'],
   callout: ['align', 'spaceAfter'],
   horizontalRule: ['spaceAfter'],
   emailHtml: ['spaceAfter'],
-  emailColumns: ['spaceAfter'],
+  columns: ['spaceAfter'],
 };
 
 /** What an attribute reads as while the block does not set it: the house renderer's own default. */
@@ -217,16 +218,16 @@ export function emailUi(
   return { slash: [...offered, ...hosted], toolbar: marks(contributions.toolbar), bubble: marks(contributions.bubble) };
 }
 
-const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph' }] });
+const lane = (): NodeJSON => ({ type: 'column', content: [{ type: 'paragraph' }] });
 
 /** What each kind inserts, empty, so the author fills it in place. */
 const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph'>, () => NodeJSON>> = {
-  button: () => ({ type: 'emailButton' }),
+  button: () => ({ type: 'button' }),
   code: () => ({ type: 'codeBlock', attrs: { language: 'text', code: '' } }),
   list: () => ({ type: 'bulletList', content: [{ type: 'listItem', content: [{ type: 'paragraph' }] }] }),
   callout: () => ({ type: 'callout', attrs: { variant: 'info' }, content: [{ type: 'paragraph' }] }),
   divider: () => ({ type: 'horizontalRule' }),
-  columns: () => ({ type: 'emailColumns', attrs: { ratio: [1, 1] }, content: [lane(), lane()] }),
+  columns: () => ({ type: 'columns', attrs: { ratio: [1, 1] }, content: [lane(), lane()] }),
   html: () => ({ type: 'emailHtml' }),
 };
 
@@ -267,7 +268,7 @@ function setRatio(engine: Editor, { node, pos }: Found, ratio: number[]): boolea
   const have = node.childCount;
   const want = ratio.length;
   if (want > have) {
-    const laneType = engine.state.schema.nodes.emailLane;
+    const laneType = engine.state.schema.nodes.column;
     const added = Array.from({ length: want - have }, () => laneType.createAndFill());
     tr.insert(
       pos + node.nodeSize - 1,
@@ -450,8 +451,8 @@ function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: r
 
 /**
  * The email profile's features: the Document Editor's own blocks, frame and block menu (`standardKit`, the
- * callout and the code block), and what the document has no block for (the button, the columns and their lanes,
- * the html block, the variable chip and the link to a url variable), with the email attributes on the
+ * callout, the code block, the button and the columns), and what the document has no block for (the html block,
+ * the variable chip and the link to a url variable), with the email attributes on the
  * document's nodes and a block menu item for each. Every email node is in the schema, so a stored block of a
  * kind the profile leaves out still opens and shows its problem; none is offered, and a change that adds one is
  * refused. `extra` joins when each of its block nodes has an email codec, and its blocks carry an id and a key.
@@ -477,7 +478,7 @@ export function emailKit(
   const extraNodes = extra.flatMap((feature) => (feature.nodes ?? []).filter((node) => inGroup(node, 'block')));
   const extraBlocks = extraNodes.map((node) => node.name);
   // A lane holds no block of lanes, as it holds no columns block.
-  const laneBlocks = extraNodes.filter((node) => !(node.content ?? '').includes('emailLane')).map((node) => node.name);
+  const laneBlocks = extraNodes.filter((node) => !/\bcolumn\b/.test(node.content ?? '')).map((node) => node.name);
   // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
     ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
@@ -530,7 +531,7 @@ export function emailKit(
   const linkable = (editor: IEditor) => {
     const found = contextOf(editor);
     const block = found && blockAt(found.engine.state);
-    if (!found || !block || block.node.type.name !== 'emailButton' || locked()) return undefined;
+    if (!found || !block || block.node.type.name !== 'button' || locked()) return undefined;
     return isRequired(block.node, required()) ? undefined : { engine: found.engine, block };
   };
   const linkTarget = (editor: IEditor) => {
@@ -546,8 +547,7 @@ export function emailKit(
 
   const blocks = defineFeature({
     id: 'emailBlocks',
-    nodes: [emailButtonNode(), ...emailColumnsNodes(laneContent), emailHtmlNode(), emailUnknownNode()],
-    codecs: [emailButtonCodec, ...emailColumnsCodecs] as NodeCodec[],
+    nodes: [emailHtmlNode(), emailUnknownNode()],
     commands: {
       insertEmailBlock: {
         args: z.object({ kind: z.enum(EMAIL_KINDS as [EmailBlockKind, ...EmailBlockKind[]]) }),
@@ -634,6 +634,9 @@ export function emailKit(
     blockIdentity({ required: options.required, structure: options.structure, types: extraBlocks }),
     variables.feature,
     emailMarks(),
+    // The document's own button and columns, offered through the email's slash items rather than their own.
+    { ...button({ labelField: EmailButtonLabelField, linkField: false }), slash: [] },
+    { ...columns({ columnContent: laneContent }), slash: [] },
     blocks,
     defineFeature({
       id: 'emailBlockMenu',
@@ -721,7 +724,7 @@ function emailBlockMenuItems(
 
   // Always offered, so a locked button's link can be read; the popover disables its field with the reason.
   const link: BlockMenuItem[] =
-    type === 'emailButton' ? [{ id: LINK_ITEM_ID, title: words.link, command: 'editEmailLink' }] : [];
+    type === 'button' ? [{ id: LINK_ITEM_ID, title: words.link, command: 'editEmailLink' }] : [];
 
   const columns = columnsAt(found.engine.state);
   const stored = columns?.node.attrs.ratio as number[] | null | undefined;

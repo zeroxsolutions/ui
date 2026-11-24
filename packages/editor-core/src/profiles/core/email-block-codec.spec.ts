@@ -75,7 +75,7 @@ describe("a product block's email codec", () => {
       },
     ];
     const doc = fromEmailBlocks(stored, codecs);
-    expect(doc.content?.[0].content?.map((lane) => lane.type)).toEqual(['emailLane', 'emailLane']);
+    expect(doc.content?.[0].content?.map((lane) => lane.type)).toEqual(['column', 'column']);
     expect(toEmailBlocks(doc, codecs)).toEqual(stored);
   });
 });

@@ -144,7 +144,7 @@ function pasteHtml(html: string): void {
   );
 }
 
-const buttonHtml = '<div data-type="emailButton" label="Go" href="{{resetUrl}}"></div>';
+const buttonHtml = '<div data-type="button" label="Go" href="{{resetUrl}}"></div>';
 const typesOf = (editor: IEditor) => (editor.getJSON().content ?? []).map((node) => node.type);
 
 function find(selector: string, text?: string): HTMLElement {
@@ -187,7 +187,7 @@ async function chooseInBlockMenu(text: string, group: string, title: string, sel
 
 /** Opens the link popover of the only button from its block menu. */
 async function openButtonLink() {
-  await openBlockMenu('', '[data-slot=email-button]');
+  await openBlockMenu('', '[data-slot=link-button]');
   await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
   const popover = page.getByRole('dialog', { name: 'Link' });
   await expect.element(popover).toBeVisible();
@@ -585,7 +585,7 @@ describe('the email kit', () => {
     ]);
     await caretAfter('Before');
 
-    await chooseInBlockMenu('', 'Width', 'Full width', '[data-slot=email-button]');
+    await chooseInBlockMenu('', 'Width', 'Full width', '[data-slot=link-button]');
 
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
     expect(exported(editor)[0].attributes).toEqual({});
@@ -643,13 +643,13 @@ describe('the email kit', () => {
     expect(editor.can('insertEmailBlock', { kind: 'columns' })).toBe(false);
     expect(editor.run('insertEmailBlock', { kind: 'columns' })).toBe(false);
     editor.run('insertContent', {
-      content: { type: 'emailColumns', content: [{ type: 'emailLane', content: [{ type: 'paragraph' }] }] },
+      content: { type: 'columns', content: [{ type: 'column', content: [{ type: 'paragraph' }] }] },
     });
 
     const lanes = editor.getJSON().content?.flatMap((node) => node.content ?? []) ?? [];
-    expect(lanes.filter((lane) => lane.type === 'emailLane').length).toBeGreaterThan(0);
+    expect(lanes.filter((lane) => lane.type === 'column').length).toBeGreaterThan(0);
     for (const lane of lanes) {
-      expect((lane.content ?? []).map((child) => child.type)).not.toContain('emailColumns');
+      expect((lane.content ?? []).map((child) => child.type)).not.toContain('columns');
     }
   });
 
@@ -672,7 +672,7 @@ describe('the email kit', () => {
       block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[], []] }),
     ]);
 
-    for (const slot of ['email-button', 'code-card', 'email-html', 'divider', 'email-columns']) {
+    for (const slot of ['link-button', 'code-card', 'email-html', 'divider', 'columns']) {
       const selector =
         slot === 'divider'
           ? '[contenteditable=true] hr'
@@ -736,7 +736,7 @@ describe('the email kit', () => {
     };
 
     for (const group of ['Turn into', 'Align', 'Space after', 'Tone']) await refusedIn(group, 'Hi');
-    await refusedIn('Width', '', '[data-slot=email-button]');
+    await refusedIn('Width', '', '[data-slot=link-button]');
     await refusedIn('Lanes', 'left');
 
     await openBlockMenu('Hi');
@@ -761,7 +761,7 @@ describe('the email kit', () => {
     await mount([paragraph('Header'), block({ type: 'button', content: { label: 'Go' } })], {
       profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }),
     });
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
 
     const refused = page.getByRole('menuitem', { name: 'Duplicate' });
     await expect.element(refused).toBeDisabled();
@@ -786,19 +786,19 @@ describe('the email kit', () => {
     const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
     pasteHtml(buttonHtml);
-    expect(typesOf(layout)).not.toContain('emailButton');
+    expect(typesOf(layout)).not.toContain('button');
 
     const full = await mount([paragraph('Body')]);
     await caretAfter('Body');
     pasteHtml(buttonHtml);
-    await vi.waitFor(() => expect(typesOf(full)).toContain('emailButton'));
+    await vi.waitFor(() => expect(typesOf(full)).toContain('button'));
   });
 
   it('brings back a stored block of a left-out kind on undo', async () => {
     const stored = [paragraph('Header', 'p'), block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go' } })];
     const editor = await mount(stored, { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(typesOf(editor)).toEqual(['paragraph']));
     await vi.waitFor(() => expect(document.activeElement?.classList.contains('ProseMirror')).toBe(true));

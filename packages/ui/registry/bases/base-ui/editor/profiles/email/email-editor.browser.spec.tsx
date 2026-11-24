@@ -615,7 +615,7 @@ describe('EmailEditor', () => {
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
     );
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
@@ -669,7 +669,7 @@ describe('EmailEditor', () => {
 
   it("inserts the toolbar's variable into the link popover's href field, which stays open", async () => {
     const probe = await mount([button()]);
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     const href = popover.getByRole('textbox', { name: 'Link' });

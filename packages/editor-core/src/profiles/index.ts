@@ -1,4 +1,6 @@
 export {
+  buttonNodeSpec,
+  columnsNodeSpecs,
   docProblems,
   EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,

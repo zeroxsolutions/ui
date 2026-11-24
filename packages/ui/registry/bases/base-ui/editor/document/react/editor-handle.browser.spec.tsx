@@ -9,8 +9,8 @@ import '../../../../../../test/nova-style.css';
 // file left resting there enters it before the spec hovers it.
 import '../../styles.css';
 import { defineFeature } from '@zeroxsolutions/editor-core/document/core/index';
-import { emailColumnsNodes } from '../../profiles/email/nodes/columns';
 import { codeBlock } from '../features/code-block/index';
+import { columns as columnsFeature } from '../features/columns/index';
 import { standardKit } from '../features/standard/index';
 import { table } from '../features/table/index';
 import { Editor } from './editor';
@@ -358,12 +358,12 @@ describe('the block menu the grip opens', () => {
   });
 });
 
-// The email profile's columns block, whose lanes hold their own blocks.
-const columns = defineFeature({ id: 'columns', nodes: emailColumnsNodes('paragraph+') });
+// The columns block, whose columns hold their own blocks.
+const columns = columnsFeature({ columnContent: 'paragraph+' });
 const twoLanes = (left: string[], right: string[]) => ({
-  type: 'emailColumns',
+  type: 'columns',
   attrs: { ratio: [1, 1] },
-  content: [left, right].map((texts) => ({ type: 'emailLane', content: texts.map(line) })),
+  content: [left, right].map((texts) => ({ type: 'column', content: texts.map(line) })),
 });
 const lanesOf = (editor: IEditor) =>
   (editor.getJSON().content?.[0]?.content ?? []).map((lane) =>
@@ -410,7 +410,7 @@ describe('the block a grip addresses inside another block', () => {
     const { editor } = await mountDocument(laneDoc, 1, [columns]);
     await userEvent.click(await gripBeside(holding('.ProseMirror p', 'l1')));
     await userEvent.click(page.getByRole('menuitem', { name: 'Duplicate' }));
-    await vi.waitFor(() => expect(types(editor())).toEqual(['emailColumns', 'emailColumns', 'paragraph']));
+    await vi.waitFor(() => expect(types(editor())).toEqual(['columns', 'columns', 'paragraph']));
   });
 
   it("opens the menu with Mod-/ on a lane's first block holding the caret, not on its columns block", async () => {
@@ -424,7 +424,7 @@ describe('the block a grip addresses inside another block', () => {
   it('drags the whole columns block from the grip beside its first line', async () => {
     const { blocks, editor } = await mountDocument(laneDoc, 1, [columns]);
     await userEvent.dragAndDrop(await gripBeside(holding('.ProseMirror p', 'l1')), blocks[1], { steps: 10 });
-    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'emailColumns', 'paragraph']));
+    await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'columns', 'paragraph']));
     expect(editor().getJSON().content?.[1]).toEqual(twoLanes(['l1', 'l2'], ['r1', 'r2']));
   });
 

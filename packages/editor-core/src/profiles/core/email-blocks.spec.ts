@@ -222,6 +222,21 @@ describe('email blocks', () => {
       expect(code.content).toBeUndefined();
     });
 
+    it('reads a button as the shared button node, its label and href as attributes', () => {
+      const [button] = fromEmailBlocks([
+        block({ type: 'button', attributes: { width: 'full' }, content: { label: 'Go', href: '{{u}}' } }),
+      ]).content!;
+      expect(button).toMatchObject({ type: 'button', attrs: { width: 'full', label: 'Go', href: '{{u}}' } });
+    });
+
+    it('reads columns as the shared columns node holding a column per lane', () => {
+      const [columns] = fromEmailBlocks([
+        block({ type: 'columns', attributes: { ratio: [1, 2] }, lanes: [[block({ type: 'divider' })], []] }),
+      ]).content!;
+      expect(columns).toMatchObject({ type: 'columns', attrs: { ratio: [1, 2] } });
+      expect(columns.content?.map((lane) => lane.type)).toEqual(['column', 'column']);
+    });
+
     it('reads a divider as a horizontalRule', () => {
       expect(fromEmailBlocks([block({ type: 'divider' })]).content?.[0].type).toBe('horizontalRule');
     });
