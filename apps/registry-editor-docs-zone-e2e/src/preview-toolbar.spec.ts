@@ -85,6 +85,8 @@ test("the theme toggle frames the demo dark, leaving the page's theme and its st
     )
     .toBe(framed);
   await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
+  // The stage has the controls, so the framed page draws none of its own.
+  await expect(frame.contentFrame().locator('[data-slot=example-view-controls]')).toBeHidden();
   await expect(page.locator('html')).toHaveClass(/(^|\s)light(\s|$)/);
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
 
@@ -93,14 +95,42 @@ test("the theme toggle frames the demo dark, leaving the page's theme and its st
   await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
 });
 
-test('a view page opened alone draws only its demo, in its `?theme=`, leaving the stored theme', async ({ page }) => {
+test('a view page opened alone floats its device and theme controls over its demo, with no bar', async ({ page }) => {
   test.setTimeout(90_000);
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto(`/docs/editor/view/${DEMO}?theme=dark`);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/docs/editor/view/${DEMO}`);
 
   await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back to the docs' })).toHaveCount(0);
-  await expect(page.getByRole('banner')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: DEMO })).toHaveCount(0);
+  const controls = page.locator('[data-slot=example-view-controls]');
+  await expect(controls).toBeVisible();
+  await expect(controls).toHaveCSS('position', 'fixed');
+
+  // The theme toggle rewrites `?theme=` in place, leaving the stored theme; it is enabled once the page hydrates.
+  await expect(darkTheme(page)).toBeEnabled();
+  await darkTheme(page).click();
+  await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
+  await expect(page).toHaveURL(/[?&]theme=dark/);
+  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
+
+  // Mobile frames the page itself at 375px, in its theme, edged by a border, with no controls of its own.
+  await device(page, 'Mobile').click();
+  const frame = page.getByTitle(`${DEMO}, mobile, dark`);
+  await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
+  expect(await frame.evaluate((element: { clientWidth: number }) => element.clientWidth)).toBe(375);
+  await expect(frame).toHaveCSS('border-top-width', '1px');
+  await expect(frame.contentFrame().locator('[data-slot=example-view-controls]')).toBeHidden();
+});
+
+test('a view page embedded, as a docs frame loads it, draws no controls', async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.goto(`/docs/editor/view/${DEMO}?embed=1&theme=dark`);
+
+  await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-embed', '');
+  await expect(page.locator('[data-slot=example-view-controls]')).toBeHidden();
   await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
 });

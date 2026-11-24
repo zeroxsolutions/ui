@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { publishedBlocks } from '@zeroxsolutions/ui-docs-web/lib/published-items';
+import { viewRoute } from '@zeroxsolutions/ui-docs-web/routes';
 import { ExampleView } from '@zeroxsolutions/ui/site/components/layout/example-view';
 import { exampleDemos } from '@zeroxsolutions/ui/site/lib/example-demos';
 
@@ -30,5 +31,6 @@ export async function generateMetadata({ params }: ViewPageProps): Promise<Metad
 }
 
 export default async function Page({ params }: ViewPageProps): Promise<ReactNode> {
-  return <ExampleView name={(await params).name} />;
+  const { name } = await params;
+  return <ExampleView name={name} href={viewRoute.build({ name })} />;
 }

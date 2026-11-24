@@ -121,10 +121,16 @@ side with the Document Editor it reads as a different product.
   while the demo is dark; revised after the owner's third review, it was a switch).
 - Revised 2026-11-24 after the owner's third review: a view page is the demo alone on the theme's background,
   edge to edge, centred and at the top, padded as the docs stage pads it, with no bar, stage, panel, ring or
-  radius; `?theme=` draws it in a theme without writing the stored one, and there is no `?embed`. A framed
+  radius; `?theme=` draws it in a theme without writing the stored one. A framed
   docs preview (Tablet, Mobile, or the other theme) fills its whole stage with the frame theme's background;
   the frame has no ring or radius at any size, and at Tablet and Mobile shows its edges only as a 1px border
   in the frame theme's border colour.
+- Revised 2026-11-24 after the owner's fourth review: the view page keeps its device and theme controls,
+  floating. The docs preview's toolbar sits fixed at the page's top right on a small blurred pill, with no
+  bar, name or back link. Tablet and Mobile frame the page itself at 768px or 375px, centred on the frame
+  theme's background, with the docs frames' 1px border and no radius; the theme toggle rewrites `?theme=`
+  in place without writing the stored theme. A docs preview's frame loads the page with `?embed=1`, which
+  an inline script reads before the first paint to leave the controls out, as the stage has its own.
 - Revised 2026-11-24 after the owner's third review: the email's callout has no left accent stripe. It is
   drawn as the Document Editor's callout reads: the muted background inside a 1px border in the theme's
   border colour, at the theme's radius.
