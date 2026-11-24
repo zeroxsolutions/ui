@@ -345,15 +345,15 @@ import {
   richText,
 } from '@zeroxsolutions/editor-core/template/email/index';
 
-const quote = defineEmailBlock({
-  type: 'quote',
-  label: 'Quote',
+const testimonial = defineEmailBlock({
+  type: 'testimonial',
+  label: 'Testimonial',
   fields: { text: richText(), author: plainText({ max: 120 }) },
   attributes: { tone: choice(['neutral', 'brand'], 'neutral') },
   render: ({ fields, attributes }, h) =>
-    h.section({ class: ['zx-quote', `zx-quote-${attributes.tone}`] }, [
+    h.section({ class: ['zx-testimonial', `zx-testimonial-${attributes.tone}`] }, [
       h.text({ markup: fields.text }),
-      h.text({ class: 'zx-quote-author', text: fields.author }),
+      h.text({ class: 'zx-testimonial-author', text: fields.author }),
     ]),
   sample: {
     fields: { text: '{{first_name}} set us up in a day.', author: 'Lan' },
@@ -363,15 +363,15 @@ const quote = defineEmailBlock({
 
 const renderer = createEmailRenderer({
   theme,
-  css: '.zx-quote { border-left: 3px solid #E4E4E7; }',
-  extraBlocks: [quote],
+  css: '.zx-testimonial { border-left: 3px solid #E4E4E7; }',
+  extraBlocks: [testimonial],
 });
 ```
 
 ```tsx
-const profile = emailProfile({ variables, blocks: [quote] });
+const profile = emailProfile({ variables, blocks: [testimonial] });
 
-<EmailEditor profile={profile} blocks={[quote]} renderer={renderer} /* ... */ />;
+<EmailEditor profile={profile} blocks={[testimonial]} renderer={renderer} /* ... */ />;
 ```
 
 `emailProfile`'s `blocks` adds the type to the profile's kinds, and `validate` checks each field as the

@@ -134,6 +134,9 @@ async function mount(
 }
 
 const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON(), codecs);
+/** The blocks `editor` exports under `profile`, which decides what folds into a paragraph. */
+const exportedFor = (editor: IEditor, profile: EditorProfile = fullProfile) =>
+  toEmailBlocks(editor.getJSON(), codecs, { kinds: profile.kinds });
 
 /** Pastes `html` at the caret, as the clipboard of another editor carries it. */
 function pasteHtml(html: string): void {
@@ -218,13 +221,94 @@ describe('the email kit', () => {
       'Button',
       'Columns',
       'HTML',
+      'Heading',
+      'Quote',
+      'Image',
+      'Table',
     ]);
+  });
+
+  it.each([
+    ['Heading', { type: 'heading', attributes: { level: 2 }, content: { text: '' } }],
+    ['Quote', { type: 'quote', attributes: {}, content: { text: '' } }],
+    ['Image', { type: 'image', attributes: {}, content: { src: '', alt: '' } }],
+    [
+      'Table',
+      {
+        type: 'table',
+        attributes: { header: true },
+        content: {
+          rows: [
+            ['', ''],
+            ['', ''],
+          ],
+        },
+      },
+    ],
+  ])('inserts a %s from the slash menu, exported as its email block', async (title, block) => {
+    const editor = await mount([paragraph('')]);
+    await userEvent.click(find('[contenteditable=true] p'));
+    await userEvent.keyboard('/');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await vi.waitFor(() =>
+      expect(exportedFor(editor).map(({ id: _id, key: _key, ...rest }) => rest)).toContainEqual(block),
+    );
+  });
+
+  it('carries a stored heading, quote, image and table through the editor unchanged', async () => {
+    const stored: EditorEmailBlock[] = [
+      block({
+        id: 'h',
+        key: 'h',
+        type: 'heading',
+        attributes: { level: 1, align: 'center' },
+        content: { text: 'Hi **{{name}}**' },
+      }),
+      block({ id: 'q', key: 'q', type: 'quote', attributes: { spaceAfter: 'large' }, content: { text: '_Said_' } }),
+      block({
+        id: 'i',
+        key: 'i',
+        type: 'image',
+        attributes: { align: 'center', width: 300 },
+        content: { src: 'https://x.test/a.png', alt: 'A bay', caption: 'Morning', href: '{{resetUrl}}' },
+      }),
+      block({
+        id: 't',
+        key: 't',
+        type: 'table',
+        attributes: { header: true },
+        content: {
+          rows: [
+            ['a', 'b'],
+            ['**c**', ''],
+          ],
+        },
+      }),
+    ];
+    const editor = await mount(stored);
+    expect(exportedFor(editor)).toEqual(stored);
+  });
+
+  it("sets a heading's level from the block menu", async () => {
+    const editor = await mount([
+      block({ id: 'h', key: 'h', type: 'heading', attributes: { level: 2 }, content: { text: 'Title' } }),
+    ]);
+    await chooseInBlockMenu('Title', 'Level', 'Heading 1', '[contenteditable=true] h2');
+    await vi.waitFor(() => expect(exportedFor(editor)[0].attributes).toEqual({ level: 1 }));
   });
 
   it('offers in the slash menu only the kinds a mail-layout region holds', async () => {
     await mount([paragraph('')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
 
     expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns']);
+  });
+
+  it('folds a heading pasted into a mail-layout region into a paragraph, and marks it', async () => {
+    const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
+    const editor = await mount([paragraph('')], { profile: layout });
+    await userEvent.click(find('[contenteditable=true] p'));
+    pasteHtml('<h2>Pasted</h2>');
+    await vi.waitFor(() => expect(exportedFor(editor, layout).map((one) => one.type)).toEqual(['paragraph']));
   });
 
   it("draws the document editor's grip and its insert button beside a block", async () => {
@@ -488,8 +572,22 @@ describe('the email kit', () => {
     expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
   });
 
-  it('turns no typed shortcut into a heading and keeps no underline', async () => {
+  it('turns a typed shortcut into a heading where the profile holds one', async () => {
     const editor = await mount([paragraph('Hello')]);
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Enter}# Title');
+
+    await vi.waitFor(() =>
+      expect(exportedFor(editor)[1]).toMatchObject({
+        type: 'heading',
+        attributes: { level: 1 },
+        content: { text: 'Title' },
+      }),
+    );
+  });
+
+  it('turns no typed shortcut into a heading where the profile holds none, and keeps no underline', async () => {
+    const editor = await mount([paragraph('Hello')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Hello');
     await userEvent.keyboard('{Enter}# Title');
     await userEvent.keyboard('{Shift>}{Home}{/Shift}{ControlOrMeta>}u{/ControlOrMeta}');
@@ -651,6 +749,13 @@ describe('the email kit', () => {
     for (const lane of lanes) {
       expect((lane.content ?? []).map((child) => child.type)).not.toContain('columns');
     }
+  });
+
+  it("offers no way around the kit's own insert for a button or columns", async () => {
+    const editor = await mount([block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] })]);
+    await caretAfter('left');
+    expect(() => editor.run('insertColumns', { count: 2 })).toThrow(/Unknown command/);
+    expect(() => editor.run('insertButton')).toThrow(/Unknown command/);
   });
 
   it("turns a text block into the email's text kinds only", async () => {

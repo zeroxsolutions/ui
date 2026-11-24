@@ -210,7 +210,18 @@ describe('the default blocks', () => {
     const holding = Object.values(defaultBlocks)
       .filter((definition) => definition.holdsText)
       .map((definition) => definition.type);
-    expect(holding.sort()).toEqual(['button', 'callout', 'code', 'html', 'list', 'paragraph']);
+    expect(holding.sort()).toEqual([
+      'button',
+      'callout',
+      'code',
+      'heading',
+      'html',
+      'image',
+      'list',
+      'paragraph',
+      'quote',
+      'table',
+    ]);
   });
 
   it('mark body text, a button and each lane for the layout to resize on a narrow screen', () => {
@@ -295,5 +306,114 @@ describe('inline markup on write', () => {
 
   it('keeps a button label plain', () => {
     expect(renderer.contentOf('button', { label: '**a', href: '{{u}}' })).not.toBeNull();
+  });
+});
+
+describe('a heading', () => {
+  it('draws at level 2 unless it names another, its markup escaped', () => {
+    expect(render('heading', {}, { text: '**Hi** <b>' }).html).toMatch(
+      /<h2 class="zx-heading zx-heading-2"[^>]*><strong>Hi<\/strong> &lt;b&gt;<\/h2>/,
+    );
+    expect(render('heading', { level: 1 }, { text: 'Hi' }).html).toContain('<h1 class="zx-heading zx-heading-1"');
+    expect(render('heading', { level: 3 }, { text: 'Hi' }).text).toBe('Hi');
+  });
+
+  it('takes levels 1 to 3 on write, and draws another stored level at the default', () => {
+    expect(renderer.attributesOf('heading', { level: 4 })).toBeNull();
+    expect(renderer.attributesOf('heading', { level: 3, align: 'center' })).toEqual({ level: 3, align: 'center' });
+    expect(render('heading', { level: 6 }, { text: 'Hi' }).html).toContain('<h2 ');
+  });
+});
+
+describe('a quote', () => {
+  it('draws its text muted beside a rule, and as its text on the text arm', () => {
+    const { html, text } = render('quote', {}, { text: '_Lovely_ stay' });
+    expect(html).toMatch(/<td class="zx-quote" style="border-left:3px solid #E4E4E7;padding:0 0 0 12px;">/);
+    expect(html).toContain('class="zx-text zx-tone-muted"');
+    expect(text).toBe('Lovely stay');
+  });
+});
+
+describe('an image', () => {
+  const src = 'https://x.test/a.png';
+
+  it('draws a hosted image at its width, shrinking to a narrow screen, linked and captioned', () => {
+    const { html, text } = render(
+      'image',
+      { width: 300 },
+      { src, alt: 'A bay', caption: 'Morning', href: '{{u}}' },
+      { u: 'https://x.test/go' },
+      { u: 'url' },
+    );
+    expect(html).toContain(
+      '<a href="https://x.test/go" class="zx-image-link"><img src="https://x.test/a.png" alt="A bay" width="300" class="zx-image zx-image-fluid" style="display:block;border:0;height:auto;max-width:100%;" /></a>',
+    );
+    expect(html).toMatch(/class="zx-text zx-caption zx-tone-muted"[^>]*>Morning</);
+    expect(text).toBe('A bay: https://x.test/go\n\nMorning');
+  });
+
+  it('draws at the card width by default, and centred when its row is', () => {
+    const { html } = render('image', { align: 'center' }, { src, alt: 'A bay' });
+    expect(html).toContain('width="600"');
+    expect(html).toMatch(/class="zx-image zx-image-fluid" style="[^"]*margin:0 auto;/);
+  });
+
+  it.each(['javascript:alert(1)', 'data:image/png;base64,AAAA', '//x.test/a.png'])(
+    'draws nothing for the source %s',
+    (unsafe) => {
+      expect(render('image', {}, { src: unsafe, alt: 'x' }).html).not.toContain('<img');
+    },
+  );
+
+  it('refuses on write a source that is not https or a variable, an empty alt, and a width past the card', () => {
+    expect(renderer.contentOf('image', { src: 'http://x.test/a.png', alt: 'a' })).toBeNull();
+    expect(renderer.contentOf('image', { src: 'javascript:x', alt: 'a' })).toBeNull();
+    expect(renderer.contentOf('image', { src, alt: ' ' })).toBeNull();
+    expect(renderer.contentOf('image', { src, alt: 'a', href: 'javascript:x' })).toBeNull();
+    expect(renderer.attributesOf('image', { width: 601 })).toBeNull();
+    expect(renderer.contentOf('image', { src: '{{banner}}', alt: 'a', href: 'mailto:a@b.c' })).not.toBeNull();
+  });
+});
+
+describe('a table', () => {
+  it('draws its first row as headers where asked, each cell inline markup, borders on each cell', () => {
+    const { html, text } = render(
+      'table',
+      { header: true },
+      {
+        rows: [
+          ['Day', 'Place'],
+          ['1', '**{{p}}**'],
+        ],
+      },
+      { p: 'Hue' },
+    );
+    expect(html).toMatch(/<th scope="col" align="left" valign="top" class="zx-table-cell zx-table-head"/);
+    expect(html).toContain('<strong>Hue</strong></td>');
+    expect(html).toContain('border:1px solid #E4E4E7;');
+    expect(html).not.toMatch(/<table class="zx-table"[^>]*role="presentation"/);
+    expect(text).toBe('Day | Place\n1 | Hue');
+  });
+
+  it('pads a stored row to the widest and keeps to its bounds when drawn', () => {
+    const rows = Array.from({ length: 25 }, (_, index) => (index === 0 ? ['a', 'b', 'c', 'd', 'e', 'f', 'g'] : ['x']));
+    const { html } = render('table', {}, { rows });
+    expect(html.match(/<tr><td align="left"/g)?.length).toBe(20);
+    expect(html.match(/<td align="left" valign="top" class="zx-table-cell"/g)?.length).toBe(20 * 6);
+  });
+
+  it('refuses on write a table past 20 rows or 6 columns, rows of two widths, and malformed markup', () => {
+    expect(renderer.contentOf('table', { rows: Array.from({ length: 21 }, () => ['a']) })).toBeNull();
+    expect(renderer.contentOf('table', { rows: [['a', 'b', 'c', 'd', 'e', 'f', 'g']] })).toBeNull();
+    expect(renderer.contentOf('table', { rows: [['a', 'b'], ['c']] })).toBeNull();
+    expect(renderer.contentOf('table', { rows: [['**a']] })).toBeNull();
+    expect(
+      renderer.contentOf('table', {
+        rows: [
+          ['a', ''],
+          ['', 'd'],
+        ],
+      }),
+    ).not.toBeNull();
   });
 });

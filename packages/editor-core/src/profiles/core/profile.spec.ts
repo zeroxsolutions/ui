@@ -3,10 +3,23 @@ import { EditorError } from '../../document/core/errors.js';
 import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
 
 describe('emailProfile', () => {
-  it('allows all eight kinds with the house bounds and exports', () => {
+  it('allows every built-in kind with the house bounds and exports', () => {
     const profile = emailProfile();
     expect(profile.id).toBe('email');
-    expect(profile.kinds).toEqual(['paragraph', 'button', 'code', 'list', 'callout', 'divider', 'columns', 'html']);
+    expect(profile.kinds).toEqual([
+      'paragraph',
+      'button',
+      'code',
+      'list',
+      'callout',
+      'divider',
+      'columns',
+      'html',
+      'heading',
+      'quote',
+      'image',
+      'table',
+    ]);
     expect(profile.exports).toEqual(['email-blocks', 'email-html', 'email-text']);
     expect(profile.bounds).toEqual({
       text: 5000,

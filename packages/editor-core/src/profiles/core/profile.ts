@@ -18,6 +18,10 @@ export const EMAIL_KINDS: readonly EmailBlockKind[] = [
   'divider',
   'columns',
   'html',
+  'heading',
+  'quote',
+  'image',
+  'table',
 ];
 
 /** What a mail-layout region (header, footer) may hold. */

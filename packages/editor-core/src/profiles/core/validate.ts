@@ -1,6 +1,8 @@
 import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
 import { leadingToken } from '../../template/markup/href.js';
 import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
+import { IMAGE_TEXT_MAX_LENGTH } from '../../template/email/blocks/image.js';
+import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '../../template/email/blocks/table.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type {
@@ -42,21 +44,24 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
   if (value === '') walk.problems.push({ kind: 'text-empty', ...where });
   else if (value.length > max) walk.problems.push({ kind: 'text-too-long', ...where });
 
-  if (marked) {
-    const parsed = parseInlineMarkup(value);
-    if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
-    else {
-      const flagged = new Set<string>();
-      for (const run of parsed.runs) {
-        if (run.kind !== 'link' || flagged.has(run.href) || !hrefFaulty(walk, run.href)) continue;
-        flagged.add(run.href);
-        const name = leadingToken(run.href);
-        walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
-      }
-    }
-  }
-
+  if (marked) checkMarkup(walk, where, value);
   checkTokens(walk, where, value);
+}
+
+/** What the write check refuses in inline markup: markup that does not parse, and each link it would not open. */
+function checkMarkup(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' | 'item'>, value: string): void {
+  const parsed = parseInlineMarkup(value);
+  if (!parsed.ok) {
+    walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
+    return;
+  }
+  const flagged = new Set<string>();
+  for (const run of parsed.runs) {
+    if (run.kind !== 'link' || flagged.has(run.href) || !hrefFaulty(walk, run.href)) continue;
+    flagged.add(run.href);
+    const name = leadingToken(run.href);
+    walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
+  }
 }
 
 function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' | 'item'>, value: string): void {
@@ -98,6 +103,61 @@ function checkOwnField(
   const faulty =
     /[\r\n]/.test(value) || hrefFaulty(walk, value) || (field.kind === 'imageUrl' && MAIL.test(value.trim()));
   if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
+}
+
+/** An image the built-in image block loads: a literal `https:` address, or a url variable. */
+const SECURE_IMAGE = /^https:\/\//i;
+
+/** What the write check refuses in an image block: a missing or refused source, an empty alt, and each bound. */
+function checkImage(walk: Walk, content: Record<string, unknown>, id: string): void {
+  const fields: readonly BlockEditorField[] = [
+    { name: 'src', kind: 'imageUrl', label: '', max: walk.profile.bounds.href, required: true },
+    { name: 'alt', kind: 'plainText', label: '', max: IMAGE_TEXT_MAX_LENGTH, required: true },
+    { name: 'caption', kind: 'plainText', label: '', max: IMAGE_TEXT_MAX_LENGTH, required: false },
+    { name: 'href', kind: 'link', label: '', max: walk.profile.bounds.href, required: false },
+  ];
+  for (const field of fields) checkTokens(walk, { block: id, field: field.name }, text(content[field.name]));
+  for (const field of fields) {
+    const before = walk.problems.length;
+    checkOwnField(walk, field, content[field.name], { block: id, field: field.name });
+    const src = text(content.src).trim();
+    // A plain page address loads over no secure connection, which the image block refuses on write.
+    if (field.name === 'src' && walk.problems.length === before && src !== '' && leadingToken(src) === undefined) {
+      if (!SECURE_IMAGE.test(src)) walk.problems.push({ kind: 'href-invalid', block: id, field: 'src' });
+    }
+  }
+}
+
+/**
+ * What the write check refuses in a table block: rows that are not a list (`content-invalid`), none
+ * (`text-empty`), more rows or columns than it holds (`table-too-large`), rows of two widths or a row that is not
+ * a list of text (`content-invalid`, the row as `item`), and in each cell what a paragraph's text is refused for.
+ */
+function checkTable(walk: Walk, content: Record<string, unknown>, id: string): void {
+  const where = { block: id, field: 'rows' };
+  const rows: unknown = content.rows;
+  if (!Array.isArray(rows)) {
+    walk.problems.push({ kind: 'content-invalid', ...where });
+    return;
+  }
+  if (rows.length === 0) walk.problems.push({ kind: 'text-empty', ...where });
+  const lists = rows.filter((row): row is unknown[] => Array.isArray(row));
+  if (rows.length > TABLE_MAX_ROWS || lists.some((row) => row.length > TABLE_MAX_COLUMNS)) {
+    walk.problems.push({ kind: 'table-too-large', ...where });
+  }
+  if (lists.some((row) => row.length !== lists[0].length)) walk.problems.push({ kind: 'content-invalid', ...where });
+  rows.forEach((row: unknown, item) => {
+    if (!Array.isArray(row) || row.length === 0 || row.some((cell) => typeof cell !== 'string')) {
+      walk.problems.push({ kind: 'content-invalid', ...where, item });
+      return;
+    }
+    for (const cell of row as string[]) {
+      if (cell === '') continue;
+      if (cell.length > walk.profile.bounds.text) walk.problems.push({ kind: 'text-too-long', ...where, item });
+      checkMarkup(walk, { ...where, item }, cell);
+      checkTokens(walk, { ...where, item }, cell);
+    }
+  });
 }
 
 /**
@@ -186,6 +246,10 @@ const CONTENT_KEYS: Readonly<Record<string, readonly string[]>> = {
   html: ['html'],
   divider: [],
   columns: [],
+  heading: ['text'],
+  quote: ['text'],
+  image: ['src', 'alt', 'caption', 'href'],
+  table: ['rows'],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -297,6 +361,8 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
   switch (block.type) {
     case 'paragraph':
     case 'callout':
+    case 'heading':
+    case 'quote':
       checkField(walk, id, { field: 'text', value: text(content.text), max: bounds.text, marked: true });
       break;
     case 'list': {
@@ -322,6 +388,12 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       checkColumns(walk, block, id);
       break;
     case 'divider':
+      break;
+    case 'image':
+      checkImage(walk, content, id);
+      break;
+    case 'table':
+      checkTable(walk, content, id);
       break;
     default: {
       const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);

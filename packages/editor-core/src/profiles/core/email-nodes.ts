@@ -3,7 +3,7 @@ import type { MarkSpec, NodeSpec } from '../../document/core/types/index.js';
 
 /**
  * The block node types, besides the paragraph, that carry `id` and `key` under `blockIdentity`: the
- * document's own blocks the email reads, the email's own, and the ones the export folds into a
+ * document's own blocks the email reads, the email's own, and the ones the export may fold into a
  * paragraph or a list (`heading`, `orderedList`, `taskList`, `blockquote`) so a pasted one keeps an identity.
  */
 export const EMAIL_BLOCK_NODES = [
@@ -19,6 +19,8 @@ export const EMAIL_BLOCK_NODES = [
   'orderedList',
   'taskList',
   'blockquote',
+  'image',
+  'table',
 ] as const;
 
 /**
@@ -31,6 +33,10 @@ export const EMAIL_GLOBAL_ATTRIBUTES: Record<string, string[]> = {
   callout: ['align', 'spaceAfter', 'source'],
   codeBlock: ['align', 'spaceAfter'],
   horizontalRule: ['spaceAfter'],
+  heading: ['align', 'spaceAfter', 'source'],
+  blockquote: ['align', 'spaceAfter', 'source'],
+  image: ['align', 'spaceAfter'],
+  table: ['spaceAfter'],
 };
 
 const ALIGNS = ['left', 'center', 'right'] as const;

@@ -5,6 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   emailProfile,
+  MAIL_LAYOUT_KINDS,
   toEmailBlocks,
   validate,
   type EditorEmailBlock,
@@ -433,8 +434,10 @@ describe('EmailEditor', () => {
     expect(style.borderTopColor).toBe(style.color);
   });
 
-  it('marks a pasted heading, whose structure the email cannot carry, with one problem', async () => {
-    const probe = await mount([paragraph('Body', 'p1')]);
+  it('marks a heading pasted where the profile holds none, whose structure the email cannot carry, with one problem', async () => {
+    const probe = await mount([paragraph('Body', 'p1')], {
+      profile: emailProfile({ variables: declared, allow: MAIL_LAYOUT_KINDS }),
+    });
     await caretAfter('Body');
     const data = new DataTransfer();
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.

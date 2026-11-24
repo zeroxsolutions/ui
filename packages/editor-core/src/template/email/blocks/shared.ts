@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { leadingToken } from '../../markup/href.js';
 import { parseInlineMarkup } from '../../markup/inline-markup.js';
 
 /** The longest text one block holds, a button's label and href, and the most items a list holds. */
@@ -31,3 +32,25 @@ export function readOr<T>(schema: z.ZodType<T>, raw: unknown, fallback: T): T {
   const parsed = schema.safeParse(raw);
   return parsed.success ? parsed.data : fallback;
 }
+
+/** The widest an image is drawn, the card's width; a product's narrower card scales it down. */
+export const IMAGE_MAX_WIDTH = 600;
+
+/**
+ * An address on a write, as `validate` reads it: one line that opens with a literal scheme of `start`, or with a
+ * whole variable token, whose type `validate` checks.
+ */
+export function address(start: RegExp, max: number): z.ZodType<string> {
+  return z
+    .string()
+    .min(1)
+    .max(max)
+    .refine((value) => !/[\r\n]/.test(value) && (start.test(value.trim()) || leadingToken(value) !== undefined), {
+      message: 'an address a client opens',
+    });
+}
+
+/** A link a reader's client opens: a page or a mail. */
+export const LINK_START = /^(?:https?:\/\/|mailto:)/i;
+/** An image a client loads over a secure connection. */
+export const IMAGE_START = /^https:\/\//i;

@@ -25,9 +25,9 @@ import '../../../../../../test/nova-style.css';
 import '../../styles.css';
 import { EmailEditor } from './email-editor';
 
-const quote = defineEmailBlock({
-  type: 'quote',
-  label: 'Quote',
+const testimonial = defineEmailBlock({
+  type: 'testimonial',
+  label: 'Testimonial',
   description: 'A line someone said',
   fields: { text: richText(), author: plainText({ max: 120 }) },
   attributes: {
@@ -51,13 +51,13 @@ const social = defineEmailBlock({
 
 const profile = emailProfile({
   variables: [{ name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' }],
-  blocks: [quote, social],
+  blocks: [testimonial, social],
 });
 
 const stored = (attributes: Record<string, unknown> = {}): EditorEmailBlock => ({
   id: 'q1',
   key: 'q1',
-  type: 'quote',
+  type: 'testimonial',
   attributes,
   content: { text: 'Kind words', author: 'Lan' },
 });
@@ -83,7 +83,7 @@ function Host({
       <EmailEditor
         label="Body"
         profile={profile}
-        blocks={[quote, social]}
+        blocks={[testimonial, social]}
         structure={structure}
         value={value}
         onChange={(blocks) => {
@@ -132,7 +132,7 @@ describe('emailBlockFeature', () => {
     const probe = await mount([{ id: 'p1', key: 'p1', type: 'paragraph', attributes: {}, content: { text: '' } }]);
     await userEvent.click(page.getByRole('textbox', { name: 'Body' }));
     await userEvent.keyboard('/');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', 'Quote')));
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', 'Testimonial')));
 
     await userEvent.click(await vi.waitFor(() => find('[data-slot=email-block-body]')));
     await userEvent.keyboard('Kind words');
@@ -140,8 +140,8 @@ describe('emailBlockFeature', () => {
     await userEvent.keyboard('Lan');
 
     await vi.waitFor(() =>
-      expect(last(probe.reported)?.find((block) => block.type === 'quote')).toMatchObject({
-        type: 'quote',
+      expect(last(probe.reported)?.find((block) => block.type === 'testimonial')).toMatchObject({
+        type: 'testimonial',
         attributes: {},
         content: { text: 'Kind words', author: 'Lan' },
       }),
@@ -177,13 +177,13 @@ describe('emailBlockFeature', () => {
   it('refuses a block the profile does not name, so the server validates what the editor offers', () => {
     expect(validate([stored({ size: 3 })], profile)).toEqual([]);
     expect(() =>
-      renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[quote]} value={[]} />),
-    ).toThrow(/Block "quote" is in `blocks` but not in the profile/);
+      renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[testimonial]} value={[]} />),
+    ).toThrow(/Block "testimonial" is in `blocks` but not in the profile/);
     // A kind named by hand carries no field rules, so the server would not check the block's fields.
-    const named = emailProfile({ extraKinds: ['quote'] });
-    expect(() => renderToString(<EmailEditor label="Body" profile={named} blocks={[quote]} value={[]} />)).toThrow(
-      /not in the profile/,
-    );
+    const named = emailProfile({ extraKinds: ['testimonial'] });
+    expect(() =>
+      renderToString(<EmailEditor label="Body" profile={named} blocks={[testimonial]} value={[]} />),
+    ).toThrow(/not in the profile/);
   });
 
   it('marks a field the renderer would refuse, as the server reads it', async () => {

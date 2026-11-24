@@ -6,9 +6,19 @@ import {
   type InlineRun,
   type InlineText,
 } from '../../template/index.js';
+import { IMAGE_MAX_WIDTH } from '../../template/email/blocks/shared.js';
 import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
 import { splitVariables } from './sms-text.js';
 import type { EditorEmailBlock } from './types.js';
+
+/** What an export reads off the profile: the kinds it carries, which decide what folds into a paragraph. */
+export interface EmailExportOptions {
+  /** The profile's kinds; without them a heading and a quote fold into a paragraph, as a mail layout's do. */
+  readonly kinds?: readonly string[];
+}
+
+/** A heading's level in an email: 1 to 3, a deeper one drawn at 3. */
+const EMAIL_HEADING_LEVEL_MAX = 3;
 
 /** Attributes a kind keeps out of `attributes` because its content lives in them: a button's label and href. */
 const CONTENT_ATTRIBUTES: Readonly<Record<string, readonly string[]>> = { button: ['label', 'href'] };
@@ -155,7 +165,26 @@ function withContent(content: NodeJSON[] | undefined): Partial<NodeJSON> {
   return content === undefined || content.length === 0 ? {} : { content };
 }
 
-function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailBlock {
+/** The rows a document table holds as text: a merged cell padded with empty ones, each row to the widest. */
+function rowsOf(table: NodeJSON): string[][] {
+  const rows = (table.content ?? []).map((row) =>
+    (row.content ?? []).flatMap((cell) => {
+      const span = Number(cell.attrs?.colspan);
+      const padding = Number.isInteger(span) && span > 1 ? Array<string>(span - 1).fill('') : [];
+      return [joinedMarkup(cell), ...padding];
+    }),
+  );
+  const widest = Math.max(0, ...rows.map((row) => row.length));
+  return rows.map((row) => [...row, ...Array<string>(widest - row.length).fill('')]);
+}
+
+/** The image's width as an email draws it: a whole number of pixels up to the card's, or none. */
+function imageWidth(width: unknown): Record<string, number> {
+  if (typeof width !== 'number' || !Number.isFinite(width) || width < 1) return {};
+  return { width: Math.min(Math.round(width), IMAGE_MAX_WIDTH) };
+}
+
+function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: ReadonlySet<string>): EditorEmailBlock {
   const base = { ...identityOf(node), type: '' };
   const attributes = attributesOf(node);
   const custom = codecs.find((codec) => codec.node === node.type && codec.toEmailBlock !== undefined);
@@ -167,9 +196,55 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         attributes,
         content: { text: markupOf(node.content ?? [], node.attrs?.source) },
       };
-    case 'heading':
+    case 'heading': {
+      if (!kinds.has('heading')) {
+        return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
+      }
+      const level = Math.min(Math.max(Number(node.attrs?.level) || 2, 1), EMAIL_HEADING_LEVEL_MAX);
+      return {
+        ...base,
+        type: 'heading',
+        attributes: { level, ...carriedAttributes(node) },
+        content: { text: markupOf(node.content ?? [], node.attrs?.source) },
+      };
+    }
     case 'blockquote':
-      return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
+      if (!kinds.has('quote')) {
+        return { ...base, type: 'paragraph', attributes: {}, content: { text: joinedMarkup(node) } };
+      }
+      return {
+        ...base,
+        type: 'quote',
+        attributes: carriedAttributes(node),
+        content: { text: joinedMarkup(node, node.attrs?.source) },
+      };
+    case 'image': {
+      const { src, alt, caption, href } = node.attrs ?? {};
+      return {
+        ...base,
+        type: 'image',
+        attributes: { ...carriedAttributes(node), ...imageWidth(node.attrs?.width) },
+        content: {
+          src: str(src),
+          alt: str(alt),
+          ...(str(caption) === '' ? {} : { caption: str(caption) }),
+          ...(str(href) === '' ? {} : { href: str(href) }),
+        },
+      };
+    }
+    case 'table': {
+      const rows = node.content ?? [];
+      const header = rows.length > 0 && (rows[0].content ?? []).every((cell) => cell.type === 'tableHeader');
+      return {
+        ...base,
+        type: 'table',
+        attributes: {
+          ...(header && (rows[0].content ?? []).length > 0 ? { header: true } : {}),
+          ...carriedAttributes(node),
+        },
+        content: { rows: rowsOf(node) },
+      };
+    }
     case 'callout':
       return {
         ...base,
@@ -202,7 +277,9 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
         type: 'columns',
         attributes,
         content: {},
-        lanes: (node.content ?? []).map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs))),
+        lanes: (node.content ?? []).map((lane) =>
+          (lane.content ?? []).map((child) => exportBlock(child, codecs, kinds)),
+        ),
       };
     case 'emailUnknown':
       return {
@@ -216,7 +293,10 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[]): EditorEmailB
       // A codec's node that holds lanes, as a product's lanes block does, exports them as a columns block does.
       const lanes = node.content ?? [];
       return lanes.length > 0 && lanes.every((lane) => lane.type === 'column')
-        ? { ...exported, lanes: lanes.map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs))) }
+        ? {
+            ...exported,
+            lanes: lanes.map((lane) => (lane.content ?? []).map((child) => exportBlock(child, codecs, kinds))),
+          }
         : exported;
     }
   }
@@ -241,6 +321,48 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
         content: [{ type: 'paragraph', attrs: { source: str(item) }, ...withContent(inlineOf(str(item))) }],
       }));
       return nodeOf(block, 'bulletList', { content });
+    }
+    case 'heading': {
+      const level = block.attributes.level;
+      return nodeOf(block, 'heading', withContent(inlineOf(text)), {
+        level: level === 1 || level === 3 ? level : 2,
+        source: text,
+      });
+    }
+    case 'quote':
+      return nodeOf(
+        block,
+        'blockquote',
+        { content: [{ type: 'paragraph', ...withContent(inlineOf(text)) }] },
+        { source: text },
+      );
+    case 'image': {
+      const { src, alt, caption, href } = block.content;
+      return nodeOf(
+        block,
+        'image',
+        {},
+        {
+          src: str(src),
+          alt: str(alt),
+          title: '',
+          width: typeof block.attributes.width === 'number' ? block.attributes.width : null,
+          caption: str(caption),
+          href: str(href),
+        },
+      );
+    }
+    case 'table': {
+      const rows = Array.isArray(block.content.rows) ? (block.content.rows as unknown[]) : [];
+      const header = block.attributes.header === true;
+      const content = rows.map((row, index): NodeJSON => ({
+        type: 'tableRow',
+        content: (Array.isArray(row) ? row : []).map((cell): NodeJSON => ({
+          type: header && index === 0 ? 'tableHeader' : 'tableCell',
+          content: [{ type: 'paragraph', attrs: { source: str(cell) }, ...withContent(inlineOf(str(cell))) }],
+        })),
+      }));
+      return nodeOf(block, 'table', withContent(content));
     }
     case 'button':
       return nodeOf(block, 'button', {}, present({ label: block.content.label, href: block.content.href }));
@@ -275,9 +397,18 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
   }
 }
 
-/** The email blocks `doc` holds, in order. A node `codecs` have an email codec for exports through it; an `emailUnknown` atom exports its block as it came. */
-export function toEmailBlocks(doc: DocJSON, codecs: readonly NodeCodec[] = []): EditorEmailBlock[] {
-  return (doc.content ?? []).map((node) => exportBlock(node, codecs));
+/**
+ * The email blocks `doc` holds, in order. A node `codecs` have an email codec for exports through it; an
+ * `emailUnknown` atom exports its block as it came. A heading or a blockquote the profile's `kinds` do not carry
+ * folds into a paragraph.
+ */
+export function toEmailBlocks(
+  doc: DocJSON,
+  codecs: readonly NodeCodec[] = [],
+  options: EmailExportOptions = {},
+): EditorEmailBlock[] {
+  const kinds = new Set(options.kinds ?? []);
+  return (doc.content ?? []).map((node) => exportBlock(node, codecs, kinds));
 }
 
 /** The document `blocks` read as. A block type with no codec stays in it as an `emailUnknown` atom holding the block. */

@@ -7,9 +7,9 @@ import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
 import { createEmailRenderer } from './renderer.js';
 import { checkEmailRenderer } from './testing/index.js';
 
-const quote = defineEmailBlock({
-  type: 'quote',
-  label: 'Quote',
+const testimonial = defineEmailBlock({
+  type: 'testimonial',
+  label: 'Testimonial',
   fields: { text: richText(), author: plainText({ max: 120 }) },
   attributes: {
     tone: choice(['neutral', 'brand'], 'neutral'),
@@ -19,11 +19,16 @@ const quote = defineEmailBlock({
   render: ({ fields, attributes }, h) =>
     h.section(
       {
-        class: ['zx-quote', `zx-tone-${attributes.tone}`, attributes.boxed && 'zx-boxed', `zx-size-${attributes.size}`],
+        class: [
+          'zx-testimonial',
+          `zx-tone-${attributes.tone}`,
+          attributes.boxed && 'zx-boxed',
+          `zx-size-${attributes.size}`,
+        ],
       },
       [
-        h.text({ class: 'zx-quote-text', markup: fields.text }),
-        h.text({ class: 'zx-quote-author', text: fields.author }),
+        h.text({ class: 'zx-testimonial-text', markup: fields.text }),
+        h.text({ class: 'zx-testimonial-author', text: fields.author }),
       ],
     ),
   sample: { fields: { text: '{{place}} changed my week.', author: 'Lan' }, variableTypes: { place: 'string' } },
@@ -31,8 +36,8 @@ const quote = defineEmailBlock({
 
 const renderer = createEmailRenderer({
   theme: FIXTURE_THEME,
-  extraBlocks: [quote],
-  css: '.zx-quote-author{color:#123456}.zx-tone-brand .zx-quote-text{font-weight:600}',
+  extraBlocks: [testimonial],
+  css: '.zx-testimonial-author{color:#123456}.zx-tone-brand .zx-testimonial-text{font-weight:600}',
 });
 
 function render(block: Omit<EmailBlock, 'id'>, variables: Record<string, string> = {}): { html: string; text: string } {
@@ -49,28 +54,28 @@ function render(block: Omit<EmailBlock, 'id'>, variables: Record<string, string>
 
 describe('defineEmailBlock', () => {
   it('derives the strict write check from the fields and attributes', () => {
-    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan' }).success).toBe(true);
-    expect(quote.content.safeParse({ text: '**Hi', author: 'Lan' }).success).toBe(false);
-    expect(quote.content.safeParse({ text: 'Hi', author: 'x'.repeat(121) }).success).toBe(false);
-    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan', extra: 'x' }).success).toBe(false);
-    expect(quote.content.safeParse({ text: 'Hi', author: '' }).success).toBe(true);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: 'Lan' }).success).toBe(true);
+    expect(testimonial.content.safeParse({ text: '**Hi', author: 'Lan' }).success).toBe(false);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: 'x'.repeat(121) }).success).toBe(false);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: 'Lan', extra: 'x' }).success).toBe(false);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: '' }).success).toBe(true);
     // A field but the body left out reads as empty, as `validate` reads it.
-    expect(quote.content.safeParse({ text: 'Hi' }).success).toBe(true);
-    expect(quote.content.safeParse({ text: 'Hi', author: 5 }).success).toBe(false);
+    expect(testimonial.content.safeParse({ text: 'Hi' }).success).toBe(true);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: 5 }).success).toBe(false);
     // The editor's field holds one line; a stored newline draws as a space, and no check refuses it.
-    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(true);
-    expect(quote.attributes.safeParse({}).success).toBe(true);
-    expect(quote.attributes.safeParse({ tone: 'brand', boxed: true, size: 3 }).success).toBe(true);
-    expect(quote.attributes.safeParse({ tone: 'loud' }).success).toBe(false);
-    expect(quote.attributes.safeParse({ size: 4 }).success).toBe(false);
-    expect(quote.attributes.safeParse({ width: 'full' }).success).toBe(false);
+    expect(testimonial.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(true);
+    expect(testimonial.attributes.safeParse({}).success).toBe(true);
+    expect(testimonial.attributes.safeParse({ tone: 'brand', boxed: true, size: 3 }).success).toBe(true);
+    expect(testimonial.attributes.safeParse({ tone: 'loud' }).success).toBe(false);
+    expect(testimonial.attributes.safeParse({ size: 4 }).success).toBe(false);
+    expect(testimonial.attributes.safeParse({ width: 'full' }).success).toBe(false);
   });
 
   it('reads a stored block leniently, a value it cannot read left to its default', () => {
-    expect(quote.readContent({ text: 42 })).toEqual({ text: '', author: '' });
-    expect(quote.readAttributes({ tone: 'loud', boxed: true })).toEqual({ boxed: true });
-    expect(quote.holdsText).toBe(true);
-    expect(quote.holdsLanes).toBe(false);
+    expect(testimonial.readContent({ text: 42 })).toEqual({ text: '', author: '' });
+    expect(testimonial.readAttributes({ tone: 'loud', boxed: true })).toEqual({ boxed: true });
+    expect(testimonial.holdsText).toBe(true);
+    expect(testimonial.holdsLanes).toBe(false);
   });
 
   it('translates each rich and plain text field and copies a link', async () => {
@@ -95,18 +100,18 @@ describe('defineEmailBlock', () => {
   it('renders through the renderer in its own row, with a product sheet over its classes', () => {
     const { html, text } = render(
       {
-        type: 'quote',
+        type: 'testimonial',
         attributes: { tone: 'brand', boxed: true },
         content: { text: '**{{place}}** changed it.', author: 'Lan' },
       },
       { place: 'Hue' },
     );
-    expect(html).toContain('<td class="zx-block zx-block-quote zx-align-left zx-space-medium"');
-    expect(html).toContain('<td class="zx-quote zx-tone-brand zx-boxed zx-size-2">');
+    expect(html).toContain('<td class="zx-block zx-block-testimonial zx-align-left zx-space-medium"');
+    expect(html).toContain('<td class="zx-testimonial zx-tone-brand zx-boxed zx-size-2">');
     expect(html).toMatch(
-      /class="zx-text zx-quote-text" style="[^"]*font-weight:600;"><strong>Hue<\/strong> changed it\./,
+      /class="zx-text zx-testimonial-text" style="[^"]*font-weight:600;"><strong>Hue<\/strong> changed it\./,
     );
-    expect(html).toMatch(/class="zx-text zx-quote-author" style="[^"]*color:#123456;">Lan</);
+    expect(html).toMatch(/class="zx-text zx-testimonial-author" style="[^"]*color:#123456;">Lan</);
     expect(text).toBe('Hue changed it.\n\nLan');
   });
 
@@ -158,10 +163,10 @@ describe('defineEmailBlock', () => {
   });
 
   it('describes the block to an editor, labels capitalised where none is given', () => {
-    expect(quote.editor).toEqual({
-      type: 'quote',
-      node: 'email_quote',
-      label: 'Quote',
+    expect(testimonial.editor).toEqual({
+      type: 'testimonial',
+      node: 'email_testimonial',
+      label: 'Testimonial',
       description: '',
       keywords: [],
       body: { name: 'text', label: 'Text', max: 5000 },
@@ -187,7 +192,7 @@ describe('defineEmailBlock', () => {
 
   it.each([
     [{ type: 'paragraph' }, 'the type is a default block type'],
-    [{ type: 'Quote' }, 'the type must be a lower-case letter, then letters and digits'],
+    [{ type: 'Testimonial' }, 'the type must be a lower-case letter, then letters and digits'],
     [{ fields: { id: plainText() } }, '"id" cannot name a field or an attribute'],
     [{ fields: { key: plainText() } }, '"key" cannot name a field or an attribute'],
     [{ fields: { a: richText(), b: richText() } }, 'it holds more than one rich text field'],

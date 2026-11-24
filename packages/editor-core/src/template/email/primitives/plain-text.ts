@@ -40,6 +40,10 @@ function plainTextOfNode(node: EmailNode): string {
       return `${node.items.map((item, index) => `${node.ordered ? `${index + 1}.` : '-'} ${runsText(item)}`).join('\n')}\n\n`;
     case 'code':
       return `${node.text}\n\n`;
+    case 'table':
+      return node.rows.length === 0 ? '' : `${node.rows.map((row) => row.map(runsText).join(' | ')).join('\n')}\n\n`;
+    case 'icons':
+      return node.items.length === 0 ? '' : `${node.items.map((item) => `${item.alt}: ${item.href}`).join('\n')}\n\n`;
     case 'raw':
       return node.text;
     case 'spacer':

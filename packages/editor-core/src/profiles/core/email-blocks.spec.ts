@@ -149,26 +149,28 @@ describe('email blocks', () => {
   });
 
   it('a custom node with an email codec round-trips', () => {
-    const quote: NodeCodec = {
-      node: 'quote',
+    const testimonial: NodeCodec = {
+      node: 'testimonial',
       toEmailBlock: (node) => ({
         id: null,
         key: String(node.attrs?.key),
-        type: 'quote',
+        type: 'testimonial',
         attributes: {},
         content: { text: String(node.attrs?.text) },
       }),
       fromEmailBlock: (b) =>
-        b.type === 'quote' ? { type: 'quote', attrs: { key: b.key, text: String(b.content.text) } } : null,
+        b.type === 'testimonial' ? { type: 'testimonial', attrs: { key: b.key, text: String(b.content.text) } } : null,
     };
-    const blocks = [block({ key: 'q', type: 'quote', content: { text: 'hello' } })];
-    const doc = fromEmailBlocks(blocks, [quote]);
-    expect(doc.content?.[0].type).toBe('quote');
-    expect(toEmailBlocks(doc, [quote])).toEqual(blocks);
+    const blocks = [block({ key: 'q', type: 'testimonial', content: { text: 'hello' } })];
+    const doc = fromEmailBlocks(blocks, [testimonial]);
+    expect(doc.content?.[0].type).toBe('testimonial');
+    expect(toEmailBlocks(doc, [testimonial])).toEqual(blocks);
   });
 
   it('a block type with no codec imports as unknown-block-type content kept, not dropped', () => {
-    const blocks = [block({ id: 'x', key: 'x', type: 'quote', attributes: { a: 1 }, content: { text: 'hello' } })];
+    const blocks = [
+      block({ id: 'x', key: 'x', type: 'testimonial', attributes: { a: 1 }, content: { text: 'hello' } }),
+    ];
     const doc = fromEmailBlocks(blocks);
     expect(doc.content?.[0].type).toBe('emailUnknown');
     expect(doc.content?.[0].attrs?.block).toEqual(blocks[0]);
@@ -176,9 +178,14 @@ describe('email blocks', () => {
   });
 
   it('exports an unknown block under its node identity', () => {
-    const doc = fromEmailBlocks([block({ id: 'x', key: 'x', type: 'quote', content: { text: 'hi' } })]);
+    const doc = fromEmailBlocks([block({ id: 'x', key: 'x', type: 'testimonial', content: { text: 'hi' } })]);
     doc.content![0].attrs = { ...doc.content![0].attrs, id: 'copy', key: 'x-2' };
-    expect(toEmailBlocks(doc)[0]).toMatchObject({ id: 'copy', key: 'x-2', type: 'quote', content: { text: 'hi' } });
+    expect(toEmailBlocks(doc)[0]).toMatchObject({
+      id: 'copy',
+      key: 'x-2',
+      type: 'testimonial',
+      content: { text: 'hi' },
+    });
   });
 
   it('keeps a stored attribute from overwriting identity or content', () => {
@@ -247,8 +254,8 @@ describe('email blocks', () => {
     });
 
     it('exports a blockquote as a paragraph joining its paragraphs with a space', () => {
-      const quote: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
-      expect(only(docOf(quote))).toMatchObject({ type: 'paragraph', content: { text: 'a b' } });
+      const testimonial: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
+      expect(only(docOf(testimonial))).toMatchObject({ type: 'paragraph', content: { text: 'a b' } });
     });
 
     it('exports an orderedList as a list', () => {

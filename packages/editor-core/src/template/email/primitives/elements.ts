@@ -111,6 +111,66 @@ function flow(node: EmailNode): ElementChild[] {
       ];
     case 'code':
       return [element('div', node.classes, [{ text: node.text }])];
+    case 'table': {
+      if (node.rows.length === 0) return [];
+      // A data table, so no presentation role: a screen reader reads its cells by row and header.
+      const rows = node.rows.map((cells, index) => {
+        const head = node.header && index === 0;
+        return element(
+          'tr',
+          [],
+          cells.map((cell) =>
+            element(head ? 'th' : 'td', ['zx-table-cell', ...(head ? ['zx-table-head'] : [])], runs(cell), [
+              ...(head ? [['scope', 'col'] as const] : []),
+              ['align', 'left'],
+              ['valign', 'top'],
+            ]),
+          ),
+        );
+      });
+      return [
+        element('table', node.classes, rows, [
+          ['cellpadding', '0'],
+          ['cellspacing', '0'],
+          ['border', '0'],
+          ['width', '100%'],
+        ]),
+      ];
+    }
+    case 'icons': {
+      if (node.items.length === 0) return [];
+      const size = String(node.size);
+      const cells = node.items.map((item, index) =>
+        element(
+          'td',
+          ['zx-icon', ...(index === node.items.length - 1 ? ['zx-icon-last'] : [])],
+          [
+            element(
+              'a',
+              ['zx-icon-link'],
+              [
+                element(
+                  'img',
+                  ['zx-icon-image'],
+                  [],
+                  [
+                    ['src', item.src],
+                    ['alt', item.alt],
+                    ['width', size],
+                    ['height', size],
+                  ],
+                ),
+              ],
+              [['href', item.href]],
+            ),
+          ],
+          [['valign', 'middle']],
+        ),
+      );
+      // A table of one row keeps the icons on one line; Outlook places it by its `align`, the rest by its margin.
+      const align = node.align === 'left' ? [] : [['align', node.align] as const];
+      return [element('table', node.classes, [element('tr', [], cells)], [...TABLE, ...align])];
+    }
     case 'spacer':
       return [
         {

@@ -17,6 +17,7 @@ const NARROW_SCREEN =
   '.zx-footer-line{font-size:12px !important;line-height:17px !important;}' +
   '.zx-button{display:block !important;text-align:center !important;font-size:16px !important;line-height:22px !important;padding:12px 16px !important;}' +
   '.zx-lane{display:block !important;width:100% !important;padding:0 !important;}' +
+  '.zx-caption{font-size:12px !important;line-height:17px !important;}' +
   '}';
 
 /** The rules that repaint the email with `dark` where a client reads `prefers-color-scheme` (Apple Mail, Outlook for Mac). */
@@ -36,6 +37,9 @@ function darkScheme(dark: EmailColors): string {
     `.zx-code{color:${dark.foreground} !important;background:${dark.muted} !important;}` +
     `.zx-button{background:${dark.primary} !important;color:${dark.primaryForeground} !important;}` +
     `.zx-divider{border-color:${dark.border} !important;}` +
+    `.zx-quote{border-color:${dark.border} !important;}` +
+    `.zx-table-cell{color:${dark.foreground} !important;border-color:${dark.border} !important;}` +
+    `.zx-table-head{background:${dark.muted} !important;}` +
     `.zx-footer{border-color:${dark.border} !important;}` +
     '}'
   );
@@ -79,6 +83,19 @@ export function baseStylesheet(theme: EmailTheme): string {
     `.zx-button{display:inline-block;background:${c.primary};color:${c.primaryForeground};font-family:${font};font-size:14px;font-weight:500;line-height:18px;padding:7px 10px;border-radius:${radius}px;text-decoration:none;}` +
     '.zx-button.zx-width-full{display:block;text-align:center;}' +
     `.zx-divider{border-top:1px solid ${c.border};font-size:0;line-height:0;}` +
+    '.zx-image-fluid{max-width:100%;}' +
+    '.zx-align-center .zx-image-fluid{margin:0 auto;}' +
+    '.zx-align-right .zx-image-fluid{margin:0 0 0 auto;}' +
+    '.zx-caption{padding:6px 0 0;font-size:12px;line-height:17px;}' +
+    `.zx-quote{border-left:3px solid ${c.border};padding:0 0 0 12px;}` +
+    '.zx-table{border-collapse:collapse;}' +
+    `.zx-table-cell{border:1px solid ${c.border};padding:6px 8px;font-family:${font};font-size:14px;line-height:20px;color:${c.foreground};text-align:left;vertical-align:top;}` +
+    `.zx-table-head{font-weight:600;background:${c.muted};}` +
+    '.zx-icon{padding:0 8px 0 0;}' +
+    '.zx-icon-last{padding:0;}' +
+    '.zx-icon-image{display:block;border:0;}' +
+    '.zx-icons-center{margin:0 auto;}' +
+    '.zx-icons-right{margin:0 0 0 auto;}' +
     '.zx-lane{padding:0 8px 0 0;}' +
     '.zx-lane-last{padding:0;}' +
     `.zx-footer{padding:10px 0 0;border-top:1px solid ${c.border};}` +

@@ -3,12 +3,29 @@ import { callout } from './callout.js';
 import { code } from './code.js';
 import { columns } from './columns.js';
 import { divider } from './divider.js';
+import { heading } from './heading.js';
 import { html } from './html.js';
+import { image } from './image.js';
 import { list } from './list.js';
 import { paragraph } from './paragraph.js';
+import { quote } from './quote.js';
+import { table } from './table.js';
 
-/** The eight block types every renderer knows, keyed by type. */
-export const defaultBlocks = { paragraph, button, code, list, callout, divider, columns, html } as const;
+/** The block types every renderer knows, keyed by type. */
+export const defaultBlocks = {
+  paragraph,
+  button,
+  code,
+  list,
+  callout,
+  divider,
+  columns,
+  html,
+  heading,
+  quote,
+  image,
+  table,
+} as const;
 
 export type DefaultBlocks = typeof defaultBlocks;
 export type DefaultBlockType = keyof DefaultBlocks;

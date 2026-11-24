@@ -14,16 +14,23 @@ import {
 
 /**
  * A block image — a pure custom node (no engine extension): declarative
- * `NodeSpec` + a React node view with an inline editing popover (alt text +
- * width) + a two-way `NodeCodec`. Markdown export is `![alt](src "title")`;
- * HTML is the unambiguous round-trip. Engine-free.
+ * `NodeSpec` + a React node view with an inline editing popover (source, alt
+ * text, caption, link and width) + a two-way `NodeCodec`. Markdown export is
+ * `![alt](src "title")`; HTML is the unambiguous round-trip. Engine-free.
  */
 const imageAttrs = z.object({
   src: z.string().default(''),
   alt: z.string().default(''),
   title: z.string().default(''),
   width: z.number().nullable().default(null),
+  caption: z.string().default(''),
+  href: z.string().default(''),
 });
+
+/** An address a reader's browser opens as a page or a mail; any other, a script's included, links nowhere. */
+const OPENED = /^(?:https?:|mailto:)/i;
+const openedHref = (href: string | undefined): string | null =>
+  href !== undefined && OPENED.test(href.trim()) ? href.trim() : null;
 type ImageAttrs = z.infer<typeof imageAttrs>;
 
 /**
@@ -38,6 +45,8 @@ function ImageFigure({
   alt,
   title,
   width,
+  caption,
+  href,
   selected,
   contentEditable,
   children,
@@ -46,10 +55,22 @@ function ImageFigure({
   alt: string;
   title?: string;
   width: number | null;
+  caption?: string;
+  /** Where the image links in the Viewer; the editor draws no link, so a click selects it. */
+  href?: string | null;
   selected?: boolean;
   contentEditable?: boolean;
   children?: ReactNode;
 }) {
+  const drawn = (
+    <img
+      src={src}
+      alt={alt}
+      title={title}
+      className="cn-editor-block h-auto max-w-full border"
+      style={{ width: width ? `${width}px` : undefined }}
+    />
+  );
   return (
     <figure
       data-slot="image"
@@ -58,24 +79,25 @@ function ImageFigure({
       className="relative my-4 inline-block max-w-full"
     >
       {src ? (
-        <img
-          src={src}
-          alt={alt}
-          title={title}
-          className="cn-editor-block h-auto max-w-full border"
-          style={{ width: width ? `${width}px` : undefined }}
-        />
+        href ? (
+          <a href={href}>{drawn}</a>
+        ) : (
+          drawn
+        )
       ) : (
         <span className="text-muted-foreground text-sm">Empty image</span>
       )}
-      {alt ? <figcaption className="text-muted-foreground mt-1 text-sm">{alt}</figcaption> : null}
+      {caption || alt ? <figcaption className="text-muted-foreground mt-1 text-sm">{caption || alt}</figcaption> : null}
       {children}
     </figure>
   );
 }
 
 export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
+  const srcId = useId();
   const altId = useId();
+  const captionId = useId();
+  const hrefId = useId();
   const widthId = useId();
   return (
     <ImageFigure
@@ -83,6 +105,7 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
       alt={attrs.alt}
       title={attrs.title || undefined}
       width={attrs.width}
+      caption={attrs.caption}
       selected={selected}
       contentEditable={false}
     >
@@ -105,7 +128,16 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
                 </Button>
               }
             />
-            <PopoverContent align="end" className="w-60 gap-3">
+            <PopoverContent align="end" className="w-72 gap-3">
+              <Field>
+                <FieldLabel htmlFor={srcId}>Image address</FieldLabel>
+                <Input
+                  id={srcId}
+                  placeholder="https://"
+                  defaultValue={attrs.src}
+                  onBlur={(event) => updateAttrs({ src: event.target.value.trim() })}
+                />
+              </Field>
               <Field>
                 <FieldLabel htmlFor={altId}>Alt text</FieldLabel>
                 <Input
@@ -113,6 +145,23 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
                   placeholder="Describe the image"
                   defaultValue={attrs.alt}
                   onBlur={(event) => updateAttrs({ alt: event.target.value })}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={captionId}>Caption</FieldLabel>
+                <Input
+                  id={captionId}
+                  defaultValue={attrs.caption}
+                  onBlur={(event) => updateAttrs({ caption: event.target.value })}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={hrefId}>Link</FieldLabel>
+                <Input
+                  id={hrefId}
+                  placeholder="https://"
+                  defaultValue={attrs.href}
+                  onBlur={(event) => updateAttrs({ href: event.target.value.trim() })}
                 />
               </Field>
               <Field>
@@ -146,14 +195,26 @@ const imageCodec: NodeCodec<ImageAttrs> = {
     return title ? `![${alt}](${src} "${title}")` : `![${alt}](${src})`;
   },
   toHTML: (node) => {
-    const { src = '', alt = '', title = '', width } = node.attrs ?? {};
-    const w = width ? ` width="${width}"` : '';
+    const { src = '', alt = '', title = '', width, caption = '', href = '' } = node.attrs ?? {};
+    const w = typeof width === 'number' && width > 0 ? ` width="${Math.round(width)}"` : '';
     const t = title ? ` title="${attr(title)}"` : '';
-    return `<img src="${attr(src)}" alt="${attr(alt)}"${t}${w}>`;
+    // Kept as data, so a link the document stores, a variable's included, reads back as written and never runs.
+    const c = caption ? ` data-caption="${attr(caption)}"` : '';
+    const h = href ? ` data-href="${attr(href)}"` : '';
+    return `<img src="${attr(src)}" alt="${attr(alt)}"${t}${w}${c}${h}>`;
   },
   toReact: (node) => {
-    const { src = '', alt = '', title = '', width } = node.attrs ?? {};
-    return <ImageFigure src={src} alt={alt} title={title || undefined} width={width ?? null} />;
+    const { src = '', alt = '', title = '', width, caption = '', href } = node.attrs ?? {};
+    return (
+      <ImageFigure
+        src={src}
+        alt={alt}
+        title={title || undefined}
+        width={width ?? null}
+        caption={caption}
+        href={openedHref(href)}
+      />
+    );
   },
   fromHTML: (element) =>
     element.tagName === 'IMG'
@@ -164,6 +225,8 @@ const imageCodec: NodeCodec<ImageAttrs> = {
             alt: element.getAttribute('alt') ?? '',
             title: element.getAttribute('title') ?? '',
             width: element.getAttribute('width') ? Number(element.getAttribute('width')) : null,
+            caption: element.getAttribute('data-caption') ?? '',
+            href: element.getAttribute('data-href') ?? '',
           },
         }
       : null,

@@ -7,9 +7,9 @@ import { emailBlockCodec } from './email-block-codec.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
 import type { EditorEmailBlock } from './types.js';
 
-const quote = defineEmailBlock({
-  type: 'quote',
-  label: 'Quote',
+const testimonial = defineEmailBlock({
+  type: 'testimonial',
+  label: 'Testimonial',
   fields: { text: richText(), author: plainText(), href: link() },
   attributes: { tone: choice(['neutral', 'brand'], 'neutral') },
   render: (_view, h) => h.divider(),
@@ -22,7 +22,7 @@ const pair = defineEmailBlock({
   render: (_view, h) => h.divider(),
   sample: { fields: {}, variableTypes: {} },
 });
-const codecs = [emailBlockCodec(quote.editor), emailBlockCodec(pair.editor)];
+const codecs = [emailBlockCodec(testimonial.editor), emailBlockCodec(pair.editor)];
 
 describe("a product block's email codec", () => {
   it('reads a stored block into its node and back unchanged', () => {
@@ -30,23 +30,26 @@ describe("a product block's email codec", () => {
       {
         id: 'q1',
         key: 'k1',
-        type: 'quote',
+        type: 'testimonial',
         attributes: { tone: 'brand' },
         content: { text: '**Hi** {{name}} [a](https://x.test)', author: 'Lan', href: '{{u}}' },
       },
     ];
     const doc = fromEmailBlocks(stored, codecs);
     expect(doc.content?.[0]).toMatchObject({
-      type: 'email_quote',
+      type: 'email_testimonial',
       attrs: { id: 'q1', key: 'k1', tone: 'brand', author: 'Lan', href: '{{u}}' },
     });
     expect(toEmailBlocks(doc, codecs)).toEqual(stored);
   });
 
   it('exports an unset attribute as absent and an empty field as empty', () => {
-    const doc: DocJSON = { type: 'doc', content: [{ type: 'email_quote', attrs: { id: null, key: 'k', tone: null } }] };
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [{ type: 'email_testimonial', attrs: { id: null, key: 'k', tone: null } }],
+    };
     expect(toEmailBlocks(doc, codecs)).toEqual([
-      { id: null, key: 'k', type: 'quote', attributes: {}, content: { text: '', author: '', href: '' } },
+      { id: null, key: 'k', type: 'testimonial', attributes: {}, content: { text: '', author: '', href: '' } },
     ]);
   });
 
@@ -54,7 +57,7 @@ describe("a product block's email codec", () => {
     const stored: EditorEmailBlock = {
       id: 'q1',
       key: 'q1',
-      type: 'quote',
+      type: 'testimonial',
       attributes: {},
       content: { text: 'Hi', author: '', href: '' },
       lanes: [],
