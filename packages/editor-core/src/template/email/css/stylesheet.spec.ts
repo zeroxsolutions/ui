@@ -32,10 +32,15 @@ describe('inlining a stylesheet', () => {
     expect(styleOf('.a.b{color:red}', ['.b{color:blue}'], element(['a', 'b']))).toBe('color:red;');
   });
 
-  it('lets an important declaration beat a later, more specific one, and keeps its !important', () => {
-    expect(styleOf('.a{color:red !important}', ['.a.b{color:blue}'], element(['a', 'b']))).toBe(
-      'color:red !important;',
-    );
+  it('lets an important declaration beat a later, more specific one, and inlines it without !important', () => {
+    expect(styleOf('', ['.a{color:red !important}', '.a.b{color:blue}'], element(['a', 'b']))).toBe('color:red;');
+  });
+
+  it("warns of an inlined !important, which would beat the head's dark and narrow-screen rules", () => {
+    expect(composeStylesheets('', ['.a{\n  color:red !important}']).warnings).toEqual([
+      expect.objectContaining({ sheet: 0, line: 2, column: 3, property: 'color', feature: 'important-dropped' }),
+    ]);
+    expect(composeStylesheets('', ['@media all{.a{color:red !important}}']).warnings).toEqual([]);
   });
 
   it('matches a descendant at any depth, and a child one level down only', () => {
@@ -77,9 +82,18 @@ describe('inlining a stylesheet', () => {
     expect(styleOf('', [css], element(['a']))).toBe('color:#123456;padding:4px 2px;');
   });
 
-  it('reads no custom property declared inside @media, which holds only where its query does', () => {
-    const css = ':root{--bg:#fff}@media (prefers-color-scheme:dark){:root{--bg:#000}}.a{background:var(--bg)}';
-    expect(styleOf('', [css], element(['a']))).toBe('background:#fff;');
+  it('inlines a custom property from :root, and draws its @media value in a head rule of that query', () => {
+    const css =
+      ':root{--bg:#fff}@media (prefers-color-scheme:dark){:root{--bg:#000}}.a{background:var(--bg);padding:4px}';
+    expect(styleOf('', [css], element(['a']))).toBe('background:#fff;padding:4px;');
+    expect(composeStylesheets('', [css]).head).toMatch(
+      /@media \(prefers-color-scheme:dark\)\{.*\.a\{background:#000 !important\}\}$/,
+    );
+  });
+
+  it('reads a custom property an @media redefines first inside that query', () => {
+    const css = ':root{--c:#111}@media (prefers-color-scheme: dark){:root{--c:#eee}.zx-callout{color:var(--c)}}';
+    expect(composeStylesheets('', [css]).head).toContain('.zx-callout{color:#eee !important}');
   });
 
   it('keeps @media and @font-face in the head, adding !important to a product rule', () => {

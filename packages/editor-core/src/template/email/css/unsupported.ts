@@ -171,8 +171,8 @@ export const UNSUPPORTED_CSS: readonly UnsupportedCss[] = [
 ];
 
 /**
- * A declaration of a product's stylesheet that common mail clients drop: where it is, what it says, and the
- * clients caniemail.com lists as dropping it.
+ * A declaration of a product's stylesheet that common mail clients drop, or that the renderer changed: where it is,
+ * what it says, and the clients caniemail.com lists as dropping it, none for a change of the renderer's.
  */
 export interface StylesheetWarning {
   /** The index in the renderer's `css`. */
@@ -181,7 +181,10 @@ export interface StylesheetWarning {
   readonly column: number;
   readonly property: string;
   readonly value: string;
-  /** caniemail.com's slug for the feature. */
+  /**
+   * caniemail.com's slug for the feature; or `important-dropped` for an `!important` the renderer did not inline,
+   * since inlined it would beat the head's dark and narrow-screen rules, which hold for every client.
+   */
   readonly feature: string;
   readonly clients: readonly string[];
 }

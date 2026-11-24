@@ -102,10 +102,10 @@ function substitute(
 
 /**
  * Every custom property a top-level `:root` or `.zx-root` rule declares, a later sheet's over an earlier one's.
- * One declared inside `@media` holds only where the query does, which an inline value cannot, so it is not read.
+ * One declared inside `@media` holds only where the query does, so it is read only for that query's rules.
  */
-function customProperties(sources: readonly Source[]): Map<string, { value: string; source: Source; node: ChildNode }> {
-  const found = new Map<string, { value: string; source: Source; node: ChildNode }>();
+function customProperties(sources: readonly Source[]): CustomProperties {
+  const found: CustomProperties = new Map();
   for (const source of sources) {
     for (const rule of source.root.nodes) {
       if (rule.type !== 'rule' || !rule.selectors.some((selector) => ROOTS.has(selector.trim()))) continue;
@@ -119,28 +119,10 @@ function customProperties(sources: readonly Source[]): Map<string, { value: stri
   return found;
 }
 
-/**
- * The base sheet and a product's sheets, in that order, read into the rules a renderer inlines and the text it
- * keeps in the head. A product's `@media` and `@supports` declarations are made `!important`, since an inline
- * style beats any rule that is not.
- *
- * @throws {EmailStylesheetInvalid} for a sheet that does not parse, an inlined selector that is not class-only,
- * an `@import`, or a `var()` with no value
- */
-export function composeStylesheets(base: string, sheets: readonly string[]): ComposedStylesheet {
-  const sources: Source[] = [base, ...sheets].map((css, index) => {
-    const sheet = index === 0 ? null : index - 1;
-    try {
-      return { root: parse(css), sheet };
-    } catch (error) {
-      if (error instanceof CssSyntaxError) {
-        throw new EmailStylesheetInvalid(sheet ?? -1, error.line ?? 1, error.column ?? 1, 'unparsable', error.reason);
-      }
-      throw error;
-    }
-  });
+type CustomProperties = Map<string, { value: string; source: Source; node: ChildNode }>;
 
-  const custom = customProperties(sources);
+/** Resolves `var()` against one set of custom properties: the sheets' top-level ones, or a query's over them. */
+function createScope(custom: CustomProperties) {
   const resolving = new Set<string>();
   const cyclic = new Set<string>();
   // Undefined for a property a browser reads as invalid, so the `var()` that asked for it takes its fallback.
@@ -169,8 +151,57 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     resolved.set(name, value);
     return value;
   };
-  const resolveIn = (source: Source, node: ChildNode, value: string): string =>
-    substitute(value, lookup, (name) => refuse(source, node, 'variable-undefined', name));
+  return {
+    resolveIn: (source: Source, node: ChildNode, value: string): string =>
+      substitute(value, lookup, (name) => refuse(source, node, 'variable-undefined', name)),
+  };
+}
+
+/** The custom properties a query's own `:root` or `.zx-root` rules declare, by name. */
+function queryProperties(source: Source, rule: AtRule): CustomProperties {
+  const found: CustomProperties = new Map();
+  rule.each((child) => {
+    if (child.type !== 'rule' || !child.selectors.some((selector) => ROOTS.has(selector.trim()))) return;
+    child.each((declaration) => {
+      if (declaration.type === 'decl' && declaration.prop.startsWith('--')) {
+        found.set(declaration.prop, { value: declaration.value.trim(), source, node: declaration });
+      }
+    });
+  });
+  return found;
+}
+
+/** An inlined rule as written, kept to draw it again under a query that gives its variables other values. */
+interface WrittenRule {
+  readonly source: Source;
+  readonly selector: string;
+  readonly declarations: readonly Declaration[];
+}
+
+/**
+ * The base sheet and a product's sheets, in that order, read into the rules a renderer inlines and the text it
+ * keeps in the head. A product's `@media` and `@supports` declarations are made `!important`, since an inline
+ * style beats any rule that is not.
+ *
+ * @throws {EmailStylesheetInvalid} for a sheet that does not parse, an inlined selector that is not class-only,
+ * an `@import`, or a `var()` with no value
+ */
+export function composeStylesheets(base: string, sheets: readonly string[]): ComposedStylesheet {
+  const sources: Source[] = [base, ...sheets].map((css, index) => {
+    const sheet = index === 0 ? null : index - 1;
+    try {
+      return { root: parse(css), sheet };
+    } catch (error) {
+      if (error instanceof CssSyntaxError) {
+        throw new EmailStylesheetInvalid(sheet ?? -1, error.line ?? 1, error.column ?? 1, 'unparsable', error.reason);
+      }
+      throw error;
+    }
+  });
+
+  const globalProperties = customProperties(sources);
+  const global = createScope(globalProperties);
+  const resolveIn = (source: Source, node: ChildNode, value: string): string => global.resolveIn(source, node, value);
 
   const rules: InlineRule[] = [];
   const head: string[] = [];
@@ -193,15 +224,35 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   };
 
+  const written: WrittenRule[] = [];
   const inlineRule = (source: Source, rule: Rule): void => {
     const declarations: StyleDeclaration[] = [];
+    const kept: Declaration[] = [];
     for (const child of rule.nodes) {
       if (child.type === 'comment') continue;
       if (child.type !== 'decl') refuse(source, child, 'selector-refused', child.toString());
       if (child.prop.startsWith('--')) continue;
       const value = resolveIn(source, child, child.value.trim());
       warn(source, child, value);
+      if (child.important === true && source.sheet !== null) {
+        // Inlined, it would beat the head's dark and narrow-screen rules, which a client reads after it.
+        const { line, column } = positionOf(child);
+        const property = child.prop.toLowerCase();
+        warnings.push({
+          sheet: source.sheet,
+          line,
+          column,
+          property,
+          value,
+          feature: 'important-dropped',
+          clients: [],
+        });
+      }
       declarations.push({ property: child.prop.toLowerCase(), value, important: child.important === true });
+      kept.push(child);
+    }
+    if (kept.length > 0 && rule.selectors.every((text) => text.trim() !== ':root')) {
+      written.push({ source, selector: rule.selector, declarations: kept });
     }
     for (const text of rule.selectors) {
       // `:root` holds custom properties only; a declaration there would select no element of the email.
@@ -215,20 +266,27 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   };
 
+  const queries: { readonly at: number; readonly rule: AtRule; readonly scope: ReturnType<typeof createScope> }[] = [];
   const headRule = (source: Source, rule: AtRule): void => {
     const name = rule.name.toLowerCase();
     if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
     const conditional = name === 'media' || name === 'supports';
+    // A query's own custom properties hold inside it, over the sheets' top-level ones.
+    const own = conditional ? queryProperties(source, rule) : new Map();
+    const scope = own.size === 0 ? global : createScope(new Map([...globalProperties, ...own]));
     // A rule under `@supports` is the author's own guard for the clients that lack the feature.
     if (name !== 'supports') {
-      rule.walkDecls((declaration) => warn(source, declaration, resolveIn(source, declaration, declaration.value)));
+      rule.walkDecls((declaration) =>
+        warn(source, declaration, scope.resolveIn(source, declaration, declaration.value)),
+      );
     }
     const copy = rule.clone();
     copy.walkDecls((declaration) => {
-      declaration.value = resolveIn(source, declaration, declaration.value);
+      declaration.value = scope.resolveIn(source, declaration, declaration.value);
       if (conditional && source.sheet !== null) declaration.important = true;
     });
     head.push(copy.toString());
+    if (own.size > 0) queries.push({ at: head.length, rule, scope });
   };
 
   for (const source of sources) {
@@ -241,6 +299,21 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         if (name !== 'charset') headRule(source, node);
       } else refuse(source, node, 'unparsable', node.toString());
     }
+  }
+
+  // An inlined rule whose variables a query gives other values is drawn again under that query, after the
+  // query's own rules, as a dark theme that redefines `:root`'s colours expects.
+  for (const { at, rule, scope } of [...queries].reverse()) {
+    const redrawn = written.flatMap(({ source, selector, declarations }) => {
+      const changed = declarations.flatMap((declaration) => {
+        const value = scope.resolveIn(source, declaration, declaration.value.trim());
+        return value === resolveIn(source, declaration, declaration.value.trim())
+          ? []
+          : [`${declaration.prop.toLowerCase()}:${value} !important`];
+      });
+      return changed.length === 0 ? [] : [`${selector}{${changed.join(';')}}`];
+    });
+    if (redrawn.length > 0) head.splice(at, 0, `@${rule.name} ${rule.params}{${redrawn.join('')}}`);
   }
 
   // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.

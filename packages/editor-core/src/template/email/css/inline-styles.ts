@@ -36,8 +36,11 @@ export function inlineStyle(rules: readonly InlineRule[], element: StyledElement
     winners.delete(candidate.declaration.property);
     winners.set(candidate.declaration.property, sameRule && held !== undefined ? [...held, candidate] : [candidate]);
   }
-  return [...winners.values()]
-    .flat()
-    .map(({ declaration: { property, value, important } }) => `${property}:${value}${important ? ' !important' : ''};`)
-    .join('');
+  return (
+    [...winners.values()]
+      .flat()
+      // `!important` decides the cascade here and is not written: inline, it would beat the head's own rules.
+      .map(({ declaration: { property, value } }) => `${property}:${value};`)
+      .join('')
+  );
 }
