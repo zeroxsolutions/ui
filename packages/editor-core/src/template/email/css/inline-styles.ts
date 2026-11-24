@@ -9,11 +9,11 @@ interface Candidate {
 }
 
 /**
- * The `style` attribute's text for `element`: each declaration of the rules that select it, in cascade order
- * (importance, then specificity, then source order), a property kept once at its winning place. A longhand
- * after a shorthand stays beside it, so the inline style reads as the cascade did. Empty when no rule selects it.
+ * The declarations the rules that select `element` give it, in cascade order (importance, then specificity, then
+ * source order), a property kept once at its winning place. A longhand after a shorthand stays beside it, and a
+ * property written twice in one rule keeps both, the first a fallback for a client that drops the second.
  */
-export function inlineStyle(rules: readonly InlineRule[], element: StyledElement): string {
+export function computedStyle(rules: readonly InlineRule[], element: StyledElement): StyleDeclaration[] {
   const candidates: Candidate[] = [];
   for (const rule of rules) {
     if (!selectorMatches(rule.selector, element)) continue;
@@ -28,7 +28,6 @@ export function inlineStyle(rules: readonly InlineRule[], element: StyledElement
       left.order - right.order ||
       left.index - right.index,
   );
-  // A property written twice in one rule keeps both, the first a fallback for a client that drops the second.
   const winners = new Map<string, Candidate[]>();
   for (const candidate of candidates) {
     const held = winners.get(candidate.declaration.property);
@@ -36,11 +35,13 @@ export function inlineStyle(rules: readonly InlineRule[], element: StyledElement
     winners.delete(candidate.declaration.property);
     winners.set(candidate.declaration.property, sameRule && held !== undefined ? [...held, candidate] : [candidate]);
   }
-  return (
-    [...winners.values()]
-      .flat()
-      // `!important` decides the cascade here and is not written: inline, it would beat the head's own rules.
-      .map(({ declaration: { property, value } }) => `${property}:${value};`)
-      .join('')
-  );
+  return [...winners.values()].flat().map(({ declaration }) => declaration);
+}
+
+/** The `style` attribute's text for `element`; empty when no rule selects it. */
+export function inlineStyle(rules: readonly InlineRule[], element: StyledElement): string {
+  // `!important` decides the cascade and is not written: inline, it would beat the head's own rules.
+  return computedStyle(rules, element)
+    .map(({ property, value }) => `${property}:${value};`)
+    .join('');
 }

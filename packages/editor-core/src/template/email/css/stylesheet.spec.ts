@@ -82,52 +82,30 @@ describe('inlining a stylesheet', () => {
     expect(styleOf('', [css], element(['a']))).toBe('color:#123456;padding:4px 2px;');
   });
 
-  it('inlines a custom property from :root, and draws its @media value in a head rule of that query', () => {
+  it("reads a product query's class-only rules, and the top-level rules with its variables, for its elements", () => {
     const css =
-      ':root{--bg:#fff}@media (prefers-color-scheme:dark){:root{--bg:#000}}.a{background:var(--bg);padding:4px}';
+      ':root{--bg:#fff}@supports (display:grid){@media (prefers-color-scheme:dark){:root{--bg:#000}.b{color:red}}}' +
+      '.a{background:var(--bg);padding:4px}';
+    const { head, queries } = composeStylesheets('', [css]);
     expect(styleOf('', [css], element(['a']))).toBe('background:#fff;padding:4px;');
-    expect(composeStylesheets('', [css]).head).toMatch(
-      /^@media \(prefers-color-scheme:dark\)\{\.a\{background:#000 !important\}\}@media/,
-    );
-  });
-
-  it("lets a query's own rule for a selector beat the redraw of its variable", () => {
-    const css = ':root{--c:#111}.a{color:var(--c)}@media (prefers-color-scheme:dark){:root{--c:#eee}.a{color:red}}';
-    expect(composeStylesheets('', [css]).head).toBe(
-      '@media (prefers-color-scheme:dark){.a{color:#eee !important}}' +
-        '@media (prefers-color-scheme:dark){:root{--c:#eee !important}.a{color:red !important}}',
-    );
-  });
-
-  it('redraws every rule of a property a query changes, so a more specific one still wins', () => {
-    const css = ':root{--c:#111}@media (prefers-color-scheme:dark){:root{--c:#eee}}.a{color:var(--c)}.a.b{color:green}';
-    expect(composeStylesheets('', [css]).head).toMatch(
-      /^@media \(prefers-color-scheme:dark\)\{\.a\{color:#eee !important\}\.a\.b\{color:green !important\}\}/,
-    );
-  });
-
-  it('reads the custom properties of every query a declaration sits in, the innermost last', () => {
-    const css =
-      ':root{--c:#111}@supports (display:grid){@media (prefers-color-scheme:dark){:root{--c:#eee}.x{color:var(--c)}}}';
-    expect(composeStylesheets('', [css]).head).toContain('.x{color:#eee !important}');
-  });
-
-  it('reads a custom property an @media redefines first inside that query', () => {
-    const css = ':root{--c:#111}@media (prefers-color-scheme: dark){:root{--c:#eee}.zx-callout{color:var(--c)}}';
-    expect(composeStylesheets('', [css]).head).toContain('.zx-callout{color:#eee !important}');
-  });
-
-  it('keeps @media and @font-face in the head, adding !important to a product rule', () => {
-    const { rules, head } = composeStylesheets('@media (max-width:600px){.a{color:red !important}}', [
-      '@font-face{font-family:X;src:url(x.woff2)}@media (max-width:600px){.b{color:blue}}',
+    expect(head).toBe('');
+    expect(queries.map(({ open, close }) => [open, close])).toEqual([
+      ['@supports (display:grid){', '}'],
+      ['@supports (display:grid){@media (prefers-color-scheme:dark){', '}}'],
     ]);
-    expect(composeStylesheets('', ['@supports (display:grid){.c{color:red}}']).head).toBe(
-      '@supports (display:grid){.c{color:red !important}}',
-    );
+    expect(inlineStyle(queries[1].rules, element(['a', 'b']))).toBe('color:red;background:#000;padding:4px;');
+  });
+
+  it("keeps the base sheet's queries as written, and a product query's other selectors and at-rules", () => {
+    const { rules, head, queries } = composeStylesheets('@media (max-width:600px){.a{color:red !important}}', [
+      '@font-face{font-family:X;src:url(x.woff2)}@media (max-width:600px){.b{color:blue}p, .c{margin:0}}',
+    ]);
     expect(rules).toEqual([]);
     expect(head).toBe(
-      '@media (max-width:600px){.a{color:red !important}}@font-face{font-family:X;src:url(x.woff2)}@media (max-width:600px){.b{color:blue !important}}',
+      '@media (max-width:600px){.a{color:red !important}}@font-face{font-family:X;src:url(x.woff2)}' +
+        '@media (max-width:600px){p{margin:0 !important}}',
     );
+    expect(queries).toHaveLength(1);
   });
 
   it('keeps a product rule from ending the head style', () => {

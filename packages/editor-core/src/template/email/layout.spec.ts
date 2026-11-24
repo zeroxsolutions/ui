@@ -120,7 +120,7 @@ describe('defaultLayout', () => {
         h.image({ src: 'data:image/png;base64,AAAA', alt: 'logo', width: 10 }),
         h.image({ src: 'cid:logo', alt: 'logo', width: 10 }),
         h.raw({ markup: '<a href="https://example.test/">home</a>' }),
-        h.raw({ markup: `<p class="s">${subject}</p>` }),
+        h.raw`<td class="t" title="${subject}">${subject.slice(3)}</td>`,
         h.region('body', body),
       ],
     });
@@ -148,9 +148,15 @@ describe('defaultLayout', () => {
       expect(drawn('"').html).toContain('<a href="https://example.test/">home</a>');
     });
 
-    it("escapes a person's value that reaches raw markup through the subject", () => {
-      const { html } = drawn('Hi {{who}}');
-      expect(html).toContain('<p class="s">Hi &lt;img src=x onerror=alert(1)&gt;</p>');
+    it('escapes every value a tagged raw holds, though the layout cut it or put it in an attribute', () => {
+      const { html, text } = drawn('Hi {{who}}');
+      expect(html).toContain(
+        '<td class="t" title="Hi &lt;img src=x onerror=alert(1)&gt;">&lt;img src=x onerror=alert(1)&gt;</td>',
+      );
+      expect(drawn('" onmouseover="alert(1)').html).toContain(
+        'title="&quot; onmouseover=&quot;alert(1)">nmouseover=&quot;alert(1)</td>',
+      );
+      expect(text).toContain('<img src=x onerror=alert(1)>');
     });
   });
 });

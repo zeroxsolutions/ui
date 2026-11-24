@@ -37,11 +37,31 @@ export class EmailStylesheetInvalid extends Error {
   }
 }
 
+/**
+ * One `@media` or `@supports` of a product's sheets, nested ones flattened into the chain around them: the rules
+ * an element's style is computed from while the chain holds.
+ */
+export interface QueryRules {
+  /** The chain's at-rules, outer first, as the head opens them: `@supports (x){@media (y){`. */
+  readonly open: string;
+  readonly close: string;
+  /**
+   * Every top-level rule, its variables read with the chain's own over the sheets', then the chain's own
+   * class-only rules, each at its place in the sheets' order.
+   */
+  readonly rules: readonly InlineRule[];
+}
+
 /** The sheets one renderer composes: what it inlines, and the rules it keeps in the head's style. */
 export interface ComposedStylesheet {
   readonly rules: readonly InlineRule[];
-  /** The `@media`, `@font-face` and other at-rules, in order, as the head's `<style>` holds them. */
+  /**
+   * The base sheet's at-rules, a product's `@font-face` and other at-rules, and a product query's rules whose
+   * selector is not class-only, made `!important`, in order, as the head's `<style>` holds them.
+   */
   readonly head: string;
+  /** A product's queries, in source order; the renderer writes each element's style under them as it differs. */
+  readonly queries: readonly QueryRules[];
   /** Whether a head rule answers `prefers-color-scheme: dark`, so the email declares both schemes. */
   readonly darkScheme: boolean;
   /** Each declaration of a product's sheets that common mail clients drop, in order. */
@@ -182,19 +202,31 @@ function queryProperties(source: Source, rule: AtRule): CustomProperties {
   return found;
 }
 
-/** An inlined rule as written, kept to draw it again under a query that gives its variables other values. */
+/** A top-level rule as written, kept to read its variables again under each query. */
 interface WrittenRule {
   readonly source: Source;
-  readonly selector: string;
-  readonly declarations: readonly Declaration[];
+  readonly rule: Rule;
+  readonly selectors: readonly { readonly selector: ClassSelector; readonly order: number }[];
 }
 
+/** A product query as it is read, before the top-level rules it is computed with are all known. */
+interface QueryEntry {
+  readonly chain: readonly AtRule[];
+  readonly scope: Scope;
+  readonly own: readonly InlineRule[];
+}
+
+type Scope = ReturnType<typeof createScope>;
+
+const CONDITIONAL = new Set(['media', 'supports']);
+
 /**
- * The base sheet and a product's sheets, in that order, read into the rules a renderer inlines and the text it
- * keeps in the head. A product's `@media` and `@supports` declarations are made `!important`, since an inline
- * style beats any rule that is not.
+ * The base sheet and a product's sheets, in that order, read into the rules a renderer inlines, the text it keeps
+ * in the head, and a product's queries. A query's class-only rules are not written as they are: the renderer
+ * computes each element's style under the query, as a browser would cascade it, and writes what differs from the
+ * inlined style under a class of the element's own.
  *
- * @throws {EmailStylesheetInvalid} for a sheet that does not parse, an inlined selector that is not class-only,
+ * @throws {EmailStylesheetInvalid} for a sheet that does not parse, a top-level selector that is not class-only,
  * an `@import`, or a `var()` with no value
  */
 export function composeStylesheets(base: string, sheets: readonly string[]): ComposedStylesheet {
@@ -212,12 +244,29 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
 
   const globalProperties = customProperties(sources);
   const global = createScope(globalProperties);
-  const resolveIn = (source: Source, node: ChildNode, value: string): string => global.resolveIn(source, node, value);
+  const scopes = new Map<AtRule, Scope>();
+  /** The scope of `query`: each enclosing query's own custom properties over the sheets', the innermost last. */
+  const scopeOf = (source: Source, query: AtRule | null): Scope => {
+    if (query === null) return global;
+    const held = scopes.get(query);
+    if (held) return held;
+    const chain: AtRule[] = [];
+    for (let node: AtRule | null = query; node !== null; node = enclosingQuery(node)) chain.unshift(node);
+    const own = chain.map((node) => queryProperties(source, node));
+    const scope = own.every((properties) => properties.size === 0)
+      ? global
+      : createScope(new Map([...globalProperties, ...own.flatMap((properties) => [...properties])]));
+    scopes.set(query, scope);
+    return scope;
+  };
 
   const rules: InlineRule[] = [];
   const head: string[] = [];
   const warnings: StylesheetWarning[] = [];
+  const written: WrittenRule[] = [];
+  const entries: QueryEntry[] = [];
   let darkScheme = false;
+  let position = 0;
 
   const warn = (source: Source, declaration: Declaration, value: string): void => {
     if (source.sheet === null) return;
@@ -235,15 +284,21 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   };
 
-  const written: WrittenRule[] = [];
-  const inlineRule = (source: Source, rule: Rule): void => {
-    const declarations: StyleDeclaration[] = [];
-    const kept: Declaration[] = [];
-    for (const child of rule.nodes) {
-      if (child.type === 'comment') continue;
+  /** A rule's declarations, each value read through `scope`; `custom` properties are left out. */
+  const declarationsOf = (source: Source, rule: Rule, scope: Scope): StyleDeclaration[] =>
+    rule.nodes.flatMap((child): StyleDeclaration[] => {
+      if (child.type === 'comment') return [];
       if (child.type !== 'decl') refuse(source, child, 'selector-refused', child.toString());
-      if (child.prop.startsWith('--')) continue;
-      const value = resolveIn(source, child, child.value.trim());
+      if (child.prop.startsWith('--')) return [];
+      const value = scope.resolveIn(source, child, child.value.trim());
+      return [{ property: child.prop.toLowerCase(), value, important: child.important === true }];
+    });
+
+  const inlineRule = (source: Source, rule: Rule): void => {
+    const declarations = declarationsOf(source, rule, global);
+    rule.each((child) => {
+      if (child.type !== 'decl' || child.prop.startsWith('--')) return;
+      const value = global.resolveIn(source, child, child.value.trim());
       warn(source, child, value);
       if (child.important === true && source.sheet !== null) {
         // Inlined, it would beat the head's dark and narrow-screen rules, which a client reads after it.
@@ -259,12 +314,8 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
           clients: [],
         });
       }
-      declarations.push({ property: child.prop.toLowerCase(), value, important: child.important === true });
-      kept.push(child);
-    }
-    if (kept.length > 0 && rule.selectors.every((text) => text.trim() !== ':root')) {
-      written.push({ source, selector: rule.selector, declarations: kept });
-    }
+    });
+    const selectors: { selector: ClassSelector; order: number }[] = [];
     for (const text of rule.selectors) {
       // `:root` holds custom properties only; a declaration there would select no element of the email.
       if (text.trim() === ':root') {
@@ -273,49 +324,84 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       }
       const selector = parseClassSelector(text);
       if ('refused' in selector) refuse(source, rule, 'selector-refused', text.trim());
-      if (declarations.length > 0) rules.push({ selector, declarations, order: rules.length });
+      if (declarations.length === 0) continue;
+      const order = position++;
+      rules.push({ selector, declarations, order });
+      selectors.push({ selector, order });
     }
+    if (selectors.length > 0) written.push({ source, rule, selectors });
   };
 
-  const queries: { readonly at: number; readonly rule: AtRule; readonly scope: ReturnType<typeof createScope> }[] = [];
-  const scopes = new Map<AtRule, ReturnType<typeof createScope>>();
-  /** The scope of `query`: each enclosing query's own custom properties over the sheets', the innermost last. */
-  const scopeOf = (source: Source, query: AtRule | null): ReturnType<typeof createScope> => {
-    if (query === null) return global;
-    const held = scopes.get(query);
-    if (held) return held;
-    const chain: AtRule[] = [];
-    for (let node: AtRule | null = query; node !== null; node = enclosingQuery(node)) chain.unshift(node);
-    const own = chain.map((node) => queryProperties(source, node));
-    const scope = own.every((properties) => properties.size === 0)
-      ? global
-      : createScope(new Map([...globalProperties, ...own.flatMap((properties) => [...properties])]));
-    scopes.set(query, scope);
-    return scope;
+  /** A product query's class-only rules, read for computing, and the queries nested in it, in source order. */
+  const readQuery = (source: Source, query: AtRule, around: readonly AtRule[]): void => {
+    const chain = [...around, query];
+    const scope = scopeOf(source, query);
+    const guarded = chain.some((node) => node.name.toLowerCase() === 'supports');
+    const own: InlineRule[] = [];
+    entries.push({ chain, scope, own });
+    query.each((child) => {
+      if (child.type === 'atrule' && CONDITIONAL.has(child.name.toLowerCase())) {
+        readQuery(source, child, chain);
+        return;
+      }
+      if (child.type !== 'rule') return;
+      if (child.selectors.every((text) => ROOTS.has(text.trim()))) return;
+      const declarations = declarationsOf(source, child, scope);
+      // A rule under `@supports` is the author's own guard for the clients that lack the feature.
+      if (!guarded) {
+        child.each((node) => {
+          if (node.type === 'decl' && !node.prop.startsWith('--')) {
+            warn(source, node, scope.resolveIn(source, node, node.value.trim()));
+          }
+        });
+      }
+      for (const text of child.selectors) {
+        const selector = parseClassSelector(text);
+        if ('refused' in selector || declarations.length === 0) continue;
+        own.push({ selector, declarations, order: position++ });
+      }
+    });
   };
+
+  /**
+   * What an at-rule keeps in the head: the base sheet's as written; a product's with its class-only rules and its
+   * `:root` rules taken out, since the renderer computes those per element, and the rest made `!important`.
+   */
   const headRule = (source: Source, rule: AtRule): void => {
-    const name = rule.name.toLowerCase();
-    if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
-    const conditional = name === 'media' || name === 'supports';
+    if (CONDITIONAL.has(rule.name.toLowerCase()) && DARK_QUERY.test(rule.params)) darkScheme = true;
+    rule.walkAtRules((nested) => {
+      if (nested.name.toLowerCase() === 'media' && DARK_QUERY.test(nested.params)) darkScheme = true;
+    });
+    const product = source.sheet !== null;
+    if (product && CONDITIONAL.has(rule.name.toLowerCase())) readQuery(source, rule, []);
     // Each declaration reads the custom properties of every query around it, over the sheets' top-level ones.
     const values: string[] = [];
     rule.walkDecls((declaration) => {
-      const value = scopeOf(source, enclosingQuery(declaration)).resolveIn(source, declaration, declaration.value);
-      values.push(value);
-      // A rule under `@supports` is the author's own guard for the clients that lack the feature.
-      if (name !== 'supports') warn(source, declaration, value);
+      values.push(scopeOf(source, enclosingQuery(declaration)).resolveIn(source, declaration, declaration.value));
     });
     const copy = rule.clone();
     let index = 0;
     copy.walkDecls((declaration) => {
       declaration.value = values[index];
       index += 1;
-      if (conditional && source.sheet !== null) declaration.important = true;
+      if (product && enclosingQuery(declaration) !== null) declaration.important = true;
     });
-    head.push(copy.toString());
-    if (conditional && queryProperties(source, rule).size > 0) {
-      queries.push({ at: head.length - 1, rule, scope: scopeOf(source, rule) });
+    if (product) {
+      copy.walkRules((inner) => {
+        if (enclosingQuery(inner) === null) return;
+        const kept = inner.selectors.filter((text) => !ROOTS.has(text.trim()) && 'refused' in parseClassSelector(text));
+        if (kept.length === 0) inner.remove();
+        else inner.selectors = kept;
+      });
+      // Innermost first, so a query left empty by its own rules' removal empties the one around it too.
+      const queries: AtRule[] = [];
+      copy.walkAtRules((nested) => {
+        if (CONDITIONAL.has(nested.name.toLowerCase())) queries.unshift(nested);
+      });
+      for (const nested of queries) if ((nested.nodes ?? []).length === 0) nested.remove();
+      if (CONDITIONAL.has(copy.name.toLowerCase()) && (copy.nodes ?? []).length === 0) return;
     }
+    head.push(copy.toString());
   };
 
   for (const source of sources) {
@@ -330,33 +416,21 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   }
 
-  // An inlined rule whose variables a query gives other values is drawn again under that query, as a dark theme
-  // that redefines `:root`'s colours expects. Every product rule setting a property that changes is drawn, in its
-  // order, so the head's cascade picks the rule the inline one picked; and it goes before the query's own rules,
-  // so a rule the author wrote in the query still wins.
-  const product = written.filter(({ source }) => source.sheet !== null);
-  for (const { at, rule, scope } of [...queries].reverse()) {
-    const resolved = (source: Source, declaration: Declaration) =>
-      scope.resolveIn(source, declaration, declaration.value.trim());
-    const changed = new Set(
-      product.flatMap(({ source, declarations }) =>
-        declarations
-          .filter(
-            (declaration) => resolved(source, declaration) !== resolveIn(source, declaration, declaration.value.trim()),
-          )
-          .map((declaration) => declaration.prop.toLowerCase()),
-      ),
-    );
-    const redrawn = product.flatMap(({ source, selector, declarations }) => {
-      const kept = declarations.filter((declaration) => changed.has(declaration.prop.toLowerCase()));
-      const body = kept.map(
-        (declaration) => `${declaration.prop.toLowerCase()}:${resolved(source, declaration)} !important`,
-      );
-      return body.length === 0 ? [] : [`${selector}{${body.join(';')}}`];
-    });
-    if (redrawn.length > 0) head.splice(at, 0, `@${rule.name} ${rule.params}{${redrawn.join('')}}`);
-  }
+  const queries = entries.map(({ chain, scope, own }): QueryRules => {
+    const top =
+      scope === global
+        ? rules
+        : written.flatMap(({ source, rule, selectors }) => {
+            const declarations = declarationsOf(source, rule, scope);
+            return selectors.map(({ selector, order }) => ({ selector, declarations, order }));
+          });
+    return {
+      open: chain.map((node) => `@${node.name} ${node.params}{`).join(''),
+      close: '}'.repeat(chain.length),
+      rules: [...top, ...own],
+    };
+  });
 
   // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.
-  return { rules, head: head.join('').replaceAll('</', '<\\/'), darkScheme, warnings };
+  return { rules, head: head.join('').replaceAll('</', '<\\/'), queries, darkScheme, warnings };
 }

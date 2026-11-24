@@ -123,22 +123,27 @@ export const literalReader: PrimitiveReader = {
 const LAYOUT_LINK = /^(?:https?:|mailto:)/i;
 /** An image a client loads: a page's, one written into the address, as a preview's logo is, or a part of the mail. */
 const LAYOUT_IMAGE = /^(?:https?:|data:image\/|cid:)/i;
-/** A value that opens a tag; one that does not, such as a lone quote, is left alone in the layout's own markup. */
-const OPENS_TAG = /</;
-
 /**
- * The layout's reader: it prints the product's own props as given, checks each link's and image's scheme as a
- * block's are checked, and escapes `personal`, the filled subject and preheader, wherever raw markup holds one
- * that opens a tag.
+ * The layout's reader: it prints the product's own props as given, and checks each link's and image's scheme as a
+ * block's are checked. A person's value reaches the layout's markup only through a tagged `raw`, which escapes it.
  */
-export function layoutReader(personal: readonly string[]): PrimitiveReader {
-  const escaped = personal.filter((value) => OPENS_TAG.test(value));
-  return {
-    ...literalReader,
-    href: (template) => (LAYOUT_LINK.test(template.trim()) ? template.trim() : null),
-    imageSrc: (template) => (LAYOUT_IMAGE.test(template.trim()) ? template.trim() : null),
-    markup: (template) => escaped.reduce((markup, value) => markup.split(value).join(escapeHtml(value)), template),
-  };
+export const layoutReader: PrimitiveReader = {
+  ...literalReader,
+  href: (template) => (LAYOUT_LINK.test(template.trim()) ? template.trim() : null),
+  imageSrc: (template) => (LAYOUT_IMAGE.test(template.trim()) ? template.trim() : null),
+};
+
+const ENTITIES: Readonly<Record<string, string>> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+};
+
+/** `html`'s text, its tags dropped and the entities `escapeHtml` writes read back. */
+function textOf(html: string): string {
+  return withoutTags(html).replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity]);
 }
 
 interface Classed {
@@ -173,11 +178,16 @@ export interface EmailPrimitives {
   /** Vertical space, `height` in px. */
   spacer(options: Classed & { readonly height: number }): EmailNode;
   /**
-   * Markup as written, every value escaped; never styled. Its text arm is the markup with its tags dropped. A
-   * layout's `raw` writes its markup as given: a person's value, as the subject and preheader hold, goes through
-   * `text`, though a filled subject or preheader found in it is escaped.
+   * Trusted markup, written as given; never styled. In a block each `{{name}}` in it is filled escaped; in a
+   * layout nothing is filled, so it holds only the product's own literal markup. Its text arm is the markup with
+   * its tags dropped.
    */
   raw(options: { readonly markup: string }): EmailNode;
+  /**
+   * Markup from a tagged template, ``h.raw`<td title="${subject}">` ``: the literal parts as written, every
+   * interpolated value escaped, so a person's value, such as the subject, is safe in text and in an attribute.
+   */
+  raw(strings: TemplateStringsArray, ...values: readonly unknown[]): EmailNode;
   /** The inbox line a client shows after the subject, hidden in the email. */
   preheader(options: { readonly text: string }): EmailNode;
   /** The email's card, at most 600px wide, centred on the page. */
@@ -271,11 +281,19 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       text: reader.text(options.text),
     }),
     spacer: (options) => ({ kind: 'spacer', classes: classesOf(options.class, 'zx-spacer'), height: options.height }),
-    raw: (options) => ({
-      kind: 'raw',
-      html: reader.markup(options.markup),
-      text: `${reader.text(withoutTags(options.markup))}\n\n`,
-    }),
+    raw: ((first: { readonly markup: string } | TemplateStringsArray, ...values: readonly unknown[]): EmailNode => {
+      if ('markup' in first) {
+        return {
+          kind: 'raw',
+          html: reader.markup(first.markup),
+          text: `${reader.text(withoutTags(first.markup))}\n\n`,
+        };
+      }
+      const html = first.reduce((written, part, index) =>
+        index === 0 ? part : `${written}${escapeHtml(String(values[index - 1]))}${part}`,
+      );
+      return { kind: 'raw', html, text: `${textOf(html)}\n\n` };
+    }) as EmailPrimitives['raw'],
     preheader: (options) => ({ kind: 'preheader', text: reader.text(options.text) }),
     card: (options, children) => ({
       kind: 'card',

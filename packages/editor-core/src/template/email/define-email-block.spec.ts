@@ -154,7 +154,7 @@ describe('defineEmailBlock', () => {
     });
     expect(rendered.text).toBe('Left');
     expect(rendered.html.match(/class="zx-lane/g)).toHaveLength(2);
-    expect(rendered.problems).toEqual([{ blockId: 'p', kind: 'lanes-mismatch' }]);
+    expect(rendered.problems).toEqual([{ blockId: 'p', kind: 'lanes-count' }]);
   });
 
   it('describes the block to an editor, labels capitalised where none is given', () => {

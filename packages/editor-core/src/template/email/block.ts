@@ -30,7 +30,7 @@ export type RenderProblemKind =
   | 'href-scheme-refused'
   | 'unknown-block-type'
   | 'block-nested-too-deep'
-  | 'lanes-mismatch';
+  | 'lanes-count';
 
 /** Something a render filled with empty rather than fail; `blockId` is null for the subject and preheader. */
 export interface RenderProblem {
@@ -112,7 +112,7 @@ export interface BlockDefinition<Type extends string = string, Attributes = unkn
   /** Whether the block holds lanes of other blocks, one level deep. */
   readonly holdsLanes: boolean;
   /**
-   * How many lanes a lanes block takes. The renderer reports `lanes-mismatch` for a stored block outside it and
+   * How many lanes a lanes block takes. The renderer reports `lanes-count` for a stored block outside it and
    * draws no lane past `max`; without it, every stored lane is drawn.
    */
   readonly laneBounds?: { readonly min: number; readonly max: number };

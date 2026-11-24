@@ -17,6 +17,7 @@ import { composeStylesheets } from './css/stylesheet.js';
 import type { StylesheetWarning } from './css/unsupported.js';
 import { defaultLayout, type DefaultLayoutProps, type EmailLayout } from './layout.js';
 import { expandNodes } from './primitives/elements.js';
+import { createQueryWriter } from './css/query-styles.js';
 import { createPrimitives, layoutReader, type EmailNode } from './primitives/nodes.js';
 import { plainTextOf } from './primitives/plain-text.js';
 import { serialiseElements } from './primitives/serialise.js';
@@ -190,7 +191,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         const stored: readonly unknown[] = definition.holdsLanes && Array.isArray(block.lanes) ? block.lanes : [];
         const bounds = definition.laneBounds;
         if (bounds && (stored.length < bounds.min || stored.length > bounds.max)) {
-          problems.push({ blockId: block.id, kind: 'lanes-mismatch', ...where });
+          problems.push({ blockId: block.id, kind: 'lanes-count', ...where });
         }
         const lanes = bounds ? stored.slice(0, bounds.max) : stored;
         const ctx = createRenderContext(
@@ -263,23 +264,27 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         preheader,
         locale: input.locale,
         props: input.layoutProps,
-        h: createPrimitives(layoutReader([subject, preheader])),
+        h: createPrimitives(layoutReader),
       });
       if (!Array.isArray(framed) && (typeof framed !== 'object' || framed === null || !('kind' in framed))) {
         throw new TypeError("An email layout returns primitives, drawn with its input's `h`, not HTML and text");
       }
       const nodes: readonly EmailNode[] = Array.isArray(framed) ? framed : [framed as EmailNode];
+      const queries = createQueryWriter(stylesheet.queries);
       const document = serialiseElements(
         [{ tag: 'body', attributes: [], classes: ['zx-body'], children: expandNodes(nodes) }],
         stylesheet.rules,
+        null,
+        queries,
       );
+      const style = stylesheet.head + queries.head();
       const html =
         '<!doctype html>' +
         `<html lang="${escapeHtml(input.locale)}">` +
         '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
         (stylesheet.darkScheme ? DARK_SCHEME_META : '') +
         `<title>${escapeHtml(subject)}</title>` +
-        (stylesheet.head === '' ? '' : `<style>${stylesheet.head}</style>`) +
+        (style === '' ? '' : `<style>${style}</style>`) +
         `</head>${document}</html>`;
       return { subject, preheader, html, text: plainTextOf(nodes).trim(), problems: distinct(problems) };
     },
