@@ -121,8 +121,10 @@ const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
   'markup-malformed': 'The formatting is not closed',
   'block-not-allowed': 'This block is not allowed here',
   'unknown-block-type': 'This block is of an unknown type',
-  'block-nested-too-deep': 'Columns cannot hold columns',
+  'block-nested-too-deep': 'A block with lanes cannot sit inside a lane',
   'lanes-mismatch': 'The columns do not match their widths',
+  'lanes-count': 'This block holds more or fewer lanes than it takes',
+  'content-invalid': 'This block holds something its type does not read',
   'text-empty': 'This block is empty',
   'text-too-long': 'This text is too long',
   'list-too-long': 'This list has too many items',
@@ -137,8 +139,8 @@ const RENDER_PROBLEMS: Readonly<Record<RenderProblemKind, string>> = {
   'href-invalid': 'The link must start with https://, http://, mailto: or a link variable',
   'href-scheme-refused': 'The link is not a web or mail address',
   'unknown-block-type': 'This block is of an unknown type',
-  'block-nested-too-deep': 'Columns cannot hold columns',
-  'lanes-mismatch': 'This block holds more or fewer lanes than it takes, and draws no lane past the last it takes',
+  'block-nested-too-deep': 'A block with lanes cannot sit inside a lane',
+  'lanes-count': 'This block holds more or fewer lanes than it takes',
 };
 
 const ENCODINGS = { gsm7: 'GSM-7', ucs2: 'UCS-2' } as const;

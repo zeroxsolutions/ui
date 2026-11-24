@@ -286,11 +286,15 @@ attribute, a pseudo-class or `*` throws `EmailStylesheetInvalid`, which names th
 column and the reason. So do `@import`, a `var()` with no value and CSS that does not parse. `var()` reads the
 custom properties of a top-level `:root` or `.zx-root` rule and is resolved before the value is inlined.
 
-`@media` and `@supports` rules stay in the head, made `!important` so they beat the inlined styles in the
-clients that read them. Any selector may be used there. The base sheet's dark rules are such rules too, so a
-color you set for light mode reaches dark mode only through a `prefers-color-scheme: dark` query of your own,
-as above. A query that redefines `:root`'s custom properties does that for you: each inlined rule reading one
-is drawn again under the query, with the query's value, and a rule you write in the query wins over that.
+Your `@media` and `@supports` rules hold in a query, so they cannot be inlined. For each query the renderer
+computes every element's style as a browser would while the query holds: your top-level rules and the query's
+own, by importance, specificity and order, with the custom properties the query's `:root` redefines. Where that
+differs from the inlined style, the element gets a class of its own, such as `zx-q0-3`, and the head gets the
+differing declarations under the query, made `!important` to beat the inlined style. Queries keep the order
+you wrote them in, so when two hold at once, such as a narrow screen in dark mode, the later one wins a property
+both set. A query nested in another is written inside it. A selector in a query that is not class-only, such as
+`p`, is kept in the head as written, made `!important`. The base sheet's own dark and narrow-screen rules stay in
+the head as they are.
 
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
@@ -358,7 +362,7 @@ const profile = emailProfile({ variables, blocks: [quote] });
 `emailProfile`'s `blocks` adds the type to the profile's kinds, and `validate` checks each field as the
 renderer will: an empty body, a field over its `max`, and a link or image address it would refuse. `EmailEditor`'s
 `blocks` offers the block in the slash menu and exports it, and throws `EditorError` for a block the profile does
-not hold through its `blocks`. A lanes block holding fewer or more lanes than it takes is a `lanes-mismatch`, and the renderer draws
+not hold through its `blocks`. A lanes block holding fewer or more lanes than it takes is a `lanes-count`, and the renderer draws
 no lane past its `max`. The rich text
 field is edited in place, the other fields in a text field under it, a `choice` in a submenu of the block menu,
 a `toggle` as a checkbox there, and a `number` in a field under the block. `customBlocks` in `messages` words a
@@ -379,7 +383,9 @@ block's title and its fields, attributes and values by their names; the definiti
 
 The primitives a `render` uses are on `h`: `section`, `columns`, `column`, `text`, `heading`, `button`, `image`,
 `divider`, `list`, `code`, `spacer` and `raw`. Each but `raw` takes a `class`. The renderer fills a primitive's
-text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does. It places the result in the block's own row, and writes the
+text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does. In a
+layout, ``h.raw`<td title="${subject}">` `` escapes every value it interpolates, and `h.raw({ markup })` writes
+trusted markup as given, so a person's value, such as the subject, never goes in it. It places the result in the block's own row, and writes the
 plain-text twin from the same primitives. `defineEmailBlock` throws `EmailBlockDefinitionInvalid` for a type
 that is a default one or not a lower-case word, a field or attribute named `id`, `key` or `source`, two rich
 text or lanes fields, or a default outside its attribute's values. Run `checkEmailRenderer(renderer,
@@ -482,8 +488,10 @@ document before the export.
 | `markup-malformed`              | The formatting is not closed                                            |
 | `block-not-allowed`             | This block is not allowed here                                          |
 | `unknown-block-type`            | This block is of an unknown type                                        |
-| `block-nested-too-deep`         | Columns cannot hold columns                                             |
+| `block-nested-too-deep`         | A block with lanes cannot sit inside a lane                             |
 | `lanes-mismatch`                | The columns do not match their widths                                   |
+| `lanes-count`                   | This block holds more or fewer lanes than it takes                      |
+| `content-invalid`               | This block holds something its type does not read                       |
 | `text-empty`                    | This block is empty                                                     |
 | `text-too-long`                 | This text is too long                                                   |
 | `list-too-long`                 | This list has too many items                                            |
@@ -491,6 +499,8 @@ document before the export.
 | `block-not-carried`             | The email keeps only the text of this block                             |
 
 `block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list.
+`content-invalid` marks content that is not an object, or a key its type's content does not have, which the
+renderer's write check refuses; its `field` names the key.
 
 ## Markup
 
