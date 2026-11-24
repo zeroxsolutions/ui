@@ -224,8 +224,10 @@ against the same profile before it sends.
     Each `ProfileProblem` names its `kind` (`variable-undeclared`, `block-not-allowed`, `text-too-long`,
     `sms-segment-exceeded` and the rest of `ProblemKind`) and the block's id, or its key when the id is
     null. The editor never refuses an edit for a problem; it shows it.
-  - `toEmailBlocks(doc)` and `fromEmailBlocks(blocks)` convert between the editor's document and the
-    email renderer's blocks. A block nobody edited exports its stored text verbatim.
+  - `toEmailBlocks(doc, codecs?, { kinds? })` and `fromEmailBlocks(blocks)` convert between the editor's
+    document and the email renderer's blocks. A block nobody edited exports its stored text verbatim. A
+    heading or a quote the `kinds` leave out exports as a paragraph; pass the profile's `kinds`, since
+    without them every email kind is carried.
   - `toSmsText(doc)`, `fromSmsText(body)` and `measureSmsBody(body)` (units, limit, encoding, segments)
     do the same for an SMS body.
   - `EMAIL_KINDS`, `MAIL_LAYOUT_KINDS` (what a header or footer region may hold) and `emailNodeSpecs`.
@@ -246,7 +248,7 @@ const profile = emailProfile({
   bounds: { blocks: 20 },
 });
 
-const problems = validate(toEmailBlocks(editor.getJSON()), profile);
+const problems = validate(toEmailBlocks(editor.getJSON(), [], { kinds: profile.kinds }), profile);
 if (problems.length > 0) refuse(problems);
 ```
 

@@ -514,6 +514,41 @@ function admittedBlocks(admitted: ReadonlySet<string>, carried: ReadonlySet<stri
   });
 }
 
+/** How many blocks in `doc`'s table cells are not a line: each one the export loses or flattens. */
+function cellBlocks(doc: ProseMirrorNode): number {
+  let count = 0;
+  doc.descendants((node) => {
+    if (node.type.name !== 'tableCell' && node.type.name !== 'tableHeader') return true;
+    node.forEach((child) => {
+      if (child.type.name !== 'paragraph') count += 1;
+    });
+    return false;
+  });
+  return count;
+}
+
+/**
+ * Refuses a change that adds a block other than a line to a table cell, as a typed `# ` or a shortcut does, since
+ * the export writes a cell as one line. A paste or a drop may bring one, which `docProblems` marks; a host's load
+ * and an undo pass.
+ */
+function cellLines(): Plugin {
+  const counted = new WeakMap<ProseMirrorNode, number>();
+  const countOf = (doc: ProseMirrorNode) => {
+    let count = counted.get(doc);
+    if (count === undefined) counted.set(doc, (count = cellBlocks(doc)));
+    return count;
+  };
+  return new Plugin({
+    key: new PluginKey('emailCellLines'),
+    filterTransaction(tr, state: EngineState) {
+      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || isHistoryTransaction(tr)) return true;
+      if (tr.getMeta('uiEvent') === 'paste' || tr.getMeta('uiEvent') === 'drop') return true;
+      return countOf(tr.doc) <= countOf(state.doc);
+    },
+  });
+}
+
 /**
  * The engine half: the email attributes on the document's nodes, the blocks and marks an author may add, the
  * input and paste rules of only what the email stores, and the context the commands read.
@@ -533,7 +568,7 @@ function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: r
       contexts.delete(this.editor);
     },
     addGlobalAttributes: () => emailGlobalAttributes(),
-    addProseMirrorPlugins: () => [admittedBlocks(context.admitted, carried), heldMarks(EMAIL_MARKS)],
+    addProseMirrorPlugins: () => [admittedBlocks(context.admitted, carried), cellLines(), heldMarks(EMAIL_MARKS)],
   });
 }
 

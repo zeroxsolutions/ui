@@ -5,7 +5,6 @@ import {
   align,
   BUTTON_HREF_MAX_LENGTH,
   CONTENT_WIDTH,
-  IMAGE_MAX_WIDTH,
   IMAGE_START,
   LINK_START,
   readOr,
@@ -15,7 +14,7 @@ import {
 /** The longest alt text and caption: a sentence or two, never a body. */
 export const IMAGE_TEXT_MAX_LENGTH = 500;
 
-const width = z.number().int().min(1).max(IMAGE_MAX_WIDTH);
+const width = z.number().int().min(1).max(CONTENT_WIDTH);
 const attributes = z.object({ align, spaceAfter, width: width.optional() }).strict();
 const content = z
   .object({

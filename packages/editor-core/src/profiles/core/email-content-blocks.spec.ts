@@ -120,9 +120,9 @@ describe('an image through the email codec', () => {
     expect(toEmailBlocks(fromEmailBlocks(stored), [], ALL)).toEqual(stored);
   });
 
-  it('draws a width past the card at the card width', () => {
+  it("exports a width past the card's content at the content width", () => {
     const image: NodeJSON = { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a', width: 900 } };
-    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({ width: 600 });
+    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({ width: 566 });
   });
 });
 
@@ -329,6 +329,36 @@ describe('a table cell spanning rows', () => {
         ['', 'C'],
       ],
     });
+  });
+});
+
+describe('a ragged table cell spanning rows', () => {
+  it('keeps a later row in its columns where a short row ends before the spanned column', () => {
+    const spanning: NodeJSON = { type: 'tableCell', attrs: { rowspan: 2 }, content: [para('C')] };
+    const table: NodeJSON = {
+      type: 'table',
+      content: [
+        row(cell('tableCell', 'A'), cell('tableCell', 'B'), spanning),
+        row(cell('tableCell', 'D')),
+        row(cell('tableCell', 'E'), cell('tableCell', 'F'), cell('tableCell', 'G')),
+      ],
+    };
+    expect(toEmailBlocks(docOf(table), [], ALL)[0].content).toEqual({
+      rows: [
+        ['A', 'B', 'C'],
+        ['D', '', ''],
+        ['E', 'F', 'G'],
+      ],
+    });
+  });
+});
+
+describe('an exported block saved as stored', () => {
+  it("is a copy, so a host changing the export leaves the editor's document alone", () => {
+    const stored: EditorEmailBlock = block({ type: 'heading', content: { text: 'Hi' } });
+    const [exported] = toEmailBlocks(fromEmailBlocks([stored]));
+    expect(exported).toEqual(stored);
+    expect(exported.content).not.toBe(stored.content);
   });
 });
 

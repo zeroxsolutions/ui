@@ -829,6 +829,18 @@ describe('the email kit', () => {
     expect(editor.can('insertEmailBlock', { kind: 'paragraph' })).toBe(true);
   });
 
+  it.each([
+    ['# ', 'heading'],
+    ['- ', 'bulletList'],
+    ['> ', 'blockquote'],
+  ])('keeps a typed %s shortcut from turning a table cell into a %s', async (typed, type) => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['', 'cellB']] } })]);
+    await userEvent.click(find('[contenteditable=true] td p'));
+    await userEvent.keyboard(typed);
+    await vi.waitFor(() => expect(JSON.stringify(editor.getJSON())).toContain(typed.trim()));
+    expect(JSON.stringify(editor.getJSON())).not.toContain(`"type":"${type}"`);
+  });
+
   it("offers no way around the kit's own insert for a button or columns", async () => {
     const editor = await mount([block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] })]);
     await caretAfter('left');

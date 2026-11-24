@@ -7,7 +7,7 @@ import {
   type InlineText,
 } from '../../template/index.js';
 import { libraryBlocks, type LibraryBlockType } from '../../template/email/blocks/index.js';
-import { IMAGE_MAX_WIDTH } from '../../template/email/blocks/shared.js';
+import { CONTENT_WIDTH } from '../../template/email/blocks/shared.js';
 import { emailBlockCodec } from './email-block-codec.js';
 import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
 import { EMAIL_KINDS } from './profile.js';
@@ -200,7 +200,13 @@ function rowsOf(table: NodeJSON): string[][] {
         drawn.push(offset === 0 ? joinedMarkup(cell) : '');
       }
     }
-    take();
+    // A cell from a row above may still cover a column past this row's last cell: count it down there too.
+    for (let column = drawn.length; column < covered.length; column += 1) {
+      if ((covered[column] ?? 0) === 0) continue;
+      covered[column] -= 1;
+      while (drawn.length < column) drawn.push('');
+      drawn.push('');
+    }
     rows.push(drawn);
   }
   const widest = Math.max(0, ...rows.map((row) => row.length));
@@ -236,19 +242,16 @@ function asStored(node: NodeJSON, exported: EditorEmailBlock): EditorEmailBlock 
     withoutDefaults(stored.attributes, defaults.attributes) ===
       withoutDefaults(exported.attributes, defaults.attributes) &&
     withoutDefaults(stored.content, defaults.content) === withoutDefaults(exported.content, defaults.content);
-  return same
-    ? {
-        ...exported,
-        attributes: stored.attributes as EditorEmailBlock['attributes'],
-        content: stored.content as EditorEmailBlock['content'],
-      }
-    : exported;
+  if (!same) return exported;
+  // A copy, so a host changing the export leaves the document's stored block as it was.
+  const copy = structuredClone(stored) as Pick<EditorEmailBlock, 'attributes' | 'content'>;
+  return { ...exported, attributes: copy.attributes, content: copy.content };
 }
 
-/** The image's width as an email draws it: a whole number of pixels up to the card's, or none. */
+/** The image's width as an email draws it: a whole number of pixels up to the card's content width, or none. */
 function imageWidth(width: unknown): Record<string, number> {
   if (typeof width !== 'number' || !Number.isFinite(width) || width < 1) return {};
-  return { width: Math.min(Math.round(width), IMAGE_MAX_WIDTH) };
+  return { width: Math.min(Math.round(width), CONTENT_WIDTH) };
 }
 
 const libraryCodecs = new Map<string, NodeCodec>();

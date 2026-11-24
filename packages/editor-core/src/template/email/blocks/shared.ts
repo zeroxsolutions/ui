@@ -33,9 +33,6 @@ export function readOr<T>(schema: z.ZodType<T>, raw: unknown, fallback: T): T {
   return parsed.success ? parsed.data : fallback;
 }
 
-/** The widest an image is drawn, the card's width; a product's narrower card scales it down. */
-export const IMAGE_MAX_WIDTH = 600;
-
 /**
  * An address on a write, as `validate` reads it: one line that opens with a literal scheme of `start`, or with a
  * whole variable token, whose type `validate` checks.

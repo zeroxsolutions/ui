@@ -360,6 +360,7 @@ describe('an image', () => {
     const { html } = render('image', { align: 'center' }, { src, alt: 'A bay' });
     expect(html).toContain('width="566"');
     expect(render('image', { width: 600 }, { src, alt: 'A bay' }).html).toContain('width="566"');
+    expect(render('image', { width: 200 }, { src, alt: 'A bay' }).html).toContain('width="200"');
     expect(html).toMatch(/class="zx-image zx-image-fluid" style="[^"]*margin:0 auto;/);
   });
 
@@ -375,7 +376,8 @@ describe('an image', () => {
     expect(renderer.contentOf('image', { src: 'javascript:x', alt: 'a' })).toBeNull();
     expect(renderer.contentOf('image', { src, alt: ' ' })).toBeNull();
     expect(renderer.contentOf('image', { src, alt: 'a', href: 'javascript:x' })).toBeNull();
-    expect(renderer.attributesOf('image', { width: 601 })).toBeNull();
+    expect(renderer.attributesOf('image', { width: 567 })).toBeNull();
+    expect(renderer.attributesOf('image', { width: 566 })).not.toBeNull();
     expect(renderer.contentOf('image', { src: '{{banner}}', alt: 'a', href: 'mailto:a@b.c' })).not.toBeNull();
   });
 });
