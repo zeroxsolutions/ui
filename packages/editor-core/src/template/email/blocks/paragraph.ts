@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { align, inlineText, readOr, spaceAfter } from './shared.js';
 
 const TONES = ['default', 'muted'] as const;
@@ -9,7 +9,7 @@ const content = z.object({ text: inlineText }).strict();
 const lenientContent = z.object({ text: z.string().catch('') });
 
 /** One or more sentences. */
-export const paragraph = defineBlock({
+export const paragraph = defineBlockType({
   type: 'paragraph',
   attributes,
   content,

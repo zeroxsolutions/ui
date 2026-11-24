@@ -1,6 +1,6 @@
 /** The email renderer: a theme and a product's CSS, overridable blocks and layout, and block types a product adds. */
 export {
-  defineBlock,
+  defineBlockType,
   type BlockDefinition,
   type BlockRenderer,
   type BlockRendering,

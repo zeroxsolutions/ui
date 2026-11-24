@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { readOr, spaceAfter } from './shared.js';
 
 const attributes = z.object({ spaceAfter }).strict();
 const content = z.object({}).strict();
 
 /** A rule. It carries no text. */
-export const divider = defineBlock({
+export const divider = defineBlockType({
   type: 'divider',
   attributes,
   content,

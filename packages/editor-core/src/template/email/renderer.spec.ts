@@ -5,7 +5,7 @@ import { variableTokens } from '../variables/variable-tokens.js';
 import { hrefProblem } from '../markup/href.js';
 import { markupSamples } from '../markup/inline-markup.fixture.js';
 import { parseInlineMarkup } from '../markup/inline-markup.js';
-import { defineBlock, type EmailBlock } from './block.js';
+import { defineBlockType, type EmailBlock } from './block.js';
 import { createRenderContext } from './context.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
 import { EmailStylesheetInvalid } from './css/stylesheet.js';
@@ -21,7 +21,7 @@ import {
 } from './renderer.js';
 import { EmailThemeInvalid } from './theme.js';
 
-const itinerary = defineBlock({
+const itinerary = defineBlockType({
   type: 'itinerary',
   attributes: z.object({}).strict(),
   content: z.object({ stops: z.array(z.string().min(1)).min(1) }).strict(),
@@ -202,7 +202,7 @@ describe('createEmailRenderer', () => {
   });
 
   it('refuses an extra type that collides with a default or another extra', () => {
-    const clash = defineBlock({ ...itinerary, type: 'paragraph' });
+    const clash = defineBlockType({ ...itinerary, type: 'paragraph' });
     expect(() => createEmailRenderer({ theme: FIXTURE_THEME, extraBlocks: [clash] })).toThrow(
       new BlockTypeCollision('paragraph'),
     );

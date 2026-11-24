@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { blockText, readOr, spaceAfter } from './shared.js';
 
 const attributes = z.object({ spaceAfter }).strict();
@@ -7,7 +7,7 @@ const content = z.object({ html: blockText }).strict();
 const lenientContent = z.object({ html: z.string().catch('') });
 
 /** Raw markup, written once and never translated: the only block an author can break the layout with. */
-export const html = defineBlock({
+export const html = defineBlockType({
   type: 'html',
   attributes,
   content,

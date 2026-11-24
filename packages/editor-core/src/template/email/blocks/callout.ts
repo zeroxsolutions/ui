@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { align, inlineText, readOr, spaceAfter } from './shared.js';
 
 const attributes = z.object({ align, spaceAfter }).strict();
@@ -7,7 +7,7 @@ const content = z.object({ text: inlineText }).strict();
 const lenientContent = z.object({ text: z.string().catch('') });
 
 /** One boxed line for a warning, in the muted colour inside a border, as the document editor draws a callout. */
-export const callout = defineBlock({
+export const callout = defineBlockType({
   type: 'callout',
   attributes,
   content,

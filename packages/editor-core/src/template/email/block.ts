@@ -123,7 +123,7 @@ export interface BlockDefinition<Type extends string = string, Attributes = unkn
 }
 
 /** A block definition, its type literal kept, so a renderer composed with it knows the type by name. */
-export function defineBlock<const Type extends string, Attributes, Content>(
+export function defineBlockType<const Type extends string, Attributes, Content>(
   definition: BlockDefinition<Type, Attributes, Content>,
 ): BlockDefinition<Type, Attributes, Content> {
   return definition;

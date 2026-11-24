@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { align, BUTTON_HREF_MAX_LENGTH, BUTTON_LABEL_MAX_LENGTH, readOr, spaceAfter } from './shared.js';
 
 const attributes = z.object({ align, spaceAfter, width: z.enum(['inline', 'full']).optional() }).strict();
@@ -12,7 +12,7 @@ const content = z
 const lenientContent = z.object({ label: z.string().catch(''), href: z.string().catch('') });
 
 /** A label and a link; the link opens with a literal scheme or a url variable, and may hold any token after it. */
-export const button = defineBlock({
+export const button = defineBlockType({
   type: 'button',
   attributes,
   content,

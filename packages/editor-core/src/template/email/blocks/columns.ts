@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineBlock } from '../block.js';
+import { defineBlockType } from '../block.js';
 import { readOr, spaceAfter } from './shared.js';
 
 /** The most lanes, and the heaviest one lane may weigh against its siblings: a twelve-column grid. */
@@ -16,7 +16,7 @@ const lenientAttributes = z.object({
 });
 
 /** Lanes side by side, the only block that holds other blocks, one level deep. */
-export const columns = defineBlock({
+export const columns = defineBlockType({
   type: 'columns',
   attributes,
   content,
