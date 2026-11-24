@@ -63,7 +63,7 @@ export function tableOfContents(options: TableOfContentsOptions = {}): EditorFea
               <a
                 href={`#${fragmentOf(entry.text)}`}
                 onClick={(event) => scrollToHeading(event, entry.index)}
-                className="text-muted-foreground hover:text-foreground block truncate rounded-sm py-0.5 text-sm underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
+                className="text-muted-foreground hover:text-foreground block truncate py-0.5 text-sm underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
               >
                 {entry.text}
               </a>

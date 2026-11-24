@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
-import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../blocks/block-feature.testing';
+import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { card } from './card';
-import { cardDefinition } from './card.testing';
+import { cardDefinition } from '../../../../../../../src/test/card-definition';
 
 describe('the card in the Document Editor', () => {
   it('is inserted from the slash menu and takes its image, title, text and button', async () => {

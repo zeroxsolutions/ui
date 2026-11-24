@@ -5,7 +5,7 @@ import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/edit
 import { standardKit } from '../standard/index';
 import { Viewer } from '../../react/viewer';
 import { card } from './card';
-import { cardDefinition } from './card.testing';
+import { cardDefinition } from '../../../../../../../src/test/card-definition';
 
 const features = [standardKit(), card(cardDefinition)];
 

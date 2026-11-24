@@ -4,8 +4,8 @@ import { userEvent } from 'vitest/browser';
 import { vi } from 'vitest';
 import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
-import { Editor } from '../react/editor';
-import { SlashMenu } from '../ui/slash-menu';
+import { Editor } from '../../registry/bases/base-ui/editor/document/react/editor';
+import { SlashMenu } from '../../registry/bases/base-ui/editor/document/ui/slash-menu';
 
 /** The Document Editor with its slash menu, as a host draws it. */
 function DocumentEditorHarness({

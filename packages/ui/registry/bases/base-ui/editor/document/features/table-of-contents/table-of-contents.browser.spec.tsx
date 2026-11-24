@@ -3,7 +3,7 @@ import { page, userEvent } from 'vitest/browser';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
-import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../blocks/block-feature.testing';
+import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { toggleHeading } from '../toggle-heading/index';
 import { tableOfContents } from './table-of-contents';
