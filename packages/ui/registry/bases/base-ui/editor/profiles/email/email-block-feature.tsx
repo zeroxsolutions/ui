@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { z } from 'zod';
 import { BlocksIcon } from '@/registry/bases/base-ui/icons/lucide/blocks-icon';
 import { Input } from '@/registry/bases/base-ui/ui/input';
@@ -22,6 +22,7 @@ import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
 import { VariableTextField } from '../variables/variable-text-field';
 import { blockAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
+import { blockClasses } from './nodes/block-style';
 
 export interface EmailBlockFeatureOptions {
   /** The slash menu's icon for the block; a blocks icon when absent. */
@@ -42,7 +43,7 @@ function wordsOf(editor: EmailBlockEditor, messages: ProfileEditorMessages) {
     description: own.description ?? editor.description,
     field: (name: string, label: string) => own.fields?.[name] ?? label,
     attribute: (attribute: EmailBlockEditorAttribute) => own.attributes?.[attribute.name] ?? attribute.label,
-    value: (value: string, label: string) => own.values?.[value] ?? label,
+    value: (attribute: string, value: string, label: string) => own.values?.[attribute]?.[value] ?? label,
   };
 }
 
@@ -71,7 +72,11 @@ function refusalOf(editor: IEditor, block: Found): string | null {
 /** The frame the block is drawn in, before the editor mounts and in it: its name over its body and its fields. */
 function EmailBlockFrame({ type, title, children }: { type: string; title: string; children: ReactNode }) {
   return (
-    <div data-slot="email-block" data-type={type} className="cn-editor-block flex flex-col gap-2 border p-3">
+    <div
+      data-slot="email-block"
+      data-type={type}
+      className={cn('cn-editor-block flex flex-col gap-2 border p-3', blockClasses({}))}
+    >
       <span contentEditable={false} className="text-muted-foreground text-xs font-medium select-none">
         {title}
       </span>
@@ -96,6 +101,9 @@ function EmailBlockNumberField({
   onValueChange(value: number): void;
 }) {
   const id = useId();
+  // What the author is typing, which may pass through a value out of range, as `1` on the way to `15`; the block
+  // takes it once it is in range, and the field shows the block's value again when it loses the focus.
+  const [draft, setDraft] = useState<string | null>(null);
   return (
     <div className="flex items-center gap-2">
       <label htmlFor={id} className="text-muted-foreground text-xs">
@@ -105,14 +113,16 @@ function EmailBlockNumberField({
         id={id}
         type="number"
         className="w-20"
-        value={value}
+        value={draft ?? value}
         min={min}
         max={max}
         disabled={disabled}
         onChange={(event) => {
+          setDraft(event.currentTarget.value);
           const next = event.currentTarget.valueAsNumber;
-          if (Number.isFinite(next) && next >= min && next <= max) onValueChange(next);
+          if (Number.isFinite(next) && next >= min && next <= max && next !== value) onValueChange(next);
         }}
+        onBlur={() => setDraft(null)}
       />
     </div>
   );
@@ -301,7 +311,7 @@ export function emailBlockFeature(
       if (attribute.kind === 'choice') {
         return attribute.values.map(({ value, label }) => ({
           id: `${id}-${value}`,
-          title: shown.value(value, label),
+          title: shown.value(attribute.name, value, label),
           group: shown.attribute(attribute),
           command: setCommand,
           args: { name: attribute.name, value },

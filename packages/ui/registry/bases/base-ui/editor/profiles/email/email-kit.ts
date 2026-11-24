@@ -311,8 +311,16 @@ function outsiders(doc: ProseMirrorNode, admitted: ReadonlySet<string>): Map<str
 /**
  * Refuses a feature whose node or mark the email export cannot carry: every block it declares or encodes needs
  * a codec with `toEmailBlock` and `fromEmailBlock`, and an inline node or a mark has no place in the stored text.
+ * Refuses two features that hold one node, as a block given both in `blocks` and in `features`.
  */
 function assertEmailCodecs(extra: readonly EditorFeature[]): void {
+  const named = new Set<string>();
+  for (const node of extra.flatMap((feature) => feature.nodes ?? [])) {
+    if (named.has(node.name)) {
+      throw new EditorError('editor.profile.duplicate_node', `Two of the features hold the node "${node.name}".`);
+    }
+    named.add(node.name);
+  }
   for (const feature of extra) {
     const inline = (feature.nodes ?? []).find((node) => inGroup(node, 'inline'));
     if (inline) {
@@ -466,15 +474,16 @@ export function emailKit(
   const messages = options.messages ?? (() => DEFAULT_PROFILE_MESSAGES);
 
   const ownMenus = extra.flatMap((feature) => ownBlockMenus.get(feature) ?? []);
-  const extraBlocks = extra.flatMap((feature) =>
-    (feature.nodes ?? []).filter((node) => inGroup(node, 'block')).map((node) => node.name),
-  );
+  const extraNodes = extra.flatMap((feature) => (feature.nodes ?? []).filter((node) => inGroup(node, 'block')));
+  const extraBlocks = extraNodes.map((node) => node.name);
+  // A lane holds no block of lanes, as it holds no columns block.
+  const laneBlocks = extraNodes.filter((node) => !(node.content ?? '').includes('emailLane')).map((node) => node.name);
   // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
     ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
     ...Object.keys(FOLDED_BLOCKS),
     'emailUnknown',
-    ...extraBlocks,
+    ...laneBlocks,
   ].join(' | ')})*`;
   // A list item's and a callout's lines are paragraphs, whatever the profile allows at the top.
   const admitted = new Set([

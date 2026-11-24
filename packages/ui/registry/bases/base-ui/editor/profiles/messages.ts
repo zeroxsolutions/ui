@@ -27,10 +27,6 @@ export interface SmsMeterReading {
   maxSegments: number;
 }
 
-/**
- * Every string the email and SMS editors draw. A host passes some of them as `messages`, in its own catalogue's
- * words, and the rest stay `DEFAULT_PROFILE_MESSAGES`'s English.
- */
 /** The words of a product's own block; its definition's labels where one is absent. */
 export interface CustomBlockMessages {
   /** Its name in the slash menu and over its view. */
@@ -41,10 +37,14 @@ export interface CustomBlockMessages {
   fields?: Readonly<Record<string, string>>;
   /** Each attribute's name, by the attribute's name in the definition. */
   attributes?: Readonly<Record<string, string>>;
-  /** Each choice's value's name, by the value. */
-  values?: Readonly<Record<string, string>>;
+  /** Each choice's values' names, by the attribute's name, then the value. */
+  values?: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }
 
+/**
+ * Every string the email and SMS editors draw. A host passes some of them as `messages`, in its own catalogue's
+ * words, and the rest stay `DEFAULT_PROFILE_MESSAGES`'s English.
+ */
 export interface ProfileEditorMessages {
   /** What a problem says to the author, naming the variable it is about. */
   problem(problem: ProfileProblem): string;
