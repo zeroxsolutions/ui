@@ -3,6 +3,7 @@
 import { setFluentEmojiBase } from '@zeroxsolutions/fluent-emoji';
 import { RegistryExamplesProvider } from '@zeroxsolutions/ui/site/components/data-display/registry-example';
 import { HostProvider } from '@zeroxsolutions/ui/host';
+import { useForcedTheme } from '@zeroxsolutions/ui/site/hooks/use-forced-theme';
 import { ThemeProvider } from 'next-themes';
 import type { ReactNode } from 'react';
 
@@ -20,14 +21,15 @@ import { useNextHost } from './next-host';
 setFluentEmojiBase('https://fluent-emoji.zeroxsolutions.com');
 
 /**
- * The providers every page renders inside. The host hands the site components Next's link and router. The theme is a class on `<html>`, which the stylesheet's
- * `dark` variant reads; left unset, the provider follows the system's colour scheme. The demos are the
- * ones the preview renders.
+ * The providers every page renders inside. The host hands the site components Next's link and router. The
+ * theme is a class on `<html>`, which the stylesheet's `dark` variant reads; left unset, the provider
+ * follows the system's colour scheme, and a page's `?theme=` forces one there without storing it. The demos
+ * are the ones the preview renders.
  */
 function AppProviders({ children }: { children: ReactNode }): ReactNode {
   const host = useNextHost();
   return (
-    <ThemeProvider attribute="class" disableTransitionOnChange>
+    <ThemeProvider attribute="class" forcedTheme={useForcedTheme()} disableTransitionOnChange>
       <HostProvider host={host}>
         <RegistryExamplesProvider components={Components}>{children}</RegistryExamplesProvider>
       </HostProvider>

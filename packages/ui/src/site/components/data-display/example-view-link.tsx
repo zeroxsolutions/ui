@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 
 import { useAnimatedIcon } from '../../../../registry/bases/base-ui/hooks/use-animated-icon';
 import { Maximize2Icon } from '../../../../registry/bases/base-ui/icons/lucide/maximize-2-icon';
-import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 import { buttonVariants } from '../../../../registry/bases/base-ui/ui/button';
 
 interface ExampleViewLinkProps {
@@ -14,7 +13,7 @@ interface ExampleViewLinkProps {
   href: string;
 }
 
-/** The button on a preview's stage that opens the demo's page in a new tab; its icon plays while the pointer or the focus is on it. */
+/** The button over a preview's stage that opens the demo's page in a new tab; its icon plays while the pointer or the focus is on it. */
 function ExampleViewLink({ name, href }: ExampleViewLinkProps): ReactNode {
   const icon = useAnimatedIcon();
 
@@ -25,10 +24,7 @@ function ExampleViewLink({ name, href }: ExampleViewLinkProps): ReactNode {
       rel="noreferrer"
       aria-label={`Open ${name} in a new tab`}
       title="Open in a new tab"
-      className={cn(
-        buttonVariants({ variant: 'ghost', size: 'icon-sm' }),
-        'bg-background/80 absolute top-2 right-2 backdrop-blur-sm',
-      )}
+      className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
       {...icon.handlers}
     >
       <Maximize2Icon ref={icon.ref} aria-hidden />
