@@ -45,8 +45,10 @@ export interface EmailRendererOptions<Props, Extra extends readonly BlockDefinit
   readonly theme?: EmailTheme;
   /**
    * Level 1: the product's own stylesheets, after the base one, so a rule of equal specificity beats it. Class
-   * rules are written into each element's `style`; `@media` and `@font-face` stay in the head, a `@media`
-   * declaration made `!important`. `var()` reads the custom properties of `:root` and `.zx-root`.
+   * rules are written into each element's `style`. Under `@media` or `@supports`, each element's style is
+   * computed as the query would cascade it, and what the query sets or changes is written in the head under a
+   * class of the element's own; the query's other rules, `@font-face` and other at-rules stay in the head as
+   * written. `var()` reads the custom properties of `:root` and `.zx-root`, a query's own over the sheets'.
    */
   readonly css?: string | readonly string[];
   /** Level 2: the default layout otherwise. */

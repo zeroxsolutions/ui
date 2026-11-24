@@ -108,6 +108,27 @@ describe('inlining a stylesheet', () => {
     expect(queries).toHaveLength(1);
   });
 
+  it('keeps a query inside another at-rule, such as @layer, in the head as written', () => {
+    const { head, queries } = composeStylesheets('', ['@layer x{@media (max-width:600px){.b{color:blue}}}']);
+    expect(head).toBe('@layer x{@media (max-width:600px){.b{color:blue !important}}}');
+    expect(queries).toEqual([]);
+  });
+
+  it('keeps an at-rule inside a product query, with its rules, which the renderer does not compute', () => {
+    const { head } = composeStylesheets('', ['@media (max-width:600px){@layer x{.b{color:blue}}.c{color:red}}']);
+    expect(head).toBe('@media (max-width:600px){@layer x{.b{color:blue !important}}}');
+  });
+
+  it("computes a query's .zx-root rule as any class rule, and refuses a :root one that styles", () => {
+    const { queries } = composeStylesheets('', ['@media (max-width:600px){.zx-root{--x:1px;color:red}}']);
+    expect(inlineStyle(queries[0].rules, element(['zx-root']))).toBe('color:red;');
+    expect(refusal(['@media (max-width:600px){\n  :root{--x:1px;color:red}}'])).toMatchObject({
+      line: 2,
+      reason: 'selector-refused',
+      detail: ':root',
+    });
+  });
+
   it('keeps a product rule from ending the head style', () => {
     expect(composeStylesheets('', ['@media all{.a{font-family:"</style><b>"}}']).head).not.toContain('</style>');
   });

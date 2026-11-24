@@ -50,6 +50,8 @@ export interface QueryRules {
    * class-only rules, each at its place in the sheets' order.
    */
   readonly rules: readonly InlineRule[];
+  /** Of `rules`, the chain's own: what it declares is written for an element even at the inline value. */
+  readonly own: readonly InlineRule[];
 }
 
 /** The sheets one renderer composes: what it inlines, and the rules it keeps in the head's style. */
@@ -265,6 +267,8 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   const warnings: StylesheetWarning[] = [];
   const written: WrittenRule[] = [];
   const entries: QueryEntry[] = [];
+  /** The product query rules `readQuery` computes per element, which the head therefore leaves out. */
+  const computed = new Set<Rule>();
   let darkScheme = false;
   let position = 0;
 
@@ -345,7 +349,7 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         return;
       }
       if (child.type !== 'rule') return;
-      if (child.selectors.every((text) => ROOTS.has(text.trim()))) return;
+      computed.add(child);
       const declarations = declarationsOf(source, child, scope);
       // A rule under `@supports` is the author's own guard for the clients that lack the feature.
       if (!guarded) {
@@ -356,6 +360,11 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         });
       }
       for (const text of child.selectors) {
+        // As at the top: `:root` holds custom properties only, which the query's scope has read already.
+        if (text.trim() === ':root') {
+          if (declarations.length > 0) refuse(source, child, 'selector-refused', text.trim());
+          continue;
+        }
         const selector = parseClassSelector(text);
         if ('refused' in selector || declarations.length === 0) continue;
         own.push({ selector, declarations, order: position++ });
@@ -364,8 +373,9 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   };
 
   /**
-   * What an at-rule keeps in the head: the base sheet's as written; a product's with its class-only rules and its
-   * `:root` rules taken out, since the renderer computes those per element, and the rest made `!important`.
+   * What an at-rule keeps in the head: the base sheet's as written; a product's with the class-only and `:root`
+   * rules of its queries taken out, since the renderer computes those per element, and the rest made `!important`.
+   * A query inside another at-rule, such as `@layer`, and an at-rule inside a query are not computed, so they stay.
    */
   const headRule = (source: Source, rule: AtRule): void => {
     if (CONDITIONAL.has(rule.name.toLowerCase()) && DARK_QUERY.test(rule.params)) darkScheme = true;
@@ -380,6 +390,15 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       values.push(scopeOf(source, enclosingQuery(declaration)).resolveIn(source, declaration, declaration.value));
     });
     const copy = rule.clone();
+    // The clone walks as the rule does, so each copied rule is found at its original's index.
+    const originals: Rule[] = [];
+    rule.walkRules((inner) => {
+      originals.push(inner);
+    });
+    const copies: Rule[] = [];
+    copy.walkRules((inner) => {
+      copies.push(inner);
+    });
     let index = 0;
     copy.walkDecls((declaration) => {
       declaration.value = values[index];
@@ -387,8 +406,8 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       if (product && enclosingQuery(declaration) !== null) declaration.important = true;
     });
     if (product) {
-      copy.walkRules((inner) => {
-        if (enclosingQuery(inner) === null) return;
+      copies.forEach((inner, at) => {
+        if (!computed.has(originals[at])) return;
         const kept = inner.selectors.filter((text) => !ROOTS.has(text.trim()) && 'refused' in parseClassSelector(text));
         if (kept.length === 0) inner.remove();
         else inner.selectors = kept;
@@ -428,6 +447,7 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       open: chain.map((node) => `@${node.name} ${node.params}{`).join(''),
       close: '}'.repeat(chain.length),
       rules: [...top, ...own],
+      own,
     };
   });
 

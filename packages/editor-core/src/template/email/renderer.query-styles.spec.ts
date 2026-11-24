@@ -73,7 +73,51 @@ describe("a product's query rules, drawn per element", () => {
       '.zx-region-body .zx-callout{border-color:green}@media (prefers-color-scheme:dark){.zx-callout{border:2px solid red}}';
     const { html, head } = render(css, [callout]);
     const [dark] = queryClassesOf(html, 'zx-callout');
-    expect(ruleOf(head, dark)).toBe('border:2px solid red !important;border-color:green !important');
+    expect(head).toContain(
+      `@media (prefers-color-scheme:dark){.${dark}{border:2px solid red !important}` +
+        `.${dark}.${dark}{border-color:green !important}}`,
+    );
+  });
+
+  it("writes a query's own declaration that equals the inline one, so it still beats the base's head rules", () => {
+    const { html, head } = render('@media only screen and (max-width:600px){.zx-text{font-size:14px}}');
+    const [narrow] = queryClassesOf(html, 'zx-text zx-tone-default');
+    expect(ruleOf(head, narrow)).toBe('font-size:14px !important');
+    expect(head.indexOf(`.${narrow}{`)).toBeGreaterThan(head.indexOf('.zx-text{font-size:16px !important'));
+  });
+
+  it('keeps the specificity of a query rule, so a more specific one wins over a later query', () => {
+    const css =
+      '@media (max-width:600px){.zx-region-body .zx-text{color:red}}@media (min-width:1px){.zx-text{color:blue}}';
+    const { html, head } = render(css);
+    const [narrow, wide] = queryClassesOf(html, 'zx-text zx-tone-default');
+    expect(head).toContain(`@media (min-width:1px){.${wide}{color:blue !important}}`);
+    expect(head).toContain(`@media (max-width:600px){.${narrow}.${narrow}{color:red !important}}`);
+  });
+
+  it("lets a query's important declaration beat a more specific one in another query", () => {
+    const css =
+      '@media (max-width:600px){.zx-region-body .zx-text{color:red}}' +
+      '@media (min-width:1px){.zx-text{color:blue !important}}';
+    const { html, head } = render(css);
+    const [narrow, wide] = queryClassesOf(html, 'zx-text zx-tone-default');
+    const selectorOf = (name: string, value: string): string =>
+      new RegExp(`((?:\\.${name})+)\\{color:${value} !important\\}`).exec(head)?.[1] ?? '';
+    expect(selectorOf(wide, 'blue').length).toBeGreaterThan(selectorOf(narrow, 'red').length);
+  });
+
+  it('writes a nested query before an outer rule that follows it, so the later rule wins as written', () => {
+    const css = '@media (max-width:600px){@media (min-width:1px){.zx-text{color:red}}.zx-text{color:blue}}';
+    const { html, head } = render(css);
+    const [outer, inner] = queryClassesOf(html, 'zx-text zx-tone-default');
+    expect(head.indexOf(`.${inner}{color:red`)).toBeLessThan(head.indexOf(`.${outer}{color:blue`));
+  });
+
+  it('carries no property a shorthand does not set, such as border-collapse after border', () => {
+    const css = '.zx-callout{border-collapse:separate}@media (prefers-color-scheme:dark){.zx-callout{border:0}}';
+    const { html, head } = render(css, [callout]);
+    const [dark] = queryClassesOf(html, 'zx-callout');
+    expect(ruleOf(head, dark)).toBe('border:0 !important');
   });
 
   it('reads a :root inside a nested query, and writes the chain of queries around the rule', () => {
