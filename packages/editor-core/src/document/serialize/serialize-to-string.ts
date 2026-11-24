@@ -37,8 +37,13 @@ function serializeNode(node: NodeJSON, format: Format, registry: CodecRegistry, 
   return applyFallback(node, format, registry, ctx);
 }
 
+/** Text in HTML is text: an author's `<` or `&` never becomes markup in the export. */
+function escapedText(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function applyMarks(node: NodeJSON, format: Format, registry: CodecRegistry, ctx: SerializeContext): string {
-  let text = node.text ?? '';
+  let text = format === 'html' ? escapedText(node.text ?? '') : (node.text ?? '');
   const method = MARK_METHOD[format as keyof typeof MARK_METHOD];
   for (const mark of node.marks ?? []) {
     const codec = registry.markCodec(mark.type);
