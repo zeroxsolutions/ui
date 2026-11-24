@@ -3,6 +3,7 @@
  * carries the classes a stylesheet styles it by. Values are filled when a node is made, through the reader
  * its factory was given, and escaped when it is written.
  */
+import { escapeHtml } from '../../variables/interpolate.js';
 
 /** One class name, or several, a falsy entry left out, so a render can write `active && 'zx-x'`. */
 export type ClassList = string | readonly (string | false | null | undefined)[];
@@ -51,8 +52,16 @@ export type EmailNode =
       readonly level: 1 | 2 | 3;
       readonly runs: readonly TextRun[];
     }
-  /** `href` is empty where the link was refused: the button still draws, and links nowhere. */
-  | { readonly kind: 'button'; readonly classes: readonly string[]; readonly href: string; readonly label: string }
+  /**
+   * `href` is null where the link was refused or empty: the button draws with no `href`, since a webmail resolves
+   * an empty one to its own page.
+   */
+  | {
+      readonly kind: 'button';
+      readonly classes: readonly string[];
+      readonly href: string | null;
+      readonly label: string;
+    }
   | {
       readonly kind: 'image';
       readonly classes: readonly string[];
@@ -97,15 +106,38 @@ export interface PrimitiveReader {
   href(template: string): string | null;
   /** The template as markup, written as it is with every value escaped. */
   markup(template: string): string;
+  /** The image address the template makes, or null where it is refused. */
+  imageSrc(template: string): string | null;
 }
 
-/** Prints what it is given as it is: the layout's, whose values are the product's own and not a person's. */
+/** Prints what it is given as it is, every address included. */
 export const literalReader: PrimitiveReader = {
   text: (template) => template,
   runs: (template) => (template === '' ? [] : [{ kind: 'text', text: template, bold: false, italic: false }]),
   href: (template) => template,
   markup: (template) => template,
+  imageSrc: (template) => template,
 };
+
+/** A link a client opens: a page, or an address to write to. */
+const LAYOUT_LINK = /^(?:https?:|mailto:)/i;
+/** An image a client loads: a page's, or one written into the address, as a preview's logo is. */
+const LAYOUT_IMAGE = /^(?:https?:|data:image\/)/i;
+const MARKUP_CHARACTER = /[<>&"']/;
+
+/**
+ * The layout's reader: it prints the product's own props as given, checks each link's and image's scheme as a
+ * block's are checked, and escapes `personal`, the filled subject and preheader, wherever raw markup holds one.
+ */
+export function layoutReader(personal: readonly string[]): PrimitiveReader {
+  const escaped = personal.filter((value) => MARKUP_CHARACTER.test(value));
+  return {
+    ...literalReader,
+    href: (template) => (LAYOUT_LINK.test(template.trim()) ? template.trim() : null),
+    imageSrc: (template) => (LAYOUT_IMAGE.test(template.trim()) ? template.trim() : null),
+    markup: (template) => escaped.reduce((markup, value) => markup.split(value).join(escapeHtml(value)), template),
+  };
+}
 
 interface Classed {
   readonly class?: ClassList;
@@ -138,7 +170,11 @@ export interface EmailPrimitives {
   code(options: Classed & { readonly text: string }): EmailNode;
   /** Vertical space, `height` in px. */
   spacer(options: Classed & { readonly height: number }): EmailNode;
-  /** Markup as written, every value escaped; never styled. Its text arm is the markup with its tags dropped. */
+  /**
+   * Markup as written, every value escaped; never styled. Its text arm is the markup with its tags dropped. A
+   * layout's `raw` writes its markup as given: a person's value, as the subject and preheader hold, goes through
+   * `text`, though a filled subject or preheader found in it is escaped.
+   */
   raw(options: { readonly markup: string }): EmailNode;
   /** The inbox line a client shows after the subject, hidden in the email. */
   preheader(options: { readonly text: string }): EmailNode;
@@ -169,8 +205,6 @@ function withoutTags(html: string): string {
     .replace(/[ \t]+\n/g, '\n')
     .trim();
 }
-
-const SCHEME = /^https?:/i;
 
 /** The primitives filling through `reader`. */
 export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
@@ -207,12 +241,12 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
     button: (options) => ({
       kind: 'button',
       classes: classesOf(options.class, 'zx-button'),
-      href: reader.href(options.href) ?? '',
+      href: reader.href(options.href) || null,
       label: reader.text(options.label),
     }),
     image: (options) => {
-      const src = reader.href(options.src);
-      if (src === null || (reader !== literalReader && !SCHEME.test(src))) return { kind: 'raw', html: '', text: '' };
+      const src = reader.imageSrc(options.src);
+      if (src === null) return { kind: 'raw', html: '', text: '' };
       return {
         kind: 'image',
         classes: classesOf(options.class, 'zx-image'),

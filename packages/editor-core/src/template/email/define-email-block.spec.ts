@@ -55,7 +55,8 @@ describe('defineEmailBlock', () => {
     expect(quote.content.safeParse({ text: 'Hi', author: 'x'.repeat(121) }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: 'Lan', extra: 'x' }).success).toBe(false);
     expect(quote.content.safeParse({ text: 'Hi', author: '' }).success).toBe(true);
-    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(false);
+    // The editor's field holds one line; a stored newline draws as a space, and no check refuses it.
+    expect(quote.content.safeParse({ text: 'Hi', author: 'Lan\nTran' }).success).toBe(true);
     expect(quote.attributes.safeParse({}).success).toBe(true);
     expect(quote.attributes.safeParse({ tone: 'brand', boxed: true, size: 3 }).success).toBe(true);
     expect(quote.attributes.safeParse({ tone: 'loud' }).success).toBe(false);
@@ -151,6 +152,7 @@ describe('defineEmailBlock', () => {
     });
     expect(rendered.text).toBe('Left');
     expect(rendered.html.match(/class="zx-lane/g)).toHaveLength(2);
+    expect(rendered.problems).toEqual([{ blockId: 'p', kind: 'lanes-mismatch' }]);
   });
 
   it('describes the block to an editor, labels capitalised where none is given', () => {

@@ -7,12 +7,16 @@ export interface LayoutInput<Props> {
   readonly body: readonly EmailNode[];
   /** Each region's blocks; none where the render was given none. */
   readonly regions: Readonly<Record<Region, readonly EmailNode[]>>;
+  /** Filled with a person's values: drawn through `h.text` or `h.preheader`, which escape it, never `h.raw`. */
   readonly subject: string;
-  /** Empty where the template has none. */
+  /** Empty where the template has none; filled with a person's values, as `subject` is. */
   readonly preheader: string;
   readonly locale: string;
   readonly props: Props;
-  /** The primitives, printing what they are given as it is: the props are the product's, not a person's. */
+  /**
+   * The primitives, printing the product's props as given; a link or an image checks its scheme as a block's does,
+   * and an image may also be a `data:image/` address.
+   */
   readonly h: EmailPrimitives;
 }
 

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
 import type { EditorEmailBlock, VariableDeclaration } from './types.js';
 import { validate } from './validate.js';
+import { defineEmailBlock } from '../../template/email/define-email-block.js';
+import { imageUrl, lanes, link, plainText, richText } from '../../template/email/fields.js';
 
 const VARIABLES: VariableDeclaration[] = [
   { name: 'name', type: 'string' },
@@ -255,5 +257,66 @@ describe('validate an SMS body', () => {
       { kind: 'variable-undeclared', block: null, name: 'x' },
       { kind: 'required-variable-not-printed', block: null, name: 'name' },
     ]);
+  });
+
+  describe("validate a product's own block", () => {
+    const card = defineEmailBlock({
+      type: 'card',
+      label: 'Card',
+      fields: { text: richText(), author: plainText({ max: 10 }), href: link(), image: imageUrl() },
+      render: (_view, h) => h.divider(),
+      sample: { fields: { text: 'x', author: 'y', href: '', image: '' }, variableTypes: {} },
+    });
+    const pair = defineEmailBlock({
+      type: 'pair',
+      label: 'Pair',
+      fields: { sides: lanes({ min: 2, max: 2 }) },
+      render: (_view, h) => h.divider(),
+      sample: { fields: {}, variableTypes: {} },
+    });
+    const owned = emailProfile({ variables: VARIABLES, blocks: [card, pair] });
+    const cardOf = (content: Record<string, unknown>) =>
+      block('card', { text: 'Hi', author: '', href: '', image: '', ...content });
+
+    it("adds the blocks' kinds to the profile", () => {
+      expect(owned.kinds).toEqual(expect.arrayContaining(['paragraph', 'card', 'pair']));
+      expect(validate([cardOf({ href: '{{link}}', image: 'https://x.test/a.png' })], owned)).toEqual([]);
+    });
+
+    it('flags what the renderer would refuse to save, in the kinds the default blocks use', () => {
+      expect(validate([cardOf({ text: '' })], owned)).toEqual([{ kind: 'text-empty', block: 'k1', field: 'text' }]);
+      expect(validate([cardOf({ text: '**Hi' })], owned)).toEqual([
+        { kind: 'markup-malformed', block: 'k1', field: 'text', offset: 0 },
+      ]);
+      expect(validate([cardOf({ author: 'x'.repeat(11) })], owned)).toEqual([
+        { kind: 'text-too-long', block: 'k1', field: 'author' },
+      ]);
+      expect(validate([cardOf({ href: '{{name}}' })], owned)).toEqual([
+        { kind: 'href-invalid', block: 'k1', field: 'href' },
+      ]);
+      expect(validate([cardOf({ href: 'javascript:alert(1)' })], owned)).toEqual([
+        { kind: 'href-invalid', block: 'k1', field: 'href' },
+      ]);
+      expect(validate([cardOf({ image: 'mailto:a@b.test' })], owned)).toEqual([
+        { kind: 'href-invalid', block: 'k1', field: 'image' },
+      ]);
+      expect(validate([cardOf({ href: '{{nobody}}' })], owned)).toEqual([
+        { kind: 'variable-undeclared', block: 'k1', field: 'href', name: 'nobody' },
+      ]);
+    });
+
+    it('flags a lanes block holding fewer or more lanes than it takes', () => {
+      expect(validate([block('pair', {}, { lanes: [[], []] })], owned)).toEqual([]);
+      expect(validate([block('pair', {}, { lanes: [[], [], []] })], owned)).toEqual([
+        { kind: 'lanes-mismatch', block: 'k1', field: 'sides' },
+      ]);
+      expect(validate([block('pair', {}, { lanes: [[]] })], owned)).toEqual([
+        { kind: 'lanes-mismatch', block: 'k1', field: 'sides' },
+      ]);
+    });
+
+    it('refuses two blocks of one type', () => {
+      expect(() => emailProfile({ blocks: [card, card] })).toThrow(/declared twice/);
+    });
   });
 });

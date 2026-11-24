@@ -28,6 +28,9 @@ const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[
 
 const NO_LINK: RenderedBlock = { html: '', text: '' };
 
+/** The schemes an image may load from: a page; a mail address is a link only. */
+const IMAGE_SCHEME = /^https?:/i;
+
 /** The context one block renders through, reporting into `state.problems` under `blockId`. */
 export function createRenderContext(
   state: RenderState,
@@ -147,6 +150,10 @@ export function createRenderContext(
         return link.html === '' ? null : link.text;
       },
       markup: (template) => context.markup(template),
+      imageSrc: (template) => {
+        const link = context.href(template);
+        return link.html !== '' && IMAGE_SCHEME.test(link.text) ? link.text : null;
+      },
     }),
     lane,
     laneCount,

@@ -76,7 +76,9 @@ describe('the primitives', () => {
     expect(ok.html).toBe('<a href="https://x.test/a?b=1&amp;c=2" class="zx-button">Go &lt;Mai&gt;</a>');
     expect(ok.text).toBe('Go <Mai>: https://x.test/a?b=1&c=2\n\n');
     const refused = draw((h) => h.button({ href: '{{bad}}', label: 'Go' }));
-    expect(refused.html).toBe('<a href="" class="zx-button">Go</a>');
+    // No `href=""`: a webmail resolves an empty one to its own page.
+    expect(refused.html).toBe('<a class="zx-button">Go</a>');
+    expect(refused.text).toBe('Go\n\n');
     expect(refused.problems).toContainEqual({ blockId: 'b1', kind: 'href-scheme-refused', name: 'bad' });
   });
 

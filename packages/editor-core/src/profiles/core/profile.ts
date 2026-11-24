@@ -6,6 +6,7 @@ import {
   LIST_MAX_ITEMS,
   MAX_LANES,
 } from '../../template/email/index.js';
+import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
 import type { EditorProfile, EmailBlockKind, EmailBounds, VariableDeclaration } from './types.js';
 
 export const EMAIL_KINDS: readonly EmailBlockKind[] = [
@@ -86,7 +87,10 @@ export function emailProfile(
     allow?: readonly EmailBlockKind[];
     variables?: readonly VariableDeclaration[];
     bounds?: Partial<EmailBounds>;
+    /** The kinds of blocks a host's own editor features add; a block from `defineEmailBlock` goes in `blocks`. */
     extraKinds?: readonly string[];
+    /** The product's own blocks, from `defineEmailBlock`: their kinds join the profile and `validate` checks them. */
+    blocks?: readonly { readonly editor: EmailBlockEditor }[];
   } = {},
 ): EditorProfile {
   const allow = options.allow ?? EMAIL_KINDS;
@@ -98,12 +102,22 @@ export function emailProfile(
   const bounds = boundsOf(options.bounds);
   const variables = options.variables ?? [];
   assertVariables(variables, bounds.variables);
+  const blocks = (options.blocks ?? []).map((definition) => definition.editor);
+  const types = new Set<string>();
+  for (const { type } of blocks) {
+    if (types.has(type)) {
+      throw new EditorError('editor.profile.block_duplicate', `Block type "${type}" is declared twice.`);
+    }
+    types.add(type);
+  }
+  const extraKinds = (options.extraKinds ?? []).filter((kind) => !types.has(kind));
   return {
     id: 'email',
-    kinds: [...allow, ...(options.extraKinds ?? [])],
+    kinds: [...allow, ...extraKinds, ...types],
     variables,
     bounds,
     exports: ['email-blocks', 'email-html', 'email-text'],
+    ...(blocks.length === 0 ? {} : { blocks }),
   };
 }
 

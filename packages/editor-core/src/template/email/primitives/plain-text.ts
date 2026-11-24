@@ -31,7 +31,7 @@ function plainTextOfNode(node: EmailNode): string {
     case 'heading':
       return `${runsText(node.runs)}\n\n`;
     case 'button':
-      return `${node.label}: ${node.href}\n\n`;
+      return node.href === null ? `${node.label}\n\n` : `${node.label}: ${node.href}\n\n`;
     case 'image':
       return node.href === null ? '' : `${node.alt}: ${node.href}\n\n`;
     case 'divider':

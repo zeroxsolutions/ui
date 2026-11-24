@@ -70,11 +70,11 @@ describe('checkEmailRenderer', () => {
     ]);
   });
 
-  it('fails a layout that prints the subject raw', () => {
+  it('fails a layout that prints part of the subject raw, which the escape of the whole value misses', () => {
     const renderer = createEmailRenderer({
       theme: FIXTURE_THEME,
       layout: ({ body, subject, h }: LayoutInput<typeof FIXTURE_LAYOUT_PROPS>) => [
-        h.raw({ markup: `<h1>${subject}</h1>` }),
+        h.raw({ markup: `<h1>${subject.slice('Probe '.length)}</h1>` }),
         h.region('body', body),
       ],
     });

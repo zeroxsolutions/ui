@@ -186,7 +186,7 @@ function assertOptions(options: EmailBlockOptions<string, FieldMap, AttributeMap
   }
 }
 
-/** An address a link field may open with: a literal web or mail one, or a variable, whose type the profile checks. */
+/** An address a link field may open with: a literal web or mail one, or a variable, whose type `validate` checks. */
 const LINK_START = /^(?:https?:\/\/|mailto:|\{\{)/i;
 /** An address an image field may open with: a literal web one, or a variable. */
 const IMAGE_START = /^(?:https?:\/\/|\{\{)/i;
@@ -204,13 +204,13 @@ function textSchema(field: Exclude<EmailBlockField, LanesField>): z.ZodType<stri
       .max(field.max)
       .refine((value) => parseInlineMarkup(value).ok, { message: 'malformed inline markup' });
   }
-  const line = z
-    .string()
-    .max(field.max)
-    .refine((value) => !/[\r\n]/.test(value), { message: 'one line' });
-  if (field.kind === 'plainText') return line;
+  const text = z.string().max(field.max);
+  // A plain field may hold a stored newline, which draws as a space; an address may not.
+  if (field.kind === 'plainText') return text;
   const start = field.kind === 'link' ? LINK_START : IMAGE_START;
-  return line.refine((value) => value === '' || start.test(value.trim()), { message: 'an address a client opens' });
+  return text.refine((value) => value === '' || (!/[\r\n]/.test(value) && start.test(value.trim())), {
+    message: 'an address a client opens',
+  });
 }
 
 function attributeSchema(attribute: EmailBlockAttribute): z.ZodType<string | boolean | number> {
@@ -311,6 +311,7 @@ export function defineEmailBlock<
     readContent: (raw) => readOr(lenientContent as unknown as z.ZodType<Content>, raw, emptyContent),
     holdsText: textFields.some(([, field]) => field.kind === 'richText' || field.kind === 'plainText'),
     holdsLanes: lanesName !== undefined,
+    ...(lanesEntry === undefined ? {} : { laneBounds: { min: lanesEntry[1].min, max: lanesEntry[1].max } }),
     async translate(source, translateOne) {
       const translated: Record<string, string> = { ...source };
       // In order rather than at once: a provider limits translations per minute.
@@ -327,9 +328,7 @@ export function defineEmailBlock<
         lanesEntry === undefined
           ? {}
           : {
-              [lanesEntry[0]]: Array.from({ length: Math.min(ctx.laneCount, lanesEntry[1].max) }, (_lane, index) =>
-                ctx.lane(index),
-              ),
+              [lanesEntry[0]]: Array.from({ length: ctx.laneCount }, (_lane, index) => ctx.lane(index)),
             };
       return options.render(
         {

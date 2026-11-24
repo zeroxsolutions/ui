@@ -2,6 +2,7 @@ import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } fr
 import { leadingToken } from '../../template/markup/href.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
+import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
@@ -72,6 +73,52 @@ function checkHref(walk: Walk, block: string, value: string): void {
   }
 }
 
+/** An image's address: a web one, or a url variable; never a mail address, which `hrefFaulty` lets a link take. */
+const MAIL = /^mailto:/i;
+
+/**
+ * What the renderer's write check refuses in a product block's fields, in the kinds a default block's take: the
+ * body as a paragraph's text, each other field's size, each link and image address, and the lane count.
+ * Each field's tokens are checked under its name.
+ */
+function checkOwnBlock(walk: Walk, own: EmailBlockEditor, block: EditorEmailBlock, id: string): void {
+  const { content } = block;
+  for (const name of [...(own.body === null ? [] : [own.body.name]), ...own.fields.map((field) => field.name)]) {
+    checkTokens(walk, { block: id, field: name }, text(content[name]));
+  }
+  if (own.body !== null) {
+    const value = text(content[own.body.name]);
+    const where = { block: id, field: own.body.name };
+    if (value === '') walk.problems.push({ kind: 'text-empty', ...where });
+    else if (value.length > own.body.max) walk.problems.push({ kind: 'text-too-long', ...where });
+    const parsed = parseInlineMarkup(value);
+    if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
+    else {
+      for (const run of parsed.runs) {
+        if (run.kind === 'link' && hrefFaulty(walk, run.href)) {
+          const name = leadingToken(run.href);
+          walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
+        }
+      }
+    }
+  }
+  for (const field of own.fields) {
+    const value = text(content[field.name]);
+    const where = { block: id, field: field.name };
+    if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
+    if (field.kind === 'plainText' || value === '') continue;
+    const faulty =
+      /[\r\n]/.test(value) || hrefFaulty(walk, value) || (field.kind === 'imageUrl' && MAIL.test(value.trim()));
+    if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
+  }
+  if (own.lanes !== null) {
+    const count = block.lanes?.length ?? 0;
+    if (count < own.lanes.min || count > own.lanes.max) {
+      walk.problems.push({ kind: 'lanes-mismatch', block: id, field: own.lanes.name });
+    }
+  }
+}
+
 function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {
   const lanes = block.lanes ?? [];
   const ratio = block.attributes.ratio;
@@ -134,15 +181,20 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       break;
     case 'divider':
       break;
-    default:
-      for (const name of new Set(variableTokens(content))) {
-        walk.printed.add(name);
-        if (declaredType(walk, name) === undefined) {
-          walk.problems.push({ kind: 'variable-undeclared', block: id, name });
+    default: {
+      const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+      if (own) checkOwnBlock(walk, own, block, id);
+      else {
+        for (const name of new Set(variableTokens(content))) {
+          walk.printed.add(name);
+          if (declaredType(walk, name) === undefined) {
+            walk.problems.push({ kind: 'variable-undeclared', block: id, name });
+          }
         }
       }
       // A product's lanes block: its lanes' blocks are checked as a columns block's are.
       for (const lane of block.lanes ?? []) walkBlocks(walk, lane, depth + 1);
+    }
   }
 }
 

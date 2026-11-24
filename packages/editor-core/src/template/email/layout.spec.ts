@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EmailBlock } from './block.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
-import type { DefaultLayoutProps } from './layout.js';
+import type { DefaultLayoutProps, LayoutInput } from './layout.js';
 import type { RegionInput } from './region.js';
 import { createEmailRenderer, type RenderedEmail, type RenderEmailInput } from './renderer.js';
 
@@ -108,5 +108,42 @@ describe('defaultLayout', () => {
   it('draws no blank lines for a header over an empty body', () => {
     const { text } = layout({ blocks: [], regions: { header: region('HEAD') } });
     expect(text).toBe('HEAD\n\nExample Company Limited, 1 Example Street.\nSent because you created an account.');
+  });
+
+  describe("a layout's primitives", () => {
+    const custom = createEmailRenderer({
+      theme: FIXTURE_THEME,
+      layout: ({ body, subject, h }: LayoutInput<null>) => [
+        h.button({ href: 'javascript:alert(1)', label: 'Bad' }),
+        h.button({ href: 'https://example.test/', label: 'Good' }),
+        h.image({ src: 'javascript:alert(1)', alt: 'x', width: 10 }),
+        h.image({ src: 'data:image/png;base64,AAAA', alt: 'logo', width: 10 }),
+        h.raw({ markup: `<p class="s">${subject}</p>` }),
+        h.region('body', body),
+      ],
+    });
+    const drawn = (subject: string) =>
+      custom.render({
+        blocks: [],
+        subject,
+        preheader: null,
+        locale: 'en',
+        variables: { who: '<img src=x onerror=alert(1)>' },
+        variableTypes: { who: 'string' },
+        layoutProps: null,
+      });
+
+    it("checks the links and images a layout draws as a block's are checked, a data image kept", () => {
+      const { html } = drawn('Hi');
+      expect(html).toContain('<a class="zx-button" style=');
+      expect(html).toContain('href="https://example.test/"');
+      expect(html).not.toContain('javascript:');
+      expect(html).toContain('src="data:image/png;base64,AAAA"');
+    });
+
+    it("escapes a person's value that reaches raw markup through the subject", () => {
+      const { html } = drawn('Hi {{who}}');
+      expect(html).toContain('<p class="s">Hi &lt;img src=x onerror=alert(1)&gt;</p>');
+    });
   });
 });

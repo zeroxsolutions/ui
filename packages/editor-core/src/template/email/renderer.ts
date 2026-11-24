@@ -17,7 +17,7 @@ import { composeStylesheets } from './css/stylesheet.js';
 import type { StylesheetWarning } from './css/unsupported.js';
 import { defaultLayout, type DefaultLayoutProps, type EmailLayout } from './layout.js';
 import { expandNodes } from './primitives/elements.js';
-import { createPrimitives, literalReader, type EmailNode } from './primitives/nodes.js';
+import { createPrimitives, layoutReader, type EmailNode } from './primitives/nodes.js';
 import { plainTextOf } from './primitives/plain-text.js';
 import { serialiseElements } from './primitives/serialise.js';
 import type { Region, RegionInput } from './region.js';
@@ -187,7 +187,12 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
           problems.push({ blockId: block.id, kind: 'block-nested-too-deep', ...where });
           return [];
         }
-        const lanes: readonly unknown[] = definition.holdsLanes && Array.isArray(block.lanes) ? block.lanes : [];
+        const stored: readonly unknown[] = definition.holdsLanes && Array.isArray(block.lanes) ? block.lanes : [];
+        const bounds = definition.laneBounds;
+        if (bounds && (stored.length < bounds.min || stored.length > bounds.max)) {
+          problems.push({ blockId: block.id, kind: 'lanes-mismatch', ...where });
+        }
+        const lanes = bounds ? stored.slice(0, bounds.max) : stored;
         const ctx = createRenderContext(
           state,
           block.id,
@@ -258,7 +263,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         preheader,
         locale: input.locale,
         props: input.layoutProps,
-        h: createPrimitives(literalReader),
+        h: createPrimitives(layoutReader([subject, preheader])),
       });
       if (!Array.isArray(framed) && (typeof framed !== 'object' || framed === null || !('kind' in framed))) {
         throw new TypeError("An email layout returns primitives, drawn with its input's `h`, not HTML and text");

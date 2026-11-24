@@ -85,7 +85,7 @@ function flow(node: EmailNode): ElementChild[] {
     case 'heading':
       return [element(`h${node.level}`, node.classes, runs(node.runs))];
     case 'button':
-      return [element('a', node.classes, [{ text: node.label }], [['href', node.href]])];
+      return [element('a', node.classes, [{ text: node.label }], node.href === null ? [] : [['href', node.href]])];
     case 'image': {
       const image = element(
         'img',
