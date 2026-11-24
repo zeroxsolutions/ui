@@ -14,6 +14,7 @@ import { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './bloc
 import { createRenderContext, type RenderState } from './context.js';
 import { baseStylesheet } from './css/base-stylesheet.js';
 import { composeStylesheets } from './css/stylesheet.js';
+import type { StylesheetWarning } from './css/unsupported.js';
 import { defaultLayout, type DefaultLayoutProps, type EmailLayout } from './layout.js';
 import { expandNodes } from './primitives/elements.js';
 import { createPrimitives, literalReader, type EmailNode } from './primitives/nodes.js';
@@ -79,6 +80,8 @@ export interface RenderedEmail {
 /** One composed renderer: the render, and the write checks and translation every caller shares with it. */
 export interface EmailRenderer<Type extends string, Props> {
   readonly types: readonly Type[];
+  /** Each declaration of the product's `css` that common mail clients drop; `checkEmailRenderer` reports them. */
+  readonly stylesheetWarnings: readonly StylesheetWarning[];
   render(input: RenderEmailInput<Props>): RenderedEmail;
   /** The strict write check of a block's attributes; null where refused, or for a type this renderer does not know. */
   attributesOf(type: Type, raw: unknown): unknown;
@@ -164,6 +167,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
 
   return {
     types: [...definitions.keys()] as Type[],
+    stylesheetWarnings: stylesheet.warnings,
 
     render(input): RenderedEmail {
       const problems: RenderProblem[] = [];

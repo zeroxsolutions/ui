@@ -131,4 +131,14 @@ describe('checkEmailRenderer', () => {
       region: 'footer',
     });
   });
+
+  it("lists the CSS of the renderer's sheets that common clients drop", () => {
+    const renderer = createEmailRenderer({ theme: FIXTURE_THEME, css: '.zx-callout{display:flex}' });
+    expect(checkEmailRenderer(renderer, { layoutProps: FIXTURE_LAYOUT_PROPS })).toEqual([
+      {
+        problem: 'stylesheet-unsupported',
+        warning: expect.objectContaining({ sheet: 0, property: 'display', feature: 'css-display-flex' }),
+      },
+    ]);
+  });
 });

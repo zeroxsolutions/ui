@@ -1,5 +1,6 @@
-import { CssSyntaxError, parse, type AtRule, type ChildNode, type Root, type Rule } from 'postcss';
+import { CssSyntaxError, parse, type AtRule, type ChildNode, type Declaration, type Root, type Rule } from 'postcss';
 import { parseClassSelector, type ClassSelector } from './selector.js';
+import { unsupportedBy, type StylesheetWarning } from './unsupported.js';
 
 /** One declaration as a rule holds it, every `var()` already resolved. */
 export interface StyleDeclaration {
@@ -43,6 +44,8 @@ export interface ComposedStylesheet {
   readonly head: string;
   /** Whether a head rule answers `prefers-color-scheme: dark`, so the email declares both schemes. */
   readonly darkScheme: boolean;
+  /** Each declaration of a product's sheets that common mail clients drop, in order. */
+  readonly warnings: readonly StylesheetWarning[];
 }
 
 /** The selectors whose custom properties every `var()` reads. */
@@ -158,7 +161,24 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
 
   const rules: InlineRule[] = [];
   const head: string[] = [];
+  const warnings: StylesheetWarning[] = [];
   let darkScheme = false;
+
+  const warn = (source: Source, declaration: Declaration, value: string): void => {
+    if (source.sheet === null) return;
+    const { line, column } = positionOf(declaration);
+    for (const { feature, clients } of unsupportedBy(declaration.prop, value)) {
+      warnings.push({
+        sheet: source.sheet,
+        line,
+        column,
+        property: declaration.prop.toLowerCase(),
+        value,
+        feature,
+        clients,
+      });
+    }
+  };
 
   const inlineRule = (source: Source, rule: Rule): void => {
     const declarations: StyleDeclaration[] = [];
@@ -166,11 +186,9 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       if (child.type === 'comment') continue;
       if (child.type !== 'decl') refuse(source, child, 'selector-refused', child.toString());
       if (child.prop.startsWith('--')) continue;
-      declarations.push({
-        property: child.prop.toLowerCase(),
-        value: resolveIn(source, child, child.value.trim()),
-        important: child.important === true,
-      });
+      const value = resolveIn(source, child, child.value.trim());
+      warn(source, child, value);
+      declarations.push({ property: child.prop.toLowerCase(), value, important: child.important === true });
     }
     for (const text of rule.selectors) {
       // `:root` holds custom properties only; a declaration there would select no element of the email.
@@ -188,6 +206,7 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     const name = rule.name.toLowerCase();
     if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
     const conditional = name === 'media' || name === 'supports';
+    rule.walkDecls((declaration) => warn(source, declaration, resolveIn(source, declaration, declaration.value)));
     const copy = rule.clone();
     copy.walkDecls((declaration) => {
       declaration.value = resolveIn(source, declaration, declaration.value);
@@ -209,5 +228,5 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   }
 
   // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.
-  return { rules, head: head.join('').replaceAll('</', '<\\/'), darkScheme };
+  return { rules, head: head.join('').replaceAll('</', '<\\/'), darkScheme, warnings };
 }

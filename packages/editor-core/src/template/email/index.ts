@@ -33,6 +33,7 @@ export {
   type RenderEmailInput,
 } from './renderer.js';
 export { EmailStylesheetInvalid, type StylesheetRefusal } from './css/stylesheet.js';
+export type { StylesheetWarning } from './css/unsupported.js';
 export type {
   Children,
   ClassList,
