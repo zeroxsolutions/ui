@@ -335,7 +335,8 @@ export function EmailEditor({
   const text = useMemo(() => profileMessages(messages), [messages]);
   // The profile names the blocks too, so the server's `validate` reads them as the editor does.
   const [types] = useState(() => (blocks ?? []).map((definition) => definition.editor.type));
-  const missing = types.find((type) => !profile.kinds.includes(type));
+  // `extraKinds` names a kind but carries no field rules, so the profile must hold the definition itself.
+  const missing = types.find((type) => !(profile.blocks ?? []).some((block) => block.type === type));
   if (missing !== undefined) {
     throw new EditorError(
       'editor.profile.block_not_in_profile',

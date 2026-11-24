@@ -157,6 +157,11 @@ describe('emailBlockFeature', () => {
     expect(() =>
       renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[quote]} value={[]} />),
     ).toThrow(/Block "quote" is in `blocks` but not in the profile/);
+    // A kind named by hand carries no field rules, so the server would not check the block's fields.
+    const named = emailProfile({ extraKinds: ['quote'] });
+    expect(() => renderToString(<EmailEditor label="Body" profile={named} blocks={[quote]} value={[]} />)).toThrow(
+      /not in the profile/,
+    );
   });
 
   it('marks a field the renderer would refuse, as the server reads it', async () => {

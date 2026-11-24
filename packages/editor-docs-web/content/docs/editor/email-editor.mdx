@@ -290,7 +290,7 @@ custom properties of a top-level `:root` or `.zx-root` rule and is resolved befo
 clients that read them. Any selector may be used there. The base sheet's dark rules are such rules too, so a
 color you set for light mode reaches dark mode only through a `prefers-color-scheme: dark` query of your own,
 as above. A query that redefines `:root`'s custom properties does that for you: each inlined rule reading one
-is drawn again under the query, with the query's value.
+is drawn again under the query, with the query's value, and a rule you write in the query wins over that.
 
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
@@ -358,7 +358,7 @@ const profile = emailProfile({ variables, blocks: [quote] });
 `emailProfile`'s `blocks` adds the type to the profile's kinds, and `validate` checks each field as the
 renderer will: an empty body, a field over its `max`, and a link or image address it would refuse. `EmailEditor`'s
 `blocks` offers the block in the slash menu and exports it, and throws `EditorError` for a block the profile does
-not name. A lanes block holding fewer or more lanes than it takes is a `lanes-mismatch`, and the renderer draws
+not hold through its `blocks`. A lanes block holding fewer or more lanes than it takes is a `lanes-mismatch`, and the renderer draws
 no lane past its `max`. The rich text
 field is edited in place, the other fields in a text field under it, a `choice` in a submenu of the block menu,
 a `toggle` as a checkbox there, and a `number` in a field under the block. `customBlocks` in `messages` words a
