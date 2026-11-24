@@ -176,16 +176,18 @@ and reads it from (e). (f) starts when a block's feature exists.
   description?, keywords?, icon?: unknown, fields: F, attributes?: A, email?: { render, sample }, document?: {
   html(view: DocumentBlockView<F, A>, markup: Markup): MarkupValue } }` (`render` and `sample` as in
   `EmailBlockOptions`).
-- `Block` = `{ type, label, description, keywords, icon: unknown, editor: BlockEditor, email:
-  EmailBlockDefinition | null, document: DocumentBlock | null }`; `editor.node` is the type with a document side,
-  `email_<type>` without.
-- `DocumentBlock` = `{ node: string; content: 'inline' | 'none'; attrs: z.ZodType<Record<string, unknown>>;
-  codec: NodeCodec }`. `content` is `inline` when a `richText` field is the body.
+- `Block` = `{ type, label, icon: unknown, editor: BlockEditor, email: EmailBlockDefinition | null, document:
+  DocumentBlock | null }` (the description and keywords are the editor's); `editor.node` is the type with a
+  document side, `email_<type>` without.
+- `DocumentBlock` = `{ node: NodeSpec; codec: NodeCodec }`: the node is `content: 'inline*'` when a `richText`
+  field is the body, else an atom; its `attrs` schema takes each field but the body, each items field and each
+  attribute, all optional. A view is the registry's to add.
 - `DocumentBlockView` = `{ fields, attributes, body: MarkupValue }`: text fields and items as stored, attributes
   with defaults, `body` the serialised body (empty without one).
-- `Markup`: a tagged template that escapes every value, takes a nested `MarkupValue` as written, and throws
-  `BlockDefinitionInvalid` for a plain value placed straight after `href="`, `src="` or `poster="`; `markup.url(value)`
-  is the value when it opens with `https:`, `http:` or `mailto:`, else `''`, and may go in those attributes.
+- `Markup`: a tagged template that escapes every value (newlines included), takes a nested `MarkupValue` as
+  written, and throws `BlockDefinitionInvalid` for a value in a link or source attribute other than
+  `markup.url`'s, in an event handler or `style`, unquoted or loose inside a tag, or inside `script` or `style`;
+  `markup.url(value)` is the value when it opens with `https:`, `http:` or `mailto:`, else `''`.
 - HTML: `<div data-block="<type>" data-block-attrs="<escaped JSON of the node's attributes>">` + the definition's
   `html` + `</div>`, the body wrapped in `<div data-block-body>`. Markdown: the same, on one line, the JSON also
   holding the body as inline markup, so it is one HTML token; `fromMarkdown` reads that token, `fromHTML` the
@@ -197,7 +199,7 @@ and reads it from (e). (f) starts when a block's feature exists.
   `column`); an email side refused as `defineEmailBlock` refuses.
 - `emailProfile({ blocks })` takes `{ editor: BlockEditor; email?: unknown }` and throws `EditorError`
   `editor.profile.block_not_email` for one whose `email` is null. `EmailEditor`'s `blocks` takes
-  `EmailBlockDefinition | Block` and uses `.email` of a `Block`.
+  `EmailBlockDefinition | Block`; it reads only `editor`, and a block with no email side is never in a profile.
 
 - [ ] **Step 1: Failing tests** in `define-block.spec.ts`: an email-only `defineBlock` equals `defineEmailBlock`
       on `editor`, schemas and render output; a both-sided block has `editor.node === type` and its email codec

@@ -32,6 +32,7 @@ import {
   type EditorFeature,
   type IEditor,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import type { Block } from '@zeroxsolutions/editor-core/blocks/index';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -109,13 +110,14 @@ interface EmailEditorBaseProps {
   /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
   readOnly?: boolean;
   /**
-   * The product's own blocks, from `defineEmailBlock`: each is offered, edited and exported. The profile names
-   * them too, through `emailProfile({ blocks })`, so the server's `validate` reads them as the editor does.
-   * Read once: a change needs a remount.
+   * The product's own blocks, from `defineEmailBlock` or `defineBlock` with an email side: each is offered,
+   * edited and exported. The profile names them too, through `emailProfile({ blocks })`, so the server's
+   * `validate` reads them as the editor does. Read once: a change needs a remount.
    *
-   * @throws {EditorError} `editor.profile.block_not_in_profile` for a block whose type the profile lacks
+   * @throws {EditorError} `editor.profile.block_not_in_profile` for a block whose type the profile lacks, which
+   * a block with no email side always is
    */
-  blocks?: readonly EmailBlockDefinition[];
+  blocks?: readonly (EmailBlockDefinition | Block)[];
   /**
    * Features of the host's own, each block in them with an email codec; a block from `defineEmailBlock` goes in
    * `blocks`. Read once: a change needs a remount.

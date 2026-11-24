@@ -29,6 +29,25 @@ describe('emailProfile', () => {
     ]);
   });
 
+  it('refuses a block with no email side, which no renderer draws', () => {
+    const editor = {
+      type: 'linkCard',
+      node: 'linkCard',
+      label: 'Link card',
+      description: '',
+      keywords: [],
+      body: null,
+      fields: [],
+      items: [],
+      lanes: null,
+      attributes: [],
+    };
+    expect(() => emailProfile({ blocks: [{ editor, email: null }] })).toThrow(
+      new EditorError('editor.profile.block_not_email', 'Block "linkCard" has no email side.'),
+    );
+    expect(emailProfile({ blocks: [{ editor, email: {} }] }).kinds).toContain('linkCard');
+  });
+
   it('refuses an unknown kind', () => {
     expect(() => emailProfile({ allow: ['marquee' as never] })).toThrow(EditorError);
   });

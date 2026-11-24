@@ -19,8 +19,8 @@ import {
 import type { EmailNode, EmailPrimitives } from './primitives/nodes.js';
 import type { Region } from './region.js';
 
-type FieldMap = Readonly<Record<string, EmailBlockField>>;
-type AttributeMap = Readonly<Record<string, EmailBlockAttribute>>;
+export type FieldMap = Readonly<Record<string, EmailBlockField>>;
+export type AttributeMap = Readonly<Record<string, EmailBlockAttribute>>;
 
 /** The names of `F`'s fields that hold text, every one but a lanes field. */
 type TextFieldName<F extends FieldMap> = { [K in keyof F]: F[K] extends LanesField ? never : K }[keyof F];
@@ -61,8 +61,9 @@ export interface EmailBlockView<F extends FieldMap, A extends AttributeMap> {
   readonly region: Region | 'body';
 }
 
-export interface EmailBlockOptions<Type extends string, F extends FieldMap, A extends AttributeMap> {
-  /** The stored type: a lower-case letter, then letters and digits; none of the default types. */
+/** What every block declares, whichever editors hold it: its type, its slash menu entry, its fields and attributes. */
+export interface BlockShape<Type extends string, F extends FieldMap, A extends AttributeMap> {
+  /** The stored type: a lower-case letter, then letters and digits. */
   readonly type: Type;
   /** The block's name in the slash menu. */
   readonly label: string;
@@ -72,6 +73,13 @@ export interface EmailBlockOptions<Type extends string, F extends FieldMap, A ex
   readonly keywords?: readonly string[];
   readonly fields: F;
   readonly attributes?: A;
+}
+
+export interface EmailBlockOptions<Type extends string, F extends FieldMap, A extends AttributeMap> extends BlockShape<
+  Type,
+  F,
+  A
+> {
   /** The block as primitives; the renderer places it in the block's own row. */
   render(view: EmailBlockView<F, A>, h: EmailPrimitives, ctx: RenderContext): EmailNode | readonly EmailNode[];
   /** A block as `checkEmailRenderer` renders it: a type that holds text names a variable in its fields. */
@@ -170,13 +178,12 @@ function capitalised(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-/** @throws {BlockDefinitionInvalid} for the first part of `options` the renderer or the editor cannot read */
-function assertOptions(options: EmailBlockOptions<string, FieldMap, AttributeMap>): void {
+/** @throws {BlockDefinitionInvalid} for the first field or attribute of `options` no editor can read */
+export function assertBlockShape(options: BlockShape<string, FieldMap, AttributeMap>): void {
   const refuse = (reason: string): never => {
     throw new BlockDefinitionInvalid(options.type, reason);
   };
   if (!TYPE.test(options.type)) refuse('the type must be a lower-case letter, then letters and digits');
-  if (Object.hasOwn(defaultBlocks, options.type)) refuse('the type is a default block type');
   const fields = Object.entries(options.fields);
   const attributes = Object.entries(options.attributes ?? {});
   for (const [name] of [...fields, ...attributes]) {
@@ -280,13 +287,14 @@ function editorField(name: string, field: EmailBlockField): BlockEditorField {
   return { name, kind, label: field.label ?? capitalised(name), max, required };
 }
 
-function editorOf(options: EmailBlockOptions<string, FieldMap, AttributeMap>): BlockEditor {
+/** The block as an editor offers it: `node` is the editor node it is, the type itself where a document holds it. */
+export function blockEditorOf(options: BlockShape<string, FieldMap, AttributeMap>, node: string): BlockEditor {
   const fields = Object.entries(options.fields);
   const body = fields.find(([, field]) => field.kind === 'richText');
   const lanesField = fields.find(([, field]) => field.kind === 'lanes');
   return {
     type: options.type,
-    node: `email_${options.type}`,
+    node,
     label: options.label,
     description: options.description ?? '',
     keywords: options.keywords ?? [],
@@ -347,7 +355,24 @@ export function defineEmailBlock<
   const F extends FieldMap,
   const A extends AttributeMap = Record<never, never>,
 >(options: EmailBlockOptions<Type, F, A>): EmailBlockDefinition<Type, F, A> {
-  assertOptions(options as unknown as EmailBlockOptions<string, FieldMap, AttributeMap>);
+  return emailBlockOf(options, `email_${options.type}`);
+}
+
+/**
+ * The email side of a block, its editor node named `node`: what `defineEmailBlock` builds, and what `defineBlock`
+ * builds for a block both editors hold, whose node is the document's.
+ *
+ * @throws {BlockDefinitionInvalid} as `defineEmailBlock` does
+ */
+export function emailBlockOf<const Type extends string, const F extends FieldMap, const A extends AttributeMap>(
+  options: EmailBlockOptions<Type, F, A>,
+  node: string,
+): EmailBlockDefinition<Type, F, A> {
+  const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
+  assertBlockShape(shape);
+  if (Object.hasOwn(defaultBlocks, options.type)) {
+    throw new BlockDefinitionInvalid(options.type, 'the type is a default block type');
+  }
   const fields = Object.entries(options.fields);
   const textFields = fields.filter(
     (entry): entry is [string, Exclude<EmailBlockField, LanesField | ItemsField>] =>
@@ -452,6 +477,6 @@ export function defineEmailBlock<
       variableTypes: options.sample.variableTypes,
       ...(options.sample.lanes === undefined ? {} : { lanes: options.sample.lanes }),
     },
-    editor: editorOf(options as unknown as EmailBlockOptions<string, FieldMap, AttributeMap>),
+    editor: blockEditorOf(shape, node),
   };
 }

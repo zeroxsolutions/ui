@@ -89,8 +89,11 @@ export function emailProfile(
     bounds?: Partial<EmailBounds>;
     /** The kinds of blocks a host's own editor features add; a block from `defineEmailBlock` goes in `blocks`. */
     extraKinds?: readonly string[];
-    /** The product's own blocks, from `defineEmailBlock`: their kinds join the profile and `validate` checks them. */
-    blocks?: readonly { readonly editor: BlockEditor }[];
+    /**
+     * The product's own blocks, from `defineEmailBlock` or `defineBlock` with an email side: their kinds join the
+     * profile and `validate` checks them.
+     */
+    blocks?: readonly { readonly editor: BlockEditor; readonly email?: unknown }[];
   } = {},
 ): EditorProfile {
   const allow = options.allow ?? EMAIL_KINDS;
@@ -102,6 +105,12 @@ export function emailProfile(
   const bounds = boundsOf(options.bounds);
   const variables = options.variables ?? [];
   assertVariables(variables, bounds.variables);
+  for (const definition of options.blocks ?? []) {
+    // A block only a document holds has no render, so an email that offered it could not be sent.
+    if (definition.email === null) {
+      throw new EditorError('editor.profile.block_not_email', `Block "${definition.editor.type}" has no email side.`);
+    }
+  }
   const blocks = (options.blocks ?? []).map((definition) => definition.editor);
   const types = new Set<string>();
   for (const { type } of blocks) {

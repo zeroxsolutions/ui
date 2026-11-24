@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
+import { defineBlock } from '@zeroxsolutions/editor-core/blocks/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   emailProfile,
@@ -252,5 +253,69 @@ describe("an items field in the block's view", () => {
     await expect
       .element(page.getByRole('group', { name: 'Links 1' }).getByRole('textbox', { name: 'Label' }))
       .not.toHaveAttribute('aria-readonly', 'true');
+  });
+});
+
+describe('a block from defineBlock in the email editor', () => {
+  const saying = defineBlock({
+    type: 'saying',
+    label: 'Saying',
+    fields: { text: richText(), author: plainText() },
+    email: {
+      render: ({ fields }, h) => h.text({ markup: fields.text }),
+      sample: { fields: { text: '{{name}} said it', author: 'Lan' }, variableTypes: { name: 'string' } },
+    },
+    document: {
+      html: (view, markup) => markup`<blockquote>${view.body}<cite>${view.fields.author}</cite></blockquote>`,
+    },
+  });
+  const sayings = emailProfile({ blocks: [saying] });
+
+  function SayingHost({ probe }: { probe: Probe }) {
+    const [value, setValue] = useState<EditorEmailBlock[]>([
+      { id: 's1', key: 's1', type: 'saying', attributes: {}, content: { text: 'Kind words', author: '' } },
+    ]);
+    return (
+      <EmailEditor
+        label="Body"
+        profile={sayings}
+        blocks={[saying]}
+        value={value}
+        onChange={(blocks) => {
+          probe.reported.push(blocks);
+          setValue(blocks);
+        }}
+        onReady={(editor) => (probe.editor = editor)}
+      />
+    );
+  }
+
+  it('edits the block on its shared node and exports it as stored', async () => {
+    const probe: Probe = { editor: null, reported: [], validated: [] };
+    await render(<SayingHost probe={probe} />);
+
+    await expect.element(page.getByText('Kind words')).toBeVisible();
+    expect(document.querySelector('[data-slot=email-block][data-type=saying]')).not.toBeNull();
+    await userEvent.click(page.getByRole('textbox', { name: 'Author' }));
+    await userEvent.keyboard('Lan');
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)).toEqual([
+        { id: 's1', key: 's1', type: 'saying', attributes: {}, content: { text: 'Kind words', author: 'Lan' } },
+      ]),
+    );
+  });
+
+  it('refuses a block with no email side', () => {
+    const pageNote = defineBlock({
+      type: 'pageNote',
+      label: 'Page note',
+      fields: { title: plainText() },
+      document: { html: (view, markup) => markup`<p>${view.fields.title}</p>` },
+    });
+    expect(() => emailProfile({ blocks: [pageNote] })).toThrow(/has no email side/);
+    expect(() =>
+      renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[pageNote]} value={[]} />),
+    ).toThrow(/not in the profile/);
   });
 });
