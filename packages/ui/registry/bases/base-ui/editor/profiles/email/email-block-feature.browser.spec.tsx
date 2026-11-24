@@ -13,6 +13,8 @@ import {
 import {
   choice,
   defineEmailBlock,
+  items,
+  link,
   number,
   plainText,
   richText,
@@ -36,9 +38,19 @@ const quote = defineEmailBlock({
   sample: { fields: { text: '{{name}} said it', author: 'Lan' }, variableTypes: { name: 'string' } },
 });
 
+const social = defineEmailBlock({
+  type: 'social',
+  label: 'Social',
+  fields: {
+    links: items({ fields: { label: plainText({ required: true }), href: link({ required: true }) }, min: 1, max: 2 }),
+  },
+  render: (_view, h) => h.divider(),
+  sample: { fields: { links: [{ label: '{{name}}', href: 'https://x.test' }] }, variableTypes: { name: 'string' } },
+});
+
 const profile = emailProfile({
   variables: [{ name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' }],
-  blocks: [quote],
+  blocks: [quote, social],
 });
 
 const stored = (attributes: Record<string, unknown> = {}): EditorEmailBlock => ({
@@ -55,14 +67,23 @@ interface Probe {
   validated: ProfileProblem[][];
 }
 
-function Host({ initial, probe }: { initial: EditorEmailBlock[]; probe: Probe }) {
+function Host({
+  initial,
+  probe,
+  structure,
+}: {
+  initial: EditorEmailBlock[];
+  probe: Probe;
+  structure?: 'free' | 'locked';
+}) {
   const [value, setValue] = useState(initial);
   return (
     <div className="style-nova p-12">
       <EmailEditor
         label="Body"
         profile={profile}
-        blocks={[quote]}
+        blocks={[quote, social]}
+        structure={structure}
         value={value}
         onChange={(blocks) => {
           probe.reported.push(blocks);
@@ -75,9 +96,9 @@ function Host({ initial, probe }: { initial: EditorEmailBlock[]; probe: Probe })
   );
 }
 
-async function mount(initial: EditorEmailBlock[]): Promise<Probe> {
+async function mount(initial: EditorEmailBlock[], structure?: 'free' | 'locked'): Promise<Probe> {
   const probe: Probe = { editor: null, reported: [], validated: [] };
-  await render(<Host initial={initial} probe={probe} />);
+  await render(<Host initial={initial} probe={probe} structure={structure} />);
   await vi.waitFor(() => {
     if (!probe.editor) throw new Error('the editor is not ready');
   });
@@ -170,5 +191,66 @@ describe('emailBlockFeature', () => {
     await vi.waitFor(() =>
       expect(last(probe.validated)).toContainEqual({ kind: 'text-too-long', block: 'q1', field: 'author' }),
     );
+  });
+});
+
+describe("an items field in the block's view", () => {
+  const site = { label: 'Site', href: 'https://x.test' };
+  const links = (entries: readonly Record<string, string>[]): EditorEmailBlock => ({
+    id: 's1',
+    key: 's1',
+    type: 'social',
+    attributes: {},
+    content: { links: entries },
+  });
+
+  it('draws a row per stored item, each field in a text field named for it', async () => {
+    await mount([links([site, { label: 'Shop', href: '' }])]);
+
+    const first = page.getByRole('group', { name: 'Links 1' });
+    await expect.element(first.getByRole('textbox', { name: 'Label' })).toHaveTextContent('Site');
+    await expect.element(first.getByRole('textbox', { name: 'Href' })).toHaveTextContent('https://x.test');
+    await expect
+      .element(page.getByRole('group', { name: 'Links 2' }).getByRole('textbox', { name: 'Label' }))
+      .toHaveTextContent('Shop');
+  });
+
+  it('adds an item of empty fields up to the most it takes, and exports what is typed in it', async () => {
+    const probe = await mount([links([site])]);
+
+    const add = page.getByRole('button', { name: 'Add' });
+    await userEvent.click(add);
+    await expect.element(add).toBeDisabled();
+    await userEvent.click(page.getByRole('group', { name: 'Links 2' }).getByRole('textbox', { name: 'Label' }));
+    await userEvent.keyboard('Shop');
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ links: [site, { label: 'Shop', href: '' }] }),
+    );
+  });
+
+  it('removes an item down to the fewest it takes', async () => {
+    const probe = await mount([links([site, { label: 'Shop', href: 'https://y.test' }])]);
+
+    await userEvent.click(page.getByRole('group', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }));
+
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ links: [{ label: 'Shop', href: 'https://y.test' }] }),
+    );
+    await expect
+      .element(page.getByRole('group', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }))
+      .toBeDisabled();
+  });
+
+  it('adds and removes nothing in locked structure, while its text stays editable', async () => {
+    await mount([links([site, { label: 'Shop', href: '' }])], 'locked');
+
+    await expect.element(page.getByRole('button', { name: 'Add' })).toBeDisabled();
+    await expect
+      .element(page.getByRole('group', { name: 'Links 2' }).getByRole('button', { name: 'Remove' }))
+      .toBeDisabled();
+    await expect
+      .element(page.getByRole('group', { name: 'Links 1' }).getByRole('textbox', { name: 'Label' }))
+      .not.toHaveAttribute('aria-readonly', 'true');
   });
 });

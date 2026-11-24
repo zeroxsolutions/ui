@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { z } from 'zod';
 import { BlocksIcon } from '@/registry/bases/base-ui/icons/lucide/blocks-icon';
+import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import {
@@ -17,10 +18,13 @@ import type {
   EmailBlockDefinition,
   BlockEditor,
   BlockEditorAttribute,
+  BlockEditorItems,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
+import type { VariableFeature } from '../variables/variable';
 import { VariableTextField } from '../variables/variable-text-field';
+import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { blockAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
 import { blockClasses } from './nodes/block-style';
 
@@ -128,6 +132,106 @@ function EmailBlockNumberField({
   );
 }
 
+type Item = Readonly<Record<string, string>>;
+
+/** `value` as `items`' items: each stored entry an object of the item's fields, `''` where it holds none. */
+function itemsOf(items: BlockEditorItems, value: unknown): Item[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry: unknown) => {
+    const stored = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
+    return Object.fromEntries(
+      items.fields.map(({ name }) => [name, typeof stored[name] === 'string' ? (stored[name] as string) : '']),
+    );
+  });
+}
+
+/**
+ * An items field: a row per item, its fields in variable text fields, with Remove beside it and Add under the
+ * rows. `restructure` is false in locked structure and on a required block, where the rows' text still edits.
+ */
+function EmailBlockItemsField({
+  items,
+  entries,
+  label,
+  fieldLabel,
+  readOnly,
+  restructure,
+  declarations,
+  variables,
+  messages,
+  onValueChange,
+}: {
+  items: BlockEditorItems;
+  entries: readonly Item[];
+  label: string;
+  fieldLabel(field: string, fallback: string): string;
+  readOnly: boolean;
+  restructure: boolean;
+  declarations(): readonly VariableDeclaration[];
+  variables: VariableFeature | undefined;
+  messages: ProfileEditorMessages;
+  onValueChange(entries: Item[]): void;
+}): ReactNode {
+  const empty = (): Item => Object.fromEntries(items.fields.map(({ name }) => [name, '']));
+  return (
+    <fieldset data-slot="email-block-items" data-name={items.name} className="flex flex-col gap-2">
+      <legend className="text-muted-foreground mb-1 text-xs">{label}</legend>
+      {entries.map((entry, index) => (
+        <div
+          // An item has no identity of its own; its place is what the author sees and edits.
+          key={index}
+          role="group"
+          aria-label={messages.itemRow(label, index + 1)}
+          data-slot="email-block-item"
+          className="flex items-start gap-2"
+        >
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            {items.fields.map((field) => (
+              <VariableTextField
+                key={field.name}
+                value={entry[field.name] ?? ''}
+                onValueChange={(value) =>
+                  onValueChange(entries.map((item, at) => (at === index ? { ...item, [field.name]: value } : item)))
+                }
+                declarations={declarations}
+                variables={variables}
+                label={fieldLabel(field.name, field.label)}
+                placeholder={fieldLabel(field.name, field.label)}
+                readOnly={readOnly}
+                messages={messages}
+                className={cn('border-b', field.kind !== 'plainText' && 'font-mono text-sm')}
+              />
+            ))}
+          </div>
+          {!readOnly && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!restructure || entries.length <= items.min}
+              onClick={() => onValueChange(entries.filter((_item, at) => at !== index))}
+            >
+              {messages.removeItem}
+            </Button>
+          )}
+        </div>
+      ))}
+      {!readOnly && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="self-start"
+          disabled={!restructure || entries.length >= items.max}
+          onClick={() => onValueChange([...entries, empty()])}
+        >
+          {messages.addItem}
+        </Button>
+      )}
+    </fieldset>
+  );
+}
+
 /**
  * The feature of a product's block in the email editor: its node, with its body as the node's inline content
  * and its other fields and its number attributes in fields under it; its email codec; its slash item; and
@@ -145,6 +249,7 @@ export function emailBlockFeature(
 
   const attrs = z.object({
     ...Object.fromEntries(block.fields.map(({ name }) => [name, z.string().optional()])),
+    ...Object.fromEntries(block.items.map(({ name }) => [name, z.array(z.record(z.string(), z.string())).optional()])),
     ...Object.fromEntries(block.attributes.map((attribute) => [attribute.name, attributeSchema(attribute).optional()])),
     ...(block.body === null ? {} : { source: z.string().optional() }),
   });
@@ -185,7 +290,7 @@ export function emailBlockFeature(
           </div>
         )}
         {block.lanes !== null && <div data-slot="email-block-lanes">{children as ReactNode}</div>}
-        {(block.fields.length > 0 || numbers.length > 0) && (
+        {(block.fields.length > 0 || block.items.length > 0 || numbers.length > 0) && (
           <div
             contentEditable={false}
             // A field takes the focus without moving the selection; Mod-/ acts on the selected block.
@@ -204,6 +309,21 @@ export function emailBlockFeature(
                 readOnly={!editable}
                 messages={messages}
                 className={cn('border-b', field.kind !== 'plainText' && 'font-mono text-sm')}
+              />
+            ))}
+            {block.items.map((items) => (
+              <EmailBlockItemsField
+                key={items.name}
+                items={items}
+                entries={itemsOf(items, values[items.name])}
+                label={shown.field(items.name, items.label)}
+                fieldLabel={(field, fallback) => shown.field(`${items.name}.${field}`, fallback)}
+                readOnly={!editable}
+                restructure={restyle}
+                declarations={() => context?.declarations() ?? []}
+                variables={context?.variables}
+                messages={messages}
+                onValueChange={(entries) => updateAttrs({ [items.name]: entries })}
               />
             ))}
             {numbers.map(
@@ -243,6 +363,15 @@ export function emailBlockFeature(
             {String(node.attrs?.[field.name] ?? '')}
           </span>
         ))}
+        {block.items.flatMap((items) =>
+          itemsOf(items, node.attrs?.[items.name]).map((entry, index) => (
+            <span key={`${items.name}-${index}`} data-slot="email-block-item" className="flex flex-col border-b">
+              {items.fields.map((field) => (
+                <span key={field.name}>{entry[field.name]}</span>
+              ))}
+            </span>
+          )),
+        )}
       </EmailBlockFrame>
     ),
   };

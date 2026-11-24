@@ -33,7 +33,7 @@ export interface CustomBlockMessages {
   title?: string;
   /** Its line in the slash menu. */
   description?: string;
-  /** Each field's name, by the field's name in the definition. */
+  /** Each field's name, by the field's name in the definition; an items field's own fields as `<items>.<field>`. */
   fields?: Readonly<Record<string, string>>;
   /** Each attribute's name, by the attribute's name in the definition. */
   attributes?: Readonly<Record<string, string>>;
@@ -105,6 +105,12 @@ export interface ProfileEditorMessages {
   /** Why Duplicate is disabled on a block of a kind the profile does not let the author add. */
   kindNotAllowed: string;
   buttonLabel: string;
+  /** Adds an item to a block's items field, such as one more social link. */
+  addItem: string;
+  /** Removes the item it sits beside. */
+  removeItem: string;
+  /** The accessible name of one item's row: the field's name and the item's place, counted from 1. */
+  itemRow(field: string, position: number): string;
   /** The heading over an HTML block's source. */
   htmlBlock: string;
   /** What a stored block of a type no feature reads shows in its place. */
@@ -225,6 +231,9 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   deleteRequired: 'This block is required',
   kindNotAllowed: 'This kind of block is not allowed here',
   buttonLabel: 'Button label',
+  addItem: 'Add',
+  removeItem: 'Remove',
+  itemRow: (field, position) => `${field} ${position}`,
   htmlBlock: 'HTML',
   unknownBlock: (type) => `A ${type} block this editor cannot show`,
 };
