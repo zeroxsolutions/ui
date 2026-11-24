@@ -1,6 +1,17 @@
 import type { EmailBlockJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
-import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
+import type { BlockEditor, BlockEditorItems } from '../../template/email/define-email-block.js';
 import { inlineOf, markupOf } from './email-blocks.js';
+
+/** `value` as an items field's items: an array of objects of exactly `items`' fields, each text, `''` where not. */
+function itemsOf(items: BlockEditorItems, value: unknown): Record<string, string>[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry: unknown) => {
+    const stored = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
+    return Object.fromEntries(
+      items.fields.map(({ name }) => [name, typeof stored[name] === 'string' ? (stored[name] as string) : '']),
+    );
+  });
+}
 
 function present(entries: readonly (readonly [string, unknown])[]): Record<string, unknown> {
   return Object.fromEntries(entries.filter(([, value]) => value !== undefined && value !== null));
@@ -11,7 +22,7 @@ function present(entries: readonly (readonly [string, unknown])[]): Record<strin
  * and its attributes are the node's attributes. A field the author left empty exports empty; an attribute
  * left unset exports nothing, so it reads as its default. Its lanes travel as a columns block's do.
  */
-export function emailBlockCodec(editor: EmailBlockEditor): NodeCodec {
+export function emailBlockCodec(editor: BlockEditor): NodeCodec {
   return {
     node: editor.node,
     toEmailBlock(node: NodeJSON): EmailBlockJSON {
@@ -25,6 +36,7 @@ export function emailBlockCodec(editor: EmailBlockEditor): NodeCodec {
         content: {
           ...(editor.body === null ? {} : { [editor.body.name]: markupOf(node.content ?? [], attrs.source) }),
           ...Object.fromEntries(editor.fields.map(({ name }) => [name, text(name)])),
+          ...Object.fromEntries(editor.items.map((items) => [items.name, itemsOf(items, attrs[items.name])])),
         },
       };
     },
@@ -48,6 +60,7 @@ export function emailBlockCodec(editor: EmailBlockEditor): NodeCodec {
           ...Object.fromEntries(
             editor.fields.map(({ name }) => [name, typeof block.content[name] === 'string' ? block.content[name] : '']),
           ),
+          ...Object.fromEntries(editor.items.map((items) => [items.name, itemsOf(items, block.content[items.name])])),
           ...(editor.body === null ? {} : { source }),
         },
         ...(content.length === 0 ? {} : { content }),

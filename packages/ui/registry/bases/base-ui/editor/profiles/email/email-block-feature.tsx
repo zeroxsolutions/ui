@@ -15,8 +15,8 @@ import {
 import { emailBlockCodec } from '@zeroxsolutions/editor-core/profiles/index';
 import type {
   EmailBlockDefinition,
-  EmailBlockEditor,
-  EmailBlockEditorAttribute,
+  BlockEditor,
+  BlockEditorAttribute,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
@@ -36,25 +36,25 @@ export interface EmailBlockFeatureOptions {
 type AttributeValue = string | boolean | number;
 
 /** The words the editor draws the block in: the host's for the type, the definition's labels under them. */
-function wordsOf(editor: EmailBlockEditor, messages: ProfileEditorMessages) {
+function wordsOf(editor: BlockEditor, messages: ProfileEditorMessages) {
   const own: CustomBlockMessages = messages.customBlocks?.[editor.type] ?? {};
   return {
     title: own.title ?? editor.label,
     description: own.description ?? editor.description,
     field: (name: string, label: string) => own.fields?.[name] ?? label,
-    attribute: (attribute: EmailBlockEditorAttribute) => own.attributes?.[attribute.name] ?? attribute.label,
+    attribute: (attribute: BlockEditorAttribute) => own.attributes?.[attribute.name] ?? attribute.label,
     value: (attribute: string, value: string, label: string) => own.values?.[attribute]?.[value] ?? label,
   };
 }
 
-function attributeSchema(attribute: EmailBlockEditorAttribute): z.ZodType<AttributeValue> {
+function attributeSchema(attribute: BlockEditorAttribute): z.ZodType<AttributeValue> {
   if (attribute.kind === 'choice') return z.enum(attribute.values.map(({ value }) => value) as [string, ...string[]]);
   if (attribute.kind === 'toggle') return z.boolean();
   return z.number().min(attribute.min).max(attribute.max);
 }
 
 /** What `value` reads as on `attrs`: the attribute's default while the block does not set it. */
-function current(attrs: Record<string, unknown>, attribute: EmailBlockEditorAttribute): AttributeValue {
+function current(attrs: Record<string, unknown>, attribute: BlockEditorAttribute): AttributeValue {
   const value = attrs[attribute.name];
   return value === null || value === undefined ? attribute.default : (value as AttributeValue);
 }

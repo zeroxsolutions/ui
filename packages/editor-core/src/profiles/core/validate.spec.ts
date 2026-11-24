@@ -3,7 +3,17 @@ import { emailProfile, MAIL_LAYOUT_KINDS, smsProfile } from './profile.js';
 import type { EditorEmailBlock, VariableDeclaration } from './types.js';
 import { validate } from './validate.js';
 import { defineEmailBlock } from '../../template/email/define-email-block.js';
-import { choice, imageUrl, lanes, link, number, plainText, richText, toggle } from '../../template/email/fields.js';
+import {
+  choice,
+  imageUrl,
+  items,
+  lanes,
+  link,
+  number,
+  plainText,
+  richText,
+  toggle,
+} from '../../template/email/fields.js';
 
 const VARIABLES: VariableDeclaration[] = [
   { name: 'name', type: 'string' },
@@ -317,6 +327,83 @@ describe('validate an SMS body', () => {
       expect(validate([block('pair', {}, { lanes: [[]] })], owned)).toEqual([
         { kind: 'lanes-count', block: 'k1', field: 'sides' },
       ]);
+    });
+
+    describe('with required fields and items', () => {
+      const social = defineEmailBlock({
+        type: 'social',
+        label: 'Social',
+        fields: {
+          title: plainText({ required: true }),
+          links: items({
+            fields: { label: plainText({ required: true, max: 10 }), icon: imageUrl({ required: true }), href: link() },
+            min: 1,
+            max: 2,
+          }),
+        },
+        render: (_view, h) => h.divider(),
+        sample: { fields: { title: 't', links: [] }, variableTypes: {} },
+      });
+      const withSocial = emailProfile({ variables: VARIABLES, blocks: [social] });
+      const entry = { label: 'Site', icon: 'https://x.test/i.png', href: '{{link}}' };
+      const socialOf = (content: Record<string, unknown>) =>
+        block('social', { title: 'T', links: [entry], ...content });
+
+      it('flags an empty required field, and too few or too many items', () => {
+        expect(validate([socialOf({})], withSocial)).toEqual([]);
+        expect(validate([socialOf({ title: '' })], withSocial)).toEqual([
+          { kind: 'text-empty', block: 'k1', field: 'title' },
+        ]);
+        expect(validate([socialOf({ links: [] })], withSocial)).toEqual([
+          { kind: 'text-empty', block: 'k1', field: 'links' },
+        ]);
+        expect(validate([socialOf({ links: [entry, entry, entry] })], withSocial)).toEqual([
+          { kind: 'list-too-long', block: 'k1', field: 'links' },
+        ]);
+      });
+
+      it("flags each item's fields under the item's index", () => {
+        expect(
+          validate(
+            [socialOf({ links: [entry, { label: 'x'.repeat(11), icon: 'mailto:a@b.test', href: '{{nobody}}' }] })],
+            withSocial,
+          ),
+        ).toEqual([
+          { kind: 'variable-undeclared', block: 'k1', field: 'links', item: 1, name: 'nobody' },
+          { kind: 'text-too-long', block: 'k1', field: 'links', item: 1 },
+          { kind: 'href-invalid', block: 'k1', field: 'links', item: 1 },
+        ]);
+        expect(validate([socialOf({ links: [{ ...entry, label: '' }] })], withSocial)).toEqual([
+          { kind: 'text-empty', block: 'k1', field: 'links', item: 0 },
+        ]);
+        expect(validate([socialOf({ links: [entry, 'x'] })], withSocial)).toEqual([
+          { kind: 'content-invalid', block: 'k1', field: 'links', item: 1 },
+        ]);
+        expect(validate([socialOf({ links: 'x' })], withSocial)).toEqual([
+          { kind: 'content-invalid', block: 'k1', field: 'links' },
+        ]);
+        expect(validate([socialOf({ links: [{ ...entry, extra: 'x' }] })], withSocial)).toEqual([
+          { kind: 'content-invalid', block: 'k1', field: 'links', item: 0 },
+        ]);
+        expect(validate([socialOf({ links: [{ ...entry, href: 'https://x.test\nBcc: a' }] })], withSocial)).toEqual([
+          { kind: 'href-invalid', block: 'k1', field: 'links', item: 0 },
+        ]);
+      });
+
+      it.each([
+        { title: 'T', links: [entry] },
+        { title: 'T', links: [entry, { label: 'B', icon: '{{link}}', href: '' }] },
+        { title: 'T', links: [{ label: 'A', icon: 'https://x.test/a.png' }] },
+        { title: '', links: [entry] },
+        { title: 'T', links: [] },
+        { title: 'T', links: [{ ...entry, icon: 'mailto:a@b.test' }] },
+        { title: 'T', links: [{ ...entry, extra: 'x' }] },
+        { title: 'T', links: [{ ...entry, label: 5 }] },
+        { links: [entry] },
+      ])('agrees with the write check on %o', (content) => {
+        const clean = validate([block('social', content)], withSocial).length === 0;
+        expect(clean).toBe(social.content.safeParse(content).success);
+      });
     });
 
     it('refuses two blocks of one type', () => {

@@ -1,5 +1,5 @@
 import type { EmailBlockJSON, Format } from '../../document/core/types/codec.js';
-import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
+import type { BlockEditor } from '../../template/email/define-email-block.js';
 import type { VariableType } from '../../template/index.js';
 
 export type EmailBlockKind = 'paragraph' | 'button' | 'code' | 'list' | 'callout' | 'divider' | 'columns' | 'html';
@@ -64,5 +64,5 @@ export interface EditorProfile {
   maxSegments?: number;
   exports: readonly Format[];
   /** The product's own blocks from `defineEmailBlock`, whose fields `validate` checks as the renderer reads them. */
-  blocks?: readonly EmailBlockEditor[];
+  blocks?: readonly BlockEditor[];
 }

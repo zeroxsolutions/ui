@@ -3,7 +3,12 @@ import { leadingToken } from '../../template/markup/href.js';
 import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
-import type { EmailBlockEditor, EmailBlockEditorAttribute } from '../../template/email/define-email-block.js';
+import type {
+  BlockEditor,
+  BlockEditorAttribute,
+  BlockEditorField,
+  BlockEditorItems,
+} from '../../template/email/define-email-block.js';
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
@@ -77,6 +82,47 @@ function checkHref(walk: Walk, block: string, value: string): void {
 /** An image's address: a web one, or a url variable; never a mail address, which `hrefFaulty` lets a link take. */
 const MAIL = /^mailto:/i;
 
+/** What the write check refuses in one plain, link or image field of a product block, or of one of its items. */
+function checkOwnField(
+  walk: Walk,
+  field: BlockEditorField,
+  stored: unknown,
+  where: Pick<ProfileProblem, 'block' | 'field' | 'item'>,
+): void {
+  const value = text(stored);
+  // Left out, a field reads as empty; a value that is not text cannot be read at all.
+  if (stored !== undefined && typeof stored !== 'string') walk.problems.push({ kind: 'text-empty', ...where });
+  else if (field.required && value === '') walk.problems.push({ kind: 'text-empty', ...where });
+  if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
+  if (field.kind === 'plainText' || value === '') return;
+  const faulty =
+    /[\r\n]/.test(value) || hrefFaulty(walk, value) || (field.kind === 'imageUrl' && MAIL.test(value.trim()));
+  if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
+}
+
+/**
+ * What the write check refuses in an items field: a value that is not a list, or an entry that is not an object
+ * of the item's fields (`content-invalid`), fewer items than `min` (`text-empty`) or more than `max`
+ * (`list-too-long`), and each item's fields, under the item's index.
+ */
+function checkItems(walk: Walk, items: BlockEditorItems, stored: unknown, id: string): void {
+  const where = { block: id, field: items.name };
+  // Left out, an items field reads as none.
+  const entries: unknown = stored ?? [];
+  if (!Array.isArray(entries)) {
+    walk.problems.push({ kind: 'content-invalid', ...where });
+    return;
+  }
+  if (entries.length < items.min) walk.problems.push({ kind: 'text-empty', ...where });
+  else if (entries.length > items.max) walk.problems.push({ kind: 'list-too-long', ...where });
+  entries.forEach((entry: unknown, item) => {
+    const known = isRecord(entry) && Object.keys(entry).every((key) => items.fields.some(({ name }) => name === key));
+    if (!known) walk.problems.push({ kind: 'content-invalid', ...where, item });
+    if (!isRecord(entry)) return;
+    for (const field of items.fields) checkOwnField(walk, field, entry[field.name], { ...where, item });
+  });
+}
+
 /**
  * What the renderer's write check refuses in a product block's fields, in the kinds a default block's take: the
  * body as a paragraph's text, each other field's size, each link and image address, and the lane count.
@@ -84,13 +130,23 @@ const MAIL = /^mailto:/i;
  */
 function checkOwnBlock(
   walk: Walk,
-  own: EmailBlockEditor,
+  own: BlockEditor,
   block: EditorEmailBlock,
   content: Record<string, unknown>,
   id: string,
 ): void {
   for (const name of [...(own.body === null ? [] : [own.body.name]), ...own.fields.map((field) => field.name)]) {
     checkTokens(walk, { block: id, field: name }, text(content[name]));
+  }
+  for (const items of own.items) {
+    const entries = content[items.name];
+    if (!Array.isArray(entries)) continue;
+    entries.forEach((entry: unknown, item) => {
+      if (!isRecord(entry)) return;
+      for (const field of items.fields) {
+        checkTokens(walk, { block: id, field: items.name, item }, text(entry[field.name]));
+      }
+    });
   }
   if (own.body !== null) {
     const value = text(content[own.body.name]);
@@ -110,18 +166,8 @@ function checkOwnBlock(
       }
     }
   }
-  for (const field of own.fields) {
-    const stored = content[field.name];
-    const value = text(stored);
-    const where = { block: id, field: field.name };
-    // Left out, a field reads as empty; a value that is not text cannot be read at all.
-    if (stored !== undefined && typeof stored !== 'string') walk.problems.push({ kind: 'text-empty', ...where });
-    if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
-    if (field.kind === 'plainText' || value === '') continue;
-    const faulty =
-      /[\r\n]/.test(value) || hrefFaulty(walk, value) || (field.kind === 'imageUrl' && MAIL.test(value.trim()));
-    if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
-  }
+  for (const field of own.fields) checkOwnField(walk, field, content[field.name], { block: id, field: field.name });
+  for (const items of own.items) checkItems(walk, items, content[items.name], id);
   if (own.lanes !== null) {
     const count = Array.isArray(block.lanes) ? block.lanes.length : 0;
     if (count < own.lanes.min || count > own.lanes.max) {
@@ -159,7 +205,11 @@ function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<stri
   }
   const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
   const keys = own
-    ? [...(own.body === null ? [] : [own.body.name]), ...own.fields.map((field) => field.name)]
+    ? [
+        ...(own.body === null ? [] : [own.body.name]),
+        ...own.fields.map((field) => field.name),
+        ...own.items.map((items) => items.name),
+      ]
     : CONTENT_KEYS[block.type];
   if (keys !== undefined) {
     for (const key of Object.keys(raw)) {
@@ -170,7 +220,7 @@ function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<stri
 }
 
 /** Whether `value` is one the product attribute takes. */
-function attributeTakes(attribute: EmailBlockEditorAttribute, value: unknown): boolean {
+function attributeTakes(attribute: BlockEditorAttribute, value: unknown): boolean {
   if (attribute.kind === 'choice') return attribute.values.some((option) => option.value === value);
   if (attribute.kind === 'toggle') return typeof value === 'boolean';
   return typeof value === 'number' && value >= attribute.min && value <= attribute.max;

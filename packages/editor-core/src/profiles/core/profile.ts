@@ -6,7 +6,7 @@ import {
   LIST_MAX_ITEMS,
   MAX_LANES,
 } from '../../template/email/index.js';
-import type { EmailBlockEditor } from '../../template/email/define-email-block.js';
+import type { BlockEditor } from '../../template/email/define-email-block.js';
 import type { EditorProfile, EmailBlockKind, EmailBounds, VariableDeclaration } from './types.js';
 
 export const EMAIL_KINDS: readonly EmailBlockKind[] = [
@@ -90,7 +90,7 @@ export function emailProfile(
     /** The kinds of blocks a host's own editor features add; a block from `defineEmailBlock` goes in `blocks`. */
     extraKinds?: readonly string[];
     /** The product's own blocks, from `defineEmailBlock`: their kinds join the profile and `validate` checks them. */
-    blocks?: readonly { readonly editor: EmailBlockEditor }[];
+    blocks?: readonly { readonly editor: BlockEditor }[];
   } = {},
 ): EditorProfile {
   const allow = options.allow ?? EMAIL_KINDS;

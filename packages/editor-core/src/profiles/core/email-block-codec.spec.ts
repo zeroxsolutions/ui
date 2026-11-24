@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DocJSON } from '../../document/core/types/index.js';
 import { defineEmailBlock } from '../../template/email/define-email-block.js';
-import { choice, lanes, link, plainText, richText } from '../../template/email/fields.js';
+import { choice, imageUrl, items, lanes, link, plainText, richText } from '../../template/email/fields.js';
 import { emailBlockCodec } from './email-block-codec.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
 import type { EditorEmailBlock } from './types.js';
@@ -77,5 +77,47 @@ describe("a product block's email codec", () => {
     const doc = fromEmailBlocks(stored, codecs);
     expect(doc.content?.[0].content?.map((lane) => lane.type)).toEqual(['emailLane', 'emailLane']);
     expect(toEmailBlocks(doc, codecs)).toEqual(stored);
+  });
+});
+
+describe("a product block's items through its email codec", () => {
+  const social = defineEmailBlock({
+    type: 'social',
+    label: 'Social',
+    fields: { links: items({ fields: { label: plainText(), icon: imageUrl(), href: link() }, max: 8 }) },
+    render: (_view, h) => h.divider(),
+    sample: { fields: { links: [] }, variableTypes: {} },
+  });
+  const socialCodecs = [emailBlockCodec(social.editor)];
+
+  it('reads stored items into the node and back unchanged', () => {
+    const stored: EditorEmailBlock[] = [
+      {
+        id: 's1',
+        key: 's1',
+        type: 'social',
+        attributes: {},
+        content: { links: [{ label: 'Site', icon: 'https://x.test/i.png', href: '{{u}}' }] },
+      },
+    ];
+    const doc = fromEmailBlocks(stored, socialCodecs);
+    expect(doc.content?.[0]).toMatchObject({ type: 'email_social', attrs: { links: stored[0].content.links } });
+    expect(toEmailBlocks(doc, socialCodecs)).toEqual(stored);
+  });
+
+  it('exports each item with every sub-field as text, whatever the node holds', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [{ type: 'email_social', attrs: { id: null, key: 'k', links: [{ label: 5, icon: 'i' }, null, 'x'] } }],
+    };
+    expect(toEmailBlocks(doc, socialCodecs)[0].content).toEqual({
+      links: [
+        { label: '', icon: 'i', href: '' },
+        { label: '', icon: '', href: '' },
+        { label: '', icon: '', href: '' },
+      ],
+    });
+    const none: DocJSON = { type: 'doc', content: [{ type: 'email_social', attrs: { id: null, key: 'k' } }] };
+    expect(toEmailBlocks(none, socialCodecs)[0].content).toEqual({ links: [] });
   });
 });
