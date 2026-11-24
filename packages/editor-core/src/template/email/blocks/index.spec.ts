@@ -206,20 +206,24 @@ describe('the default blocks', () => {
     await expect(defaultBlocks.html.translate({ html: '<p>x</p>' }, never)).resolves.toEqual({ html: '<p>x</p>' });
   });
 
-  it('hold text in every type but a divider and a columns block', () => {
+  it('hold text in every type but a divider, a columns block and a spacer', () => {
     const holding = Object.values(defaultBlocks)
       .filter((definition) => definition.holdsText)
       .map((definition) => definition.type);
     expect(holding.sort()).toEqual([
       'button',
       'callout',
+      'card',
       'code',
       'heading',
+      'hero',
       'html',
       'image',
+      'legalFooter',
       'list',
       'paragraph',
       'quote',
+      'socialLinks',
       'table',
     ]);
   });
@@ -416,5 +420,126 @@ describe('a table', () => {
         ],
       }),
     ).not.toBeNull();
+  });
+});
+
+describe('a spacer', () => {
+  it('draws empty space of its height, medium by default', () => {
+    expect(render('spacer', { height: 'large' }, {}).html).toMatch(/height:32px/);
+    expect(render('spacer', {}, {}).html).toMatch(/height:16px/);
+    expect(renderer.attributesOf('spacer', { height: 'huge' })).toBeNull();
+  });
+});
+
+describe('social links', () => {
+  const link = (label: string, href = 'https://x.test/p') => ({ label, icon: 'https://x.test/i.png', href });
+
+  it('draws a linked icon per link, its label the alt text, and a line per link on the text arm', () => {
+    const { html, text } = render(
+      'socialLinks',
+      { align: 'center', size: 'small' },
+      { links: [link('{{b}} on X', 'https://x.test/x'), link('Blog', 'https://x.test/blog')] },
+      { b: 'Acme' },
+    );
+    expect(html).toContain('<a href="https://x.test/x"');
+    expect(html).toMatch(/<img src="https:\/\/x.test\/i.png" alt="Acme on X" width="24" height="24"/);
+    expect(html).toMatch(/align="center"/);
+    expect(text).toBe('Acme on X: https://x.test/x\nBlog: https://x.test/blog');
+  });
+
+  it('refuses on write no links, more than 8, and a link or icon a client would not open', () => {
+    expect(renderer.contentOf('socialLinks', { links: [] })).toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: Array.from({ length: 9 }, () => link('a')) })).toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: [link('a', 'javascript:alert(1)')] })).toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: [{ ...link('a'), icon: 'data:x' }] })).toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: [link(' ')] })).toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: Array.from({ length: 8 }, () => link('a')) })).not.toBeNull();
+  });
+
+  it('draws no link a client would not open', () => {
+    expect(render('socialLinks', {}, { links: [link('a', 'javascript:alert(1)')] }).html).not.toContain('javascript');
+  });
+});
+
+const feature = {
+  image: 'https://x.test/h.png',
+  alt: 'A bay',
+  heading: 'Hello {{n}}',
+  text: 'Come **soon**',
+  buttonLabel: 'Go',
+  buttonHref: 'https://x.test/go',
+};
+
+describe.each([
+  ['hero', 1, 566],
+  ['card', 2, 564],
+] as const)('a %s', (type, level, width) => {
+  it('draws its image, heading, text and button, the heading escaped', () => {
+    const { html, text } = render(type, {}, { ...feature, heading: 'Hello <b>{{n}}</b>' }, { n: 'Ann' });
+    expect(html).toMatch(new RegExp(`<img src="https://x.test/h.png" alt="A bay" width="${width}"`));
+    expect(html).toContain(`<h${level}`);
+    expect(html).toContain('Hello &lt;b&gt;Ann&lt;/b&gt;');
+    expect(html).toContain('<strong>soon</strong>');
+    expect(html).toMatch(/<a href="https:\/\/x.test\/go"[^>]*>Go<\/a>/);
+    expect(text).toContain('Go: https://x.test/go');
+  });
+
+  it('draws no button where its label or link is empty', () => {
+    expect(render(type, {}, { ...feature, buttonLabel: '', buttonHref: '' }).html).not.toContain('zx-button');
+    expect(render(type, {}, { ...feature, buttonHref: '' }).html).not.toContain('zx-button');
+  });
+
+  it('refuses on write a button label without its link, a missing image, alt or heading, and an unsafe link', () => {
+    expect(renderer.contentOf(type, feature)).not.toBeNull();
+    expect(renderer.contentOf(type, { ...feature, buttonLabel: '', buttonHref: '' })).not.toBeNull();
+    expect(renderer.contentOf(type, { ...feature, buttonHref: '' })).toBeNull();
+    expect(renderer.contentOf(type, { ...feature, buttonLabel: ' ' })).toBeNull();
+    expect(renderer.contentOf(type, { ...feature, alt: '' })).toBeNull();
+    expect(renderer.contentOf(type, { ...feature, heading: '' })).toBeNull();
+    expect(renderer.contentOf(type, { ...feature, image: 'javascript:x' })).toBeNull();
+    expect(renderer.contentOf(type, { ...feature, buttonHref: 'javascript:x' })).toBeNull();
+  });
+});
+
+describe('a card', () => {
+  it('frames its content in a bordered box', () => {
+    const { html } = render('card', {}, feature);
+    expect(html).toMatch(/class="zx-card-block" style="[^"]*border:1px solid #E4E4E7;/);
+  });
+});
+
+describe('a legal footer', () => {
+  const footer = {
+    text: 'You joined {{b}}.',
+    address: '1 Road, Town',
+    unsubscribe: '{{u}}',
+    unsubscribeLabel: '',
+  };
+
+  it('draws why, the address and an unsubscribe link, muted and small', () => {
+    const { html, text } = render('legalFooter', {}, footer, { b: 'Acme', u: 'https://x.test/u?a=1' }, { u: 'url' });
+    expect(html).toContain('You joined Acme.');
+    expect(html).toContain('1 Road, Town');
+    expect(html).toMatch(/<a href="https:\/\/x.test\/u\?a=1"[^>]*>Unsubscribe<\/a>/);
+    expect(html).toContain('zx-legal-text zx-tone-muted');
+    expect(text).toContain('Unsubscribe (https://x.test/u?a=1)');
+  });
+
+  it("draws a label it is given, kept plain even where it holds markup or a link's brackets", () => {
+    const { html } = render(
+      'legalFooter',
+      {},
+      { ...footer, unsubscribeLabel: '**Stop** [x](y)' },
+      { u: 'https://x.test/u' },
+      { u: 'url' },
+    );
+    expect(html).toMatch(/<a href="https:\/\/x.test\/u"[^>]*>\*\*Stop\*\* \[x\]\(y\)<\/a>/);
+  });
+
+  it('refuses on write no address, no unsubscribe link, or one a client would not open', () => {
+    expect(renderer.contentOf('legalFooter', footer)).not.toBeNull();
+    expect(renderer.contentOf('legalFooter', { ...footer, address: ' ' })).toBeNull();
+    expect(renderer.contentOf('legalFooter', { ...footer, unsubscribe: '' })).toBeNull();
+    expect(renderer.contentOf('legalFooter', { ...footer, unsubscribe: 'javascript:x' })).toBeNull();
   });
 });

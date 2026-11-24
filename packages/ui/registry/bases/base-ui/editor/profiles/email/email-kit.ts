@@ -1,6 +1,11 @@
 import { z } from 'zod';
+import { AtSignIcon } from '@/registry/bases/base-ui/icons/lucide/at-sign-icon';
+import { ChevronsUpDownIcon } from '@/registry/bases/base-ui/icons/lucide/chevrons-up-down-icon';
 import { Heading2Icon } from '@/registry/bases/base-ui/icons/lucide/heading-2-icon';
+import { IdCardIcon } from '@/registry/bases/base-ui/icons/lucide/id-card-icon';
 import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
+import { LayoutPanelTopIcon } from '@/registry/bases/base-ui/icons/lucide/layout-panel-top-icon';
+import { MailboxIcon } from '@/registry/bases/base-ui/icons/lucide/mailbox-icon';
 import { TableIcon } from '@/registry/bases/base-ui/icons/lucide/table-icon';
 import { TextAlignStartIcon } from '@/registry/bases/base-ui/icons/lucide/text-align-start-icon';
 import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
@@ -24,6 +29,7 @@ import {
   type ToolbarItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
+import { libraryBlocks, type LibraryBlockType } from '@zeroxsolutions/editor-core/template/email/index';
 import {
   EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,
@@ -50,6 +56,7 @@ import {
 import { heldMarks } from '../held-marks';
 import { codeMirrorVariables } from '../variables/code-mirror-variables';
 import { variableFeature, variableIcon, type VariableFeature } from '../variables/variable';
+import { emailBlockFeature } from './email-block-feature';
 import {
   blockAt,
   cellAt,
@@ -89,6 +96,11 @@ export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
   quote: 'blockquote',
   image: 'image',
   table: 'table',
+  spacer: 'spacer',
+  socialLinks: 'socialLinks',
+  hero: 'hero',
+  card: 'card',
+  legalFooter: 'legalFooter',
 };
 
 /**
@@ -163,6 +175,11 @@ const SLASH_ORDER: readonly EmailBlockKind[] = [
   'quote',
   'image',
   'table',
+  'hero',
+  'card',
+  'socialLinks',
+  'spacer',
+  'legalFooter',
 ];
 
 /** The slash item that inserts each kind: the document's own where the kind is a document block. */
@@ -179,6 +196,20 @@ const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
   quote: 'email-quote',
   image: 'email-image',
   table: 'email-table',
+  spacer: 'email-block-spacer',
+  socialLinks: 'email-block-socialLinks',
+  hero: 'email-block-hero',
+  card: 'email-block-card',
+  legalFooter: 'email-block-legalFooter',
+};
+
+/** The library's blocks the kit offers, each as a product's block is offered, and the icon its slash item shows. */
+const LIBRARY_ICONS: Readonly<Record<LibraryBlockType, unknown>> = {
+  spacer: ChevronsUpDownIcon,
+  socialLinks: AtSignIcon,
+  hero: LayoutPanelTopIcon,
+  card: IdCardIcon,
+  legalFooter: MailboxIcon,
 };
 
 /** The toolbar and bubble items of the marks an email stores, by the words each is drawn in. */
@@ -268,7 +299,7 @@ const lane = (): NodeJSON => ({ type: 'column', content: [{ type: 'paragraph' }]
 const tableCell = (type: 'tableHeader' | 'tableCell'): NodeJSON => ({ type, content: [{ type: 'paragraph' }] });
 
 /** What each kind inserts, empty, so the author fills it in place. */
-const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph'>, () => NodeJSON>> = {
+const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph' | LibraryBlockType>, () => NodeJSON>> = {
   button: () => ({ type: 'button' }),
   code: () => ({ type: 'codeBlock', attrs: { language: 'text', code: '' } }),
   list: () => ({ type: 'bulletList', content: [{ type: 'listItem', content: [{ type: 'paragraph' }] }] }),
@@ -531,7 +562,11 @@ export function emailKit(
   const locked = () => options.structure?.() === 'locked';
   const messages = options.messages ?? (() => DEFAULT_PROFILE_MESSAGES);
 
-  const ownMenus = extra.flatMap((feature) => ownBlockMenus.get(feature) ?? []);
+  // In the schema whatever the profile allows, so a stored one opens; its slash item is offered where it is allowed.
+  const library = (Object.keys(libraryBlocks) as LibraryBlockType[]).map((type) =>
+    emailBlockFeature(libraryBlocks[type], { icon: LIBRARY_ICONS[type], messages }),
+  );
+  const ownMenus = [...extra, ...library].flatMap((feature) => ownBlockMenus.get(feature) ?? []);
   const extraNodes = extra.flatMap((feature) => (feature.nodes ?? []).filter((node) => inGroup(node, 'block')));
   const extraBlocks = extraNodes.map((node) => node.name);
   // A lane holds no block of lanes, as it holds no columns block.
@@ -616,7 +651,9 @@ export function emailKit(
         run: (editor, { kind }: { kind: EmailBlockKind }) => {
           if (!insertable(editor, kind)) return false;
           if (kind === 'paragraph') return editor.run('setParagraph');
-          return editor.run('insertContent', { content: NEW_BLOCKS[kind]() });
+          // A library block is inserted by its own feature's command, as a product's block is.
+          if (Object.hasOwn(libraryBlocks, kind)) return editor.run(`insertEmailBlock:${kind}`);
+          return editor.run('insertContent', { content: NEW_BLOCKS[kind as keyof typeof NEW_BLOCKS]() });
         },
         can: (editor, { kind }: { kind: EmailBlockKind }) => insertable(editor, kind),
       },
@@ -706,6 +743,7 @@ export function emailKit(
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
     { ...image(), slash: [], commands: {} },
     { ...table(), slash: [], commands: {} },
+    ...library,
     blocks,
     defineFeature({
       id: 'emailBlockMenu',

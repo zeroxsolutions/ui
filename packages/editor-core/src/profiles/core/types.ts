@@ -14,7 +14,12 @@ export type EmailBlockKind =
   | 'heading'
   | 'quote'
   | 'image'
-  | 'table';
+  | 'table'
+  | 'spacer'
+  | 'socialLinks'
+  | 'hero'
+  | 'card'
+  | 'legalFooter';
 
 export type ProblemKind =
   | 'variable-undeclared'

@@ -4,7 +4,7 @@ import { parseInlineMarkup } from '../markup/inline-markup.js';
 import type { VariableType } from '../variables/variable-type.js';
 import type { BlockDefinition, EmailBlock, RenderContext } from './block.js';
 import { MAX_LANES } from './blocks/columns.js';
-import { defaultBlocks } from './blocks/index.js';
+import { DEFAULT_BLOCK_TYPES } from './blocks/default-types.js';
 import { readOr } from './blocks/shared.js';
 import {
   ITEMS_MAX,
@@ -371,11 +371,29 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
   options: EmailBlockOptions<Type, F, A>,
   node: string,
 ): EmailBlockDefinition<Type, F, A> {
-  const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
-  assertBlockShape(shape);
-  if (Object.hasOwn(defaultBlocks, options.type)) {
+  if ((DEFAULT_BLOCK_TYPES as readonly string[]).includes(options.type)) {
     throw new BlockDefinitionInvalid(options.type, 'the type is a default block type');
   }
+  return builtInEmailBlockOf(options, node);
+}
+
+/** Fields of a built-in block that are drawn together or not at all, such as a button's label and link. */
+export type FieldPairs = readonly (readonly [string, string])[];
+
+/**
+ * The email side of a block as `emailBlockOf` builds it, without refusing a default type: the renderer's own
+ * library blocks are built with it. `pairs` names fields that are filled together or left empty together, which
+ * the write check refuses one of.
+ *
+ * @throws {BlockDefinitionInvalid} for a shape `assertBlockShape` refuses
+ */
+export function builtInEmailBlockOf<const Type extends string, const F extends FieldMap, const A extends AttributeMap>(
+  options: EmailBlockOptions<Type, F, A>,
+  node: string,
+  pairs: FieldPairs = [],
+): EmailBlockDefinition<Type, F, A> {
+  const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
+  assertBlockShape(shape);
   const fields = Object.entries(options.fields);
   const textFields = fields.filter(
     (entry): entry is [string, Exclude<EmailBlockField, LanesField | ItemsField>] =>
@@ -390,12 +408,17 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
   // each is asserted to the shape the maps' types spell where it is handed out.
   type Content = EmailBlockContent<F>;
   type Stored = Partial<EmailBlockAttributes<A>>;
+  const filled = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
   const content = z
     .object({
       ...Object.fromEntries(textFields.map(([name, field]) => [name, textSchema(field)])),
       ...Object.fromEntries(itemsFields.map(([name, field]) => [name, itemsSchema(field)])),
     })
-    .strict();
+    .strict()
+    .refine(
+      (stored: Record<string, unknown>) => pairs.every(([one, other]) => filled(stored[one]) === filled(stored[other])),
+      { message: 'paired fields are filled together' },
+    );
   const lenientContent = z.object({
     ...Object.fromEntries(textFields.map(([name]) => [name, z.string().catch('')])),
     ...Object.fromEntries(

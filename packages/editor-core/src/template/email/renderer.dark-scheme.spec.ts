@@ -54,7 +54,8 @@ describe('a dark palette', () => {
         '.zx-button{background:#00BC7D !important;color:#022C22 !important;}' +
         '.zx-divider{border-color:#FFFFFF1A !important;}.zx-quote{border-color:#FFFFFF1A !important;}' +
         '.zx-table-cell{color:#FAFAFA !important;border-color:#FFFFFF1A !important;}' +
-        '.zx-table-head{background:#27272A !important;}.zx-footer{border-color:#FFFFFF1A !important;}',
+        '.zx-table-head{background:#27272A !important;}.zx-card-block{border-color:#FFFFFF1A !important;}' +
+        '.zx-footer{border-color:#FFFFFF1A !important;}',
     );
     for (const marked of [
       '<body class="zx-body"',

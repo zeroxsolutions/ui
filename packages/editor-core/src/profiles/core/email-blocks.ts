@@ -6,7 +6,9 @@ import {
   type InlineRun,
   type InlineText,
 } from '../../template/index.js';
+import { libraryBlocks, type LibraryBlockType } from '../../template/email/blocks/index.js';
 import { IMAGE_MAX_WIDTH } from '../../template/email/blocks/shared.js';
+import { emailBlockCodec } from './email-block-codec.js';
 import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
 import { EMAIL_KINDS } from './profile.js';
 import { splitVariables } from './sms-text.js';
@@ -249,6 +251,19 @@ function imageWidth(width: unknown): Record<string, number> {
   return { width: Math.min(Math.round(width), IMAGE_MAX_WIDTH) };
 }
 
+const libraryCodecs = new Map<string, NodeCodec>();
+
+/**
+ * The codec of the library block `type` is, or undefined for another type. Built on first use, since the codec
+ * module reads this one's markup helpers as it loads.
+ */
+function libraryCodecOf(type: string): NodeCodec | undefined {
+  if (!Object.hasOwn(libraryBlocks, type)) return undefined;
+  let codec = libraryCodecs.get(type);
+  if (!codec) libraryCodecs.set(type, (codec = emailBlockCodec(libraryBlocks[type as LibraryBlockType].editor)));
+  return codec;
+}
+
 function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: ReadonlySet<string>): EditorEmailBlock {
   const base = { ...identityOf(node), type: '' };
   const attributes = attributesOf(node);
@@ -358,6 +373,8 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
         ...(node.attrs && 'key' in node.attrs ? { key: base.key } : {}),
       };
     default: {
+      const library = libraryCodecOf(node.type);
+      if (library?.toEmailBlock) return library.toEmailBlock(node) as EditorEmailBlock;
       if (!custom?.toEmailBlock) return { ...base, type: node.type, attributes, content: {} };
       const exported = custom.toEmailBlock(node);
       // A codec's node that holds lanes, as a product's lanes block does, exports them as a columns block does.
@@ -456,7 +473,9 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
       }));
       return nodeOf(block, 'columns', { content });
     }
-    default:
+    default: {
+      const library = libraryCodecOf(block.type)?.fromEmailBlock?.(block);
+      if (library) return library;
       for (const codec of codecs) {
         const node = codec.fromEmailBlock?.(block);
         const lanes = node?.content ?? [];
@@ -471,6 +490,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
         if (node) return node;
       }
       return { type: 'emailUnknown', attrs: { id: block.id, key: block.key, block } };
+    }
   }
 }
 

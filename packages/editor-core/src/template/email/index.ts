@@ -19,7 +19,14 @@ export {
   LIST_MAX_ITEMS,
 } from './blocks/shared.js';
 export { MAX_LANES } from './blocks/columns.js';
-export { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './blocks/index.js';
+export {
+  defaultBlocks,
+  LIBRARY_BLOCK_PAIRS,
+  libraryBlocks,
+  type DefaultBlocks,
+  type DefaultBlockType,
+  type LibraryBlockType,
+} from './blocks/index.js';
 export {
   defineEmailBlock,
   BlockDefinitionInvalid,

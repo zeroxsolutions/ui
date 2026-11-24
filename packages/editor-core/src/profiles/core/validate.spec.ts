@@ -271,7 +271,7 @@ describe('validate an SMS body', () => {
 
   describe("validate a product's own block", () => {
     const card = defineEmailBlock({
-      type: 'card',
+      type: 'promo',
       label: 'Card',
       fields: { text: richText(), author: plainText({ max: 10 }), href: link(), image: imageUrl() },
       render: (_view, h) => h.divider(),
@@ -286,10 +286,10 @@ describe('validate an SMS body', () => {
     });
     const owned = emailProfile({ variables: VARIABLES, blocks: [card, pair] });
     const cardOf = (content: Record<string, unknown>) =>
-      block('card', { text: 'Hi', author: '', href: '', image: '', ...content });
+      block('promo', { text: 'Hi', author: '', href: '', image: '', ...content });
 
     it("adds the blocks' kinds to the profile", () => {
-      expect(owned.kinds).toEqual(expect.arrayContaining(['paragraph', 'card', 'pair']));
+      expect(owned.kinds).toEqual(expect.arrayContaining(['paragraph', 'promo', 'pair']));
       expect(validate([cardOf({ href: '{{link}}', image: 'https://x.test/a.png' })], owned)).toEqual([]);
     });
 
@@ -463,7 +463,7 @@ describe('validate an SMS body', () => {
       const owned = emailProfile({
         blocks: [
           defineEmailBlock({
-            type: 'card',
+            type: 'promo',
             label: 'Card',
             fields: { text: richText() },
             attributes: {
@@ -476,7 +476,7 @@ describe('validate an SMS body', () => {
           }),
         ],
       });
-      const card = (attributes: Record<string, unknown>) => block('card', { text: 'Hi' }, { attributes });
+      const card = (attributes: Record<string, unknown>) => block('promo', { text: 'Hi' }, { attributes });
       expect(validate([card({ tone: 'brand', bold: true, size: 2.5 })], owned)).toEqual([]);
       expect(validate([card({ tone: 'loud', bold: 'yes', size: 4, extra: 1 })], owned)).toEqual([
         { kind: 'attributes-invalid', block: 'k1', field: 'tone' },
@@ -490,7 +490,7 @@ describe('validate an SMS body', () => {
       const owned = emailProfile({
         blocks: [
           defineEmailBlock({
-            type: 'card',
+            type: 'promo',
             label: 'Card',
             fields: { text: richText() },
             render: (_view, h) => h.divider(),
@@ -498,7 +498,7 @@ describe('validate an SMS body', () => {
           }),
         ],
       });
-      expect(validate([block('card', { text: 'Hi', extra: 1 })], owned)).toEqual([
+      expect(validate([block('promo', { text: 'Hi', extra: 1 })], owned)).toEqual([
         { kind: 'content-invalid', block: 'k1', field: 'extra' },
       ]);
     });

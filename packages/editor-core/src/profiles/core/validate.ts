@@ -1,6 +1,12 @@
 import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
 import { leadingToken } from '../../template/markup/href.js';
-import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
+import {
+  defaultBlocks,
+  LIBRARY_BLOCK_PAIRS,
+  libraryBlocks,
+  type DefaultBlockType,
+  type LibraryBlockType,
+} from '../../template/email/blocks/index.js';
 import { IMAGE_TEXT_MAX_LENGTH } from '../../template/email/blocks/image.js';
 import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '../../template/email/blocks/table.js';
 import { EMAIL_KINDS } from './profile.js';
@@ -227,6 +233,13 @@ function checkOwnBlock(
     }
   }
   for (const field of own.fields) checkOwnField(walk, field, content[field.name], { block: id, field: field.name });
+  // A library block's paired fields, such as a button's label and link, are filled together; the empty one is flagged.
+  for (const [one, other] of LIBRARY_BLOCK_PAIRS[own.type as LibraryBlockType] ?? []) {
+    const filled = (name: string) => text(content[name]).trim() !== '';
+    if (filled(one) !== filled(other)) {
+      walk.problems.push({ kind: 'text-empty', block: id, field: filled(one) ? other : one });
+    }
+  }
   for (const items of own.items) checkItems(walk, items, content[items.name], id);
   if (own.lanes !== null) {
     const count = Array.isArray(block.lanes) ? block.lanes.length : 0;
@@ -234,6 +247,13 @@ function checkOwnBlock(
       walk.problems.push({ kind: 'lanes-count', block: id, field: own.lanes.name });
     }
   }
+}
+
+/** The editor of a block built as a product's is: a profile's own block, or one of the library's. */
+function ownEditorOf(walk: Walk, type: string): BlockEditor | undefined {
+  const own = walk.profile.blocks?.find((candidate) => candidate.type === type);
+  if (own) return own;
+  return Object.hasOwn(libraryBlocks, type) ? libraryBlocks[type as LibraryBlockType].editor : undefined;
 }
 
 /** The keys each default kind's strict content schema has. */
@@ -267,7 +287,7 @@ function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<stri
     walk.problems.push({ kind: 'content-invalid', block: id });
     return {};
   }
-  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  const own = ownEditorOf(walk, block.type);
   const keys = own
     ? [
         ...(own.body === null ? [] : [own.body.name]),
@@ -303,7 +323,7 @@ function checkAttributes(walk: Walk, block: EditorEmailBlock, id: string): void 
     return;
   }
   const fields = new Set<string>();
-  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  const own = ownEditorOf(walk, block.type);
   if (own) {
     for (const attribute of own.attributes) {
       if (raw[attribute.name] !== undefined && !attributeTakes(attribute, raw[attribute.name])) {
@@ -396,7 +416,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       checkTable(walk, content, id);
       break;
     default: {
-      const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+      const own = ownEditorOf(walk, block.type);
       if (own) checkOwnBlock(walk, own, block, content, id);
       else {
         for (const name of new Set(variableTokens(content))) {

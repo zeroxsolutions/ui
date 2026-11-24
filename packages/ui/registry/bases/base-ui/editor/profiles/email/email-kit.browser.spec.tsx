@@ -225,7 +225,69 @@ describe('the email kit', () => {
       'Quote',
       'Image',
       'Table',
+      'Hero',
+      'Card',
+      'Social links',
+      'Spacer',
+      'Legal footer',
     ]);
+  });
+
+  it.each([
+    ['Hero', 'hero'],
+    ['Card', 'card'],
+    ['Social links', 'socialLinks'],
+    ['Spacer', 'spacer'],
+    ['Legal footer', 'legalFooter'],
+  ])('inserts a %s from the slash menu, exported as its email block', async (title, type) => {
+    const editor = await mount([paragraph('')]);
+    await userEvent.click(find('[contenteditable=true] p'));
+    await userEvent.keyboard('/');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain(type));
+  });
+
+  it("inserts a library block through the kit's own command where the profile allows it", async () => {
+    const editor = await mount([paragraph('Hi')]);
+    await caretAfter('Hi');
+    expect(editor.run('insertEmailBlock', { kind: 'spacer' })).toBe(true);
+    await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain('spacer'));
+
+    const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+    await caretAfter('Header');
+    expect(layout.can('insertEmailBlock', { kind: 'hero' })).toBe(false);
+  });
+
+  it('carries a stored hero, card, social links, spacer and legal footer through the editor unchanged', async () => {
+    const feature = {
+      image: 'https://x.test/h.png',
+      alt: 'A bay',
+      heading: 'Hello {{name}}',
+      text: 'Come **soon**',
+      buttonLabel: 'Go',
+      buttonHref: '{{resetUrl}}',
+    };
+    const stored: EditorEmailBlock[] = [
+      block({ id: 'h', key: 'h', type: 'hero', attributes: { align: 'center' }, content: feature }),
+      block({ id: 'c', key: 'c', type: 'card', content: { ...feature, buttonLabel: '', buttonHref: '' } }),
+      block({
+        id: 's',
+        key: 's',
+        type: 'socialLinks',
+        attributes: { size: 'small' },
+        content: { links: [{ label: 'Blog', icon: 'https://x.test/i.png', href: 'https://x.test/b' }] },
+      }),
+      block({ id: 'p', key: 'p', type: 'spacer', attributes: { height: 'large' } }),
+      block({
+        id: 'f',
+        key: 'f',
+        type: 'legalFooter',
+        content: { text: 'You joined.', address: '1 Road', unsubscribe: '{{resetUrl}}', unsubscribeLabel: '' },
+      }),
+    ];
+    const editor = await mount(stored);
+    expect(exportedFor(editor)).toEqual(stored);
+    expect(exported(editor)).toEqual(stored);
   });
 
   it.each([

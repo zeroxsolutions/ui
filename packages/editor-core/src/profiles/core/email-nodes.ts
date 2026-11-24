@@ -4,7 +4,8 @@ import type { MarkSpec, NodeSpec } from '../../document/core/types/index.js';
 /**
  * The block node types, besides the paragraph, that carry `id` and `key` under `blockIdentity`: the
  * document's own blocks the email reads, the email's own, and the ones the export may fold into a
- * paragraph or a list (`heading`, `orderedList`, `taskList`, `blockquote`) so a pasted one keeps an identity.
+ * paragraph or a list (`heading`, `orderedList`, `taskList`, `blockquote`) so a pasted one keeps an identity, and
+ * the library's blocks, each a node named for its type.
  */
 export const EMAIL_BLOCK_NODES = [
   'bulletList',
@@ -21,6 +22,11 @@ export const EMAIL_BLOCK_NODES = [
   'blockquote',
   'image',
   'table',
+  'spacer',
+  'socialLinks',
+  'hero',
+  'card',
+  'legalFooter',
 ] as const;
 
 /**

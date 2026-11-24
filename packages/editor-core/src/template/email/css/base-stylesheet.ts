@@ -18,6 +18,7 @@ const NARROW_SCREEN =
   '.zx-button{display:block !important;text-align:center !important;font-size:16px !important;line-height:22px !important;padding:12px 16px !important;}' +
   '.zx-lane{display:block !important;width:100% !important;padding:0 !important;}' +
   '.zx-caption{font-size:12px !important;line-height:17px !important;}' +
+  '.zx-legal-text{font-size:12px !important;line-height:17px !important;}' +
   '}';
 
 /** The rules that repaint the email with `dark` where a client reads `prefers-color-scheme` (Apple Mail, Outlook for Mac). */
@@ -40,6 +41,7 @@ function darkScheme(dark: EmailColors): string {
     `.zx-quote{border-color:${dark.border} !important;}` +
     `.zx-table-cell{color:${dark.foreground} !important;border-color:${dark.border} !important;}` +
     `.zx-table-head{background:${dark.muted} !important;}` +
+    `.zx-card-block{border-color:${dark.border} !important;}` +
     `.zx-footer{border-color:${dark.border} !important;}` +
     '}'
   );
@@ -96,6 +98,11 @@ export function baseStylesheet(theme: EmailTheme): string {
     '.zx-icon-image{display:block;border:0;}' +
     '.zx-icons-center{margin:0 auto;}' +
     '.zx-icons-right{margin:0 0 0 auto;}' +
+    '.zx-hero-heading,.zx-card-block-heading{padding:12px 0 4px;}' +
+    '.zx-hero-action,.zx-card-block-action{padding:12px 0 0;}' +
+    `.zx-card-block{border:1px solid ${c.border};border-radius:${radius}px;}` +
+    '.zx-card-block-body{padding:0 16px 16px;}' +
+    '.zx-legal-text{padding:0 0 4px;font-size:12px;line-height:17px;}' +
     '.zx-lane{padding:0 8px 0 0;}' +
     '.zx-lane-last{padding:0;}' +
     `.zx-footer{padding:10px 0 0;border-top:1px solid ${c.border};}` +

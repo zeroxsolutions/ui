@@ -19,6 +19,11 @@ describe('emailProfile', () => {
       'quote',
       'image',
       'table',
+      'spacer',
+      'socialLinks',
+      'hero',
+      'card',
+      'legalFooter',
     ]);
     expect(profile.exports).toEqual(['email-blocks', 'email-html', 'email-text']);
     expect(profile.bounds).toEqual({
