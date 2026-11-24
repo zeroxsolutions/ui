@@ -17,29 +17,60 @@ import type { ReactMarkCodec } from '../../../react-types';
  * the `setLink`/`unsetLink` commands (composed from built-in `setMark`/
  * `unsetMark`), and a bubble affordance the chrome fills via its link popover.
  */
+/** The schemes a link may open; an address naming no scheme opens in the site and is kept too. */
+const SCHEMES: ReadonlySet<string> = new Set(['http', 'https', 'mailto', 'tel']);
+
+/**
+ * `href` where it opens a web, mail or phone address or one in the site, else null. The scheme is read as a
+ * browser reads it, after dropping the control characters and spaces around the address and the tabs and newlines
+ * inside it, so `java&#9;script:` is refused as `javascript:` is.
+ */
+export function linkHref(href: string): string | null {
+  // eslint-disable-next-line no-control-regex -- the controls are what a browser drops from an address
+  const read = href.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '').replace(/[\t\n\r]/g, '');
+  const scheme = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(read)?.[1];
+  return scheme === undefined || SCHEMES.has(scheme.toLowerCase()) ? href : null;
+}
+
 const linkArgs = z.object({ href: z.string().min(1) });
 
 const escapeAttr = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+/** The address a stored link mark opens, or null for one `linkHref` refuses, which every export writes as text. */
+const hrefOf = (attrs: Record<string, unknown> | undefined): string | null => linkHref(String(attrs?.href ?? ''));
+
 const linkCodec: ReactMarkCodec = {
   mark: 'link',
-  toMarkdown: (mark) => ({
-    open: '[',
-    close: `](${String(mark.attrs?.href ?? '')})`,
-  }),
-  toHTML: (mark) => ({
-    open: `<a href="${escapeAttr(String(mark.attrs?.href ?? ''))}">`,
-    close: '</a>',
-  }),
-  toReact: (mark, children) => (
-    <a href={String(mark.attrs?.href ?? '')} rel="noreferrer">
-      {children}
-    </a>
-  ),
-  fromMarkdown: (token) => (token.type === 'link' ? { type: 'link', attrs: { href: String(token.url ?? '') } } : null),
-  fromHTML: (element) =>
-    element.tagName === 'A' ? { type: 'link', attrs: { href: element.getAttribute('href') ?? '' } } : null,
+  toMarkdown: (mark) => {
+    const href = hrefOf(mark.attrs);
+    return href === null ? { open: '', close: '' } : { open: '[', close: `](${href})` };
+  },
+  toHTML: (mark) => {
+    const href = hrefOf(mark.attrs);
+    return href === null ? { open: '', close: '' } : { open: `<a href="${escapeAttr(href)}">`, close: '</a>' };
+  },
+  toReact: (mark, children) => {
+    const href = hrefOf(mark.attrs);
+    return href === null ? (
+      children
+    ) : (
+      <a href={href} rel="noreferrer">
+        {children}
+      </a>
+    );
+  },
+  // A link the reader should not open is not read: its text stays, unmarked.
+  fromMarkdown: (token) => {
+    if (token.type !== 'link') return null;
+    const href = linkHref(String(token.url ?? ''));
+    return href === null ? null : { type: 'link', attrs: { href } };
+  },
+  fromHTML: (element) => {
+    if (element.tagName !== 'A') return null;
+    const href = linkHref(element.getAttribute('href') ?? '');
+    return href === null ? null : { type: 'link', attrs: { href } };
+  },
 };
 
 /** The chrome renders its own href popover, then calls `setLink`; the item just
@@ -59,7 +90,9 @@ export function link(): EditorFeature {
     commands: {
       setLink: {
         args: linkArgs,
-        run: (editor, args) => editor.run('setMark', { name: 'link', attrs: { href: args.href } }),
+        run: (editor, args) =>
+          linkHref(args.href) !== null && editor.run('setMark', { name: 'link', attrs: { href: args.href } }),
+        can: (editor, args) => linkHref(args.href) !== null && editor.can('setMark', { name: 'link', attrs: args }),
       },
       unsetLink: {
         run: (editor) => editor.run('unsetMark', { name: 'link' }),
@@ -72,6 +105,8 @@ export function link(): EditorFeature {
           openOnClick: false,
           autolink: true,
           linkOnPaste: true,
+          // A pasted or parsed link is kept by the rule the codec imports by.
+          isAllowedUri: (url: string) => linkHref(url) !== null,
         }),
       ],
     },
