@@ -24,13 +24,14 @@ import { sameBlockContent } from '@zeroxsolutions/editor-core/template/email/ind
 import { TriggerLayer } from '../../composer/triggers/trigger-layer';
 import { Editor } from '../../document/react/editor';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
+import { SlashMenu } from '../../document/ui/slash-menu';
 import { profileMessages, type ProfileEditorMessages } from '../messages';
 import { ProblemMarker } from '../problem-marker';
 import { caretNode, nextMarker, useFocusLeave } from '../problem-navigation';
 import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
 import { smsDecorations, smsMarks, type SmsMark } from './sms-problems';
-import { smsKit } from './sms-kit';
+import { smsKit, smsSlashItems } from './sms-kit';
 import { SmsMeter } from './sms-meter';
 
 /** How long after an edit the problems are read again, at most. */
@@ -118,7 +119,7 @@ function overlayFeature(read: () => readonly SmsMark[], label: () => string) {
 
 /**
  * The SMS profile's editor: the document editor with `smsKit`'s paragraphs and variables, each problem marked in
- * the text, and the segment meter under it. The frame is the Document Editor's: the toolbar above the text and
+ * the text, a "/" menu of the declared variables, and the segment meter under it. The frame is the Document Editor's: the toolbar above the text and
  * nothing around it. `value` loads whenever it differs from what the editor last reported, so a
  * host hands back what `onChange` gave it without moving the caret.
  */
@@ -264,6 +265,8 @@ export function SmsEditor({
     [setup, text.noVariables],
   );
 
+  const slash = useMemo(() => smsSlashItems(profile.variables, text), [profile.variables, text]);
+
   const focus = useFocusLeave(() => live.current.onBlur?.());
 
   // F8 and Shift+F8 reach the next and the previous problem, as in VS Code; Escape on one goes back to its text.
@@ -310,6 +313,7 @@ export function SmsEditor({
         }}
       />
       {menus && <TriggerLayer editor={editor} triggers={[variables]} />}
+      {menus && <SlashMenu editor={editor} items={slash} placeholder={text.slashSearch} emptyText={text.noVariables} />}
       {/* From the text's left edge: the editable text sits past the grip's gutter, the read-only text flush. */}
       <div data-slot="sms-editor-footer" className={cn('flex flex-col gap-1 text-sm', !readOnly && 'px-12')}>
         <TooltipProvider>

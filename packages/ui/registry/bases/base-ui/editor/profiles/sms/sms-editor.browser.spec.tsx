@@ -145,16 +145,41 @@ describe('SmsEditor', () => {
     expect(JSON.stringify(probe.editor.getJSON())).not.toContain('"marks"');
   });
 
-  it('draws no grip, no insert button and no slash menu', async () => {
+  it('draws no grip and no insert button', async () => {
     const probe = await mount('Hello');
     await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p')));
     await caretAtEnd(probe);
-    await userEvent.keyboard(' /');
 
-    await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello /'));
     expect(document.querySelector('.drag-handle')).toBeNull();
     expect(document.querySelector('[data-editor-add]')).toBeNull();
+  });
+
+  it('offers the declared variables under "/", inserting the picked one as its chip, which the meter counts', async () => {
+    const probe = await mount('Hello');
+    await caretAtEnd(probe);
+    await userEvent.keyboard(' /');
+
+    const menu = page.elementLocator(await vi.waitFor(() => find('[data-slot=slash-menu]')));
+    await expect.element(menu.getByText('Variables')).toBeVisible();
+    await expect.element(menu.getByText('A', { exact: true })).toBeVisible();
+    await userEvent.click(menu.getByText('Code', { exact: true }));
+
+    await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello {{code}}'));
+    expect(find('[contenteditable=true] [data-variable=code]')).toBeTruthy();
+    // More than "Hello " alone: the chip costs what the meter reserves for its variable.
+    await vi.waitFor(() => expect(Number.parseInt(meter() ?? '', 10)).toBeGreaterThan('Hello '.length));
     expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
+  });
+
+  it('leaves the typed "/" as text when its menu is dismissed', async () => {
+    const probe = await mount('Hello');
+    await caretAtEnd(probe);
+    await userEvent.keyboard(' /');
+    await vi.waitFor(() => find('[data-slot=slash-menu]'));
+
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(document.querySelector('[data-slot=slash-menu]')).toBeNull());
+    expect(last(probe.reported)).toBe('Hello /');
   });
 
   it('keeps a typed heading or list shortcut, and a pasted heading, as text', async () => {

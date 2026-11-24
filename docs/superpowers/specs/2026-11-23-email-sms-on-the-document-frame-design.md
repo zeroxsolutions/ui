@@ -42,6 +42,9 @@ side with the Document Editor it reads as a different product.
    the resizable split are gone.
 6. The SMS editor is the same frame with the SMS profile: paragraph text and variables, no block menu
    items beyond the variable, and the segment meter under the text, aligned with the text.
+   Revised 2026-11-24 after the owner's third review: the SMS editor has the Document Editor's slash menu,
+   holding one item per declared variable, labelled and iconed as the `{{` menu draws it, that inserts its
+   chip. Dismissing the menu leaves the typed `/` as text.
 7. The docs pages follow the Document Editor page's outline (demo, Installation, Usage, API reference)
    and say what the component does; travel's own wiring leaves the design system's docs.
 

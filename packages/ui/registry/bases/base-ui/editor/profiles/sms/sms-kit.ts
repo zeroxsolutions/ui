@@ -8,11 +8,12 @@ import {
   Slice,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
-import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
-import type { EditorProfile } from '@zeroxsolutions/editor-core/profiles/index';
+import { defineFeature, type EditorFeature, type SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import type { EditorProfile, VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { standardKit } from '../../document/features/standard/index';
 import { heldMarks } from '../held-marks';
-import { variableFeature, type VariableFeature } from '../variables/variable';
+import type { ProfileEditorMessages } from '../messages';
+import { variableFeature, variableIcon, variableLabel, type VariableFeature } from '../variables/variable';
 
 /**
  * The body's paste: text is one paragraph per line, as `fromSmsText` reads a body, since ProseMirror's own
@@ -90,8 +91,8 @@ export interface SmsKitOptions {
 }
 
 /**
- * The features of the SMS profile: the Document Editor's text with no grip, no "+" and no slash, toolbar,
- * bubble or block menu item, and the variable chip. It keeps no block but the paragraph and no mark, so no
+ * The features of the SMS profile: the Document Editor's text with no grip, no "+" and none of its slash,
+ * toolbar, bubble or block menu items, and the variable chip; `smsSlashItems` fills the slash menu. It keeps no block but the paragraph and no mark, so no
  * shortcut or paste can write what the body cannot hold.
  */
 export function smsKit(profile: EditorProfile, options: SmsKitOptions = {}): EditorFeature[] {
@@ -102,4 +103,23 @@ export function smsKit(profile: EditorProfile, options: SmsKitOptions = {}): Edi
     variables.feature,
     defineFeature({ id: 'smsBody', advanced: { engineExtensions: [smsBody()] } }),
   ];
+}
+
+/**
+ * The SMS slash menu's items: one per declaration, which inserts its chip, named and iconed as the chip and the
+ * variable menus draw it, under `messages.variableGroup`. A body holds no block, so a variable is all "/" offers.
+ */
+export function smsSlashItems(
+  declarations: readonly VariableDeclaration[],
+  messages: Pick<ProfileEditorMessages, 'variableGroup'>,
+): SlashItem[] {
+  return declarations.map((declaration) => ({
+    id: `sms-variable-${declaration.name}`,
+    title: variableLabel(declaration),
+    icon: variableIcon(declaration.type),
+    keywords: [declaration.name],
+    group: messages.variableGroup,
+    command: 'insertVariable',
+    args: { name: declaration.name },
+  }));
 }
