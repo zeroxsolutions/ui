@@ -22,6 +22,8 @@ import type {
 export interface ReactSerializeContext extends CoreSerializeContext {
   /** Render a node's children to a React tree. */
   renderChildren(node: NodeJSON): ReactNode;
+  /** The document being rendered, for a node drawn from the rest of it, such as a table of contents. */
+  doc: NodeJSON;
 }
 
 /** A node codec whose `toReact` builds a React tree. Use this (not the core
