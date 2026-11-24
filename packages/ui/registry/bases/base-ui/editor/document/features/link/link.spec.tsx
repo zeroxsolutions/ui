@@ -152,3 +152,32 @@ describe('a link to a web, mail or phone address, or one in the site', () => {
     expect(rendered).toContain(`href="${href.replace(/&/g, '&amp;')}"`);
   });
 });
+
+describe("a link's address in a Markdown export", () => {
+  const linked = (href: string, text = 'x'): DocJSON => ({
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text, marks: [{ type: 'link', attrs: { href } }] }] }],
+  });
+
+  it.each([
+    'https://a.com/x)<img src=x onerror=alert(1)> [y](javascript:alert(1)',
+    'https://a.com/x>\n\n<script>alert(1)</script>',
+    'https://a.com/a b(c)',
+  ])('cannot end the link and write markup or another link: %j', (href) => {
+    const markdown = serialize(linked(href), 'markdown', registry);
+    expect(markdown).not.toMatch(/<img|<script/i);
+    const read = importMarkdown(markdown, registry).doc;
+    expect(read.content).toHaveLength(1);
+    const hrefs = (read.content?.[0]?.content ?? []).flatMap((node) =>
+      (node.marks ?? []).filter((mark) => mark.type === 'link').map((mark) => String(mark.attrs?.href)),
+    );
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const written of hrefs) expect(written.startsWith('https://a.com/')).toBe(true);
+  });
+
+  it('reads back as the address it was written from', () => {
+    for (const href of ['https://a.com/x?q=(1)', 'https://a.com/a b', '/trips/hoi-an#day-one']) {
+      expect(linkOf(importMarkdown(serialize(linked(href), 'markdown', registry), registry).doc)).toBe(href);
+    }
+  });
+});

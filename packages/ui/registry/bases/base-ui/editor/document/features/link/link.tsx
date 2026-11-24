@@ -37,6 +37,20 @@ const linkArgs = z.object({ href: z.string().min(1) });
 const escapeAttr = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+/**
+ * `href` as a Markdown link destination: as it is where it holds nothing that ends one, else in angle brackets
+ * with the brackets, line breaks and backslash it holds percent-encoded, so it cannot close the link and write
+ * markup after it.
+ */
+function markdownDestination(href: string): string {
+  if (!/[\s()<>\\]/.test(href)) return href;
+  const encoded = href.replace(
+    /[<>\\\r\n]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`,
+  );
+  return `<${encoded}>`;
+}
+
 /** The address a stored link mark opens, or null for one `linkHref` refuses, which every export writes as text. */
 const hrefOf = (attrs: Record<string, unknown> | undefined): string | null => linkHref(String(attrs?.href ?? ''));
 
@@ -44,7 +58,7 @@ const linkCodec: ReactMarkCodec = {
   mark: 'link',
   toMarkdown: (mark) => {
     const href = hrefOf(mark.attrs);
-    return href === null ? { open: '', close: '' } : { open: '[', close: `](${href})` };
+    return href === null ? { open: '', close: '' } : { open: '[', close: `](${markdownDestination(href)})` };
   },
   toHTML: (mark) => {
     const href = hrefOf(mark.attrs);
