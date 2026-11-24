@@ -138,6 +138,7 @@ const RENDER_PROBLEMS: Readonly<Record<RenderProblemKind, string>> = {
   'href-scheme-refused': 'The link is not a web or mail address',
   'unknown-block-type': 'This block is of an unknown type',
   'block-nested-too-deep': 'Columns cannot hold columns',
+  'lanes-mismatch': 'This block holds more or fewer lanes than it takes, and draws no lane past the last it takes',
 };
 
 const ENCODINGS = { gsm7: 'GSM-7', ucs2: 'UCS-2' } as const;

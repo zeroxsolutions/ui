@@ -26,7 +26,12 @@ import {
   Selection,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
-import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import {
+  EditorError,
+  type DocJSON,
+  type EditorFeature,
+  type IEditor,
+} from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -104,8 +109,11 @@ interface EmailEditorBaseProps {
   /** Shows the document and its problems with no way to change it: no typing, toolbar or block menu. */
   readOnly?: boolean;
   /**
-   * The product's own blocks, from `defineEmailBlock`: each is offered, edited and exported, and its type joins
-   * the profile's kinds. Read once: a change needs a remount.
+   * The product's own blocks, from `defineEmailBlock`: each is offered, edited and exported. The profile names
+   * them too, through `emailProfile({ blocks })`, so the server's `validate` reads them as the editor does.
+   * Read once: a change needs a remount.
+   *
+   * @throws {EditorError} `editor.profile.block_not_in_profile` for a block whose type the profile lacks
    */
   blocks?: readonly EmailBlockDefinition[];
   /**
@@ -304,7 +312,7 @@ function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMe
  * gave it without moving the caret.
  */
 export function EmailEditor({
-  profile: given,
+  profile,
   value,
   label,
   messages,
@@ -325,14 +333,15 @@ export function EmailEditor({
 }: EmailEditorProps) {
   const idBase = useId();
   const text = useMemo(() => profileMessages(messages), [messages]);
+  // The profile names the blocks too, so the server's `validate` reads them as the editor does.
   const [types] = useState(() => (blocks ?? []).map((definition) => definition.editor.type));
-  const profile = useMemo(
-    () =>
-      types.every((type) => given.kinds.includes(type))
-        ? given
-        : { ...given, kinds: [...given.kinds, ...types.filter((type) => !given.kinds.includes(type))] },
-    [given, types],
-  );
+  const missing = types.find((type) => !profile.kinds.includes(type));
+  if (missing !== undefined) {
+    throw new EditorError(
+      'editor.profile.block_not_in_profile',
+      `Block "${missing}" is in \`blocks\` but not in the profile; pass it to emailProfile({ blocks }) too.`,
+    );
+  }
   const live = useRef({ profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur });
   live.current = { profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur };
 

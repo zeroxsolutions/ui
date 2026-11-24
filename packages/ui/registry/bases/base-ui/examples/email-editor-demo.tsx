@@ -31,8 +31,6 @@ const variables: VariableDeclaration[] = [
   { name: 'guide_url', type: 'url', label: 'guide link', sampleValue: 'https://example.com/guide' },
 ];
 
-const profile = emailProfile({ variables });
-
 const theme: EmailTheme = {
   colors: {
     background: '#FFFFFF',
@@ -74,6 +72,9 @@ const quote = defineEmailBlock({
     variableTypes: { first_name: 'string' },
   },
 });
+
+// The quote joins the profile, so a server's `validate` reads it as the editor does.
+const profile = emailProfile({ variables, blocks: [quote] });
 
 // The quote's own rules, and the callout's border in the brand's green; a color for dark mode goes in its own
 // query, since the base sheet's dark rules beat an inlined one.

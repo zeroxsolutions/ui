@@ -289,7 +289,11 @@ custom properties of a top-level `:root` or `.zx-root` rule and is resolved befo
 `@media` and `@supports` rules stay in the head, made `!important` so they beat the inlined styles in the
 clients that read them. Any selector may be used there. The base sheet's dark rules are such rules too, so a
 color you set for light mode reaches dark mode only through a `prefers-color-scheme: dark` query of your own,
-as above.
+as above. A query that redefines `:root`'s custom properties does that for you: each inlined rule reading one
+is drawn again under the query, with the query's value.
+
+An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
+would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
 
 | Class                                                    | On                                                       |
 | -------------------------------------------------------- | -------------------------------------------------------- |
@@ -346,10 +350,16 @@ const renderer = createEmailRenderer({
 ```
 
 ```tsx
-<EmailEditor profile={profile} blocks={[quote]} renderer={renderer} /* ... */ />
+const profile = emailProfile({ variables, blocks: [quote] });
+
+<EmailEditor profile={profile} blocks={[quote]} renderer={renderer} /* ... */ />;
 ```
 
-`blocks` adds the type to the profile's kinds, offers the block in the slash menu and exports it. The rich text
+`emailProfile`'s `blocks` adds the type to the profile's kinds, and `validate` checks each field as the
+renderer will: an empty body, a field over its `max`, and a link or image address it would refuse. `EmailEditor`'s
+`blocks` offers the block in the slash menu and exports it, and throws `EditorError` for a block the profile does
+not name. A lanes block holding fewer or more lanes than it takes is a `lanes-mismatch`, and the renderer draws
+no lane past its `max`. The rich text
 field is edited in place, the other fields in a text field under it, a `choice` in a submenu of the block menu,
 a `toggle` as a checkbox there, and a `number` in a field under the block. `customBlocks` in `messages` words a
 block's title and its fields, attributes and values by their names; the definition's labels stand in.
@@ -405,14 +415,16 @@ Build `messages` once per locale; a new object rebuilds the toolbar and the menu
 
 ### emailProfile
 
-| Option       | Type                    | Default         |
-| ------------ | ----------------------- | --------------- |
-| `allow`      | `EmailBlockKind[]`      | all eight       |
-| `variables`  | `VariableDeclaration[]` | `[]`            |
-| `bounds`     | `Partial<EmailBounds>`  | the table below |
-| `extraKinds` | `string[]`              | `[]`            |
+| Option       | Type                     | Default         |
+| ------------ | ------------------------ | --------------- |
+| `allow`      | `EmailBlockKind[]`       | all eight       |
+| `variables`  | `VariableDeclaration[]`  | `[]`            |
+| `bounds`     | `Partial<EmailBounds>`   | the table below |
+| `blocks`     | `EmailBlockDefinition[]` | `[]`            |
+| `extraKinds` | `string[]`               | `[]`            |
 
-`extraKinds` names the kinds of your own `features`; `blocks` adds its own. The renderer caps `text`, `label`, `href`, `listItems`
+`blocks` names your blocks from `defineEmailBlock`, and `validate` checks their fields. `extraKinds` names the
+kinds of blocks of your own `features` written by hand, whose fields `validate` does not know. The renderer caps `text`, `label`, `href`, `listItems`
 and `lanes` at their defaults, and a higher value throws `editor.profile.bound_above_renderer`. `blocks` and
 `variables` may be raised.
 

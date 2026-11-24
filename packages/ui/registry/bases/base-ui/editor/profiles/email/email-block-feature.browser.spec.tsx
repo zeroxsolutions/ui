@@ -1,9 +1,15 @@
 import { useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { emailProfile, type EditorEmailBlock, type ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
+import {
+  emailProfile,
+  validate,
+  type EditorEmailBlock,
+  type ProfileProblem,
+} from '@zeroxsolutions/editor-core/profiles/index';
 import {
   choice,
   defineEmailBlock,
@@ -30,7 +36,10 @@ const quote = defineEmailBlock({
   sample: { fields: { text: '{{name}} said it', author: 'Lan' }, variableTypes: { name: 'string' } },
 });
 
-const profile = emailProfile({ variables: [{ name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' }] });
+const profile = emailProfile({
+  variables: [{ name: 'name', type: 'string', label: 'Name', sampleValue: 'Lan' }],
+  blocks: [quote],
+});
 
 const stored = (attributes: Record<string, unknown> = {}): EditorEmailBlock => ({
   id: 'q1',
@@ -141,5 +150,20 @@ describe('emailBlockFeature', () => {
     await userEvent.fill(size, '3');
 
     await vi.waitFor(() => expect(last(probe.reported)?.[0]).toEqual(stored({ size: 3 })));
+  });
+
+  it('refuses a block the profile does not name, so the server validates what the editor offers', () => {
+    expect(validate([stored({ size: 3 })], profile)).toEqual([]);
+    expect(() =>
+      renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[quote]} value={[]} />),
+    ).toThrow(/Block "quote" is in `blocks` but not in the profile/);
+  });
+
+  it('marks a field the renderer would refuse, as the server reads it', async () => {
+    const probe = await mount([{ ...stored(), content: { text: 'Kind words', author: 'x'.repeat(121) } }]);
+
+    await vi.waitFor(() =>
+      expect(last(probe.validated)).toContainEqual({ kind: 'text-too-long', block: 'q1', field: 'author' }),
+    );
   });
 });
