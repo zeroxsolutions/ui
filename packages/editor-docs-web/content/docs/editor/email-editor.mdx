@@ -201,9 +201,11 @@ function WelcomeEmail({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blo
 }
 ```
 
-The editor offers the Document Editor's paragraph, bulleted list, callout, code block and divider, and the
-email's button, columns and HTML blocks. Click a block's grip, or press Mod-/, to open its block menu. The
-menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, Tone, Width, Lanes or Link.
+The editor offers the Document Editor's paragraph, bulleted list, callout, code block, divider, button, columns,
+heading, quote, image and table, and the email's HTML block and the library's hero, card, social links, spacer
+and legal footer. Click a block's grip, or press Mod-/, to open its block menu. The menu holds Turn into,
+Duplicate and Delete, and the block's own settings, such as Align, Space after, Tone, Width, Level, Lanes, Link,
+Height or Size.
 
 The editor is drawn as the Document Editor is, with its toolbar above the blocks and nothing around them.
 With a `renderer`, an Edit and a Preview tab sit at the end of the toolbar's row, as a Mermaid block's switch
@@ -217,6 +219,26 @@ drawn at the editor's own width, so under 600px the default layout goes full-ble
 around its card, and in the theme around the editor: inside a `.dark` scope its `prefers-color-scheme: dark`
 rules apply, and a theme switched later redraws it. Pick a device and the dark theme on the bar above the demo
 to see both.
+
+## Library blocks
+
+| Block         | Holds                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| `heading`     | a title at level 1, 2 or 3, level 2 when it names none                                                  |
+| `quote`       | words set off by a rule at their left, in the muted colour                                              |
+| `image`       | a hosted `https:` image, its required alt text, a caption and a link, at most 566px wide                |
+| `table`       | rows of short text, the first one headers where `header` is set, at most 20 rows of 6 columns           |
+| `hero`        | a wide image and its alt text, a heading, text, and a button, left or centred                           |
+| `card`        | the hero's fields in a frame                                                                            |
+| `socialLinks` | 1 to 8 icon links, each a label, a hosted icon your product supplies and a link, left, centred or right |
+| `spacer`      | empty space, small, medium or large                                                                     |
+| `legalFooter` | why the reader gets the mail, the required postal address, and the required unsubscribe link            |
+
+A hero's and a card's button is drawn only with both its label and its link, and the write check refuses one
+without the other. An image is drawn at its width, at most 566px, the card's width less its border and
+padding, since Outlook on Windows reads no `max-width` and would push the card wider. The card is also a block for the Document Editor: `card` from
+`@zeroxsolutions/editor-core/blocks/index` is one definition for both editors. In a table cell the editor keeps
+to a line of text, since the email writes each cell as one.
 
 ## Theme
 
@@ -314,17 +336,23 @@ their specificity in your sheet; one with no class there, such as `p`, does not.
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
 
-| Class                                                    | On                                                       |
-| -------------------------------------------------------- | -------------------------------------------------------- |
-| `zx-body`, `zx-canvas`, `zx-card`, `zx-inner`            | the body, the background table, the card and its padding |
-| `zx-region-header`, `zx-region-body`, `zx-region-footer` | each region's blocks                                     |
-| `zx-block`, `zx-block-<type>`                            | each block's row, by its type                            |
-| `zx-align-<align>`, `zx-space-<spaceAfter>`              | the row, by the block's `align` and `spaceAfter`         |
-| `zx-text`, `zx-tone-muted`, `zx-link`                    | a paragraph's text, its muted tone, a link in text       |
-| `zx-callout`, `zx-code`, `zx-list`, `zx-divider`         | the callout, code, list and divider blocks               |
-| `zx-button`, `zx-width-full`                             | the button, and a full-width one                         |
-| `zx-lane`, `zx-lane-last`                                | each lane of a columns block, and the last               |
-| `zx-footer`, `zx-footer-line`                            | the default layout's footer and each of its lines        |
+| Class                                                     | On                                                       |
+| --------------------------------------------------------- | -------------------------------------------------------- |
+| `zx-body`, `zx-canvas`, `zx-card`, `zx-inner`             | the body, the background table, the card and its padding |
+| `zx-region-header`, `zx-region-body`, `zx-region-footer`  | each region's blocks                                     |
+| `zx-block`, `zx-block-<type>`                             | each block's row, by its type                            |
+| `zx-align-<align>`, `zx-space-<spaceAfter>`               | the row, by the block's `align` and `spaceAfter`         |
+| `zx-text`, `zx-tone-muted`, `zx-link`                     | a paragraph's text, its muted tone, a link in text       |
+| `zx-callout`, `zx-code`, `zx-list`, `zx-divider`          | the callout, code, list and divider blocks               |
+| `zx-heading`, `zx-heading-<level>`, `zx-quote`            | a heading, by its level, and the quote                   |
+| `zx-image-fluid`, `zx-caption`                            | an image that shrinks to the screen, and its caption     |
+| `zx-table`, `zx-table-cell`, `zx-table-head`              | the table, each cell, and the header row's cells         |
+| `zx-hero-<part>`, `zx-card-block`, `zx-card-block-<part>` | a hero's and a card's image, heading, text and action    |
+| `zx-icons`, `zx-icon`, `zx-icon-image`                    | the social links' row, each link's cell and its icon     |
+| `zx-spacer`, `zx-legal`, `zx-legal-text`                  | the spacer, and the legal footer and each of its lines   |
+| `zx-button`, `zx-width-full`                              | the button, and a full-width one                         |
+| `zx-lane`, `zx-lane-last`                                 | each lane of a columns block, and the last               |
+| `zx-footer`, `zx-footer-line`                             | the default layout's footer and each of its lines        |
 
 Some CSS reaches only some inboxes: `display: flex` and `grid`, `position`, `float`, `transform`,
 `oklch()` and the other new color functions, and gradients. For each declaration of yours that uses one,
@@ -397,7 +425,7 @@ block's title and its fields, attributes and values by their names; the definiti
 | `number({ min, max, default })` | a number between `min` and `max` |
 
 The primitives a `render` uses are on `h`: `section`, `columns`, `column`, `text`, `heading`, `button`, `image`,
-`divider`, `list`, `code`, `spacer` and `raw`. Each but `raw` takes a `class`. The renderer fills a primitive's
+`divider`, `list`, `code`, `table`, `icons`, `spacer` and `raw`. Each but `raw` takes a `class`. The renderer fills a primitive's
 text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does.
 ``h.raw`<td title="${subject}">` `` escapes every value it interpolates and never fills one, and fills each
 `{{name}}` in its own text, escaped, in a block; `h.raw({ markup })` writes trusted markup as given, so in a
@@ -445,7 +473,7 @@ Build `messages` once per locale; a new object rebuilds the toolbar and the menu
 
 | Option       | Type                     | Default         |
 | ------------ | ------------------------ | --------------- |
-| `allow`      | `EmailBlockKind[]`       | all eight       |
+| `allow`      | `EmailBlockKind[]`       | every kind      |
 | `variables`  | `VariableDeclaration[]`  | `[]`            |
 | `bounds`     | `Partial<EmailBounds>`   | the table below |
 | `blocks`     | `EmailBlockDefinition[]` | `[]`            |
@@ -518,10 +546,12 @@ document before the export.
 | `text-empty`                    | This block is empty                                                     |
 | `text-too-long`                 | This text is too long                                                   |
 | `list-too-long`                 | This list has too many items                                            |
+| `table-too-large`               | This table has more than 20 rows or 6 columns                           |
 | `too-many-blocks`               | The email has too many blocks                                           |
 | `block-not-carried`             | The email keeps only the text of this block                             |
 
-`block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list.
+`block-not-carried` marks a block the email cannot hold, such as a numbered list, a heading where the profile
+holds none, or a table cell holding more than a line.
 `content-invalid` marks content that is not an object, or a key its type's content does not have, which the
 renderer's write check refuses; its `field` names the key. `attributes-invalid` marks attributes that are not
 an object, or a key its type does not have or whose value it does not take, such as an `align` of `middle`; a
