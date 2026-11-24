@@ -55,12 +55,10 @@ function BookmarkCard({ fields, editable }: Pick<BookmarkViewProps, 'fields' | '
         </span>
       </span>
       {image !== undefined && (
-        <img
-          data-slot="bookmark-image"
-          src={image}
-          alt=""
-          className="hidden w-1/3 max-w-60 shrink-0 border-l object-cover sm:block"
-        />
+        // The text sets the card's height; the image fills its side of it.
+        <span className="relative hidden w-1/3 max-w-60 shrink-0 border-l sm:block">
+          <img data-slot="bookmark-image" src={image} alt="" className="absolute inset-0 size-full object-cover" />
+        </span>
       )}
     </a>
   );

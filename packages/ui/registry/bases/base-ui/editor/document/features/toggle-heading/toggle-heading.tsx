@@ -102,6 +102,33 @@ function levelOf(heading: NodeJSON | undefined): number {
   return level >= 1 && level <= 6 ? level : 2;
 }
 
+/**
+ * The Viewer's toggle heading: a details element whose summary is the marker and the heading, opened and closed
+ * by the browser with no script. Its children are the heading, then the blocks it folds.
+ */
+function ToggleHeadingDetails({ open, children }: { open: boolean; children: [ReactNode, ReactNode] }): ReactNode {
+  const marker = useChromeActive();
+  const [heading, rest] = children;
+  return (
+    <details data-slot="toggle-heading" className="group mt-6 mb-2" open={open}>
+      <summary
+        {...marker.handlers}
+        className="flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden"
+      >
+        <span className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground flex size-6 shrink-0 items-center justify-center select-none">
+          <ChromeIcon
+            icon={ChevronRightIcon}
+            active={marker.active}
+            className={cn(CHROME_ICON_CLASS, 'transition-transform group-open:rotate-90')}
+          />
+        </span>
+        {heading}
+      </summary>
+      <div className="pl-7 [&>:first-child]:mt-0!">{rest}</div>
+    </details>
+  );
+}
+
 const toggleHeadingCodec: ReactNodeCodec<ToggleHeadingAttrs> = {
   node: 'toggleHeading',
   toHTML: (node, ctx) => {
@@ -128,19 +155,11 @@ const toggleHeadingCodec: ReactNodeCodec<ToggleHeadingAttrs> = {
     const [heading, ...rest] = node.content ?? [];
     const level = levelOf(heading);
     return (
-      <details data-slot="toggle-heading" className="group mt-6 mb-2" open={node.attrs?.open ?? true}>
-        <summary className="flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden">
-          <span
-            aria-hidden
-            className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground flex size-6 shrink-0 cursor-pointer items-center justify-center select-none"
-          >
-            <span className="inline-block leading-none transition-transform group-open:rotate-90">&#9656;</span>
-          </span>
-          {heading !== undefined &&
-            createElement(`h${level}`, { className: 'my-0 min-w-0 flex-1' }, ctx.renderChildren(heading))}
-        </summary>
-        <div className="pl-7">{ctx.renderChildren({ ...node, content: rest })}</div>
-      </details>
+      <ToggleHeadingDetails open={node.attrs?.open ?? true}>
+        {heading !== undefined &&
+          createElement(`h${level}`, { className: 'mt-0! mb-0! min-w-0 flex-1' }, ctx.renderChildren(heading))}
+        {ctx.renderChildren({ ...node, content: rest })}
+      </ToggleHeadingDetails>
     );
   },
   // Markdown keeps the block as raw HTML, which only the HTML import reads back.
