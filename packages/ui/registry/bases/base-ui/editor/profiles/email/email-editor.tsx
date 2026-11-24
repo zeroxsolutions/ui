@@ -26,7 +26,8 @@ import {
   Selection,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
-import type { EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
   docProblems,
@@ -47,6 +48,7 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { ChromeControl } from '../../document/ui/chrome-icon';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
+import { renderToReact } from '../../document/serialize/render-to-react';
 import { SlashMenu } from '../../document/ui/slash-menu';
 import { profileMessages, type ProfileEditorMessages } from '../messages';
 import { ProblemMarker } from '../problem-marker';
@@ -203,6 +205,32 @@ function withoutSavedKeys(blocks: readonly EditorEmailBlock[]): unknown[] {
 /** Whether two values hold the same content, saved blocks compared by id alone. */
 function sameValue(left: readonly EditorEmailBlock[], right: readonly EditorEmailBlock[]): boolean {
   return sameBlockContent(withoutSavedKeys(left), withoutSavedKeys(right));
+}
+
+interface EmailEditorStaticProps {
+  doc: DocJSON;
+  features: EditorFeature[];
+  /** Leaves the editable surface's side gutter, where the block grips sit, so the text does not move as it mounts. */
+  editable: boolean;
+}
+
+/**
+ * The document the editor opens on, drawn from its JSON with no engine, in the editor's own frame. The server
+ * draws no editor, and the engine mounts only after hydration, so without it the page shows nothing where
+ * the document goes until the client has loaded and run the editor.
+ */
+function EmailEditorStatic({ doc, features, editable }: EmailEditorStaticProps) {
+  const registry = useMemo(() => createCodecRegistry(features), [features]);
+  return (
+    <div
+      data-slot="email-editor-static"
+      data-editor="document"
+      className="cn-editor-content document-editor prose max-w-none text-base leading-relaxed [contain:inline-size]"
+    >
+      {/* The engine's own wrapper, which the document's rules in `styles.css` select. */}
+      <div className={cn('ProseMirror', editable && 'px-12')}>{renderToReact(doc, registry)}</div>
+    </div>
+  );
 }
 
 interface EmailEditorPaneProps {
@@ -535,7 +563,12 @@ export function EmailEditor({
     if (view?.dom === element) view.focus();
     else element.focus({ preventScroll: true });
   };
-  const pane = <EmailEditorPane surface={surface} onRelease={release} onAdopt={adopt} />;
+  const pane = (
+    <>
+      {editor === null && <EmailEditorStatic doc={initialContent} features={setup.features} editable={!readOnly} />}
+      <EmailEditorPane surface={surface} onRelease={release} onAdopt={adopt} />
+    </>
+  );
   const toolbar = menus && (
     <EditorToolbar
       editor={editor}

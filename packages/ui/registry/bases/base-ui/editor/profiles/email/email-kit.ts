@@ -15,6 +15,7 @@ import {
   type BlockMenuItem,
   type EditorFeature,
   type IEditor,
+  type NodeCodec,
   type NodeJSON,
   type SlashItem,
   type ToolbarItem,
@@ -59,8 +60,8 @@ import {
   type KitContext,
 } from './kit-context';
 import { emailMarks, LINK_ITEM_ID, UNLINK_ITEM_ID } from './marks';
-import { emailButtonNode, emailButtonSlashItem } from './nodes/button';
-import { emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
+import { emailButtonCodec, emailButtonNode, emailButtonSlashItem } from './nodes/button';
+import { emailColumnsCodecs, emailColumnsNodes, emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
 import { emailUnknownNode } from './nodes/unknown';
 
@@ -534,6 +535,7 @@ export function emailKit(
   const blocks = defineFeature({
     id: 'emailBlocks',
     nodes: [emailButtonNode(), ...emailColumnsNodes(laneContent), emailHtmlNode(), emailUnknownNode()],
+    codecs: [emailButtonCodec, ...emailColumnsCodecs] as NodeCodec[],
     commands: {
       insertEmailBlock: {
         args: z.object({ kind: z.enum(EMAIL_KINDS as [EmailBlockKind, ...EmailBlockKind[]]) }),

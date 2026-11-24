@@ -112,6 +112,8 @@ side with the Document Editor it reads as a different product.
   Light and Dark switch. Desktop in the site's theme draws the demo inline; any other choice frames the
   demo's view page at the device's width (768px, 375px, or the stage's for Desktop), in the theme its
   `?theme=` forces.
+- Before hydration the editor draws its starting document from the JSON, with no engine, so the page does
+  not show an empty stage until the client has loaded the editor.
 - The frame runs scripts at an opaque origin under a nonce policy that admits only its height report.
 
 ## Testing

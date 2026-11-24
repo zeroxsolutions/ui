@@ -2,6 +2,7 @@ import { MousePointerClickIcon } from '@/registry/bases/base-ui/icons/lucide/mou
 import { buttonVariants } from '@/registry/bases/base-ui/ui/button';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { NodeSpec, NodeViewProps, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
+import type { ReactNodeCodec } from '../../../react-types';
 import { contextOf, messagesOf, selectBlockOf } from '../kit-context';
 import { DEFAULT_PROFILE_MESSAGES } from '../../messages';
 import { VariableTextField } from '../../variables/variable-text-field';
@@ -60,3 +61,19 @@ export function emailButtonNode(): NodeSpec {
   }
   return { ...emailSpec('emailButton'), render: EmailButtonView };
 }
+
+/** The button as the document is drawn before the editor mounts: the view's frame around its label as written. */
+export const emailButtonCodec: ReactNodeCodec<EmailButtonAttrs> = {
+  node: 'emailButton',
+  toReact: ({ attrs = {} }) => (
+    <div
+      data-slot="email-button"
+      data-width={attrs.width ?? 'inline'}
+      className={cn('flex', justifyClass(attrs.align), blockClasses(attrs))}
+    >
+      <div className={cn(buttonVariants({ variant: 'default' }), attrs.width === 'full' && 'w-full')}>
+        <span className="min-w-16 text-center">{attrs.label}</span>
+      </div>
+    </div>
+  ),
+};
