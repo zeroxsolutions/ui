@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
+import {
+  createCodecRegistry,
+  importHTML,
+  importMarkdown,
+  serialize,
+} from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index';
 import { toggle } from '../toggle/index';
 import { Viewer } from '../../react/viewer';
@@ -64,5 +69,37 @@ describe('toggleHeading', () => {
     expect(details.hasAttribute('open')).toBe(false);
     expect(details.querySelector('summary h2')?.textContent).toBe('Day one');
     expect(details.querySelector(':scope > div > p')?.textContent).toBe('Walk');
+  });
+
+  it('reads its Markdown back as a toggle heading holding its heading, the folded blocks after it', () => {
+    const markdown = serialize(docOf(false, heading(3, 'Day & night'), paragraph('Walk')), 'markdown', registry);
+    expect(importMarkdown(markdown, registry).doc.content).toEqual([
+      { type: 'toggleHeading', attrs: { open: false }, content: [heading(3, 'Day & night')] },
+      paragraph('Walk'),
+    ]);
+  });
+
+  it('keeps the text a summary holds beside its heading', () => {
+    expect(
+      importHTML('<details data-toggle-heading open><summary><h2>A</h2> tail <em>x</em></summary></details>', registry)
+        .doc,
+    ).toEqual(docOf(true, heading(2, 'A tail x')));
+  });
+
+  it('draws a heading of no level or one out of range at the level the heading codec gives it', () => {
+    const host = document.createElement('div');
+    const stored = (level: unknown): NodeJSON => ({
+      type: 'toggleHeading',
+      attrs: { open: true },
+      content: [{ type: 'heading', attrs: { level }, content: [{ type: 'text', text: String(level) }] }],
+    });
+    host.innerHTML = renderToStaticMarkup(
+      <Viewer doc={{ type: 'doc', content: [stored(undefined), stored(7), stored(0)] }} features={features} />,
+    );
+    expect([...host.querySelectorAll('summary > *:last-child')].map((element) => element.tagName)).toEqual([
+      'H1',
+      'H6',
+      'H1',
+    ]);
   });
 });

@@ -96,10 +96,25 @@ function textOf(node: NodeJSON): string {
   return node.type === 'text' ? (node.text ?? '') : (node.content ?? []).map(textOf).join('');
 }
 
-/** The heading a toggle heading folds under, at a level of 1 to 3. */
+/** The level `heading` is drawn at, read as the heading codec reads it, so a table of contents finds it there. */
 function levelOf(heading: NodeJSON | undefined): number {
-  const level = Number(heading?.attrs?.level);
-  return level >= 1 && level <= 6 ? level : 2;
+  return Math.min(6, Math.max(1, Number(heading?.attrs?.level) || 1));
+}
+
+const ENTITIES: Readonly<Record<string, string>> = { amp: '&', lt: '<', gt: '>', quot: '"' };
+
+/** The heading a Markdown export wrote into a toggle heading's opening, or null for any other HTML. */
+function headingOfMarkdown(html: string): NodeJSON<ToggleHeadingAttrs> | null {
+  const match = /^<details data-toggle-heading( open)?>\s*<summary><h([1-6])>([^<]*)<\/h\2><\/summary>/.exec(html);
+  if (match === null) return null;
+  const text = match[3].replace(/&(amp|lt|gt|quot);/g, (_entity, name: string) => ENTITIES[name]);
+  return {
+    type: 'toggleHeading',
+    attrs: { open: match[1] !== undefined },
+    content: [
+      { type: 'heading', attrs: { level: Number(match[2]) }, content: text === '' ? [] : [{ type: 'text', text }] },
+    ],
+  };
 }
 
 /**
@@ -162,17 +177,24 @@ const toggleHeadingCodec: ReactNodeCodec<ToggleHeadingAttrs> = {
       </ToggleHeadingDetails>
     );
   },
-  // Markdown keeps the block as raw HTML, which only the HTML import reads back.
-  fromMarkdown: () => null,
+  // Markdown reads raw HTML a block at a time, so the blocks the export wrote inside come back after the heading.
+  fromMarkdown: (token) =>
+    token.type === 'html' && typeof token.value === 'string' ? headingOfMarkdown(token.value) : null,
   fromHTML: (element, ctx) => {
     if (element.tagName !== 'DETAILS' || !element.hasAttribute('data-toggle-heading')) return null;
     const summary = [...element.children].find((child) => child.tagName === 'SUMMARY') as HTMLElement | undefined;
     const read = summary === undefined ? [] : ctx.fromHTMLChildren(summary);
-    const heading = read.find((child) => child.type === 'heading') ?? {
-      type: 'heading',
-      attrs: { level: 2 },
-      content: summary?.textContent ? [{ type: 'text', text: summary.textContent }] : [],
-    };
+    const found = read.find((child) => child.type === 'heading');
+    const text = summary?.textContent?.trim() ?? '';
+    // A summary holding more than its heading keeps all its text, at the heading's level.
+    const heading =
+      found !== undefined && read.length === 1
+        ? found
+        : {
+            type: 'heading',
+            attrs: { level: levelOf(found ?? { type: 'heading', attrs: { level: 2 } }) },
+            content: text === '' ? [] : [{ type: 'text', text: text.replace(/\s+/g, ' ') }],
+          };
     const body = element.cloneNode(true) as HTMLElement;
     [...body.children].filter((child) => child.tagName === 'SUMMARY').forEach((child) => child.remove());
     return {

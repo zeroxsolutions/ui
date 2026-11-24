@@ -44,4 +44,16 @@ describe('the bookmark in the Document Editor', () => {
     await vi.waitFor(() => expect(readLink).toHaveBeenCalledTimes(1));
     expect((await findElement('[data-slot=bookmark-title]')).textContent).toBe('https://example.com/x');
   });
+
+  it('asks the host for no preview of a mail address', async () => {
+    const readLink = vi.fn(async () => ({ title: 'x' }));
+    await mountDocumentEditor([standardKit(), bookmark({ readLink })]);
+
+    await insertFromSlashMenu('Bookmark');
+    await userEvent.click(page.getByRole('textbox', { name: 'Link' }));
+    await userEvent.keyboard('mailto:lan@example.com{Enter}');
+
+    expect((await findElement('[data-slot=bookmark-title]')).textContent).toBe('mailto:lan@example.com');
+    expect(readLink).not.toHaveBeenCalled();
+  });
 });

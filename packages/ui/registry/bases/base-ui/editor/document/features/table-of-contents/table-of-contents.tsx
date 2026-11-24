@@ -19,7 +19,14 @@ type TableOfContentsViewProps = BlockViewPropsOf<typeof tableOfContentsBlock>;
 function scrollToHeading(event: MouseEvent<HTMLAnchorElement>, index: number): void {
   event.preventDefault();
   const root = event.currentTarget.closest('[data-editor="document"]');
-  root?.querySelectorAll('h1, h2, h3')[index]?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  const heading = root?.querySelectorAll('h1, h2, h3')[index];
+  if (!heading) return;
+  // A closed details element in the Viewer hides its heading, which then has no place to scroll to.
+  for (let folded = heading.parentElement?.closest('details:not([open])'); folded;) {
+    (folded as HTMLDetailsElement).open = true;
+    folded = folded.parentElement?.closest('details:not([open])') ?? null;
+  }
+  heading.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 /** Lowercase words of `text` joined by dashes: the fragment an entry's link names. */

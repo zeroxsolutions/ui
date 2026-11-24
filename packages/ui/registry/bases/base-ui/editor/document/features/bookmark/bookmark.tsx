@@ -84,7 +84,8 @@ export function bookmark(options: BookmarkOptions = {}): EditorFeature {
     if (fields.url !== '') return <BookmarkCard fields={fields} editable={editable} />;
     if (!editable) return null;
     const read = async (url: string): Promise<void> => {
-      if (readLink === undefined || linkAddress(url) === undefined) return;
+      // Only a web page has a preview to read.
+      if (readLink === undefined || sourceAddress(url) === undefined) return;
       try {
         const preview = await readLink(url);
         if (!mounted.current) return;
