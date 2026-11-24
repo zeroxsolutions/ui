@@ -306,8 +306,10 @@ element, even where it keeps the inlined value, such as a light colour kept in d
 When two of your queries hold at once, a property both set on one element is decided by their order in your
 sheet, not by selector specificity: the later query wins. A nested query is computed with the rules of the
 queries around it, so inside it the cascade is a browser's. A selector in a query that is not class-only, such
-as `p`, is kept in the head as written, made `!important`, as is a query inside another at-rule, such as
-`@layer`. A `:root` in a query holds custom properties only; a declaration there throws, as it does at the top.
+as `.zx-button:hover` or `p`, is kept in the head, made `!important`, as is a query inside another at-rule, such
+as `@layer`. The renderer cannot compute such a rule, so where its last part has a class, that class is repeated
+as often as a query class is, and the rule wins over the computed style on an element both select, whatever
+their specificity in your sheet; one with no class there, such as `p`, does not. A `:root` in a query holds custom properties only; a declaration there throws, as it does at the top.
 
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
@@ -402,8 +404,10 @@ text and escapes it, so a variable's value never writes markup; `raw` takes HTML
 layout a person's value, such as the subject, never goes in it. A null or undefined value prints nothing; any
 other value but text or a number throws `EmailMarkupInvalid`. Escaping keeps a value inside its attribute, but it
 does not make a link safe: a `javascript:` address escapes to itself. So a link or an image goes through
-`h.button`, `h.image` or a link in `h.text`'s markup, which check the scheme, and a tagged `raw` throws
-`EmailMarkupInvalid` for a value inside an `href`, `src` or other attribute that takes a link. It places the result in the block's own row, and writes the
+`h.button`, `h.image` or a link in `h.text`'s markup, which check the scheme. A tagged `raw` takes a value in text,
+in a comment, or in a quoted value of a plain attribute (`title`, `alt`, `class`, `width`, `data-*`, `aria-*` and
+the like), and throws `EmailMarkupInvalid` for one anywhere else: an unquoted value, an attribute that takes a
+link, a script or a style (`href`, `src`, `on*`, `style`), or inside a `style` or `script` element. It places the result in the block's own row, and writes the
 plain-text twin from the same primitives. `defineEmailBlock` throws `EmailBlockDefinitionInvalid` for a type
 that is a default one or not a lower-case word, a field or attribute named `id`, `key` or `source`, two rich
 text or lanes fields, or a default outside its attribute's values. Run `checkEmailRenderer(renderer,

@@ -362,3 +362,11 @@ Each kept the design's intent; the reason follows it.
   it still does when `otp` is required, because neither arm prints `otp`, so that report is now true rather
   than a disagreement with the text arm. Upper-case named entities decode only where HTML defines them (`AMP`,
   `LT`, `GT`, `QUOT`, `COPY`, `REG`).
+- **After the third review (no further review round, as the brief set).** A product query's rule that is not
+  class-only, such as `.a:hover` or `div.a`, would always lose to the fixed-weight query class, so its last
+  compound's first class is repeated `queryWeight` times; it then wins over the computed class on an element
+  both select, whatever the two rules' specificity (a `p` with no class still loses). The tagged `raw` check
+  reads the markup as a tokenizer does and takes a value only in text, a comment, or a quoted value of a plain
+  attribute (an allow-list), since the deny-list regex was bypassed by `/` separators, a `>` in an earlier
+  value, unquoted values and unlisted attributes. A later top-level shorthand now resets a query's longhand,
+  and a later top-level `:root` property beats a query's. Numbered entities 128 to 159 read as Windows-1252.
