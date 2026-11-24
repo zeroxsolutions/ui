@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import type { RenderedBlock } from '../block.js';
+import type { LayoutInput } from '../layout.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from '../fixtures.fixture.js';
 import { createEmailRenderer } from '../renderer.js';
 import { checkEmailRenderer } from './index.js';
@@ -73,10 +73,10 @@ describe('checkEmailRenderer', () => {
   it('fails a layout that prints the subject raw', () => {
     const renderer = createEmailRenderer({
       theme: FIXTURE_THEME,
-      layout: ({ body, subject }: { body: RenderedBlock; subject: string; props: typeof FIXTURE_LAYOUT_PROPS }) => ({
-        html: `<h1>${subject}</h1>${body.html}`,
-        text: body.text,
-      }),
+      layout: ({ body, subject, h }: LayoutInput<typeof FIXTURE_LAYOUT_PROPS>) => [
+        h.raw({ markup: `<h1>${subject}</h1>` }),
+        h.region('body', body),
+      ],
     });
     expect(checkEmailRenderer(renderer, { layoutProps: FIXTURE_LAYOUT_PROPS })).toContainEqual(
       expect.objectContaining({ problem: 'value-unescaped' }),

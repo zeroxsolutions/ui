@@ -7,7 +7,7 @@ import type { Variables } from '../variables/variables.js';
 import type { RenderContext, RenderedBlock, RenderProblem } from './block.js';
 import type { Region } from './region.js';
 import type { EmailTheme } from './theme.js';
-import { createPrimitives, type TextRun, type TextRunText } from './primitives/nodes.js';
+import { createPrimitives, type EmailNode, type TextRun, type TextRunText } from './primitives/nodes.js';
 
 /** What one render shares across its blocks; `problems` collects as the blocks render. */
 export interface RenderState {
@@ -32,7 +32,8 @@ const NO_LINK: RenderedBlock = { html: '', text: '' };
 export function createRenderContext(
   state: RenderState,
   blockId: string | null,
-  lane: (index: number) => RenderedBlock,
+  lane: (index: number) => readonly EmailNode[],
+  laneCount = 0,
 ): RenderContext {
   const report = (kind: RenderProblem['kind'], name?: string): void => {
     state.problems.push({
@@ -148,6 +149,7 @@ export function createRenderContext(
       markup: (template) => context.markup(template),
     }),
     lane,
+    laneCount,
   };
   return context;
 }

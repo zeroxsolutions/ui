@@ -5,9 +5,11 @@ import { describe, expect, it } from 'vitest';
 
 const root = resolve(import.meta.dirname, '..');
 const templateRoot = join(root, 'template');
-const allowedPackages = ['zod', 'get-east-asian-width'];
+const allowedPackages = ['zod', 'get-east-asian-width', 'postcss'];
 
-const importPattern = /\bfrom\s*['"]([^'"]+)['"]|\bimport\s*['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
+// A side-effect import opens a statement, so a string that merely ends in `import` is not read as one.
+const importPattern =
+  /\bfrom\s*['"]([^'"]+)['"]|(?:^|[;}])\s*import\s*['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/gm;
 
 function importsOf(source: string): string[] {
   const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
@@ -56,8 +58,10 @@ describe('the template fence', () => {
     ]);
   });
 
-  it('allows zod and the width table', () => {
-    expect(fenceViolations(join(root, 'template/index.ts'), ['zod', 'zod/v4', 'get-east-asian-width'])).toEqual([]);
+  it('allows zod, the width table and the CSS parser', () => {
+    expect(
+      fenceViolations(join(root, 'template/index.ts'), ['zod', 'zod/v4', 'get-east-asian-width', 'postcss']),
+    ).toEqual([]);
   });
 
   it('reads every kind of import', () => {
@@ -67,6 +71,7 @@ describe('the template fence', () => {
       "export { c } from 'zod';",
       "import './side-effect.js';",
       "const d = await import('./d.js');",
+      "if (name === 'import') refuse('import-refused');",
     ].join('\n');
     expect(importsOf(source)).toEqual(['./a.js', '../b.js', 'zod', './side-effect.js', './d.js']);
   });

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { defineBlock } from '../block.js';
-import { align, inlineText, readOr, row, spaceAfter, textClassAttribute, textStyle } from './shared.js';
+import { align, inlineText, readOr, spaceAfter } from './shared.js';
 
 const TONES = ['default', 'muted'] as const;
 
@@ -20,16 +20,8 @@ export const paragraph = defineBlock({
   async translate(source, translateOne) {
     return { text: await translateOne(source.text) };
   },
-  render({ attributes: a, content: c }, ctx) {
-    const color = a.tone === 'muted' ? ctx.theme.colors.mutedForeground : undefined;
-    const drawn = ctx.inline(c.text);
-    return {
-      html: row(
-        a,
-        `<div${textClassAttribute(ctx.theme, ctx.region, a.tone === 'muted' ? 'mutedForeground' : undefined)} style="${textStyle(ctx.theme, ctx.region, color)}">${drawn.html}</div>`,
-      ),
-      text: `${drawn.text}\n\n`,
-    };
+  render({ attributes: a, content: c }, { h }) {
+    return h.text({ class: `zx-tone-${a.tone ?? 'default'}`, markup: c.text });
   },
   sample: { attributes: {}, content: { text: 'Hi {{name}},' }, variableTypes: { name: 'string' } },
 });

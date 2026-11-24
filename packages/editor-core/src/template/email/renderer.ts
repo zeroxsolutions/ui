@@ -1,11 +1,26 @@
 import type { VariableType } from '../variables/variable-type.js';
 import type { Variables } from '../variables/variables.js';
-import type { BlockDefinition, BlockRenderer, BlockSample, EmailBlock, RenderedBlock, RenderProblem } from './block.js';
+import { escapeHtml } from '../variables/interpolate.js';
+import type {
+  BlockDefinition,
+  BlockRenderer,
+  BlockRendering,
+  BlockSample,
+  EmailBlock,
+  RenderedBlock,
+  RenderProblem,
+} from './block.js';
 import { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './blocks/index.js';
 import { createRenderContext, type RenderState } from './context.js';
+import { baseStylesheet } from './css/base-stylesheet.js';
+import { composeStylesheets } from './css/stylesheet.js';
 import { defaultLayout, type DefaultLayoutProps, type EmailLayout } from './layout.js';
+import { expandNodes } from './primitives/elements.js';
+import { createPrimitives, literalReader, type EmailNode } from './primitives/nodes.js';
+import { plainTextOf } from './primitives/plain-text.js';
+import { serialiseElements } from './primitives/serialise.js';
 import type { Region, RegionInput } from './region.js';
-import { assertEmailTheme, type EmailTheme } from './theme.js';
+import { assertEmailTheme, DEFAULT_EMAIL_THEME, type EmailTheme } from './theme.js';
 
 /** Two definitions of one block type handed to one renderer. */
 export class BlockTypeCollision extends Error {
@@ -24,8 +39,14 @@ export type BlockOverrides = {
 };
 
 export interface EmailRendererOptions<Props, Extra extends readonly BlockDefinition[]> {
-  /** Level 1. */
-  readonly theme: EmailTheme;
+  /** Level 1: the values the base stylesheet is written with; the ZUI palette, light and dark, when absent. */
+  readonly theme?: EmailTheme;
+  /**
+   * Level 1: the product's own stylesheets, after the base one, so a rule of equal specificity beats it. Class
+   * rules are written into each element's `style`; `@media` and `@font-face` stay in the head, a `@media`
+   * declaration made `!important`. `var()` reads the custom properties of `:root` and `.zx-root`.
+   */
+  readonly css?: string | readonly string[];
   /** Level 2: the default layout otherwise. */
   readonly layout?: EmailLayout<Props>;
   /** Level 2: replaces the default render of the types it names, and keeps their write checks. */
@@ -69,7 +90,22 @@ export interface EmailRenderer<Type extends string, Props> {
   sample(type: Type): BlockSample;
 }
 
-const EMPTY: RenderedBlock = { html: '', text: '' };
+/** Whether a render answered the rows it wrote itself rather than primitives. */
+function isRendered(drawn: BlockRendering): drawn is RenderedBlock {
+  return !Array.isArray(drawn) && !('kind' in (drawn as object));
+}
+
+const CLASS_PART = /^[\w-]+$/;
+
+/** `attributes[name]` where it is a string a class name can carry, else `fallback`. */
+function classPart(attributes: unknown, name: string, fallback: string): string {
+  const value =
+    typeof attributes === 'object' && attributes !== null ? (attributes as Record<string, unknown>)[name] : undefined;
+  return typeof value === 'string' && CLASS_PART.test(value) ? value : fallback;
+}
+
+const DARK_SCHEME_META =
+  '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">';
 
 /** A stored entry with the two fields a render routes by; anything else is skipped. */
 function isBlock(value: unknown): value is EmailBlock {
@@ -97,14 +133,18 @@ function distinct(problems: readonly RenderProblem[]): RenderProblem[] {
  * the retranslation. A second renderer anywhere is a preview that can disagree with the mail it previews.
  *
  * @throws {EmailThemeInvalid} for a theme value a mail client cannot read
+ * @throws {EmailStylesheetInvalid} for a stylesheet that does not parse, a selector it would inline that is not
+ * class-only, an `@import`, or a `var()` with no value
  * @throws {BlockTypeCollision} for an extra type that a default or another extra already defines
  */
 export function createEmailRenderer<Props = DefaultLayoutProps, const Extra extends readonly BlockDefinition[] = []>(
-  options: EmailRendererOptions<Props, Extra>,
+  options: EmailRendererOptions<Props, Extra> = {},
 ): EmailRenderer<DefaultBlockType | Extra[number]['type'], Props> {
   type Type = DefaultBlockType | Extra[number]['type'];
-  const { theme } = options;
+  const theme = options.theme ?? DEFAULT_EMAIL_THEME;
   assertEmailTheme(theme);
+  const sheets = options.css === undefined ? [] : typeof options.css === 'string' ? [options.css] : options.css;
+  const stylesheet = composeStylesheets(baseStylesheet(theme), sheets);
 
   const definitions = new Map<string, BlockDefinition>();
   for (const definition of Object.values(defaultBlocks) as BlockDefinition[]) {
@@ -128,34 +168,50 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
     render(input): RenderedEmail {
       const problems: RenderProblem[] = [];
       // Stored JSON is read, not trusted: a list or lane of another shape renders as empty.
-      const renderList = (state: RenderState, blocks: unknown, inLane: boolean): RenderedBlock => {
+      const renderList = (state: RenderState, blocks: unknown, inLane: boolean): EmailNode[] => {
         const readable = Array.isArray(blocks) ? (blocks as unknown[]).filter(isBlock) : [];
-        const parts = readable.map((block) => renderOne(state, block, inLane));
-        return { html: parts.map((part) => part.html).join(''), text: parts.map((part) => part.text).join('') };
+        return readable.flatMap((block) => renderOne(state, block, inLane));
       };
-      const renderOne = (state: RenderState, block: EmailBlock, inLane: boolean): RenderedBlock => {
+      const renderOne = (state: RenderState, block: EmailBlock, inLane: boolean): EmailNode[] => {
         const definition = definitionOf(block.type);
         const where = state.region === 'body' ? {} : { region: state.region };
         if (definition === undefined) {
           problems.push({ blockId: block.id, kind: 'unknown-block-type', name: block.type, ...where });
-          return EMPTY;
+          return [];
         }
         if (inLane && definition.holdsLanes) {
           problems.push({ blockId: block.id, kind: 'block-nested-too-deep', ...where });
-          return EMPTY;
+          return [];
         }
-        const lanes: readonly unknown[] = Array.isArray(block.lanes) ? block.lanes : [];
-        const ctx = createRenderContext(state, block.id, (index) =>
-          definition.holdsLanes ? renderList(state, lanes[index], true) : EMPTY,
+        const lanes: readonly unknown[] = definition.holdsLanes && Array.isArray(block.lanes) ? block.lanes : [];
+        const ctx = createRenderContext(
+          state,
+          block.id,
+          (index) => renderList(state, lanes[index], true),
+          lanes.length,
         );
-        return definition.render(
-          {
-            id: block.id,
-            attributes: definition.readAttributes(block.attributes),
-            content: definition.readContent(block.content),
-          },
+        const attributes = definition.readAttributes(block.attributes);
+        const drawn = definition.render(
+          { id: block.id, attributes, content: definition.readContent(block.content) },
           ctx,
         );
+        if (isRendered(drawn)) return [{ kind: 'raw', html: drawn.html, text: drawn.text }];
+        const nodes: readonly EmailNode[] = Array.isArray(drawn) ? drawn : [drawn as EmailNode];
+        if (nodes.length === 0) return [];
+        // The block's own row: its gap below and its alignment, by the attributes every default block reads.
+        return [
+          ctx.h.section(
+            {
+              class: [
+                'zx-block',
+                `zx-block-${classPart({ type: block.type }, 'type', 'custom')}`,
+                `zx-align-${classPart(attributes, 'align', 'left')}`,
+                `zx-space-${classPart(attributes, 'spaceAfter', 'medium')}`,
+              ],
+            },
+            nodes,
+          ),
+        ];
       };
 
       const bodyState: RenderState = {
@@ -166,10 +222,10 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         problems,
         region: 'body',
       };
-      const renderRegion = (region: Region): RenderedBlock => {
+      const renderRegion = (region: Region): EmailNode[] => {
         // Stored JSON is read, not trusted: a region that is not an object renders as empty.
         const given: unknown = input.regions?.[region];
-        if (typeof given !== 'object' || given === null) return EMPTY;
+        if (typeof given !== 'object' || given === null) return [];
         const { blocks, variables, variableTypes } = given as Partial<RegionInput>;
         return renderList(
           {
@@ -188,19 +244,32 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
       const header = renderRegion('header');
       const body = renderList(bodyState, input.blocks, false);
       const footer = renderRegion('footer');
-      const inbox = createRenderContext(bodyState, null, () => EMPTY);
+      const inbox = createRenderContext(bodyState, null, () => []);
       const subject = inbox.text(input.subject);
       const preheader = input.preheader === null ? '' : inbox.text(input.preheader);
-      const { html, text } = layout({
+      const framed = layout({
         body,
         regions: { header, footer },
         subject,
         preheader,
         locale: input.locale,
-        theme,
         props: input.layoutProps,
+        h: createPrimitives(literalReader),
       });
-      return { subject, preheader, html, text, problems: distinct(problems) };
+      const nodes: readonly EmailNode[] = Array.isArray(framed) ? framed : [framed as EmailNode];
+      const document = serialiseElements(
+        [{ tag: 'body', attributes: [], classes: ['zx-body'], children: expandNodes(nodes) }],
+        stylesheet.rules,
+      );
+      const html =
+        '<!doctype html>' +
+        `<html lang="${escapeHtml(input.locale)}">` +
+        '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+        (stylesheet.darkScheme ? DARK_SCHEME_META : '') +
+        `<title>${escapeHtml(subject)}</title>` +
+        (stylesheet.head === '' ? '' : `<style>${stylesheet.head}</style>`) +
+        `</head>${document}</html>`;
+      return { subject, preheader, html, text: plainTextOf(nodes).trim(), problems: distinct(problems) };
     },
 
     attributesOf(type, raw): unknown {

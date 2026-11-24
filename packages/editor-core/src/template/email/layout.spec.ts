@@ -1,34 +1,42 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import type { RenderedBlock } from './block.js';
+import type { EmailBlock } from './block.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
-import { defaultLayout, type DefaultLayoutProps, type LayoutInput } from './layout.js';
+import type { DefaultLayoutProps } from './layout.js';
+import type { RegionInput } from './region.js';
+import { createEmailRenderer, type RenderedEmail, type RenderEmailInput } from './renderer.js';
 
-const NO_REGIONS = {
-  header: { html: '', text: '' },
-  footer: { html: '', text: '' },
-} as const satisfies LayoutInput<DefaultLayoutProps>['regions'];
+const renderer = createEmailRenderer({ theme: FIXTURE_THEME });
 
-function layout(overrides: Partial<LayoutInput<DefaultLayoutProps>> = {}): RenderedBlock {
-  return defaultLayout({
-    body: { html: '<tr><td>BODY</td></tr>', text: 'BODY\n\n' },
-    regions: NO_REGIONS,
+const block = (id: string, text: string): EmailBlock => ({ id, type: 'paragraph', attributes: {}, content: { text } });
+const region = (text: string): RegionInput => ({ blocks: [block(text, text)], variables: {}, variableTypes: {} });
+
+/** The default layout around one paragraph, `BODY`. */
+function layout(overrides: Partial<RenderEmailInput<DefaultLayoutProps>> = {}): RenderedEmail {
+  return renderer.render({
+    blocks: [block('b', 'BODY')],
     subject: 'Verify your email',
-    preheader: '',
+    preheader: null,
     locale: 'en',
-    theme: FIXTURE_THEME,
-    props: FIXTURE_LAYOUT_PROPS,
+    variables: {},
+    variableTypes: {},
+    layoutProps: FIXTURE_LAYOUT_PROPS,
     ...overrides,
   });
+}
+
+/** The inline style of the element whose class attribute is `classes`. */
+function styleOf(html: string, classes: string): string {
+  return new RegExp(`class="${classes}" style="([^"]*)"`).exec(html)?.[1] ?? '';
 }
 
 describe('defaultLayout', () => {
   it('puts the body inside a 600px card in the border colour and radius', () => {
     const { html } = layout();
-    expect(html).toContain('max-width:600px');
-    expect(html).toContain('border:1px solid #E4E4E7');
-    expect(html).toContain('border-radius:10px');
-    expect(html).toContain('<tr><td>BODY</td></tr>');
+    expect(styleOf(html, 'zx-card')).toBe(
+      'width:100%;max-width:600px;background:#FFFFFF;border:1px solid #E4E4E7;border-radius:10px;',
+    );
+    expect(html).toContain('BODY');
   });
 
   it('puts the logo first, at its width, with its alt text', () => {
@@ -40,8 +48,10 @@ describe('defaultLayout', () => {
 
   it('writes each footer line under a rule, 12px in the muted foreground', () => {
     const { html, text } = layout();
-    expect(html).toContain('color:#63636D');
-    expect(html).toContain('font-size:12px');
+    expect(styleOf(html, 'zx-footer')).toBe('padding:10px 0 0;border-top:1px solid #E4E4E7;');
+    expect(styleOf(html, 'zx-text zx-footer-line')).toBe(
+      'font-family:Inter, Arial, Helvetica, sans-serif;margin:0 0 4px;font-size:12px;line-height:17px;color:#63636D;',
+    );
     expect(html.indexOf('BODY')).toBeLessThan(html.indexOf('Example Company Limited'));
     expect(text).toBe('BODY\n\nExample Company Limited, 1 Example Street.\nSent because you created an account.');
   });
@@ -50,15 +60,15 @@ describe('defaultLayout', () => {
     const { html } = layout({
       subject: 'A <b>',
       preheader: 'P <i>',
-      props: { logo: { url: 'https://x.test/"onerror="x', alt: '<a>', width: 1 }, footer: ['<script>'] },
+      layoutProps: { logo: { url: 'https://x.test/"onerror="x', alt: '<a>', width: 1 }, footer: ['<script>'] },
     });
     expect(html).not.toMatch(/<b>|<i>|<a>|<script>|"onerror="/);
     expect(html).toContain('<title>A &lt;b&gt;</title>');
   });
 
   it('hides the preheader and writes none when it is empty', () => {
-    expect(layout({ preheader: 'Works for 30 minutes' }).html).toContain('display:none');
-    expect(layout().html).not.toContain('display:none');
+    expect(styleOf(layout({ preheader: 'Works for 30 minutes' }).html, 'zx-preheader')).toContain('display:none');
+    expect(layout().html).not.toContain('zx-preheader"');
   });
 
   it('sets the lang attribute from the locale', () => {
@@ -85,12 +95,7 @@ describe('defaultLayout', () => {
   });
 
   it('draws the header after the logo and the footer blocks above the footer lines', () => {
-    const { html, text } = layout({
-      regions: {
-        header: { html: '<tr><td>HEAD</td></tr>', text: 'HEAD\n\n' },
-        footer: { html: '<tr><td>FOOT</td></tr>', text: 'FOOT\n\n' },
-      },
-    });
+    const { html, text } = layout({ regions: { header: region('HEAD'), footer: region('FOOT') } });
     expect(html.indexOf('logo@2x.png')).toBeLessThan(html.indexOf('HEAD'));
     expect(html.indexOf('HEAD')).toBeLessThan(html.indexOf('BODY'));
     expect(html.indexOf('BODY')).toBeLessThan(html.indexOf('FOOT'));
@@ -101,10 +106,7 @@ describe('defaultLayout', () => {
   });
 
   it('draws no blank lines for a header over an empty body', () => {
-    const { text } = layout({
-      body: { html: '', text: '' },
-      regions: { header: { html: '<tr><td>HEAD</td></tr>', text: 'HEAD\n\n' }, footer: { html: '', text: '' } },
-    });
+    const { text } = layout({ blocks: [], regions: { header: region('HEAD') } });
     expect(text).toBe('HEAD\n\nExample Company Limited, 1 Example Street.\nSent because you created an account.');
   });
 });

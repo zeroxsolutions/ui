@@ -1,36 +1,51 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import type { EmailBlock, RenderedBlock, RenderProblem } from '../block.js';
-import { createRenderContext, type RenderState } from '../context.js';
+import type { EmailBlock, RenderProblem } from '../block.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from '../fixtures.fixture.js';
 import { createEmailRenderer } from '../renderer.js';
 import { defaultBlocks, type DefaultBlockType } from './index.js';
 
-interface Rendered extends RenderedBlock {
-  readonly problems: RenderProblem[];
+interface Rendered {
+  /** The body's markup alone, from the body region's table on. */
+  readonly html: string;
+  readonly text: string;
+  readonly problems: readonly RenderProblem[];
 }
 
+const renderer = createEmailRenderer({ theme: FIXTURE_THEME });
+
+/** One block of `type` rendered in an email with no footer lines, so the body is all the text there is. */
 function render(
   type: DefaultBlockType,
   attributes: unknown,
   content: unknown,
-  variables: RenderState['variables'] = {},
-  variableTypes: RenderState['variableTypes'] = {},
-  lanes: RenderedBlock[] = [],
+  variables: Record<string, string> = {},
+  variableTypes: Record<string, 'string' | 'url'> = {},
+  lanes?: EmailBlock[][],
 ): Rendered {
-  const problems: RenderProblem[] = [];
-  const definition = defaultBlocks[type];
-  const ctx = createRenderContext(
-    { theme: FIXTURE_THEME, locale: 'en', variables, variableTypes, problems, region: 'body' },
-    'b1',
-    (index) => lanes[index] ?? { html: '', text: '' },
-  );
-  const view = {
-    id: 'b1',
-    attributes: definition.readAttributes(attributes),
-    content: definition.readContent(content),
-  };
-  return { ...(definition.render as (v: typeof view, c: typeof ctx) => RenderedBlock)(view, ctx), problems };
+  const rendered = renderer.render({
+    blocks: [{ id: 'b1', type, attributes, content, ...(lanes === undefined ? {} : { lanes }) }],
+    subject: 's',
+    preheader: null,
+    locale: 'en',
+    variables,
+    variableTypes,
+    layoutProps: { ...FIXTURE_LAYOUT_PROPS, footer: [] },
+  });
+  const body = rendered.html.indexOf('zx-region-body');
+  return { html: body < 0 ? '' : rendered.html.slice(body), text: rendered.text, problems: rendered.problems };
+}
+
+const paragraph = (id: string, text: string): EmailBlock => ({
+  id,
+  type: 'paragraph',
+  attributes: {},
+  content: { text },
+});
+
+/** The inline style of the first element whose class attribute starts with `classes`. */
+function styleOf(html: string, classes: string): string {
+  return new RegExp(`class="${classes}[^"]*" style="([^"]*)"`).exec(html)?.[1] ?? '';
 }
 
 describe('the default blocks', () => {
@@ -50,7 +65,7 @@ describe('the default blocks', () => {
     expect(html).toContain('font-family:Inter, Arial, Helvetica, sans-serif');
     expect(html).toContain('color:#09090B');
     expect(html).toContain('Hi &lt;Mai&gt;,');
-    expect(text).toBe('Hi <Mai>,\n\n');
+    expect(text).toBe('Hi <Mai>,');
   });
 
   it('align a paragraph and space it after by its attributes', () => {
@@ -79,11 +94,12 @@ describe('the default blocks', () => {
       { verify_url: 'url' },
     );
     expect(html).toContain('href="https://x.test/v?a=1&amp;b=2"');
-    expect(html).toContain('background:#007A55');
-    expect(html).toContain('color:#ECFDF5');
-    expect(html).toContain('border-radius:10px');
-    expect(html).toContain('display:inline-block');
-    expect(text).toBe('Verify email: https://x.test/v?a=1&b=2\n\n');
+    const style = styleOf(html, 'zx-button');
+    expect(style).toContain('background:#007A55');
+    expect(style).toContain('color:#ECFDF5');
+    expect(style).toContain('border-radius:10px');
+    expect(style).toContain('display:inline-block');
+    expect(text).toBe('Verify email: https://x.test/v?a=1&b=2');
   });
 
   it('stretch a full-width button', () => {
@@ -94,20 +110,21 @@ describe('the default blocks', () => {
       { u: 'https://x.test' },
       { u: 'url' },
     );
-    expect(html).toContain('display:block');
+    expect(styleOf(html, 'zx-button')).toContain('display:block');
+    expect(styleOf(html, 'zx-button')).toContain('text-align:center');
   });
 
   it('render a code block large and letter-spaced, filling its value', () => {
     const { html, text } = render('code', {}, { code: '{{code}}' }, { code: '482 913' });
     expect(html).toContain('letter-spacing:4px');
     expect(html).toContain('482 913');
-    expect(text).toBe('482 913\n\n');
+    expect(text).toBe('482 913');
   });
 
   it('render a list, one item per text line', () => {
     const { html, text } = render('list', {}, { items: ['One', 'Two {{n}}'] }, { n: '2' });
     expect(html).toContain('<li>One</li><li>Two 2</li>');
-    expect(text).toBe('- One\n- Two 2\n\n');
+    expect(text).toBe('- One\n- Two 2');
   });
 
   it('render a callout boxed in the muted colour inside a border all round, with no accent edge', () => {
@@ -117,34 +134,34 @@ describe('the default blocks', () => {
   });
 
   it('render a divider as a rule in the border colour and a blank text line', () => {
-    expect(render('divider', {}, {})).toMatchObject({ text: '\n' });
-    expect(render('divider', {}, {}).html).toContain('border-top:1px solid #E4E4E7');
+    expect(render('divider', {}, {}).text).toBe('');
+    expect(styleOf(render('divider', {}, {}).html, 'zx-divider')).toContain('border-top:1px solid #E4E4E7');
   });
 
   it("render a columns block's lanes at the ratio's own weights", () => {
-    const lanes = [
-      { html: '<tr><td>L</td></tr>', text: 'L\n' },
-      { html: '<tr><td>R</td></tr>', text: 'R\n' },
-    ];
+    const lanes = [[paragraph('l', 'L')], [paragraph('r', 'R')]];
     const { html, text } = render('columns', { ratio: [2, 1] }, {}, {}, {}, lanes);
     expect(html).toContain('width="67%"');
     expect(html).toContain('width="33%"');
-    expect(text).toBe('L\nR\n');
+    expect(text).toBe('L\n\nR');
   });
 
   it('render nothing for a columns block whose ratio cannot be read', () => {
-    expect(render('columns', { ratio: 'x' }, {})).toMatchObject({ html: '', text: '' });
+    const { html, text } = render('columns', { ratio: 'x' }, {});
+    expect(html).not.toContain('zx-lane');
+    expect(html).not.toContain('zx-block');
+    expect(text).toBe('');
   });
 
   it('print an html block as written, escaping only its value, and strip its tags for the text arm', () => {
     const { html, text } = render('html', {}, { html: '<p class="x">Hi {{name}}</p>' }, { name: '<b>' });
     expect(html).toContain('<p class="x">Hi &lt;b&gt;</p>');
-    expect(text).toBe('Hi <b>\n\n');
+    expect(text).toBe('Hi <b>');
   });
 
   it('degrade content it cannot read to empty rather than throw', () => {
     expect(() => render('paragraph', {}, { text: 42 })).not.toThrow();
-    expect(render('list', {}, null).text).toBe('\n\n');
+    expect(render('list', {}, null).text).toBe('');
   });
 
   it('refuse, on a write, an attribute another type owns', () => {
@@ -197,17 +214,21 @@ describe('the default blocks', () => {
   });
 
   it('mark body text, a button and each lane for the layout to resize on a narrow screen', () => {
-    expect(render('paragraph', {}, { text: 'Hi' }).html).toContain('class="zx-text"');
-    expect(render('callout', {}, { text: 'Hi' }).html).toContain('class="zx-text"');
-    expect(render('list', {}, { items: ['a'] }).html).toContain('class="zx-text"');
+    expect(render('paragraph', {}, { text: 'Hi' }).html).toContain('class="zx-text');
+    expect(render('callout', {}, { text: 'Hi' }).html).toContain('class="zx-text');
+    expect(render('list', {}, { items: ['a'] }).html).toContain('class="zx-text');
     expect(render('button', {}, { label: 'Go', href: '{{u}}' }, { u: 'https://x.test' }, { u: 'url' }).html).toContain(
-      'class="zx-button"',
+      'class="zx-button',
     );
-    const lanes = [
-      { html: '<tr><td>L</td></tr>', text: 'L\n' },
-      { html: '<tr><td>R</td></tr>', text: 'R\n' },
-    ];
-    expect(render('columns', { ratio: [1, 1] }, {}, {}, {}, lanes).html.match(/class="zx-lane"/g)).toHaveLength(2);
+    const lanes = [[paragraph('l', 'L')], [paragraph('r', 'R')]];
+    expect(render('columns', { ratio: [1, 1] }, {}, {}, {}, lanes).html.match(/class="zx-lane/g)).toHaveLength(2);
+  });
+
+  it('give each block its own row, named for its type and its gap and alignment', () => {
+    expect(render('paragraph', { align: 'center', spaceAfter: 'small' }, { text: 'x' }).html).toContain(
+      '<td class="zx-block zx-block-paragraph zx-align-center zx-space-small" style="text-align:center;padding:0 0 6px;">',
+    );
+    expect(render('divider', {}, {}).html).toContain('class="zx-block zx-block-divider zx-align-left zx-space-medium"');
   });
 });
 
@@ -229,10 +250,10 @@ describe('text in the footer region', () => {
     { id: 'p', type: 'paragraph', attributes: {}, content: { text: 'Foot' } },
     { id: 'l', type: 'list', attributes: {}, content: { items: ['Foot'] } },
     { id: 'c', type: 'callout', attributes: {}, content: { text: 'Foot' } },
-  ])('draws a $type 12px over 17px in the muted foreground, with no phone resize', (block) => {
+  ])('draws a $type 12px over 17px in the muted foreground, and keeps it there on a phone', (block) => {
     const html = footerHtml(block);
     expect(html).toContain('font-size:12px;line-height:17px;color:#63636D;');
-    expect(html).not.toContain('class="zx-text"');
+    expect(html).toContain('.zx-region-footer .zx-text{font-size:12px !important;line-height:17px !important;}');
   });
 
   it('draws a paragraph in a footer lane at the footer size', () => {
@@ -244,7 +265,6 @@ describe('text in the footer region', () => {
       lanes: [[{ id: 'a', type: 'paragraph', attributes: {}, content: { text: 'Left' } }], []],
     });
     expect(html).toContain('font-size:12px;line-height:17px;color:#63636D;');
-    expect(html).not.toContain('class="zx-text"');
   });
 
   it('keeps a muted paragraph muted in the body, at the body size', () => {
@@ -258,7 +278,7 @@ describe('text in the footer region', () => {
       layoutProps: FIXTURE_LAYOUT_PROPS,
     }).html;
     expect(html).toContain('font-size:14px;line-height:20px;color:#63636D;');
-    expect(html).toContain('class="zx-text"');
+    expect(html).toContain('class="zx-text zx-tone-muted"');
   });
 });
 

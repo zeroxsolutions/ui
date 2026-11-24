@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { defineBlock } from '../block.js';
-import { NARROW } from '../narrow-screen.js';
-import { readOr, row, spaceAfter } from './shared.js';
+import { readOr, spaceAfter } from './shared.js';
 
 /** The most lanes, and the heaviest one lane may weigh against its siblings: a twelve-column grid. */
 export const MAX_LANES = 4;
@@ -28,19 +27,12 @@ export const columns = defineBlock({
   async translate(source) {
     return { ...source };
   },
-  render({ attributes: a }, ctx) {
-    const total = a.ratio.reduce((sum, weight) => sum + weight, 0);
-    if (total === 0) return { html: '', text: '' };
-    const lanes = a.ratio.map((weight, index) => ({ weight, rendered: ctx.lane(index) }));
-    const cells = lanes
-      .map(
-        ({ weight, rendered }, index) =>
-          `<td width="${Math.round((weight / total) * 100)}%" valign="top" class="${NARROW.lane}" style="padding:0 ${index < lanes.length - 1 ? 8 : 0}px 0 0;">` +
-          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rendered.html}</table></td>`,
-      )
-      .join('');
-    const table = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${cells}</tr></table>`;
-    return { html: row(a, table), text: lanes.map(({ rendered }) => rendered.text).join('') };
+  render({ attributes: a }, { h, lane }) {
+    if (a.ratio.reduce((sum, weight) => sum + weight, 0) === 0) return [];
+    return h.columns(
+      {},
+      a.ratio.map((weight, index) => h.column({ weight }, lane(index))),
+    );
   },
   sample: {
     attributes: { ratio: [1, 1] },

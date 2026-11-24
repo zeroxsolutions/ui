@@ -5,10 +5,12 @@ import { variableTokens } from '../variables/variable-tokens.js';
 import { hrefProblem } from '../markup/href.js';
 import { markupSamples } from '../markup/inline-markup.fixture.js';
 import { parseInlineMarkup } from '../markup/inline-markup.js';
-import { defineBlock, type EmailBlock, type RenderedBlock } from './block.js';
+import { defineBlock, type EmailBlock } from './block.js';
 import { createRenderContext } from './context.js';
 import { FIXTURE_LAYOUT_PROPS, FIXTURE_THEME } from './fixtures.fixture.js';
-import type { DefaultLayoutProps } from './layout.js';
+import { EmailStylesheetInvalid } from './css/stylesheet.js';
+import type { DefaultLayoutProps, LayoutInput } from './layout.js';
+import type { EmailNode } from './primitives/nodes.js';
 import type { RegionInput } from './region.js';
 import {
   BlockTypeCollision,
@@ -119,13 +121,62 @@ describe('createEmailRenderer', () => {
   it("level 2: frames the body in the layout it is given, with that layout's props", () => {
     const renderer = createEmailRenderer({
       theme: FIXTURE_THEME,
-      layout: ({ body, props }: { body: RenderedBlock; props: { brand: string } }) => ({
-        html: `<main data-brand="${props.brand}">${body.html}</main>`,
-        text: body.text,
-      }),
+      layout: ({ body, props, h }: LayoutInput<{ brand: string }>) =>
+        h.section({ class: `brand-${props.brand}` }, [h.region('body', body)]),
     });
     const rendered = renderer.render({ ...input([paragraph('p1', 'x')]), layoutProps: { brand: 'own' } });
-    expect(rendered.html.startsWith('<main data-brand="own">')).toBe(true);
+    expect(rendered.html).toMatch(
+      /^<!doctype html><html lang="en"><head>.*<\/head><body class="zx-body"[^>]*><table [^>]*><tr><td class="brand-own">/,
+    );
+    expect(rendered.html).not.toContain('class="zx-card"');
+    expect(rendered.text).toBe('x');
+  });
+
+  it("level 1: lets a product's rule beat the base sheet's by coming later", () => {
+    const renderer = createEmailRenderer({
+      theme: FIXTURE_THEME,
+      css: [
+        '.zx-button{border-radius:0}',
+        ':root{--brand:#123456}.zx-block-button .zx-button{background:var(--brand)}',
+      ],
+    });
+    const { html } = renderer.render(
+      input([{ id: 'b1', type: 'button', attributes: {}, content: { label: 'Go', href: '{{verify_url}}' } }]),
+    );
+    const style = /class="zx-button zx-width-inline" style="([^"]*)"/.exec(html)?.[1];
+    expect(style).toContain('border-radius:0;');
+    expect(style).toContain('background:#123456;');
+    expect(style).not.toContain('border-radius:10px');
+  });
+
+  it("keeps a product's media rules in the head, made important", () => {
+    const { html } = createEmailRenderer({ css: '@media (max-width:600px){.zx-callout{padding:8px}}' }).render(
+      input([]),
+    );
+    expect(html).toContain('@media (max-width:600px){.zx-callout{padding:8px !important}}</style>');
+  });
+
+  it('refuses a stylesheet it cannot inline when it is composed', () => {
+    expect(() => createEmailRenderer({ css: ['.ok{}', 'p{color:red}'] })).toThrow(
+      new EmailStylesheetInvalid(1, 1, 1, 'selector-refused', 'p'),
+    );
+  });
+
+  it('draws with the ZUI palette, light and dark, when it is given no theme', () => {
+    const { html } = createEmailRenderer().render(input([paragraph('p1', 'x')]));
+    expect(html).toContain('color:#09090B;');
+    expect(html).toContain('<meta name="color-scheme" content="light dark">');
+  });
+
+  it('places the rows a render writes as HTML, unstyled, where the block sits', () => {
+    const renderer = createEmailRenderer({
+      blocks: { divider: () => ({ html: '<tr><td data-own>own</td></tr>', text: 'own\n\n' }) },
+    });
+    const { html, text } = renderer.render(
+      input([paragraph('p1', 'a'), { id: 'd', type: 'divider', attributes: {}, content: {} }]),
+    );
+    expect(html).toContain('</td></tr><tr><td data-own>own</td></tr></table>');
+    expect(text).toBe('a\n\nown\n\nExample Company Limited, 1 Example Street.\nSent because you created an account.');
   });
 
   it('level 3: parses, translates and renders a type the defaults do not have', async () => {
@@ -336,12 +387,12 @@ describe('createEmailRenderer', () => {
   });
 
   it('hands a custom layout both regions, an absent one empty', () => {
-    const seen: string[] = [];
+    const seen: (readonly EmailNode[])[] = [];
     const renderer = createEmailRenderer<{ tag: string }>({
       theme: FIXTURE_THEME,
-      layout: ({ body, regions }) => {
-        seen.push(regions.header.html, regions.footer.html);
-        return body;
+      layout: ({ body, regions, h }) => {
+        seen.push(regions.header, regions.footer);
+        return h.card({}, [h.region('body', body), h.region('footer', regions.footer)]);
       },
     });
     const { html } = renderer.render({
@@ -350,8 +401,9 @@ describe('createEmailRenderer', () => {
       regions: { footer: { blocks: [paragraph('f1', 'Foot')], variables: {}, variableTypes: {} } },
     });
     expect(html).toContain('Hi');
-    expect(seen[0]).toBe('');
-    expect(seen[1]).toContain('Foot');
+    expect(seen[0]).toEqual([]);
+    expect(html).toContain('Foot');
+    expect(seen[1]).toHaveLength(1);
   });
 });
 
@@ -452,7 +504,7 @@ describe('inline markup in text blocks', () => {
       const ctx = createRenderContext(
         { theme: FIXTURE_THEME, locale: 'en', variables, variableTypes, problems: [], region: 'body' },
         'b1',
-        () => ({ html: '', text: '' }),
+        () => [],
       );
       const { text } = ctx.inline(source);
       const filled = Array.from(text.matchAll(/~(\w+)~/g), (match) => match[1]).sort();

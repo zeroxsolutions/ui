@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { VariableType } from '../variables/variable-type.js';
-import type { EmailPrimitives } from './primitives/nodes.js';
+import type { EmailNode, EmailPrimitives } from './primitives/nodes.js';
 import type { Region } from './region.js';
 import type { EmailTheme } from './theme.js';
 
@@ -62,8 +62,10 @@ export interface RenderContext {
   href(template: string): RenderedBlock;
   /** The primitives a render draws with, filling each value through this context and checking each link. */
   readonly h: EmailPrimitives;
-  /** A lane-holding block's lane, rendered through the same renderer; empty on any other type. */
-  lane(index: number): RenderedBlock;
+  /** A lane-holding block's lane, its blocks rendered through the same renderer; empty on any other type. */
+  lane(index: number): readonly EmailNode[];
+  /** How many lanes the stored block holds; 0 on a type that holds none. */
+  readonly laneCount: number;
 }
 
 /** What a block's render reads: its attributes and its content, already read through its definition. */
@@ -73,10 +75,16 @@ export interface BlockView<Attributes, Content> {
   readonly content: Content;
 }
 
+/**
+ * What a render answers: primitives, which the renderer places in the block's own row and styles, or, as a
+ * render written before there were primitives, the block's rows as HTML and its text, placed as written.
+ */
+export type BlockRendering = EmailNode | readonly EmailNode[] | RenderedBlock;
+
 export type BlockRenderer<Attributes, Content> = (
   block: BlockView<Attributes, Content>,
   ctx: RenderContext,
-) => RenderedBlock;
+) => BlockRendering;
 
 /**
  * A block of this type as `checkEmailRenderer` renders it. A type that holds text names at least one variable
@@ -104,7 +112,7 @@ export interface BlockDefinition<Type extends string = string, Attributes = unkn
   readonly holdsLanes: boolean;
   /** The content with each sentence replaced by `translateOne`'s answer; what is not a sentence is copied. */
   translate(content: Content, translateOne: (sentence: string) => Promise<string>): Promise<Content>;
-  render(block: BlockView<Attributes, Content>, ctx: RenderContext): RenderedBlock;
+  render(block: BlockView<Attributes, Content>, ctx: RenderContext): BlockRendering;
   readonly sample: BlockSample;
 }
 

@@ -31,7 +31,7 @@ function draw(
       region: 'body',
     },
     'b1',
-    () => ({ html: '', text: '' }),
+    () => [],
   );
   const built = build(ctx.h);
   const nodes = Array.isArray(built) ? built : [built];

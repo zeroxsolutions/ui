@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { defineBlock } from '../block.js';
-import { align, blockText, monospaceStyle, readOr, row, spaceAfter } from './shared.js';
-import { classAttribute, paintClasses } from '../color-scheme.js';
+import { align, blockText, readOr, spaceAfter } from './shared.js';
 
 const attributes = z.object({ align, spaceAfter }).strict();
 const content = z.object({ code: blockText }).strict();
@@ -19,18 +18,8 @@ export const code = defineBlock({
   async translate(source) {
     return { ...source };
   },
-  render({ attributes: a, content: c }, ctx) {
-    const { colors, radius } = ctx.theme;
-    const style =
-      `display:inline-block;${monospaceStyle()}font-size:24px;font-weight:600;letter-spacing:4px;line-height:32px;` +
-      `white-space:pre-wrap;color:${colors.foreground};background:${colors.muted};border-radius:${radius}px;padding:12px 16px;`;
-    return {
-      html: row(
-        a,
-        `<div${classAttribute(...paintClasses(ctx.theme, 'foreground', 'muted'))} style="${style}">${ctx.html(c.code)}</div>`,
-      ),
-      text: `${ctx.text(c.code)}\n\n`,
-    };
+  render({ content: c }, { h }) {
+    return h.code({ text: c.code });
   },
   sample: { attributes: {}, content: { code: '{{code}}' }, variableTypes: { code: 'string' } },
 });

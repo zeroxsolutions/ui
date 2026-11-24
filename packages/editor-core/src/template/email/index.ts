@@ -1,8 +1,9 @@
-/** The email renderer: a theme, overridable blocks and layout, and block types a product adds. */
+/** The email renderer: a theme and a product's CSS, overridable blocks and layout, and block types a product adds. */
 export {
   defineBlock,
   type BlockDefinition,
   type BlockRenderer,
+  type BlockRendering,
   type BlockSample,
   type BlockView,
   type EmailBlock,
@@ -31,4 +32,22 @@ export {
   type RenderedEmail,
   type RenderEmailInput,
 } from './renderer.js';
-export { assertEmailTheme, EmailThemeInvalid, type EmailColors, type EmailTheme } from './theme.js';
+export { EmailStylesheetInvalid, type StylesheetRefusal } from './css/stylesheet.js';
+export type {
+  Children,
+  ClassList,
+  ColumnNode,
+  EmailNode,
+  EmailPrimitives,
+  TextEnd,
+  TextRun,
+  TextRunLink,
+  TextRunText,
+} from './primitives/nodes.js';
+export {
+  assertEmailTheme,
+  DEFAULT_EMAIL_THEME,
+  EmailThemeInvalid,
+  type EmailColors,
+  type EmailTheme,
+} from './theme.js';

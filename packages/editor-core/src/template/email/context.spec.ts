@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import type { RenderedBlock, RenderProblem } from './block.js';
+import type { RenderProblem } from './block.js';
+import type { EmailNode } from './primitives/nodes.js';
 import { createRenderContext, type RenderState } from './context.js';
 import { FIXTURE_THEME } from './fixtures.fixture.js';
 
@@ -16,7 +17,7 @@ function state(overrides: Partial<RenderState> = {}): RenderState {
   };
 }
 
-const NO_LANES = (): RenderedBlock => ({ html: '', text: '' });
+const NO_LANES = (): readonly EmailNode[] => [];
 
 describe('createRenderContext', () => {
   it("escapes the template's own text on the html arm, so authored text is never markup", () => {
