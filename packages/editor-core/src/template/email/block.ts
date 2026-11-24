@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { VariableType } from '../variables/variable-type.js';
+import type { EmailPrimitives } from './primitives/nodes.js';
 import type { Region } from './region.js';
 import type { EmailTheme } from './theme.js';
 
@@ -59,6 +60,8 @@ export interface RenderContext {
   inline(template: string): RenderedBlock;
   /** A link: the value of the one `url` variable `template` names, escaped for the html arm; empty otherwise. */
   href(template: string): RenderedBlock;
+  /** The primitives a render draws with, filling each value through this context and checking each link. */
+  readonly h: EmailPrimitives;
   /** A lane-holding block's lane, rendered through the same renderer; empty on any other type. */
   lane(index: number): RenderedBlock;
 }

@@ -7,7 +7,7 @@ import type { Variables } from '../variables/variables.js';
 import type { RenderContext, RenderedBlock, RenderProblem } from './block.js';
 import type { Region } from './region.js';
 import type { EmailTheme } from './theme.js';
-import { classAttribute, paintClasses } from './color-scheme.js';
+import { createPrimitives, type TextRun, type TextRunText } from './primitives/nodes.js';
 
 /** What one render shares across its blocks; `problems` collects as the blocks render. */
 export interface RenderState {
@@ -53,6 +53,31 @@ export function createRenderContext(
     for (const name of variableTokens(template)) {
       if (valueOf(name) === null) report('variable-missing', name);
     }
+  };
+  const fill = (text: string): string => interpolate(text, state.variables, 'text');
+  // A link's label reads as plain runs where its href is refused, so the text survives and nothing links.
+  const runs = (template: string): TextRun[] => {
+    reportMissing(template);
+    const parsed = parseInlineMarkup(template);
+    if (!parsed.ok) return template === '' ? [] : [{ kind: 'text', text: fill(template), bold: false, italic: false }];
+    const filled = (run: InlineText): TextRunText => ({
+      kind: 'text',
+      text: fill(run.text),
+      bold: run.bold,
+      italic: run.italic,
+    });
+    return parsed.runs.flatMap((run): TextRun[] => {
+      if (run.kind === 'text') return [filled(run)];
+      const label = run.label.map(filled);
+      const link = context.href(run.href);
+      return link.html === '' ? label : [{ kind: 'link', href: link.text, label }];
+    });
+  };
+  const drawText = (run: TextRunText): RenderedBlock => {
+    let html = escapeHtml(run.text);
+    if (run.italic) html = `<em>${html}</em>`;
+    if (run.bold) html = `<strong>${html}</strong>`;
+    return { html, text: run.text };
   };
   const context: RenderContext = {
     theme: state.theme,
@@ -103,35 +128,25 @@ export function createRenderContext(
       return { html: escapeHtml(href), text: href };
     },
     inline(template): RenderedBlock {
-      reportMissing(template);
-      const parsed = parseInlineMarkup(template);
-      if (!parsed.ok) {
-        return {
-          html: escapeHtml(interpolate(template, state.variables, 'text')),
-          text: interpolate(template, state.variables, 'text'),
-        };
-      }
-      const fill = (text: string): string => interpolate(text, state.variables, 'text');
-      const drawText = (run: InlineText): RenderedBlock => {
-        let html = escapeHtml(fill(run.text));
-        if (run.italic) html = `<em>${html}</em>`;
-        if (run.bold) html = `<strong>${html}</strong>`;
-        return { html, text: fill(run.text) };
-      };
-      const parts = parsed.runs.map((run): RenderedBlock => {
+      const parts = runs(template).map((run): RenderedBlock => {
         if (run.kind === 'text') return drawText(run);
         const label = run.label.map(drawText);
-        const labelHtml = label.map((part) => part.html).join('');
-        const labelText = label.map((part) => part.text).join('');
-        const href = context.href(run.href);
-        if (href.html === '') return { html: labelHtml, text: labelText };
         return {
-          html: `<a href="${href.html}"${classAttribute(...paintClasses(state.theme, 'link'))} style="color:${state.theme.colors.primary};">${labelHtml}</a>`,
-          text: `${labelText} (${href.text})`,
+          html: `<a href="${escapeHtml(run.href)}" class="zx-link" style="color:${state.theme.colors.primary};">${label.map((part) => part.html).join('')}</a>`,
+          text: `${label.map((part) => part.text).join('')} (${run.href})`,
         };
       });
       return { html: parts.map((part) => part.html).join(''), text: parts.map((part) => part.text).join('') };
     },
+    h: createPrimitives({
+      text: (template) => context.text(template),
+      runs: (template) => runs(template),
+      href: (template) => {
+        const link = context.href(template);
+        return link.html === '' ? null : link.text;
+      },
+      markup: (template) => context.markup(template),
+    }),
     lane,
   };
   return context;
