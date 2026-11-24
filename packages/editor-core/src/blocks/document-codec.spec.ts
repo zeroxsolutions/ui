@@ -7,6 +7,7 @@ import { serialize } from '../document/serialize/serialize-to-string.js';
 import { BlockDefinitionInvalid } from '../template/email/define-email-block.js';
 import { choice, items, link, plainText, richText } from '../template/email/fields.js';
 import { defineBlock, type Block } from './define-block.js';
+import type { Markup, MarkupValue } from './document-codec.js';
 
 const note = defineBlock({
   type: 'note',
@@ -170,6 +171,20 @@ describe("a defined block's markup fragments", () => {
     );
   });
 
+  it.each([
+    ['inside a single-quoted attribute', (view: { title: string }, markup: Markup) => markup`<p title='${view.title}`],
+    ['inside an attribute with no value yet', (_view: { title: string }, markup: Markup) => markup`<p title='`],
+    ['inside a tag', (_view: { title: string }, markup: Markup) => markup`<p class="x"`],
+    ['in a style element', (_view: { title: string }, markup: Markup) => markup`<style>.x{color:red}`],
+    [
+      'in a fragment placed in text',
+      (view: { title: string }, markup: Markup) => markup`<div>${markup`${view.title}<p title='`}</div>`,
+    ],
+  ])('refuses a template that ends %s, where the body and the next block would land', (_where, html) => {
+    const block = tagged({ html: (view, markup) => html(view.fields as { title: string }, markup) });
+    expect(() => exported(block, { title: 'x' })).toThrow(BlockDefinitionInvalid);
+  });
+
   it('keeps a template line break out of Markdown, however the template ends its lines', () => {
     const block = tagged({ html: (view, markup) => markup`<p>${view.fields.title}</p>\r\n\r\n<p>end</p>` });
     const markdown = serialize(docOf({ title: 'x' }, undefined, 'tagged'), 'markdown', registryOf(block));
@@ -218,6 +233,29 @@ describe('markup.url', () => {
     });
     expect(() =>
       serialize(docOf({ url: 'https://x.test/ onmouseover=alert(1)' }, undefined, 'linked'), 'html', registryOf(block)),
+    ).toThrow(BlockDefinitionInvalid);
+  });
+
+  it.each([
+    [
+      'after a scheme the template wrote',
+      (markup: Markup, url: MarkupValue) => markup`<a href="javascript:${url}">x</a>`,
+    ],
+    ['after other text in the address', (markup: Markup, url: MarkupValue) => markup`<a href="x${url}">x</a>`],
+    [
+      'after a fragment in the address',
+      (markup: Markup, url: MarkupValue) => markup`<a href="${markup`javascript:`}${url}">x</a>`,
+    ],
+    ['before more of the address', (markup: Markup, url: MarkupValue) => markup`<a href="${url}/x">x</a>`],
+  ])('is refused %s, so it is the whole of a link attribute', (_where, html) => {
+    const block = defineBlock({
+      type: 'linked',
+      label: 'Linked',
+      fields: { url: link() },
+      document: { html: (view, markup) => html(markup, markup.url(view.fields.url)) },
+    });
+    expect(() =>
+      serialize(docOf({ url: 'https://x.test/%0aalert(1)' }, undefined, 'linked'), 'html', registryOf(block)),
     ).toThrow(BlockDefinitionInvalid);
   });
 
