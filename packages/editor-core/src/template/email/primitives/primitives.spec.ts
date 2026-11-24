@@ -171,6 +171,32 @@ describe('the primitives', () => {
     expect(() => draw((h) => build(h, 'javascript:alert(1)'))).toThrow(EmailMarkupInvalid);
   });
 
+  it.each([
+    ['a slash before the attribute', (h: EmailPrimitives, v: string) => h.raw`<a/href="${v}">x</a>`],
+    ['a > in an earlier value', (h: EmailPrimitives, v: string) => h.raw`<a title="a>b" href="${v}">x</a>`],
+    ['an unquoted value', (h: EmailPrimitives, v: string) => h.raw`<a title=${v}>x</a>`],
+    ['an attribute name', (h: EmailPrimitives, v: string) => h.raw`<a ${v}="x">x</a>`],
+    ['a style', (h: EmailPrimitives, v: string) => h.raw`<td style="background:url(${v})">x</td>`],
+    ['an event handler', (h: EmailPrimitives, v: string) => h.raw`<a onclick="${v}">x</a>`],
+    ['a cite', (h: EmailPrimitives, v: string) => h.raw`<q cite="${v}">x</q>`],
+    ['a srcdoc', (h: EmailPrimitives, v: string) => h.raw`<iframe srcdoc="${v}"></iframe>`],
+    ['a style element', (h: EmailPrimitives, v: string) => h.raw`<style>.a{color:${v}}</style>`],
+  ])('refuse a tagged raw value in %s', (_case, build) => {
+    expect(() => draw((h) => build(h, 'javascript:alert(1)'))).toThrow(EmailMarkupInvalid);
+  });
+
+  it('take a tagged raw value in a quoted plain attribute, after a closed style element, and in a comment', () => {
+    const { html } = draw(
+      (h) =>
+        h.raw`<style>.a{}</style><td data-x="${'1'}" aria-label='${'2'}' title="${'"3'}"><!-- ${'4'} -->${'5'}</td>`,
+    );
+    expect(html).toBe('<style>.a{}</style><td data-x="1" aria-label=\'2\' title="&quot;3"><!-- 4 -->5</td>');
+  });
+
+  it('read a numbered entity in 128 to 159 as Windows-1252, as HTML does', () => {
+    expect(draw((h) => h.raw`<p>&#128;&#x9F;&#x81;</p>`).text).toBe('\u20ac\u0178\u0081\n\n');
+  });
+
   it('take a tagged raw value in another attribute, and in text after a link', () => {
     expect(draw((h) => h.raw`<a href="https://x.test/" title="${'t'}">${'x'}</a> href=${'y'}`).html).toBe(
       '<a href="https://x.test/" title="t">x</a> href=y',

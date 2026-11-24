@@ -170,19 +170,51 @@ function textOf(html: string): string {
     const code = decimal === undefined ? Number.parseInt(hex, 16) : Number.parseInt(decimal, 10);
     // As HTML reads it: no character, a surrogate, or one past Unicode is the replacement character.
     const replaced = code === 0 || (code >= 0xd800 && code <= 0xdfff) || !(code <= 0x10ffff);
-    return replaced ? '\ufffd' : String.fromCodePoint(code);
+    return replaced ? '\ufffd' : String.fromCodePoint(WINDOWS_1252[code] ?? code);
   });
 }
+
+/** The characters HTML reads a numbered entity from 128 to 159 as, by Windows-1252; the rest stand for themselves. */
+const WINDOWS_1252: Readonly<Record<number, number>> = {
+  0x80: 0x20ac,
+  0x82: 0x201a,
+  0x83: 0x0192,
+  0x84: 0x201e,
+  0x85: 0x2026,
+  0x86: 0x2020,
+  0x87: 0x2021,
+  0x88: 0x02c6,
+  0x89: 0x2030,
+  0x8a: 0x0160,
+  0x8b: 0x2039,
+  0x8c: 0x0152,
+  0x8e: 0x017d,
+  0x91: 0x2018,
+  0x92: 0x2019,
+  0x93: 0x201c,
+  0x94: 0x201d,
+  0x95: 0x2022,
+  0x96: 0x2013,
+  0x97: 0x2014,
+  0x98: 0x02dc,
+  0x99: 0x2122,
+  0x9a: 0x0161,
+  0x9b: 0x203a,
+  0x9c: 0x0153,
+  0x9e: 0x017e,
+  0x9f: 0x0178,
+};
 
 /** The named entities HTML also reads in upper case; no other is. */
 const UPPER_CASE_ENTITIES = new Set(['AMP', 'LT', 'GT', 'QUOT', 'COPY', 'REG']);
 
 /** Why a tagged `raw` refused a value. */
-export type MarkupRefusal = 'value-refused' | 'url-attribute';
+export type MarkupRefusal = 'value-refused' | 'attribute-refused' | 'position-refused';
 
 /**
- * A tagged `raw` value the renderer will not write: one that is not text, a number, null or undefined, or one
- * inside an attribute that takes a link, where escaping keeps it in the attribute but does not make it safe.
+ * A tagged `raw` value the renderer will not write: one that is not text, a number, null or undefined; one in a
+ * quoted attribute that can take a link, a script or a style, where escaping keeps it in the attribute but does
+ * not make it safe; or one anywhere else in a tag, or inside a `style` or `script` element.
  */
 export class EmailMarkupInvalid extends Error {
   constructor(
@@ -194,9 +226,112 @@ export class EmailMarkupInvalid extends Error {
   }
 }
 
-/** An open value, quoted or not, of an attribute that takes a link, at the end of an open tag. */
-const URL_ATTRIBUTE =
-  /[\s"'](href|src|srcset|background|action|formaction|poster|data|xlink:href)\s*=\s*(?:"[^"]*|'[^']*|[^\s"'>]*)$/i;
+/** The attributes a value may be written into: none takes a link, a script or a style. */
+const PLAIN_ATTRIBUTES = new Set([
+  'title',
+  'alt',
+  'class',
+  'id',
+  'lang',
+  'dir',
+  'width',
+  'height',
+  'align',
+  'valign',
+  'bgcolor',
+  'color',
+  'border',
+  'cellpadding',
+  'cellspacing',
+  'colspan',
+  'rowspan',
+  'role',
+  'name',
+  'value',
+  'placeholder',
+  'summary',
+  'label',
+  'abbr',
+  'scope',
+  'face',
+  'size',
+]);
+
+function plainAttribute(name: string): boolean {
+  return PLAIN_ATTRIBUTES.has(name) || /^(?:aria|data)-[a-z0-9-]+$/.test(name);
+}
+
+/** Where the markup written so far ends: in text, or in a quoted value of the attribute named. */
+type MarkupPlace =
+  | { readonly in: 'text' }
+  | { readonly in: 'quoted'; readonly attribute: string }
+  | { readonly in: 'other'; readonly what: string };
+
+/**
+ * Where `html` ends, read as an HTML tokenizer reads tags: `/` and whitespace part attributes, a quoted value runs
+ * to its own quote whatever it holds, a comment to `-->`, and a `style` or `script` element to its end tag.
+ */
+function placeAtEnd(html: string): MarkupPlace {
+  const lower = html.toLowerCase();
+  let at = 0;
+  for (;;) {
+    const open = lower.indexOf('<', at);
+    if (open < 0) return { in: 'text' };
+    if (lower.startsWith('<!--', open)) {
+      const close = lower.indexOf('-->', open + 4);
+      if (close < 0) return { in: 'text' };
+      at = close + 3;
+      continue;
+    }
+    if (!/[a-z/!?]/.test(lower[open + 1] ?? '')) {
+      if (open + 1 >= lower.length) return { in: 'other', what: 'tag' };
+      at = open + 1;
+      continue;
+    }
+    // The tag's name, then its attributes, to the `>` outside a quoted value that ends it.
+    let index = open + 1;
+    while (index < lower.length && !/[\s/>]/.test(lower[index])) index += 1;
+    const tag = lower.slice(open + 1, index);
+    let ended = false;
+    while (index < lower.length && !ended) {
+      const char = lower[index];
+      if (/[\s/]/.test(char)) {
+        index += 1;
+        continue;
+      }
+      if (char === '>') {
+        ended = true;
+        index += 1;
+        break;
+      }
+      const nameStart = index;
+      while (index < lower.length && !/[\s/>=]/.test(lower[index])) index += 1;
+      const attribute = lower.slice(nameStart, index);
+      while (index < lower.length && /\s/.test(lower[index])) index += 1;
+      if (index >= lower.length) return { in: 'other', what: attribute };
+      if (lower[index] !== '=') continue;
+      index += 1;
+      while (index < lower.length && /\s/.test(lower[index])) index += 1;
+      if (index >= lower.length) return { in: 'other', what: attribute };
+      const quote = lower[index];
+      if (quote === '"' || quote === "'") {
+        const close = lower.indexOf(quote, index + 1);
+        if (close < 0) return { in: 'quoted', attribute };
+        index = close + 1;
+      } else {
+        while (index < lower.length && !/[\s>]/.test(lower[index])) index += 1;
+        if (index >= lower.length) return { in: 'other', what: attribute };
+      }
+    }
+    if (!ended) return { in: 'other', what: tag };
+    at = index;
+    if (tag === 'style' || tag === 'script') {
+      const close = lower.indexOf(`</${tag}`, at);
+      if (close < 0) return { in: 'other', what: tag };
+      at = close;
+    }
+  }
+}
 
 /** `value` as a tagged `raw` writes it after `before`, the markup written so far. */
 function interpolated(before: string, value: unknown): string {
@@ -204,9 +339,11 @@ function interpolated(before: string, value: unknown): string {
   if (typeof value !== 'string' && typeof value !== 'number') {
     throw new EmailMarkupInvalid('value-refused', typeof value);
   }
-  const tag = before.slice(before.lastIndexOf('<'));
-  const attribute = before.lastIndexOf('<') > before.lastIndexOf('>') ? URL_ATTRIBUTE.exec(tag) : null;
-  if (attribute !== null) throw new EmailMarkupInvalid('url-attribute', attribute[1].toLowerCase());
+  const place = placeAtEnd(before);
+  if (place.in === 'other') throw new EmailMarkupInvalid('position-refused', place.what);
+  if (place.in === 'quoted' && !plainAttribute(place.attribute)) {
+    throw new EmailMarkupInvalid('attribute-refused', place.attribute);
+  }
   return escapeHtml(String(value));
 }
 
