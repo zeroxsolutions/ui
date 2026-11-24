@@ -202,3 +202,9 @@ owner's review.
 - **2026-11-24, layout markup.** `h.raw` is also a tagged template that escapes every interpolated value; the
   options form writes trusted markup as given. A layout puts a person's value, such as the subject, only in
   text or in a tagged `raw`.
+- **2026-11-24, query cascade.** A query also writes each declaration its own rules set where it equals the
+  inlined one, so it beats the base sheet's head rules at equal specificity. Each written declaration keeps the
+  specificity of its rule, the class repeated once per class, and the head writes them in their rules' order,
+  so queries that hold at once cascade together, a nested query's rules included. In a block, a tagged `raw`
+  fills each `{{name}}` in its literal parts, escaped. `validate` reports attributes the write check refuses
+  as `attributes-invalid`.

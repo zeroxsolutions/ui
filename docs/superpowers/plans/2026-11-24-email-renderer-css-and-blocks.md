@@ -340,8 +340,18 @@ Each kept the design's intent; the reason follows it.
   gone); `0a08760d`'s body records them.
 - **After the final review.** A plain text field may hold a stored newline (it draws as a space), and a field
   but the body may be left out, so the write check refuses no content `validate` lets pass: `validate` reports
-  content that is not an object, and each key the type's content does not have, as `content-invalid`. A
-  block's attribute values are not checked by `validate`, as a default block's are not. `extraKinds` stays, for blocks of
+  content that is not an object, and each key the type's content does not have, as `content-invalid`, and
+  attributes that are not an object, or a key the type does not have or whose value it does not take, as
+  `attributes-invalid` (a columns block's ratio stays `lanes-mismatch`). `extraKinds` stays, for blocks of
   hand-written features, but `EmailEditor` needs a `blocks` definition in the profile's own `blocks`. A
   product's queries are computed per element (see the spec's Revisions), and a layout's person values go
   through a tagged `raw`, which escapes them; its images may also be `data:image/` and `cid:`.
+- **Second review of the per-element queries.** A query writes each declaration its own rules win even at the
+  inline value, since the base's head rules beat the inline one. Each written declaration keeps its rule's
+  specificity (the class repeated once per class of the rule, an `!important` one weighted over every query
+  rule) and the head writes them in their rules' order, so two queries that hold at once, and a nested query
+  and the rules after it, cascade as written. A query inside another at-rule, such as `@layer`, and an at-rule
+  inside a query stay in the head as written; a styling `:root` in a query is refused, as at the top. A tagged
+  `raw` fills its literal parts through the reader, so a block's `{{name}}` is filled there too, prints a
+  null or undefined value as nothing, and its text arm and the options form's read numbered and common named
+  entities back.

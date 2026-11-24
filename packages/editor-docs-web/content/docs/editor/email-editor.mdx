@@ -288,13 +288,29 @@ custom properties of a top-level `:root` or `.zx-root` rule and is resolved befo
 
 Your `@media` and `@supports` rules hold in a query, so they cannot be inlined. For each query the renderer
 computes every element's style as a browser would while the query holds: your top-level rules and the query's
-own, by importance, specificity and order, with the custom properties the query's `:root` redefines. Where that
-differs from the inlined style, the element gets a class of its own, such as `zx-q0-3`, and the head gets the
-differing declarations under the query, made `!important` to beat the inlined style. Queries keep the order
-you wrote them in, so when two hold at once, such as a narrow screen in dark mode, the later one wins a property
-both set. A query nested in another is written inside it. A selector in a query that is not class-only, such as
-`p`, is kept in the head as written, made `!important`. The base sheet's own dark and narrow-screen rules stay in
-the head as they are.
+own, by importance, specificity and order, with the custom properties the query's `:root` redefines. The element
+gets a class of its own, such as `zx-q0-3`, and the head gets, under the query, `!important` to beat the
+inlined style, each declaration that differs from the inlined style and each one the query's own rules set.
+Each keeps its rule's specificity, its class written once per class of the rule, and the head writes them in the
+order of their rules, so when two queries hold at once, such as a narrow screen in dark mode, the more specific
+rule wins a property both set, and at equal specificity the later one, a nested query's included. A selector in
+a query that is not class-only, such as `p`, is kept in the head as written, made `!important`, as is a query
+inside another at-rule, such as `@layer`. A `:root` in a query holds custom properties only; a declaration there
+throws, as it does at the top.
+
+The base sheet's own dark and narrow-screen rules stay in the head as they are, before yours. A query's own
+declaration still beats them at equal specificity, so a value your query sets holds even where it equals the
+inlined one, such as a light colour kept in dark mode:
+
+```css
+@media (prefers-color-scheme: dark) {
+  .zx-callout {
+    background: #f4f4f5;
+  }
+}
+```
+
+A base rule of two classes, such as `.zx-region-footer .zx-text`, needs two in yours to beat it.
 
 An inlined `!important` decides the cascade among your rules but is not written into the `style`, since there it
 would beat the head's dark and narrow-screen rules; `stylesheetWarnings` names each one as `important-dropped`.
@@ -383,9 +399,10 @@ block's title and its fields, attributes and values by their names; the definiti
 
 The primitives a `render` uses are on `h`: `section`, `columns`, `column`, `text`, `heading`, `button`, `image`,
 `divider`, `list`, `code`, `spacer` and `raw`. Each but `raw` takes a `class`. The renderer fills a primitive's
-text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does. In a
-layout, ``h.raw`<td title="${subject}">` `` escapes every value it interpolates, and `h.raw({ markup })` writes
-trusted markup as given, so a person's value, such as the subject, never goes in it. It places the result in the block's own row, and writes the
+text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does.
+``h.raw`<td title="${subject}">` `` escapes every value it interpolates and never fills one, and fills each
+`{{name}}` in its own text, escaped, in a block; `h.raw({ markup })` writes trusted markup as given, so in a
+layout a person's value, such as the subject, never goes in it. A null or undefined value prints nothing. It places the result in the block's own row, and writes the
 plain-text twin from the same primitives. `defineEmailBlock` throws `EmailBlockDefinitionInvalid` for a type
 that is a default one or not a lower-case word, a field or attribute named `id`, `key` or `source`, two rich
 text or lanes fields, or a default outside its attribute's values. Run `checkEmailRenderer(renderer,
@@ -492,6 +509,7 @@ document before the export.
 | `lanes-mismatch`                | The columns do not match their widths                                   |
 | `lanes-count`                   | This block holds more or fewer lanes than it takes                      |
 | `content-invalid`               | This block holds something its type does not read                       |
+| `attributes-invalid`            | This block has a setting its type does not take                         |
 | `text-empty`                    | This block is empty                                                     |
 | `text-too-long`                 | This text is too long                                                   |
 | `list-too-long`                 | This list has too many items                                            |
@@ -500,7 +518,9 @@ document before the export.
 
 `block-not-carried` marks a block the email cannot hold, such as a pasted heading or numbered list.
 `content-invalid` marks content that is not an object, or a key its type's content does not have, which the
-renderer's write check refuses; its `field` names the key.
+renderer's write check refuses; its `field` names the key. `attributes-invalid` marks attributes that are not
+an object, or a key its type does not have or whose value it does not take, such as an `align` of `middle`; a
+columns block's ratio is reported as `lanes-mismatch` instead.
 
 ## Markup
 
