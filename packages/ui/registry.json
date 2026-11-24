@@ -3377,7 +3377,7 @@
         ".document-editor .ProseMirror [data-space-after='large']": {
           "margin-bottom": "2rem"
         },
-        ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react]": {
+        ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react], .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react]": {
           "display": "grid",
           "grid-auto-flow": "column",
           "grid-auto-columns": "minmax(0, 1fr)",
