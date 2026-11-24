@@ -125,6 +125,7 @@ const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
   'lanes-mismatch': 'The columns do not match their widths',
   'lanes-count': 'This block holds more or fewer lanes than it takes',
   'content-invalid': 'This block holds something its type does not read',
+  'attributes-invalid': 'This block has a setting its type does not take',
   'text-empty': 'This block is empty',
   'text-too-long': 'This text is too long',
   'list-too-long': 'This list has too many items',
