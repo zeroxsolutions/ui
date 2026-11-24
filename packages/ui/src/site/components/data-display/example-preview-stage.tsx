@@ -46,13 +46,7 @@ function ExamplePreviewStage({ name, viewHref, children }: ExamplePreviewStagePr
         <ExampleViewLink name={name} href={viewHref} />
       </div>
       {framed ? (
-        <ExampleFrame
-          name={name}
-          viewHref={viewHref}
-          device={device}
-          theme={theme}
-          className="bg-muted/40 data-[device=desktop]:bg-transparent"
-        />
+        <ExampleFrame name={name} viewHref={viewHref} device={device} theme={theme} />
       ) : (
         <ComponentPreviewStage>{children}</ComponentPreviewStage>
       )}

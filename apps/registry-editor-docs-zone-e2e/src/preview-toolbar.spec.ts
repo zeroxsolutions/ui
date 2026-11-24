@@ -36,7 +36,9 @@ for (const [name, width] of [
   ['Tablet', 768],
   ['Mobile', 375],
 ] as const) {
-  test(`${name} frames the demo's page ${width}px wide, as tall as the demo`, async ({ page }) => {
+  test(`${name} frames the demo's page in a ${width}px wide window as tall as the demo, edged by a border`, async ({
+    page,
+  }) => {
     test.setTimeout(90_000);
     await openPreview(page);
 
@@ -45,11 +47,18 @@ for (const [name, width] of [
     const frame = page.getByTitle(`${DEMO}, ${name.toLowerCase()}, light`);
     await expect(frame).toBeVisible();
     await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
-    expect((await frame.boundingBox())?.width).toBe(width);
+    // The frame's window, inside its border, is the device's width and the demo's height, so nothing scrolls.
+    expect(await frame.evaluate((element: { clientWidth: number }) => element.clientWidth)).toBe(width);
     const demo = frame.contentFrame().locator('[data-slot=example-view]');
     await expect
-      .poll(async () => ((await frame.boundingBox())?.height ?? 0) - Math.ceil((await demo.boundingBox())?.height ?? 0))
+      .poll(
+        async () =>
+          (await frame.evaluate((element: { clientHeight: number }) => element.clientHeight)) -
+          Math.ceil((await demo.boundingBox())?.height ?? 0),
+      )
       .toBe(0);
+    await expect(frame).toHaveCSS('border-top-width', '1px');
+    await expect(frame).toHaveCSS('border-radius', '0px');
   });
 }
 
@@ -62,6 +71,19 @@ test("the theme toggle frames the demo dark, leaving the page's theme and its st
 
   const frame = page.getByTitle(`${DEMO}, desktop, dark`);
   await expect(frame.contentFrame().locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
+  // The whole stage takes the frame's background, not only the frame.
+  const background = (scope: string) => `getComputedStyle(${scope}).backgroundColor`;
+  const framed = await frame
+    .contentFrame()
+    .locator('[data-slot=example-view]')
+    .evaluate(`(main) => ${background('main.closest("[data-slot=scroll-area]")')}`);
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-slot=example-frame]')
+        .evaluate(`(inner) => ${background('inner.closest("[data-slot=scroll-area]")')}`),
+    )
+    .toBe(framed);
   await expect(frame.contentFrame().getByRole('textbox', { name: 'Email body' })).toBeVisible();
   await expect(page.locator('html')).toHaveClass(/(^|\s)light(\s|$)/);
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
@@ -71,31 +93,14 @@ test("the theme toggle frames the demo dark, leaving the page's theme and its st
   await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
 });
 
-test('a view page opened alone has a bar back to its docs page over its demo, and switches its theme in place', async ({
-  page,
-}) => {
+test('a view page opened alone draws only its demo, in its `?theme=`, leaving the stored theme', async ({ page }) => {
   test.setTimeout(90_000);
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto(`/docs/editor/view/${DEMO}`);
+  await page.goto(`/docs/editor/view/${DEMO}?theme=dark`);
 
-  await expect(page.getByRole('heading', { name: DEMO })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Back to the docs' })).toHaveAttribute(
-    'href',
-    '/docs/editor/email-editor',
-  );
   await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
-
-  await darkTheme(page).click();
+  await expect(page.getByRole('link', { name: 'Back to the docs' })).toHaveCount(0);
+  await expect(page.getByRole('banner')).toHaveCount(0);
   await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
-  await expect(page).toHaveURL(/[?&]theme=dark/);
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
-});
-
-test('a view page embedded draws the demo alone, with no bar', async ({ page }) => {
-  test.setTimeout(90_000);
-  await page.goto(`/docs/editor/view/${DEMO}?embed=1`);
-
-  await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Back to the docs' })).toBeHidden();
-  await expect(page.getByRole('heading', { name: DEMO })).toBeHidden();
 });

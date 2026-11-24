@@ -118,9 +118,13 @@ side with the Document Editor it reads as a different product.
   open message, and the email's frame follows edge to edge with no padding, ring, radius or background of
   its own. Under 600px the default layout is full-bleed: no gutter around the card, no border or radius on
   it. The docs preview's theme control is the site header's theme toggle (a sun-moon icon button, pressed
-  while the demo is dark; revised after the owner's third review, it was a switch), and a view page opened directly has a bar (back to the
-  docs, the demo's name, the device and theme controls) over a muted stage; `?embed=1` draws the demo alone
-  for a docs preview's frame.
+  while the demo is dark; revised after the owner's third review, it was a switch).
+- Revised 2026-11-24 after the owner's third review: a view page is the demo alone on the theme's background,
+  edge to edge, centred and at the top, padded as the docs stage pads it, with no bar, stage, panel, ring or
+  radius; `?theme=` draws it in a theme without writing the stored one, and there is no `?embed`. A framed
+  docs preview (Tablet, Mobile, or the other theme) fills its whole stage with the frame theme's background;
+  the frame has no ring or radius at any size, and at Tablet and Mobile shows its edges only as a 1px border
+  in the frame theme's border colour.
 - Revised 2026-11-24 after the owner's third review: the email's callout has no left accent stripe. It is
   drawn as the Document Editor's callout reads: the muted background inside a 1px border in the theme's
   border colour, at the theme's radius.

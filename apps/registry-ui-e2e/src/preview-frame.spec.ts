@@ -6,12 +6,10 @@ import { waitForHydration } from './test/hydrated';
 const PAGE = '/docs/components/base/ai-provider-picker';
 const VIEW = '/view/ai-provider-picker-demo';
 
-/** The columns the picker's grid lays its cards in: one, then `sm:` two, then `lg:` three. */
-async function columnsOf(grid: Locator): Promise<number> {
-  // A string, as the suite compiles without the DOM's types.
-  return (await grid.evaluate(
-    "(element) => getComputedStyle(element).gridTemplateColumns.split(' ').length",
-  )) as number;
+/** Expects the picker's grid to lay its cards in `count` columns: one, then `sm:` two, then `lg:` three. */
+async function expectColumns(grid: Locator, count: number): Promise<void> {
+  // One track size per column, each a length with no space in it.
+  await expect(grid).toHaveCSS('grid-template-columns', new RegExp(`^\\S+(?: \\S+){${count - 1}}$`));
 }
 
 function pickerIn(scope: Page | FrameLocator): Locator {
@@ -29,7 +27,7 @@ for (const [device, width, columns] of [
     await page.goto(PAGE);
     await waitForHydration(page);
     // The page's own window is wide enough for the picker's three columns.
-    await expect.poll(() => columnsOf(pickerIn(page).first())).toBe(3);
+    await expectColumns(pickerIn(page).first(), 3);
 
     await page
       .getByRole('group', { name: 'Device' })
@@ -40,10 +38,10 @@ for (const [device, width, columns] of [
     const frame = page.getByTitle(new RegExp(`^ai-provider-picker-demo, ${device.toLowerCase()}, `));
     const picker = pickerIn(frame.contentFrame());
     await expect(picker).toBeVisible();
-    await expect.poll(() => columnsOf(picker)).toBe(columns);
+    await expectColumns(picker, columns);
 
     await page.setViewportSize({ width, height: 900 });
     await page.goto(VIEW);
-    await expect.poll(() => columnsOf(pickerIn(page))).toBe(columns);
+    await expectColumns(pickerIn(page), columns);
   });
 }

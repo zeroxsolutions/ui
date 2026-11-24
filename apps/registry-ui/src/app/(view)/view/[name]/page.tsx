@@ -3,12 +3,8 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { publishedBlocks } from '@zeroxsolutions/ui-docs-web/lib/published-items';
-import { docsRoute, viewRoute } from '@zeroxsolutions/ui-docs-web/routes';
 import { ExampleView } from '@zeroxsolutions/ui/site/components/layout/example-view';
 import { exampleDemos } from '@zeroxsolutions/ui/site/lib/example-demos';
-import { pagePreviewing } from '@zeroxsolutions/ui/site/lib/page-markdown';
-
-import { source } from '@/lib/source';
 
 export const revalidate = false;
 export const dynamic = 'force-static';
@@ -34,7 +30,5 @@ export async function generateMetadata({ params }: ViewPageProps): Promise<Metad
 }
 
 export default async function Page({ params }: ViewPageProps): Promise<ReactNode> {
-  const { name } = await params;
-  const docs = await pagePreviewing(source.getPages(), name);
-  return <ExampleView name={name} href={viewRoute.build({ name })} docsHref={docs?.url ?? docsRoute.build()} />;
+  return <ExampleView name={(await params).name} />;
 }
