@@ -742,44 +742,42 @@ describe('EmailEditor frame', () => {
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello! there' }));
   });
 
-  it("puts the preview's controls in the toolbar's place on the Preview tab, and the toolbar back on Edit", async () => {
+  it("holds only the tabs in the toolbar's row on the Preview tab, and the toolbar back on Edit", async () => {
     await mount([paragraph('Hello', 'p1')], withPreview());
 
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    await expect.element(page.getByRole('group', { name: 'Device' })).toBeVisible();
-    await expect.element(page.getByRole('group', { name: 'Color scheme' })).toBeVisible();
+    await expect.element(page.getByTitle('Email preview')).toBeVisible();
     expect(document.querySelector('[role=toolbar]')).toBeNull();
+    expect(find('[data-slot=email-editor-bar]').querySelectorAll('button:not([role=tab])')).toHaveLength(0);
 
     await userEvent.click(page.getByRole('tab', { name: 'Edit' }));
     const toolbar = page.getByRole('toolbar');
     await expect.element(toolbar.getByRole('button', { name: 'Bold' })).toBeEnabled();
     await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeEnabled();
-    expect(document.querySelector('[data-slot=email-preview-bar]')).toBeNull();
   });
 
   const frame = () => find('iframe[data-slot=email-preview]') as HTMLIFrameElement;
 
-  it('draws the email at a desktop width, and at a phone width under the narrow-screen breakpoint', async () => {
-    await page.viewport(1280, 800);
+  const previewAt = async (width: number) => {
+    await page.viewport(width, 800);
     await mount([paragraph('Hello', 'p1')], withPreview());
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    const devices = page.getByRole('group', { name: 'Device' });
-    await expect.element(devices.getByRole('button', { name: 'Desktop' })).toHaveAttribute('aria-pressed', 'true');
-    // The email's narrow-screen rules apply at 600px and under.
-    expect(frame().offsetWidth).toBeGreaterThan(600);
+    return vi.waitFor(() => {
+      expect(frame().offsetWidth).toBeGreaterThan(0);
+      return frame().offsetWidth;
+    });
+  };
 
-    await userEvent.click(devices.getByRole('button', { name: 'Mobile' }));
-    await expect.element(devices.getByRole('button', { name: 'Mobile' })).toHaveAttribute('aria-pressed', 'true');
-    await vi.waitFor(() => expect(frame().offsetWidth).toBeLessThanOrEqual(375));
+  // The email's narrow-screen rules apply at 600px and under.
+  it("draws the email at the editor's own width, past the narrow-screen breakpoint on a wide page", async () => {
+    expect(await previewAt(1280)).toBeGreaterThan(600);
   });
 
-  it('scales the desktop email down to fit a narrow viewport, past the narrow-screen breakpoint', async () => {
-    await page.viewport(375, 800);
-    await mount([paragraph('Hello', 'p1')], withPreview());
-    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+  it('draws the email under the narrow-screen breakpoint on a phone, unscaled and inside the page', async () => {
+    const width = await previewAt(375);
 
-    await vi.waitFor(() => expect(frame().getBoundingClientRect().width).toBeLessThan(375));
-    expect(frame().offsetWidth).toBeGreaterThan(600);
+    expect(width).toBeLessThan(375);
+    expect(frame().getBoundingClientRect().width).toBe(width);
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375);
   });
 
@@ -800,19 +798,24 @@ describe('EmailEditor frame', () => {
     await vi.waitFor(() => expect(parseFloat(frame().style.height)).toBeGreaterThan(first));
   });
 
-  it("answers the email's dark rules on Dark, and its light ones on Light", async () => {
+  it("answers the email's dark rules in a dark theme, and its light ones once the theme turns light", async () => {
     const dark = { ...theme.colors, background: '#18181B' };
-    await mount([paragraph('Hello', 'p1')], {
-      preview: { renderer: createEmailRenderer({ theme: { ...theme, dark } }), input: previewInput },
-    });
-    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    const schemes = page.getByRole('group', { name: 'Color scheme' });
-    await expect.element(schemes.getByRole('button', { name: 'Light' })).toHaveAttribute('aria-pressed', 'true');
-    await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-bg{background:#18181B'));
+    const root = document.documentElement;
+    root.classList.add('dark');
+    try {
+      await mount([paragraph('Hello', 'p1')], {
+        preview: { renderer: createEmailRenderer({ theme: { ...theme, dark } }), input: previewInput },
+      });
+      await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
+      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-bg{background:#18181B'));
+      expect(frame().style.colorScheme).toBe('dark');
 
-    await userEvent.click(schemes.getByRole('button', { name: 'Dark' }));
-    await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-bg{background:#18181B'));
-    expect(frame().style.colorScheme).toBe('dark');
+      root.classList.remove('dark');
+      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-bg{background:#18181B'));
+      expect(frame().style.colorScheme).toBe('light');
+    } finally {
+      root.classList.remove('dark');
+    }
   });
 
   it('shows the sender, the subject and the preheader above the email', async () => {

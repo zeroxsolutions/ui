@@ -99,13 +99,19 @@ side with the Document Editor it reads as a different product.
 ### Preview
 
 - `EmailEditor` draws the renderer's HTML in a sandboxed iframe under the Preview tab, on a muted canvas,
-  as tall as the email. On desktop the email's own background is the page, 640px wide and scaled down to
-  fit; on mobile it sits in a rounded column at most 375px wide, where its narrow-screen rules apply.
-- The iframe's background follows the renderer's theme; the canvas around it follows Editor Theme.
-- On the Preview tab the toolbar's place holds the device and the color-scheme controls. The scheme
-  answers the email's `prefers-color-scheme` rules. The sender, subject and preheader sit above the email
-  as an inbox lists them. `EmailTheme` takes an optional `dark` palette that the renderer emits as those
-  rules. Added 2026-11-23 after the owner's review of the bare page.
+  as tall as the email and as wide as the editor, so the email's narrow-screen rules apply wherever the
+  editor is narrow.
+- The iframe's background follows the renderer's theme; the canvas around it follows Editor Theme. The
+  email's `prefers-color-scheme` rules are answered for the theme around the editor: dark inside a `.dark`
+  scope, light otherwise, following a theme switched later. `EmailTheme` takes an optional `dark` palette
+  that the renderer emits as those rules.
+- On the Preview tab the toolbar's row holds only the tabs. The sender, subject and preheader sit above the
+  email as an inbox lists them. Added 2026-11-23 after the owner's review of the bare page.
+- Revised 2026-11-24 after the owner's review: device and theme switches belong to every docs preview, not
+  to the email preview. Each docs preview with a view page has a Desktop, Tablet and Mobile switch and a
+  Light and Dark switch. Desktop in the site's theme draws the demo inline; any other choice frames the
+  demo's view page at the device's width (768px, 375px, or the stage's for Desktop), in the theme its
+  `?theme=` forces.
 - The frame runs scripts at an opaque origin under a nonce policy that admits only its height report.
 
 ## Testing

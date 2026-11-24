@@ -70,7 +70,7 @@ const PIECES: Record<string, string[]> = {
   'document/ui/editor-toolbar-combobox-trigger.tsx': ['toggleVariants', '<Tooltip'],
   'profiles/problem-marker.tsx': ['<Button', '<Tooltip'],
   'profiles/email/email-editor.tsx': ['<Tooltip', '<TabsList'],
-  'profiles/email/email-preview.tsx': ['cn-editor-toolbar', 'cn-editor-page', '<ToggleGroup', '<Tooltip'],
+  'profiles/email/email-preview.tsx': ['cn-editor-page'],
   'profiles/sms/sms-editor.tsx': ['<Tooltip'],
   'document/features/callout/callout.tsx': ['cn-alert'],
   'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-sm'],

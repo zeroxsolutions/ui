@@ -3220,9 +3220,7 @@
         "@shadcn/combobox",
         "@shadcn/field",
         "@shadcn/popover",
-        "@shadcn/separator",
         "@shadcn/tabs",
-        "@shadcn/toggle-group",
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/chat-input",
@@ -3234,10 +3232,8 @@
         "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
         "@zui/lucide-link-icon",
-        "@zui/lucide-moon-icon",
         "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-pencil-line-icon",
-        "@zui/lucide-sun-icon",
         "@zui/lucide-text-align-start-icon"
       ],
       "files": [

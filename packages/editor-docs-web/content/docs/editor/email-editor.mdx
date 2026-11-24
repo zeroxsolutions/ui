@@ -35,7 +35,7 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field popover separator tabs toggle-group tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-moon-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-sun-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-text-align-start-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -207,17 +207,14 @@ menu holds Turn into, Duplicate and Delete, and the block's Align, Space after, 
 
 The editor is drawn as the Document Editor is, with its toolbar above the blocks and nothing around them.
 With a `renderer`, an Edit and a Preview tab sit at the end of the toolbar's row, as a Mermaid block's switch
-does. The Preview tab shows the rendered email with each variable's `sampleValue`. `layoutProps` is the
-default layout's logo and footer, and the demo's source defines it.
+does. The Preview tab shows the rendered email with each variable's `sampleValue`, and the toolbar's row holds
+only the tabs while it is open. `layoutProps` is the default layout's logo and footer, and the demo's source
+defines it.
 
-On the Preview tab, the preview's controls take the toolbar's place. Desktop draws the email 640px wide,
-scaled down to fit a narrower page, and Mobile draws it in a column at most 375px wide, where the email's
-narrow-screen rules apply. Light and Dark answer the email's `prefers-color-scheme` rules, and the scheme
-opens on the page's own. Above the email sit the `sender`, the subject and the preheader as an inbox lists
-them, and the frame is as tall as the email.
-
-The frame runs scripts at an opaque origin, under a policy that admits only the script that reports its
-height, so a script or a handler in an HTML block does not run.
+Above the email, the preview shows the `sender`, the subject and the preheader as an inbox lists them. The
+email is drawn at the editor's own width, so its narrow-screen rules apply wherever the editor is narrow, and
+in the theme around the editor: inside a `.dark` scope its `prefers-color-scheme: dark` rules apply, and a
+theme switched later redraws it. Pick a device and a theme on the bar above the demo to see both.
 
 ## Theme
 

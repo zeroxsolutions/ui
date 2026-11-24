@@ -57,7 +57,7 @@ import { emailKit, emailUi, type EmailUi } from './email-kit';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { EmailLinkPopover } from './email-link-popover';
-import { EmailPreview, EmailPreviewBar, type EmailPreviewDevice, type EmailPreviewScheme } from './email-preview';
+import { EmailPreview } from './email-preview';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
 
 /** How long after an edit the problems are read again, at most, and how long after the last edit the preview is. */
@@ -259,9 +259,9 @@ function EmailEditorBubbleMenu({ editor, items, container }: EmailEditorBubbleMe
 /**
  * The email profile's editor: the document editor with `emailKit`'s blocks, marks and variables, the block menu,
  * each problem marked where it is, the host's adornment beside each block, and, with a renderer, the rendered
- * email under a Preview tab, at a desktop or a phone's width and in a light or a dark scheme. The frame is the Document Editor's: the toolbar above the document, the Edit and
- * Preview tabs at the end of the toolbar's row, as a Mermaid block's switch sits, and the problems no block holds
- * under the document.
+ * email under a Preview tab, at the editor's own width and in the scheme of the theme around it. The frame is
+ * the Document Editor's: the toolbar above the document, the Edit and Preview tabs at the end of the toolbar's
+ * row, as a Mermaid block's switch sits, and the problems no block holds under the document.
  * `value` loads whenever it differs from what the editor last reported, so a host hands back what `onChange`
  * gave it without moving the caret.
  */
@@ -330,8 +330,6 @@ export function EmailEditor({
   }, []);
   const [tab, setTab] = useState<'edit' | 'preview'>('edit');
   const previewing = Boolean(renderer) && tab === 'preview';
-  const [device, setDevice] = useState<EmailPreviewDevice>('desktop');
-  const [scheme, setScheme] = useState<EmailPreviewScheme>('light');
 
   // What held the focus in the editor as its pane gave it up: moving the surface drops the focus, and the
   // author typing as the host passes a renderer keeps typing.
@@ -339,10 +337,6 @@ export function EmailEditor({
 
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
-  // The preview opens on the page's scheme, a class on an ancestor that only the browser reads.
-  useEffect(() => {
-    if (root?.closest('.dark')) setScheme('dark');
-  }, [root]);
   const [rows, setRows] = useState<Row[]>([]);
   const [marks, setMarks] = useState<ProblemMark[]>([]);
   const [unplaced, setUnplaced] = useState<string[]>([]);
@@ -562,20 +556,9 @@ export function EmailEditor({
     >
       {renderer ? (
         <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="gap-3">
-          {/* The Preview tab's controls take the toolbar's place, as the editor is out of sight. */}
           <div data-slot="email-editor-bar" className="flex items-center gap-3">
-            {previewing ? (
-              <EmailPreviewBar
-                device={device}
-                scheme={scheme}
-                onDeviceChange={setDevice}
-                onSchemeChange={setScheme}
-                messages={text}
-                className="min-w-0 self-start"
-              />
-            ) : (
-              toolbar
-            )}
+            {/* The editor is out of sight on the Preview tab, so its toolbar is too. */}
+            {!previewing && toolbar}
             <TabsList className="ms-auto shrink-0">
               <ChromeControl
                 icon={PencilLineIcon}
@@ -598,8 +581,6 @@ export function EmailEditor({
                 subject={preview.subject}
                 preheader={preview.preheader}
                 sender={sender}
-                device={device}
-                scheme={scheme}
                 messages={text}
               />
             )}

@@ -46,14 +46,6 @@ export interface ProfileEditorMessages {
   editTab: string;
   /** The tab that shows the email preview there. */
   previewTab: string;
-  /** The preview's group of device widths, and its two devices. */
-  previewDevice: string;
-  desktopPreview: string;
-  mobilePreview: string;
-  /** The preview's group of color schemes, and its two schemes. */
-  previewScheme: string;
-  lightPreview: string;
-  darkPreview: string;
   /** The hint an empty email line shows. */
   emptyLine: string;
   /** The hint after a typed `/` before anything follows it. */
@@ -164,12 +156,6 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   emailPreview: 'Email preview',
   editTab: 'Edit',
   previewTab: 'Preview',
-  previewDevice: 'Device',
-  desktopPreview: 'Desktop',
-  mobilePreview: 'Mobile',
-  previewScheme: 'Color scheme',
-  lightPreview: 'Light',
-  darkPreview: 'Dark',
   emptyLine: "Type '/' for blocks",
   slashSearch: 'Type to search',
   slashEmpty: 'No matching blocks',
