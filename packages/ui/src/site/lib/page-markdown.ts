@@ -16,3 +16,16 @@ export function pageMarkdownDocument(
 export async function pageMarkdown(page: MarkdownPage): Promise<string> {
   return pageMarkdownDocument(page, await page.data.getText('processed'));
 }
+
+/** The first of `pages` whose body previews the demo `name`, as `<ComponentPreview name>`; `undefined` where none does. */
+export async function pagePreviewing<Page extends MarkdownPage>(
+  pages: readonly Page[],
+  name: string,
+): Promise<Page | undefined> {
+  const asked = `name="${name}"`;
+  for (const page of pages) {
+    const body = await page.data.getText('processed');
+    if (body.includes('<ComponentPreview') && body.includes(asked)) return page;
+  }
+  return undefined;
+}
