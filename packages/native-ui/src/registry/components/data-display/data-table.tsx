@@ -1,4 +1,10 @@
-import { flexRender, type ColumnDefTemplate, type Table as TanstackTable } from '@tanstack/react-table';
+import {
+  flexRender,
+  type ColumnDefTemplate,
+  type RowData,
+  type Table as TanstackTable,
+  type TableFeatures,
+} from '@tanstack/react-table';
 import {
   createContext,
   useContext,
@@ -28,8 +34,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Text } from '../../ui/text';
 
 interface DataTableContextValue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- one context holds a table of any row type; useDataTable narrows it
-  table: TanstackTable<any>;
+  // One context holds a table of any features and row type, and a table type is invariant in both; useDataTable narrows it.
+  table: unknown;
 }
 
 const DataTableContext = createContext<DataTableContextValue | null>(null);
@@ -38,23 +44,29 @@ const DataTableContext = createContext<DataTableContextValue | null>(null);
  * Reads the `@tanstack/react-table` instance the surrounding DataTable holds.
  * @throws {Error} when called outside a DataTable
  */
-function useDataTable<TData>(): TanstackTable<TData> {
+function useDataTable<TFeatures extends TableFeatures, TData extends RowData>(): TanstackTable<TFeatures, TData> {
   const context = useContext(DataTableContext);
   if (!context) throw new Error('DataTable parts must be used within <DataTable>');
-  return context.table as TanstackTable<TData>;
+  return context.table as TanstackTable<TFeatures, TData>;
 }
 
-type DataTableProps<TData> = ComponentProps<typeof View> & {
-  /** The instance the caller's `useReactTable` returns, which every part reads. */
-  table: TanstackTable<TData>;
+type DataTableProps<TFeatures extends TableFeatures, TData extends RowData> = ComponentProps<typeof View> & {
+  /** The instance the caller's `useTable` returns, which every part reads. */
+  table: TanstackTable<TFeatures, TData>;
 };
 
 /**
  * The root of a data table, holding the caller's table instance for its toolbar, view, view options and pager,
- * which it stacks with a gap. The caller owns `useReactTable` and its column definitions, and with them the
- * sorting, paging and visibility state; the parts only render it.
+ * which it stacks with a gap. The caller owns `useTable` and its column definitions, and with them the
+ * sorting, paging and visibility state; the parts only render it. The parts call the APIs of the features they
+ * drive, so the table registers `rowPaginationFeature` for the pager's steps and `columnVisibilityFeature` for
+ * DataTableViewOptions.
  */
-function DataTable<TData>({ table, className, ...props }: DataTableProps<TData>): ReactNode {
+function DataTable<TFeatures extends TableFeatures, TData extends RowData>({
+  table,
+  className,
+  ...props
+}: DataTableProps<TFeatures, TData>): ReactNode {
   const value = useMemo(() => ({ table }), [table]);
   return (
     <DataTableContext.Provider value={value}>

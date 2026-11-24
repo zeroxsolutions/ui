@@ -9,7 +9,7 @@ catalog:
   "@opennextjs/cloudflare": "1.20.17"
   "@shikijs/langs": "4.6.0"
   "@tailwindcss/postcss": "^4.3.5"
-  "@tanstack/react-table": "^8.21.3"
+  "@tanstack/react-table": "^9.3.1"
   "@testing-library/react-native": "14.1.0"
   "@types/jest": "~30.0.0"
   "@zeroxsolutions/routing": "0.0.16"
