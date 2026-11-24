@@ -1,11 +1,16 @@
 'use client';
 
 import {
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  rowPaginationFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
@@ -39,9 +44,19 @@ const DATA: FileRow[] = [
   { name: 'logo.png', size: '340 KB' },
 ];
 
-const COLUMNS: ColumnDef<FileRow>[] = [
-  {
-    accessorKey: 'name',
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+});
+
+const COLUMN = createColumnHelper<typeof FEATURES, FileRow>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', {
     header: ({ column }) => (
       <DataTableColumnHeader column={column}>
         <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
@@ -53,9 +68,8 @@ const COLUMNS: ColumnDef<FileRow>[] = [
         </DataTableColumnHeaderContent>
       </DataTableColumnHeader>
     ),
-  },
-  {
-    accessorKey: 'size',
+  }),
+  COLUMN.accessor('size', {
     header: ({ column }) => (
       <DataTableColumnHeader column={column}>
         <DataTableColumnHeaderTrigger>Size</DataTableColumnHeaderTrigger>
@@ -67,18 +81,16 @@ const COLUMNS: ColumnDef<FileRow>[] = [
         </DataTableColumnHeaderContent>
       </DataTableColumnHeader>
     ),
-  },
-];
+  }),
+]);
 
 /** A small, paginated file table with sortable columns and a view-options menu. */
 function DataTableDemo(): ReactNode {
-  const table = useReactTable({
+  const table = useTable({
+    features: FEATURES,
     data: DATA,
     columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 2 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 2 } },
   });
 
   return (
@@ -89,7 +101,7 @@ function DataTableDemo(): ReactNode {
       <DataTableView />
       <DataTablePagination>
         <span className="text-muted-foreground text-sm">
-          {`Page ${table.getState().pagination.pageIndex + 1} of ${table.getPageCount()}`}
+          {`Page ${table.state.pagination.pageIndex + 1} of ${table.getPageCount()}`}
         </span>
         <DataTablePaginationPrevious aria-label="Previous page" />
         <DataTablePaginationNext aria-label="Next page" />

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Column } from '@tanstack/react-table';
+import type { Column, RowData, TableFeatures } from '@tanstack/react-table';
 
 import { usePrefersReducedMotion } from '@/registry/bases/base-ui/hooks/use-prefers-reduced-motion';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
@@ -28,22 +28,27 @@ type DataTableColumnHeaderIcon = React.ComponentType<{
 }>;
 
 interface DataTableColumnHeaderContextValue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- one context holds a column of any row and value type
-  column: Column<any, any>;
+  // One context holds a column of any features, row and value type, and a column type is invariant in each of them.
+  column: unknown;
 }
 
 const DataTableColumnHeaderContext = React.createContext<DataTableColumnHeaderContextValue | null>(null);
 
-function useDataTableColumnHeader(): DataTableColumnHeaderContextValue {
+/** The column the surrounding header holds, typed with every feature's APIs; the parts call only sorting and visibility. */
+function useDataTableColumnHeader(): { column: Column<TableFeatures, RowData, unknown> } {
   const ctx = React.useContext(DataTableColumnHeaderContext);
   if (!ctx) {
     throw new Error('DataTableColumnHeader parts must be used within <DataTableColumnHeader>');
   }
-  return ctx;
+  return { column: ctx.column as Column<TableFeatures, RowData, unknown> };
 }
 
-interface DataTableColumnHeaderProps<TData, TValue> extends React.ComponentProps<'div'> {
-  column: Column<TData, TValue>;
+interface DataTableColumnHeaderProps<
+  TFeatures extends TableFeatures,
+  TData extends RowData,
+  TValue,
+> extends React.ComponentProps<'div'> {
+  column: Column<TFeatures, TData, TValue>;
 }
 
 /**
@@ -62,13 +67,15 @@ interface DataTableColumnHeaderProps<TData, TValue> extends React.ComponentProps
  * </DataTableColumnHeader>
  * ```
  *
- * A column that neither sorts nor hides takes its title as plain `children`, with no menu.
+ * A column that neither sorts nor hides takes its title as plain `children`, with no menu. The sort
+ * actions and the trigger's sort icon call `rowSortingFeature`'s APIs and the hide action
+ * `columnVisibilityFeature`'s, so the column's table registers the features its menu uses.
  */
-function DataTableColumnHeader<TData, TValue>({
+function DataTableColumnHeader<TFeatures extends TableFeatures, TData extends RowData, TValue>({
   column,
   className,
   ...props
-}: DataTableColumnHeaderProps<TData, TValue>): React.ReactNode {
+}: DataTableColumnHeaderProps<TFeatures, TData, TValue>): React.ReactNode {
   const value = React.useMemo(() => ({ column }), [column]);
   return (
     <DataTableColumnHeaderContext.Provider value={value}>

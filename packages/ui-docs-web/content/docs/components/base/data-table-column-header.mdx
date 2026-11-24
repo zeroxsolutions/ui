@@ -84,7 +84,9 @@ It takes the column directly, since column defs live outside the render tree, as
 }
 ```
 
-A column that neither sorts nor hides takes its title as plain `children`, with no menu.
+A column that neither sorts nor hides takes its title as plain `children`, with no menu. The sort actions and the
+trigger's sort icon call `rowSortingFeature`'s APIs and Hide calls `columnVisibilityFeature`'s, so the column's
+table registers the features its menu uses.
 
 ## Composition
 

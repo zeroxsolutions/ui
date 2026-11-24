@@ -72,10 +72,17 @@ import {
 } from '@/components/data-display/data-table';
 ```
 
-The consumer owns `useReactTable` and the column defs; this family ships only the composable parts:
+The consumer owns `useTable`, its features and the column defs; this family ships only the composable parts.
+The pagination steps call `rowPaginationFeature`'s APIs and `DataTableViewOptions` calls
+`columnVisibilityFeature`'s, so the table registers the features of the parts it renders:
 
 ```tsx
-const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+const features = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+});
+const table = useTable({ features, data, columns });
 
 <DataTable table={table}>
   <DataTableToolbar>

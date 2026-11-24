@@ -1,10 +1,12 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
-  type ColumnDef,
-  getCoreRowModel,
-  getSortedRowModel,
-  type Table as TanstackTable,
-  useReactTable,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createSortedRowModel,
+  type ReactTable,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import * as React from 'react';
 import type { ComponentProps, MouseEvent, ReactNode } from 'react';
@@ -53,10 +55,22 @@ interface Row {
   size: number;
 }
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+});
+
+const COLUMN = createColumnHelper<typeof FEATURES, Row>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', { header: 'Name' }),
+  COLUMN.accessor('size', { header: 'Size' }),
+]);
+
+// Module-level, so the data keeps its identity across renders.
+const ONE_ROW: Row[] = [{ name: 'a', size: 1 }];
+const NO_ROWS: Row[] = [];
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
@@ -75,18 +89,13 @@ afterEach(() => {
   stopAnimation.mockClear();
 });
 
-function useRowsTable(rows: Row[]): TanstackTable<Row> {
-  return useReactTable({
-    data: rows,
-    columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+function useRowsTable(rows: Row[]): ReactTable<typeof FEATURES, Row> {
+  return useTable({ features: FEATURES, data: rows, columns: COLUMNS });
 }
 
 /** Renders the three column actions for `name` in an open menu, and the table state they change. */
 function ColumnActions({ onClick }: { onClick: (event: MouseEvent) => void }): ReactNode {
-  const table = useRowsTable([{ name: 'a', size: 1 }]);
+  const table = useRowsTable(ONE_ROW);
   const column = table.getColumn('name');
   if (!column) return null;
   return (
@@ -99,7 +108,7 @@ function ColumnActions({ onClick }: { onClick: (event: MouseEvent) => void }): R
           <DataTableColumnHeaderHide onClick={onClick} />
         </DataTableColumnHeaderContent>
       </DataTableColumnHeader>
-      <output data-testid="sorting">{JSON.stringify(table.getState().sorting)}</output>
+      <output data-testid="sorting">{JSON.stringify(table.state.sorting)}</output>
       <output data-testid="visible">{String(column.getIsVisible())}</output>
     </>
   );
@@ -181,7 +190,7 @@ describe('DataTableColumnHeader', () => {
 
   it('takes a plain title with no menu for a column that neither sorts nor hides', () => {
     function PlainHeader(): ReactNode {
-      const table = useRowsTable([]);
+      const table = useRowsTable(NO_ROWS);
       const column = table.getColumn('name');
       return column ? <DataTableColumnHeader column={column}>Name</DataTableColumnHeader> : null;
     }
