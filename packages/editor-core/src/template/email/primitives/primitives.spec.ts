@@ -139,9 +139,10 @@ describe('the primitives', () => {
     expect(draw((h) => h.text({ text: 'x' }), { place: 'stack' }).html).toBe(
       '<tr><td><div class="zx-text">x</div></td></tr>',
     );
-    expect(draw((h) => h.raw({ markup: '<tr><td>own</td></tr>' }), { place: 'stack' }).html).toBe(
-      '<tr><td>own</td></tr>',
-    );
+    expect(draw((h) => h.raw({ markup: '<p>own</p>' }), { place: 'stack' }).html).toBe('<tr><td><p>own</p></td></tr>');
+    expect(
+      draw(() => ({ kind: 'raw', html: '<tr><td>own</td></tr>', text: '', rows: true }), { place: 'stack' }).html,
+    ).toBe('<tr><td>own</td></tr>');
   });
 
   it('style a node by its ancestors, so a region decides how its text reads', () => {

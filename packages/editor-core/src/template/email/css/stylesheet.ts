@@ -74,7 +74,7 @@ function substitute(
   let out = '';
   let index = 0;
   for (;;) {
-    const start = value.indexOf('var(', index);
+    const start = value.toLowerCase().indexOf('var(', index);
     if (start < 0) return out + value.slice(index);
     out += value.slice(index, start);
     let depth = 1;
@@ -94,26 +94,29 @@ function substitute(
   }
 }
 
-/** Every custom property a `:root` or `.zx-root` rule declares, a later sheet's over an earlier one's. */
+/**
+ * Every custom property a top-level `:root` or `.zx-root` rule declares, a later sheet's over an earlier one's.
+ * One declared inside `@media` holds only where the query does, which an inline value cannot, so it is not read.
+ */
 function customProperties(sources: readonly Source[]): Map<string, { value: string; source: Source; node: ChildNode }> {
   const found = new Map<string, { value: string; source: Source; node: ChildNode }>();
   for (const source of sources) {
-    source.root.walkRules((rule) => {
-      if (!rule.selectors.some((selector) => ROOTS.has(selector.trim()))) return;
-      rule.walkDecls((declaration) => {
-        if (declaration.prop.startsWith('--')) {
+    for (const rule of source.root.nodes) {
+      if (rule.type !== 'rule' || !rule.selectors.some((selector) => ROOTS.has(selector.trim()))) continue;
+      rule.each((declaration) => {
+        if (declaration.type === 'decl' && declaration.prop.startsWith('--')) {
           found.set(declaration.prop, { value: declaration.value.trim(), source, node: declaration });
         }
       });
-    });
+    }
   }
   return found;
 }
 
 /**
  * The base sheet and a product's sheets, in that order, read into the rules a renderer inlines and the text it
- * keeps in the head. A product's `@media` declarations are made `!important`, since an inline style beats any
- * rule that is not.
+ * keeps in the head. A product's `@media` and `@supports` declarations are made `!important`, since an inline
+ * style beats any rule that is not.
  *
  * @throws {EmailStylesheetInvalid} for a sheet that does not parse, an inlined selector that is not class-only,
  * an `@import`, or a `var()` with no value
@@ -141,7 +144,9 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         const held = resolved.get(name);
         if (held !== undefined) return held;
         const declared = custom.get(name);
-        if (declared === undefined || resolving.has(name)) return undefined;
+        if (declared === undefined) return undefined;
+        // A browser reads every property in a cycle as invalid, its fallback included.
+        if (resolving.has(name)) refuse(declared.source, declared.node, 'variable-undefined', name);
         resolving.add(name);
         const value = resolveIn(declared.source, declared.node, declared.value);
         resolving.delete(name);
@@ -180,12 +185,13 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   };
 
   const headRule = (source: Source, rule: AtRule): void => {
-    const media = rule.name.toLowerCase() === 'media';
-    if (media && DARK_QUERY.test(rule.params)) darkScheme = true;
+    const name = rule.name.toLowerCase();
+    if (name === 'media' && DARK_QUERY.test(rule.params)) darkScheme = true;
+    const conditional = name === 'media' || name === 'supports';
     const copy = rule.clone();
     copy.walkDecls((declaration) => {
       declaration.value = resolveIn(source, declaration, declaration.value);
-      if (media && source.sheet !== null) declaration.important = true;
+      if (conditional && source.sheet !== null) declaration.important = true;
     });
     head.push(copy.toString());
   };

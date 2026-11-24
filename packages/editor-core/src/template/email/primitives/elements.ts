@@ -151,13 +151,13 @@ function flow(node: EmailNode): ElementChild[] {
 
 /**
  * The elements `nodes` are drawn as. In a stack each node is a row: a section is its own row's cell, raw markup
- * is written as it is (a render that writes its own rows), and any other node sits in a cell of its own.
+ * a render wrote as rows is written as it is, and any other node sits in a cell of its own.
  */
 export function expandNodes(nodes: readonly EmailNode[], place: Place = 'flow'): ElementChild[] {
   if (place === 'flow') return nodes.flatMap(flow);
   return nodes.flatMap((node): ElementChild[] => {
     if (node.kind === 'section') return [row(element('td', node.classes, expandNodes(node.children, 'flow')))];
-    if (node.kind === 'raw') return flow(node);
+    if (node.kind === 'raw' && node.rows === true) return flow(node);
     const drawn = flow(node);
     return drawn.length === 0 ? [] : [row(element('td', [], drawn))];
   });

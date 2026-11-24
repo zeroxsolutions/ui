@@ -21,7 +21,18 @@ export interface StyledElement {
   readonly parent: StyledElement | null;
 }
 
-const CLASS_NAME = /^-?[_a-zA-Z][_a-zA-Z0-9-]*/;
+/**
+ * A class name as CSS writes it, escapes included, as Tailwind's `.md\:p-4` and `.w-1\/2` are: a name
+ * character, a non-ASCII one, or a backslash and what it escapes (a hex code point, or any one character).
+ */
+const CLASS_NAME = /^(?:[\w-]|[\u0080-\uFFFF]|\\[0-9a-fA-F]{1,6}[ \t\n\r\f]?|\\[^\n\r\f0-9a-fA-F])+/;
+
+/** A class name's escapes read back as the characters they stand for. */
+function unescape(name: string): string {
+  return name.replace(/\\([0-9a-fA-F]{1,6})[ \t\n\r\f]?|\\(.)/g, (_match, hex: string | undefined, char: string) =>
+    hex === undefined ? char : String.fromCodePoint(Number.parseInt(hex, 16)),
+  );
+}
 
 /** The kind of selector part `char` starts, which no class selector holds. */
 function refusalAt(char: string): SelectorRefusal {
@@ -48,7 +59,7 @@ export function parseClassSelector(text: string): ClassSelector | { readonly ref
       continue;
     }
     if (char === '>') {
-      if (compounds.length === 0) return { refused: 'combinator' };
+      if (compounds.length === 0 || pending === 'child') return { refused: 'combinator' };
       pending = 'child';
       index += 1;
       continue;
@@ -57,8 +68,8 @@ export function parseClassSelector(text: string): ClassSelector | { readonly ref
     const compound: string[] = [];
     while (source[index] === '.') {
       const name = CLASS_NAME.exec(source.slice(index + 1));
-      if (name === null) return { refused: 'element' };
-      compound.push(name[0]);
+      if (name === null || /^(?:\d|-\d)/.test(name[0])) return { refused: 'element' };
+      compound.push(unescape(name[0]));
       index += 1 + name[0].length;
     }
     const next = source[index];

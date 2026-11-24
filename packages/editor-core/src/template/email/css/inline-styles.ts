@@ -28,12 +28,16 @@ export function inlineStyle(rules: readonly InlineRule[], element: StyledElement
       left.order - right.order ||
       left.index - right.index,
   );
-  const winners = new Map<string, StyleDeclaration>();
-  for (const { declaration } of candidates) {
-    winners.delete(declaration.property);
-    winners.set(declaration.property, declaration);
+  // A property written twice in one rule keeps both, the first a fallback for a client that drops the second.
+  const winners = new Map<string, Candidate[]>();
+  for (const candidate of candidates) {
+    const held = winners.get(candidate.declaration.property);
+    const sameRule = held?.at(-1)?.order === candidate.order && held.at(-1)?.specificity === candidate.specificity;
+    winners.delete(candidate.declaration.property);
+    winners.set(candidate.declaration.property, sameRule && held !== undefined ? [...held, candidate] : [candidate]);
   }
   return [...winners.values()]
-    .map(({ property, value, important }) => `${property}:${value}${important ? ' !important' : ''};`)
+    .flat()
+    .map(({ declaration: { property, value, important } }) => `${property}:${value}${important ? ' !important' : ''};`)
     .join('');
 }

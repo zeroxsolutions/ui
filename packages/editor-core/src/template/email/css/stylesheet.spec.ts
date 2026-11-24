@@ -52,20 +52,43 @@ describe('inlining a stylesheet', () => {
     );
   });
 
+  it('keeps a property written twice in one rule, the first a fallback for a client that drops the second', () => {
+    expect(styleOf('', ['.a{background:#fff;background:oklch(0.9 0 0)}'], element(['a']))).toBe(
+      'background:#fff;background:oklch(0.9 0 0);',
+    );
+    expect(styleOf('.a{background:#000}', ['.a{background:#fff;background:red}'], element(['a']))).toBe(
+      'background:#fff;background:red;',
+    );
+  });
+
+  it("reads Tailwind's escaped class names", () => {
+    expect(
+      styleOf('', ['.md\\:p-4{padding:4px}.w-1\\/2{width:50%}.--x{color:red}'], element(['md:p-4', 'w-1/2', '--x'])),
+    ).toBe('padding:4px;width:50%;color:red;');
+  });
+
   it('applies each selector of a list', () => {
     expect(styleOf('', ['.a, .b{color:red}'], element(['b']))).toBe('color:red;');
   });
 
   it('resolves var() from :root and .zx-root, falling back where a variable has no value', () => {
     const css =
-      ':root{--brand:#123456}.zx-root{--gap:var(--unit)}:root{--unit:4px}.a{color:var(--brand);padding:var(--gap) var(--none, 2px)}';
+      ':root{--brand:#123456}.zx-root{--gap:var(--unit)}:root{--unit:4px}.a{color:VAR(--brand);padding:var(--gap) var(--none, 2px)}';
     expect(styleOf('', [css], element(['a']))).toBe('color:#123456;padding:4px 2px;');
+  });
+
+  it('reads no custom property declared inside @media, which holds only where its query does', () => {
+    const css = ':root{--bg:#fff}@media (prefers-color-scheme:dark){:root{--bg:#000}}.a{background:var(--bg)}';
+    expect(styleOf('', [css], element(['a']))).toBe('background:#fff;');
   });
 
   it('keeps @media and @font-face in the head, adding !important to a product rule', () => {
     const { rules, head } = composeStylesheets('@media (max-width:600px){.a{color:red !important}}', [
       '@font-face{font-family:X;src:url(x.woff2)}@media (max-width:600px){.b{color:blue}}',
     ]);
+    expect(composeStylesheets('', ['@supports (display:grid){.c{color:red}}']).head).toBe(
+      '@supports (display:grid){.c{color:red !important}}',
+    );
     expect(rules).toEqual([]);
     expect(head).toBe(
       '@media (max-width:600px){.a{color:red !important}}@font-face{font-family:X;src:url(x.woff2)}@media (max-width:600px){.b{color:blue !important}}',
@@ -88,6 +111,7 @@ describe('inlining a stylesheet', () => {
     ['.a:hover{color:red}', '.a:hover'],
     ['.a + .b{color:red}', '.a + .b'],
     ['*{color:red}', '*'],
+    ['.a > > .b{color:red}', '.a > > .b'],
     [':root{color:red}', ':root'],
   ])('refuses the inlined selector of %s at its position', (css, selector) => {
     expect(refusal(['.ok{color:red}', `\n  ${css}`])).toMatchObject({
@@ -107,6 +131,9 @@ describe('inlining a stylesheet', () => {
     expect(refusal(['@import url(x.css);'])).toMatchObject({ sheet: 0, reason: 'import-refused' });
     expect(refusal(['.a{color:var(--missing)}'])).toMatchObject({ reason: 'variable-undefined', detail: '--missing' });
     expect(refusal([':root{--a:var(--b);--b:var(--a)}.x{color:var(--a)}'])).toMatchObject({
+      reason: 'variable-undefined',
+    });
+    expect(refusal([':root{--a:var(--b, red);--b:var(--a, blue)}.x{color:var(--a)}'])).toMatchObject({
       reason: 'variable-undefined',
     });
     expect(refusal(['.a{color:red}', '.a{'])).toMatchObject({ sheet: 1, line: 1, reason: 'unparsable' });

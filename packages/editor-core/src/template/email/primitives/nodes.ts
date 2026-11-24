@@ -70,8 +70,11 @@ export type EmailNode =
     }
   | { readonly kind: 'code'; readonly classes: readonly string[]; readonly text: string }
   | { readonly kind: 'spacer'; readonly classes: readonly string[]; readonly height: number }
-  /** Markup written as it is, on no stylesheet's terms, and its text arm. */
-  | { readonly kind: 'raw'; readonly html: string; readonly text: string }
+  /**
+   * Markup written as it is, on no stylesheet's terms, and its text arm. `rows` marks the table rows a render
+   * written before there were primitives answers, which a stack of rows holds as they are.
+   */
+  | { readonly kind: 'raw'; readonly html: string; readonly text: string; readonly rows?: boolean }
   | { readonly kind: 'preheader'; readonly text: string }
   | { readonly kind: 'card'; readonly classes: readonly string[]; readonly children: readonly EmailNode[] }
   | {

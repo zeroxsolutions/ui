@@ -195,7 +195,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
           { id: block.id, attributes, content: definition.readContent(block.content) },
           ctx,
         );
-        if (isRendered(drawn)) return [{ kind: 'raw', html: drawn.html, text: drawn.text }];
+        if (isRendered(drawn)) return [{ kind: 'raw', html: drawn.html, text: drawn.text, rows: true }];
         const nodes: readonly EmailNode[] = Array.isArray(drawn) ? drawn : [drawn as EmailNode];
         if (nodes.length === 0) return [];
         // The block's own row: its gap below and its alignment, by the attributes every default block reads.
