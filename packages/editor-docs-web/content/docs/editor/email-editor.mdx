@@ -263,6 +263,118 @@ Hand the blocks `onChange` gives you back as `value`, and the editor does not re
 call `editor.run('assignBlockIds', { ids })` on the editor `onReady` gave you, with a map of block key to
 saved id. The blocks it reports from then on carry those ids.
 
+## Styling
+
+The renderer draws the email from tables, each part carrying a class, and inlines a base stylesheet built
+from the theme into each element's `style`, since some clients drop a `<style>` block or parts of it. `css`
+adds your own sheets after the base one. At equal specificity a rule of yours wins by coming later.
+
+```tsx
+const renderer = createEmailRenderer({
+  theme,
+  css: `
+    .zx-callout { border-color: #007A55; }
+    @media (prefers-color-scheme: dark) {
+      .zx-callout { border-color: #00BC7D; }
+    }
+  `,
+});
+```
+
+An inlined rule's selector is made of classes only: `.a`, `.a.b`, `.a .b` and `.a > .b`. A tag, an id, an
+attribute, a pseudo-class or `*` throws `EmailStylesheetInvalid`, which names the sheet's index, the line, the
+column and the reason. So do `@import`, a `var()` with no value and CSS that does not parse. `var()` reads the
+custom properties of a top-level `:root` or `.zx-root` rule and is resolved before the value is inlined.
+
+`@media` and `@supports` rules stay in the head, made `!important` so they beat the inlined styles in the
+clients that read them. Any selector may be used there. The base sheet's dark rules are such rules too, so a
+color you set for light mode reaches dark mode only through a `prefers-color-scheme: dark` query of your own,
+as above.
+
+| Class                                                    | On                                                       |
+| -------------------------------------------------------- | -------------------------------------------------------- |
+| `zx-body`, `zx-canvas`, `zx-card`, `zx-inner`            | the body, the background table, the card and its padding |
+| `zx-region-header`, `zx-region-body`, `zx-region-footer` | each region's blocks                                     |
+| `zx-block`, `zx-block-<type>`                            | each block's row, by its type                            |
+| `zx-align-<align>`, `zx-space-<spaceAfter>`              | the row, by the block's `align` and `spaceAfter`         |
+| `zx-text`, `zx-tone-muted`, `zx-link`                    | a paragraph's text, its muted tone, a link in text       |
+| `zx-callout`, `zx-code`, `zx-list`, `zx-divider`         | the callout, code, list and divider blocks               |
+| `zx-button`, `zx-width-full`                             | the button, and a full-width one                         |
+| `zx-lane`, `zx-lane-last`                                | each lane of a columns block, and the last               |
+| `zx-footer`, `zx-footer-line`                            | the default layout's footer and each of its lines        |
+
+Some CSS reaches only some inboxes: `display: flex` and `grid`, `position`, `float`, `transform`,
+`oklch()` and the other new color functions, and gradients. For each declaration of yours that uses one,
+`renderer.stylesheetWarnings` holds its place, the feature's name on [caniemail.com](https://www.caniemail.com),
+and the clients that drop it. `checkEmailRenderer` reports them too, so a test fails on them.
+
+## Your own blocks
+
+`defineEmailBlock` declares a block once, for the renderer and for the editor. Its fields are what the author
+writes, its attributes what the author picks, and its `render` draws it with the renderer's primitives.
+
+```tsx
+import {
+  choice,
+  createEmailRenderer,
+  defineEmailBlock,
+  plainText,
+  richText,
+} from '@zeroxsolutions/editor-core/template/email/index';
+
+const quote = defineEmailBlock({
+  type: 'quote',
+  label: 'Quote',
+  fields: { text: richText(), author: plainText({ max: 120 }) },
+  attributes: { tone: choice(['neutral', 'brand'], 'neutral') },
+  render: ({ fields, attributes }, h) =>
+    h.section({ class: ['zx-quote', `zx-quote-${attributes.tone}`] }, [
+      h.text({ markup: fields.text }),
+      h.text({ class: 'zx-quote-author', text: fields.author }),
+    ]),
+  sample: {
+    fields: { text: '{{first_name}} set us up in a day.', author: 'Lan' },
+    variableTypes: { first_name: 'string' },
+  },
+});
+
+const renderer = createEmailRenderer({
+  theme,
+  css: '.zx-quote { border-left: 3px solid #E4E4E7; }',
+  extraBlocks: [quote],
+});
+```
+
+```tsx
+<EmailEditor profile={profile} blocks={[quote]} renderer={renderer} /* ... */ />
+```
+
+`blocks` adds the type to the profile's kinds, offers the block in the slash menu and exports it. The rich text
+field is edited in place, the other fields in a text field under it, a `choice` in a submenu of the block menu,
+a `toggle` as a checkbox there, and a `number` in a field under the block. `customBlocks` in `messages` words a
+block's title and its fields, attributes and values by their names; the definition's labels stand in.
+
+| Field                  | Holds                                                             |
+| ---------------------- | ----------------------------------------------------------------- |
+| `richText({ max })`    | bold, italic, links and variables; the block's body, at most one  |
+| `plainText({ max })`   | one line of text and variables                                    |
+| `link()`, `imageUrl()` | an address, or a url variable                                     |
+| `lanes({ min, max })`  | lanes of other blocks side by side, as a columns block holds them |
+
+| Attribute                       | Holds                            |
+| ------------------------------- | -------------------------------- |
+| `choice(values, default)`       | one of `values`                  |
+| `toggle(default)`               | on or off                        |
+| `number({ min, max, default })` | a number between `min` and `max` |
+
+The primitives a `render` uses are on `h`: `section`, `columns`, `column`, `text`, `heading`, `button`, `image`,
+`divider`, `list`, `code`, `spacer` and `raw`. Each but `raw` takes a `class`. The renderer fills a primitive's
+text and escapes it, so a variable's value never writes markup; `raw` takes HTML, as the HTML block does. It places the result in the block's own row, and writes the
+plain-text twin from the same primitives. `defineEmailBlock` throws `EmailBlockDefinitionInvalid` for a type
+that is a default one or not a lower-case word, a field or attribute named `id`, `key` or `source`, two rich
+text or lanes fields, or a default outside its attribute's values. Run `checkEmailRenderer(renderer,
+{ layoutProps })` in a test: it renders each type's `sample` and lists what fails.
+
 ## API reference
 
 ### EmailEditor
@@ -279,7 +391,8 @@ saved id. The blocks it reports from then on carry those ids.
 | `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                       |
 | `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                    |
 | `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.       |
-| `features`             | `EditorFeature[]`                                | -        | Your own blocks, each with an email codec. Read once, on mount.                     |
+| `blocks`               | `EmailBlockDefinition[]`                         | -        | Your own blocks, from `defineEmailBlock`. Read once, on mount.                      |
+| `features`             | `EditorFeature[]`                                | -        | Your own features, each block in them with an email codec. Read once, on mount.     |
 | `className`            | `string`                                         | -        | Classes for the frame.                                                              |
 | `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                             |
 | `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                    |
@@ -299,7 +412,7 @@ Build `messages` once per locale; a new object rebuilds the toolbar and the menu
 | `bounds`     | `Partial<EmailBounds>`  | the table below |
 | `extraKinds` | `string[]`              | `[]`            |
 
-`extraKinds` names the kinds of your own `features`. The renderer caps `text`, `label`, `href`, `listItems`
+`extraKinds` names the kinds of your own `features`; `blocks` adds its own. The renderer caps `text`, `label`, `href`, `listItems`
 and `lanes` at their defaults, and a higher value throws `editor.profile.bound_above_renderer`. `blocks` and
 `variables` may be raised.
 
