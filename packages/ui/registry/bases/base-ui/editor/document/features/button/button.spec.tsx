@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
+import {
+  createCodecRegistry,
+  importHTML,
+  importMarkdown,
+  serialize,
+} from '@zeroxsolutions/editor-core/document/serialize/index';
 import { Viewer } from '../../react/viewer';
 import { standardKit } from '../standard/index';
 import { button } from './button';
@@ -51,6 +56,32 @@ describe('button', () => {
   it('writes Markdown as a link on its own line, its label escaped', () => {
     const doc = docOf({ label: 'Go [now]', href: 'https://x.test/a b(c)' });
     expect(serialize(doc, 'markdown', registry).trim()).toBe('[Go \\[now\\]](https://x.test/a%20b%28c%29)');
+  });
+
+  it.each([
+    ['an autolink', '<javascript:alert(1)>'],
+    ['raw HTML', '<img src=x onerror=alert(1)>'],
+    ['a blank line and a heading', 'a\n\n# H'],
+  ])('keeps a label holding %s plain text in Markdown', (_case, label) => {
+    for (const href of [undefined, 'https://x.test']) {
+      const markdown = serialize(docOf({ label, ...(href ? { href } : {}) }), 'markdown', registry).trim();
+      expect(markdown).not.toMatch(/(?<!\\)<|\n/);
+      expect(importMarkdown(markdown, registry).doc.content?.[0]?.content?.[0]?.text).toBe(label.replace(/\s+/g, ' '));
+    }
+  });
+
+  it('writes a link ending in a backslash whole in Markdown', () => {
+    expect(serialize(docOf({ label: 'Go', href: 'https://x.test/a\\' }), 'markdown', registry).trim()).toBe(
+      '[Go](https://x.test/a%5C)',
+    );
+  });
+
+  it('draws a stored label that is not text as an empty one', () => {
+    const doc = docOf({ label: 1, href: 'https://x.test' });
+    expect(serialize(doc, 'html', registry)).toContain('<a href="https://x.test"></a>');
+    expect(() =>
+      renderToStaticMarkup(<Viewer doc={docOf({ label: {} })} features={[button(), standardKit()]} />),
+    ).not.toThrow();
   });
 
   it('draws in the Viewer as a link in the button look', () => {

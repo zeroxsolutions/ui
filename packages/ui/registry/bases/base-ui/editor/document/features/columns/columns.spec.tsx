@@ -34,6 +34,44 @@ describe('columns', () => {
     expect(importHTML(html, registry).doc).toEqual(docOf({}, [line('a')], [{ type: 'paragraph' }]));
   });
 
+  it.each([
+    ['styles', ['1fr) ; background:url(https://evil.test/x)', 1]],
+    ['markup', ['"><img src=x onerror=alert(1)>', 1]],
+    ['text', '1,2'],
+    ['weights past the grid', [13, 1]],
+  ])('writes and draws no ratio holding %s', (_case, ratio) => {
+    const doc = docOf({ ratio }, [line('left')], [line('right')]);
+    expect(serialize(doc, 'html', registry)).toMatch(/^<div data-columns><div data-column>/);
+    const markup = renderToStaticMarkup(<Viewer doc={doc} features={[columns(), standardKit()]} />);
+    expect(markup).not.toContain('--columns-ratio');
+  });
+
+  it('reads bare text in a column as a line, and a column outside columns as no column', () => {
+    expect(
+      importHTML(
+        '<div data-columns><div data-column>bare <b>t</b></div><div data-column><p>b</p></div></div>',
+        registry,
+      ).doc,
+    ).toEqual(
+      docOf(
+        {},
+        [
+          {
+            type: 'paragraph',
+            content: [
+              { type: 'text', text: 'bare ' },
+              { type: 'text', text: 't', marks: [{ type: 'bold' }] },
+            ],
+          },
+        ],
+        [line('b')],
+      ),
+    );
+    expect(importHTML('<div data-column><p>a</p></div>', registry).doc.content?.map((node) => node.type)).toEqual([
+      'paragraph',
+    ]);
+  });
+
   it('draws in the Viewer with its columns weighed by the ratio', () => {
     const markup = renderToStaticMarkup(
       <Viewer doc={docOf({ ratio: [2, 1] }, [line('left')], [line('right')])} features={[columns(), standardKit()]} />,

@@ -49,8 +49,15 @@ function openedHref(href: string | null | undefined): string | null {
 const escapedHtml = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** The label as Markdown link text: a bracket or a backslash would end it or escape what follows. */
-const escapedMarkdown = (value: string): string => value.replace(/[\\[\]]/g, (character) => `\\${character}`);
+/**
+ * The label as Markdown text on one line: each character Markdown reads as syntax, an autolink's or raw HTML's
+ * `<` among them, is escaped, and a line break, which could open a block, is a space.
+ */
+const escapedMarkdown = (value: string): string =>
+  value.replace(/\s+/g, ' ').replace(/[\\`*_{}[\]()#+\-.!<>|~&]/g, (character) => `\\${character}`);
+
+/** The stored label as text; a stored value of another kind draws as no label. */
+const labelOf = (attrs: ButtonAttrs): string => (typeof attrs.label === 'string' ? attrs.label : '');
 
 const ALIGNS = ['left', 'center', 'right'] as const;
 const SPACES = ['small', 'medium', 'large'] as const;
@@ -105,7 +112,7 @@ function ButtonLinkPopover({ href, onHrefChange }: { href: string; onHrefChange(
 
 function buttonView(options: ButtonOptions) {
   return function ButtonView({ attrs, updateAttrs, editable, editor }: NodeViewProps<ButtonAttrs>) {
-    const label = attrs.label ?? '';
+    const label = labelOf(attrs);
     const onValueChange = (value: string) => updateAttrs({ label: value });
     return (
       <ButtonShell attrs={attrs}>
@@ -145,15 +152,15 @@ const buttonCodec: ReactNodeCodec<ButtonAttrs> = {
     const space = attrs.spaceAfter ? ` data-space-after="${escapedHtml(attrs.spaceAfter)}"` : '';
     const href = openedHref(attrs.href);
     const link = href === null ? '<a>' : `<a href="${escapedHtml(href)}">`;
-    return `<div data-button${data}${space}>${link}${escapedHtml(attrs.label ?? '')}</a></div>`;
+    return `<div data-button${data}${space}>${link}${escapedHtml(labelOf(attrs))}</a></div>`;
   },
   toMarkdown: (node) => {
-    const label = escapedMarkdown(node.attrs?.label ?? '');
+    const label = escapedMarkdown(labelOf(node.attrs ?? {}));
     const href = openedHref(node.attrs?.href);
     if (href === null) return label;
-    // A space, a bracket or a parenthesis would end the destination early; each is written as its escape.
+    // A space, a bracket, a parenthesis or a backslash would end the destination early, or escape its end.
     const destination = href.replace(
-      /[\s()<>]/g,
+      /[\s()<>\\]/g,
       (character) => `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`,
     );
     return `[${label}](${destination})`;
@@ -165,10 +172,10 @@ const buttonCodec: ReactNodeCodec<ButtonAttrs> = {
     return (
       <ButtonShell attrs={attrs}>
         {href === null ? (
-          <span className={look}>{attrs.label}</span>
+          <span className={look}>{labelOf(attrs)}</span>
         ) : (
           <a href={href} className={look}>
-            {attrs.label}
+            {labelOf(attrs)}
           </a>
         )}
       </ButtonShell>

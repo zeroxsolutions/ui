@@ -25,10 +25,22 @@ const SPACES = ['small', 'medium', 'large'] as const;
 /** The heaviest a column may weigh against its siblings: a twelve-column grid. */
 const COLUMN_WEIGHT_MAX = 12;
 
+/**
+ * The stored ratio as weights: two or more whole numbers from 1 to 12, or null. A ratio a paste or a stored
+ * document holds in another shape is never drawn or written, since it would reach a style or an attribute.
+ */
+function weightsOf(ratio: unknown): number[] | null {
+  const valid =
+    Array.isArray(ratio) &&
+    ratio.length >= 2 &&
+    ratio.every((weight) => Number.isInteger(weight) && weight >= 1 && weight <= COLUMN_WEIGHT_MAX);
+  return valid ? (ratio as number[]) : null;
+}
+
 // The columns are the content element's children, so the grid is drawn on it in `styles.css`; an absent ratio
 // leaves them equal.
 function ColumnsShell({ attrs, children }: { attrs: ColumnsAttrs; children: ReactNode }) {
-  const ratio = attrs.ratio && attrs.ratio.length > 0 ? attrs.ratio : null;
+  const ratio = weightsOf(attrs.ratio);
   const style = ratio
     ? ({ '--columns-ratio': ratio.map((share) => `minmax(0, ${share}fr)`).join(' ') } as CSSProperties)
     : undefined;
@@ -75,7 +87,8 @@ const columnsCodecs: ReactNodeCodec[] = [
   {
     node: 'columns',
     toHTML: (node, ctx) => {
-      const ratio = Array.isArray(node.attrs?.ratio) ? ` data-ratio="${(node.attrs.ratio as number[]).join(',')}"` : '';
+      const weights = weightsOf(node.attrs?.ratio);
+      const ratio = weights === null ? '' : ` data-ratio="${weights.join(',')}"`;
       const spaceAfter = SPACES.find((space) => space === node.attrs?.spaceAfter);
       const space = spaceAfter ? ` data-space-after="${spaceAfter}"` : '';
       return `<div data-columns${ratio}${space}>${ctx.serializeChildren(node)}</div>`;
@@ -118,8 +131,9 @@ const columnsCodecs: ReactNodeCodec[] = [
       </ColumnShell>
     ),
     fromHTML: (element, ctx) => {
-      if (!element.hasAttribute('data-column')) return null;
-      const content = ctx.fromHTMLChildren(element);
+      // Only a columns block holds a column; one anywhere else reads as the blocks it holds.
+      if (!element.hasAttribute('data-column') || !element.parentElement?.hasAttribute('data-columns')) return null;
+      const content = linesOf(ctx.fromHTMLChildren(element));
       // A column holds at least one block, so an empty one reads as an empty line.
       return { type: 'column', content: content.length > 0 ? content : [{ type: 'paragraph' }] };
     },
@@ -128,6 +142,26 @@ const columnsCodecs: ReactNodeCodec[] = [
 ];
 
 const emptyColumn = (): NodeJSON => ({ type: 'column', content: [{ type: 'paragraph' }] });
+
+/** The inline nodes HTML may hold loose in a column, which only a paragraph holds in a document. */
+const INLINE = new Set(['text', 'hardBreak']);
+
+/** `nodes` with each run of loose inline nodes in a paragraph of its own, so a column holds blocks only. */
+function linesOf(nodes: readonly NodeJSON[]): NodeJSON[] {
+  const lines: NodeJSON[] = [];
+  let loose: NodeJSON[] | null = null;
+  for (const node of nodes) {
+    if (!INLINE.has(node.type)) {
+      lines.push(node);
+      loose = null;
+    } else if (loose) loose.push(node);
+    else {
+      loose = [node];
+      lines.push({ type: 'paragraph', content: loose });
+    }
+  }
+  return lines;
+}
 
 /**
  * Columns of blocks side by side, weighed by `ratio`, stacking on a narrow screen. HTML keeps them whole;
