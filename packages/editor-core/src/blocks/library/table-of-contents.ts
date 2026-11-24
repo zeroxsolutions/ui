@@ -24,8 +24,9 @@ export function contentsOf(doc: NodeJSON): ContentsEntry[] {
   let index = 0;
   const visit = (node: NodeJSON): void => {
     if (node.type === 'heading') {
-      const level = Number(node.attrs?.level ?? 1);
-      if (level >= 1 && level <= 3) {
+      // As the heading codec draws it, so the entry's place matches the drawn h1 to h3.
+      const level = Math.min(6, Math.max(1, Number(node.attrs?.level) || 1));
+      if (level <= 3) {
         const text = textOf(node).trim();
         if (text !== '') entries.push({ level, text, index });
         index += 1;

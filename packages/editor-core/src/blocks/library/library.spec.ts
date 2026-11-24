@@ -67,6 +67,12 @@ describe('the library blocks', () => {
     );
   });
 
+  it('names a file without a name by its link, as its view does', () => {
+    expect(html(docOf('file', { href: 'https://f.test/a.pdf' }))).toContain(
+      '<span data-file-name>https://f.test/a.pdf</span>',
+    );
+  });
+
   it('exports a video with its controls and poster, and an audio with its controls', () => {
     expect(
       html(docOf('media', { src: 'https://c.test/a.mp4', poster: 'https://c.test/a.jpg', caption: 'Hi' })),
@@ -163,5 +169,29 @@ describe('contentsOf', () => {
   it('leaves out a heading with no text, which still takes its place among the headings', () => {
     const doc: DocJSON = { type: 'doc', content: [heading(2, ''), heading(2, 'Kept')] };
     expect(contentsOf(doc)).toEqual([{ level: 2, text: 'Kept', index: 1 }]);
+  });
+
+  it('reads a level as the heading codec draws it: missing, zero or not a number as 1, past 6 as 6', () => {
+    const stored = (level: unknown, text: string): NodeJSON => ({
+      type: 'heading',
+      attrs: { level },
+      content: [{ type: 'text', text }],
+    });
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        stored(0, 'zero'),
+        stored('abc', 'nan'),
+        stored(undefined, 'none'),
+        stored(7, 'seven'),
+        stored(2, 'two'),
+      ],
+    };
+    expect(contentsOf(doc)).toEqual([
+      { level: 1, text: 'zero', index: 0 },
+      { level: 1, text: 'nan', index: 1 },
+      { level: 1, text: 'none', index: 2 },
+      { level: 2, text: 'two', index: 3 },
+    ]);
   });
 });

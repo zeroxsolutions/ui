@@ -37,7 +37,7 @@ export const file = defineBlock({
   },
   document: {
     html: ({ fields, attributes }, markup) =>
-      markup`<a href="${markup.url(fields.href)}" download data-file><span data-file-name>${fields.name}</span>${
+      markup`<a href="${markup.url(fields.href)}" download data-file><span data-file-name>${fields.name === '' ? fields.href : fields.name}</span>${
         attributes.size === 0 ? '' : markup`<span data-file-size>${fileSizeText(attributes.size)}</span>`
       }</a>`,
   },
