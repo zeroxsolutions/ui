@@ -20,7 +20,7 @@ function DocumentEditorHarness({
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [slash] = useState(() => collectUiContributions(features).slash);
   return (
-    <div className="style-nova" style={{ padding: '0 80px', width: 720 }}>
+    <div className="style-nova" style={{ padding: '0 80px' }}>
       <Editor
         features={features}
         content={content}
