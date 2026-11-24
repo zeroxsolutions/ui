@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { ProfileEditorMessages } from '../messages';
 
@@ -43,7 +43,8 @@ function framed(html: string, scheme: EmailPreviewScheme, nonce: string): string
  */
 function useSchemeAround(element: HTMLElement | null): EmailPreviewScheme {
   const [scheme, setScheme] = useState<EmailPreviewScheme>('light');
-  useEffect(() => {
+  // Before the first paint, so a frame in the other scheme never loads only to be replaced.
+  useLayoutEffect(() => {
     if (!element) return;
     const read = () => setScheme(element.closest('.dark') ? 'dark' : 'light');
     read();
@@ -69,16 +70,16 @@ interface EmailPreviewProps {
 }
 
 /**
- * The rendered email as an inbox shows it: the sender, subject and preheader over the email, on a muted canvas.
- * The email is drawn at the canvas's own width, so its narrow-screen rules apply wherever the preview is
- * narrow, and in the scheme of the theme around it. The frame is as tall as the email, so the page scrolls
- * rather than the frame.
+ * The rendered email as a mail client shows an open message: the subject, sender and preheader over a hairline,
+ * then the email, whose own background is the only surface. The email is drawn at the preview's own width, so
+ * its narrow-screen rules apply wherever the preview is narrow, and in the scheme of the theme around it. The
+ * frame is as tall as the email, so the page scrolls rather than the frame.
  */
 function EmailPreview({ html, subject, preheader, sender, messages, className }: EmailPreviewProps): ReactNode {
-  const [canvas, setCanvas] = useState<HTMLDivElement | null>(null);
+  const [message, setMessage] = useState<HTMLDivElement | null>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState<number | null>(null);
-  const scheme = useSchemeAround(canvas);
+  const scheme = useSchemeAround(message);
 
   useEffect(() => {
     const read = (event: MessageEvent) => {
@@ -94,16 +95,13 @@ function EmailPreview({ html, subject, preheader, sender, messages, className }:
   const srcDoc = useMemo(() => framed(html, scheme, randomNonce()), [html, scheme]);
 
   return (
-    <div
-      ref={setCanvas}
-      data-slot="email-preview-canvas"
-      className={cn('cn-editor-page bg-muted flex flex-col gap-3 p-4', className)}
-    >
-      <div data-slot="email-preview-inbox" className="flex min-w-0 flex-col gap-0.5">
-        {sender && <p className="text-muted-foreground truncate text-xs">{sender}</p>}
-        <p className="truncate text-sm font-medium">{subject}</p>
-        {preheader && <p className="text-muted-foreground truncate text-xs">{preheader}</p>}
-      </div>
+    <div ref={setMessage} data-slot="email-preview-message" className={cn('flex flex-col', className)}>
+      {/* As a mail client heads an open message: the subject, then who sent it and its preheader. */}
+      <header data-slot="email-preview-inbox" className="flex min-w-0 flex-col gap-0.5 border-b pb-3">
+        <h2 className="truncate text-base font-medium">{subject}</h2>
+        {sender && <p className="text-muted-foreground truncate text-sm">{sender}</p>}
+        {preheader && <p className="text-muted-foreground truncate text-sm">{preheader}</p>}
+      </header>
       {/* A new frame per scheme: Chromium kept the first document when `srcdoc` changed before it loaded. */}
       <iframe
         ref={frame}

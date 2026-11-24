@@ -46,7 +46,6 @@ const STANDS_FOR: [editor: string, component: string, properties: Property[]][] 
   ['cn-editor-block', 'cn-alert', ['radius']],
   ['cn-editor-inline', 'cn-kbd', ['radius']],
   ['cn-editor-diagram', 'cn-card', ['radius', 'shadow', 'ring']],
-  ['cn-editor-page', 'cn-card', ['radius', 'shadow', 'ring']],
 ];
 
 /** The engine's own nodes the editor's root rounds, through `cn-editor-content`, as `cn-kbd` is rounded. */
@@ -70,7 +69,6 @@ const PIECES: Record<string, string[]> = {
   'document/ui/editor-toolbar-combobox-trigger.tsx': ['toggleVariants', '<Tooltip'],
   'profiles/problem-marker.tsx': ['<Button', '<Tooltip'],
   'profiles/email/email-editor.tsx': ['<Tooltip', '<TabsList'],
-  'profiles/email/email-preview.tsx': ['cn-editor-page'],
   'profiles/sms/sms-editor.tsx': ['<Tooltip'],
   'document/features/callout/callout.tsx': ['cn-alert'],
   'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-sm'],

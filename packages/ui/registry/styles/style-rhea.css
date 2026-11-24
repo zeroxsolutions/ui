@@ -113,11 +113,6 @@
     @apply ring-foreground/5 dark:ring-foreground/10 rounded-[min(var(--radius-4xl),24px)] shadow-sm ring-1;
   }
 
-  /* cn-card's ring, radius and shadow, the page a rendered email is drawn on */
-  .cn-editor-page {
-    @apply ring-foreground/5 dark:ring-foreground/10 rounded-[min(var(--radius-4xl),24px)] shadow-sm ring-1;
-  }
-
   /* cn-dropdown-menu-content's ring, radius, padding and shadow */
   .cn-editor-toolbar {
     @apply ring-foreground/5 dark:ring-foreground/10 rounded-2xl p-1 shadow-lg ring-1;

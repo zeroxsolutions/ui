@@ -113,11 +113,6 @@
     @apply ring-foreground/10 rounded-xl ring-1;
   }
 
-  /* cn-card's ring, radius and shadow, the page a rendered email is drawn on */
-  .cn-editor-page {
-    @apply ring-foreground/10 rounded-xl ring-1;
-  }
-
   /* cn-dropdown-menu-content's ring, radius, padding and shadow */
   .cn-editor-toolbar {
     @apply ring-foreground/10 rounded-lg p-1 shadow-md ring-1;

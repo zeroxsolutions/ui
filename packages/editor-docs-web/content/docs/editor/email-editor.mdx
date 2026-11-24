@@ -211,10 +211,12 @@ does. The Preview tab shows the rendered email with each variable's `sampleValue
 only the tabs while it is open. `layoutProps` is the default layout's logo and footer, and the demo's source
 defines it.
 
-Above the email, the preview shows the `sender`, the subject and the preheader as an inbox lists them. The
-email is drawn at the editor's own width, so its narrow-screen rules apply wherever the editor is narrow, and
-in the theme around the editor: inside a `.dark` scope its `prefers-color-scheme: dark` rules apply, and a
-theme switched later redraws it. Pick a device and a theme on the bar above the demo to see both.
+The preview heads the email as a mail client heads an open message: the subject, then the `sender` and the
+preheader, over a hairline. The email follows edge to edge, with its own background the only surface. It is
+drawn at the editor's own width, so under 600px the default layout goes full-bleed, with no gutter or border
+around its card, and in the theme around the editor: inside a `.dark` scope its `prefers-color-scheme: dark`
+rules apply, and a theme switched later redraws it. Pick a device and the dark theme on the bar above the demo
+to see both.
 
 ## Theme
 
@@ -235,13 +237,13 @@ const theme: EmailTheme = {
     border: '#E4E4E7',
   },
   dark: {
-    background: '#18181B',
+    background: '#0A0A0A',
     foreground: '#FAFAFA',
     primary: '#00BC7D',
     primaryForeground: '#022C22',
-    muted: '#27272A',
-    mutedForeground: '#9F9FA9',
-    border: '#3F3F46',
+    muted: '#262626',
+    mutedForeground: '#A1A1A1',
+    border: '#262626',
   },
   radius: 10,
   font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },

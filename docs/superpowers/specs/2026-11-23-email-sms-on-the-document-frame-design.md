@@ -98,11 +98,9 @@ side with the Document Editor it reads as a different product.
 
 ### Preview
 
-- `EmailEditor` draws the renderer's HTML in a sandboxed iframe under the Preview tab, on a muted canvas,
-  as tall as the email and as wide as the editor, so the email's narrow-screen rules apply wherever the
-  editor is narrow.
-- The iframe's background follows the renderer's theme; the canvas around it follows Editor Theme. The
-  email's `prefers-color-scheme` rules are answered for the theme around the editor: dark inside a `.dark`
+- `EmailEditor` draws the renderer's HTML in a sandboxed iframe under the Preview tab, as tall as the email
+  and as wide as the editor, so the email's narrow-screen rules apply wherever the editor is narrow.
+- The iframe's background follows the renderer's theme and is the preview's only surface. The email's `prefers-color-scheme` rules are answered for the theme around the editor: dark inside a `.dark`
   scope, light otherwise, following a theme switched later. `EmailTheme` takes an optional `dark` palette
   that the renderer emits as those rules.
 - On the Preview tab the toolbar's row holds only the tabs. The sender, subject and preheader sit above the
@@ -112,6 +110,13 @@ side with the Document Editor it reads as a different product.
   Light and Dark switch. Desktop in the site's theme draws the demo inline; any other choice frames the
   demo's view page at the device's width (768px, 375px, or the stage's for Desktop), in the theme its
   `?theme=` forces.
+- Revised 2026-11-24 after the owner's second review: one surface, not boxes in boxes. The muted canvas
+  is gone; the subject, sender and preheader are plain lines over a hairline, as a mail client heads an
+  open message, and the email's frame follows edge to edge with no padding, ring, radius or background of
+  its own. Under 600px the default layout is full-bleed: no gutter around the card, no border or radius on
+  it. The docs preview's theme control is a switch, and a view page opened directly has a bar (back to the
+  docs, the demo's name, the device and theme controls) over a muted stage; `?embed=1` draws the demo alone
+  for a docs preview's frame.
 - Before hydration the editor draws its starting document from the JSON, with no engine, so the page does
   not show an empty stage until the client has loaded the editor.
 - The frame runs scripts at an opaque origin under a nonce policy that admits only its height report.

@@ -76,6 +76,8 @@ describe('defaultLayout', () => {
     const { html } = layout();
     const head = html.slice(0, html.indexOf('</head>'));
     expect(head).toContain('@media only screen and (max-width:600px)');
+    // Full-bleed on a phone: no gutter around the card and no frame on it, the card's background edge to edge.
+    expect(head).toContain('.zx-outer{padding:0 !important;}');
     expect(head).toContain('.zx-card{border:0 !important;border-radius:0 !important;}');
     expect(html).toContain('class="zx-card"');
     expect(html).toContain('class="zx-outer"');
