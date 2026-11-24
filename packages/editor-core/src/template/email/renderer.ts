@@ -272,7 +272,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         throw new TypeError("An email layout returns primitives, drawn with its input's `h`, not HTML and text");
       }
       const nodes: readonly EmailNode[] = Array.isArray(framed) ? framed : [framed as EmailNode];
-      const queries = createQueryWriter(stylesheet.queries);
+      const queries = createQueryWriter(stylesheet.queries, stylesheet.queryWeight);
       const document = serialiseElements(
         [{ tag: 'body', attributes: [], classes: ['zx-body'], children: expandNodes(nodes) }],
         stylesheet.rules,

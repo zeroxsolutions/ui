@@ -36,79 +36,44 @@ function written(
   });
 }
 
-/** One declaration a query class is written with, at the place the cascade gave it. */
-interface Piece {
-  readonly query: number;
-  readonly name: string;
-  /** Its selector's specificity, raised over every query rule's for an `!important` one. */
-  readonly weight: number;
-  readonly order: number;
-  readonly index: number;
-  readonly text: string;
-}
-
 /**
- * Writes a product's queries per element: each element whose style a query changes gets a class of its own,
- * `zx-q<query>-<n>`, one per distinct style in that query, and the head gets those declarations under the
- * query's chain, made `!important` to beat the inline style. Two queries that hold at once cascade as their
- * rules would: each declaration's selector repeats the class once per class of the rule it came from, so a more
- * specific rule still wins, and the head writes the declarations in their rules' order, so at equal specificity
- * the later rule wins, a nested query's included.
+ * Writes a product's queries per element: each element whose style a query changes gets one class of its own
+ * for that query, `zx-q<query>-<n>`, one per distinct style in it, and the head gets that style under the
+ * query's chain, `!important` to beat the inline style. Its selector repeats the class `weight` times, more than
+ * the classes of any base head rule, so the query's style beats them on its element. Queries are written in
+ * source order, so when two hold at once, a property both set on one element is decided by their order, not by
+ * the specificity of their rules; a nested query is computed with the rules of the queries around it.
  */
-export function createQueryWriter(queries: readonly QueryRules[]) {
+export function createQueryWriter(queries: readonly QueryRules[], weight: number) {
   const classes = queries.map(() => new Map<string, string>());
   const owners = queries.map((query) => new Set<unknown>(query.own));
-  // An important declaration outweighs any query rule's specificity, as importance comes first in a cascade.
-  const heaviest = Math.max(0, ...queries.flatMap((query) => query.rules.map((rule) => rule.selector.specificity)));
-  const pieces: Piece[] = [];
 
   return {
     /** The query classes `element` takes, given the style it is inlined with. */
     classesFor(element: StyledElement, inline: readonly StyleDeclaration[]): string[] {
       return queries.flatMap((query, index) => {
-        const changed = written(inline, cascade(query.rules, element), owners[index]).map((cascaded) => ({
-          weight: cascaded.specificity + (cascaded.declaration.important ? heaviest : 0),
-          order: cascaded.order,
-          index: cascaded.index,
-          text: `${cascaded.declaration.property}:${cascaded.declaration.value} !important`,
-        }));
+        const changed = written(inline, cascade(query.rules, element), owners[index]);
         if (changed.length === 0) return [];
-        const signature = changed
-          .map((piece) => `${piece.weight}/${piece.order}/${piece.index}/${piece.text}`)
-          .join('\n');
-        let name = classes[index].get(signature);
+        const body = changed.map(({ declaration: { property, value } }) => `${property}:${value} !important`).join(';');
+        let name = classes[index].get(body);
         if (name === undefined) {
           name = `zx-q${index}-${classes[index].size}`;
-          classes[index].set(signature, name);
-          for (const piece of changed) pieces.push({ ...piece, query: index, name });
+          classes[index].set(body, name);
         }
         return [name];
       });
     },
-    /** The head's rules for the classes given so far, in cascade order, each query's under its chain. */
+    /** The head's rules for the classes given so far, each query's under its chain, in source order. */
     head(): string {
-      const sorted = [...pieces].sort(
-        (left, right) =>
-          left.weight - right.weight ||
-          left.order - right.order ||
-          left.index - right.index ||
-          left.query - right.query,
-      );
-      let out = '';
-      let previous: Piece | null = null;
-      for (const piece of sorted) {
-        const sameQuery = previous?.query === piece.query;
-        const sameRule = sameQuery && previous?.name === piece.name && previous.weight === piece.weight;
-        if (sameRule) out += `;${piece.text}`;
-        else {
-          if (previous !== null) out += sameQuery ? '}' : `}${queries[previous.query].close}`;
-          if (!sameQuery) out += queries[piece.query].open;
-          out += `${`.${piece.name}`.repeat(Math.max(1, piece.weight))}{${piece.text}`;
-        }
-        previous = piece;
-      }
-      if (previous !== null) out += `}${queries[previous.query].close}`;
-      return out.replaceAll('</', '<\\/');
+      return queries
+        .map((query, index) => {
+          const given = [...classes[index]];
+          if (given.length === 0) return '';
+          const rules = given.map(([body, name]) => `${`.${name}`.repeat(weight)}{${body}}`).join('');
+          return `${query.open}${rules}${query.close}`;
+        })
+        .join('')
+        .replaceAll('</', '<\\/');
     },
   };
 }

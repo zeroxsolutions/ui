@@ -46,11 +46,11 @@ export interface QueryRules {
   readonly open: string;
   readonly close: string;
   /**
-   * Every top-level rule, its variables read with the chain's own over the sheets', then the chain's own
-   * class-only rules, each at its place in the sheets' order.
+   * Every top-level rule, then the class-only rules of each query of the chain, outer first, each at its place in
+   * the sheets' order and its variables read with the chain's own over the sheets'.
    */
   readonly rules: readonly InlineRule[];
-  /** Of `rules`, the chain's own: what it declares is written for an element even at the inline value. */
+  /** Of `rules`, the chain's queries': what they declare is written for an element even at the inline value. */
   readonly own: readonly InlineRule[];
 }
 
@@ -64,6 +64,11 @@ export interface ComposedStylesheet {
   readonly head: string;
   /** A product's queries, in source order; the renderer writes each element's style under them as it differs. */
   readonly queries: readonly QueryRules[];
+  /**
+   * How many times a query class is written in its selector: once more than the classes of the base sheet's
+   * widest rule, so a product query's style beats every base head rule on its element.
+   */
+  readonly queryWeight: number;
   /** Whether a head rule answers `prefers-color-scheme: dark`, so the email declares both schemes. */
   readonly darkScheme: boolean;
   /** Each declaration of a product's sheets that common mail clients drop, in order. */
@@ -215,7 +220,8 @@ interface WrittenRule {
 interface QueryEntry {
   readonly chain: readonly AtRule[];
   readonly scope: Scope;
-  readonly own: readonly InlineRule[];
+  /** The class-only rules of each query of the chain, outer first; an outer one is filled as it is read. */
+  readonly levels: readonly (readonly WrittenRule[])[];
 }
 
 type Scope = ReturnType<typeof createScope>;
@@ -337,15 +343,21 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   };
 
   /** A product query's class-only rules, read for computing, and the queries nested in it, in source order. */
-  const readQuery = (source: Source, query: AtRule, around: readonly AtRule[]): void => {
+  const readQuery = (
+    source: Source,
+    query: AtRule,
+    around: readonly AtRule[],
+    outer: readonly (readonly WrittenRule[])[],
+  ): void => {
     const chain = [...around, query];
     const scope = scopeOf(source, query);
     const guarded = chain.some((node) => node.name.toLowerCase() === 'supports');
-    const own: InlineRule[] = [];
-    entries.push({ chain, scope, own });
+    const own: WrittenRule[] = [];
+    const levels = [...outer, own];
+    entries.push({ chain, scope, levels });
     query.each((child) => {
       if (child.type === 'atrule' && CONDITIONAL.has(child.name.toLowerCase())) {
-        readQuery(source, child, chain);
+        readQuery(source, child, chain, levels);
         return;
       }
       if (child.type !== 'rule') return;
@@ -359,6 +371,7 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
           }
         });
       }
+      const selectors: { selector: ClassSelector; order: number }[] = [];
       for (const text of child.selectors) {
         // As at the top: `:root` holds custom properties only, which the query's scope has read already.
         if (text.trim() === ':root') {
@@ -367,8 +380,9 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
         }
         const selector = parseClassSelector(text);
         if ('refused' in selector || declarations.length === 0) continue;
-        own.push({ selector, declarations, order: position++ });
+        selectors.push({ selector, order: position++ });
       }
+      if (selectors.length > 0) own.push({ source, rule: child, selectors });
     });
   };
 
@@ -383,7 +397,7 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
       if (nested.name.toLowerCase() === 'media' && DARK_QUERY.test(nested.params)) darkScheme = true;
     });
     const product = source.sheet !== null;
-    if (product && CONDITIONAL.has(rule.name.toLowerCase())) readQuery(source, rule, []);
+    if (product && CONDITIONAL.has(rule.name.toLowerCase())) readQuery(source, rule, [], []);
     // Each declaration reads the custom properties of every query around it, over the sheets' top-level ones.
     const values: string[] = [];
     rule.walkDecls((declaration) => {
@@ -435,14 +449,14 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
     }
   }
 
-  const queries = entries.map(({ chain, scope, own }): QueryRules => {
-    const top =
-      scope === global
-        ? rules
-        : written.flatMap(({ source, rule, selectors }) => {
-            const declarations = declarationsOf(source, rule, scope);
-            return selectors.map(({ selector, order }) => ({ selector, declarations, order }));
-          });
+  const queries = entries.map(({ chain, scope, levels }): QueryRules => {
+    const read = (list: readonly WrittenRule[]): InlineRule[] =>
+      list.flatMap(({ source, rule, selectors }) => {
+        const declarations = declarationsOf(source, rule, scope);
+        return selectors.map(({ selector, order }) => ({ selector, declarations, order }));
+      });
+    const top = scope === global ? rules : read(written);
+    const own = read(levels.flat());
     return {
       open: chain.map((node) => `@${node.name} ${node.params}{`).join(''),
       close: '}'.repeat(chain.length),
@@ -452,5 +466,21 @@ export function composeStylesheets(base: string, sheets: readonly string[]): Com
   });
 
   // A `</style>` in a product's rule would end the head's style, and the rest of it would print as the email.
-  return { rules, head: head.join('').replaceAll('</', '<\\/'), queries, darkScheme, warnings };
+  // The base sheet's widest rule, wherever it stands: a query class must outweigh its head rules.
+  let widest = 0;
+  sources[0].root.walkRules((rule) => {
+    for (const text of rule.selectors) {
+      const selector = parseClassSelector(text);
+      if (!('refused' in selector)) widest = Math.max(widest, selector.specificity);
+    }
+  });
+
+  return {
+    rules,
+    head: head.join('').replaceAll('</', '<\\/'),
+    queries,
+    queryWeight: widest + 1,
+    darkScheme,
+    warnings,
+  };
 }

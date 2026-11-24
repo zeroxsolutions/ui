@@ -26,6 +26,11 @@ function queryClassesOf(html: string, classes: string): string[] {
   return found.split(' ').filter((name) => name.startsWith('zx-q'));
 }
 
+/** The selector a query class is written with: the class once per class of the base sheet's widest rule, plus one. */
+function selectorOf(name: string): string {
+  return `.${name}`.repeat(3);
+}
+
 /** The declarations the head gives `name` under the query text that opens before it. */
 function ruleOf(head: string, name: string): string | undefined {
   return new RegExp(`\\.${name}\\{([^}]*)\\}`).exec(head)?.[1];
@@ -36,7 +41,7 @@ describe("a product's query rules, drawn per element", () => {
     const css = ':root{--c:#111111}.zx-text{color:var(--c)}@media (prefers-color-scheme:dark){:root{--c:#EEEEEE}}';
     const { html, head } = render(css);
     const [dark] = queryClassesOf(html, 'zx-text zx-tone-default');
-    expect(head).toContain(`@media (prefers-color-scheme:dark){.${dark}{color:#EEEEEE !important}}`);
+    expect(head).toContain(`@media (prefers-color-scheme:dark){${selectorOf(dark)}{color:#EEEEEE !important}}`);
   });
 
   it('keeps the queries in their order, so the later one wins a shared property when both hold', () => {
@@ -73,44 +78,52 @@ describe("a product's query rules, drawn per element", () => {
       '.zx-region-body .zx-callout{border-color:green}@media (prefers-color-scheme:dark){.zx-callout{border:2px solid red}}';
     const { html, head } = render(css, [callout]);
     const [dark] = queryClassesOf(html, 'zx-callout');
-    expect(head).toContain(
-      `@media (prefers-color-scheme:dark){.${dark}{border:2px solid red !important}` +
-        `.${dark}.${dark}{border-color:green !important}}`,
-    );
+    expect(ruleOf(head, dark)).toBe('border:2px solid red !important;border-color:green !important');
   });
 
-  it("writes a query's own declaration that equals the inline one, so it still beats the base's head rules", () => {
+  it("writes a query's own declaration that equals the inline one, over the base's head rules", () => {
     const { html, head } = render('@media only screen and (max-width:600px){.zx-text{font-size:14px}}');
     const [narrow] = queryClassesOf(html, 'zx-text zx-tone-default');
     expect(ruleOf(head, narrow)).toBe('font-size:14px !important');
-    expect(head.indexOf(`.${narrow}{`)).toBeGreaterThan(head.indexOf('.zx-text{font-size:16px !important'));
+    expect(head).toContain(`${selectorOf(narrow)}{font-size:14px !important}`);
+    expect(head.indexOf(selectorOf(narrow))).toBeGreaterThan(head.indexOf('.zx-text{font-size:16px !important'));
   });
 
-  it('keeps the specificity of a query rule, so a more specific one wins over a later query', () => {
+  it('lets the later query decide a property two set on one element, whatever their specificity', () => {
     const css =
       '@media (max-width:600px){.zx-region-body .zx-text{color:red}}@media (min-width:1px){.zx-text{color:blue}}';
     const { html, head } = render(css);
     const [narrow, wide] = queryClassesOf(html, 'zx-text zx-tone-default');
-    expect(head).toContain(`@media (min-width:1px){.${wide}{color:blue !important}}`);
-    expect(head).toContain(`@media (max-width:600px){.${narrow}.${narrow}{color:red !important}}`);
+    expect(head).toContain(`@media (max-width:600px){${selectorOf(narrow)}{color:red !important}}`);
+    expect(head).toContain(`@media (min-width:1px){${selectorOf(wide)}{color:blue !important}}`);
+    expect(head.indexOf(selectorOf(narrow))).toBeLessThan(head.indexOf(selectorOf(wide)));
   });
 
-  it("lets a query's important declaration beat a more specific one in another query", () => {
-    const css =
-      '@media (max-width:600px){.zx-region-body .zx-text{color:red}}' +
-      '@media (min-width:1px){.zx-text{color:blue !important}}';
-    const { html, head } = render(css);
-    const [narrow, wide] = queryClassesOf(html, 'zx-text zx-tone-default');
-    const selectorOf = (name: string, value: string): string =>
-      new RegExp(`((?:\\.${name})+)\\{color:${value} !important\\}`).exec(head)?.[1] ?? '';
-    expect(selectorOf(wide, 'blue').length).toBeGreaterThan(selectorOf(narrow, 'red').length);
-  });
-
-  it('writes a nested query before an outer rule that follows it, so the later rule wins as written', () => {
+  it('computes a nested query with its outer rules, so an outer rule after it still wins as written', () => {
     const css = '@media (max-width:600px){@media (min-width:1px){.zx-text{color:red}}.zx-text{color:blue}}';
     const { html, head } = render(css);
     const [outer, inner] = queryClassesOf(html, 'zx-text zx-tone-default');
-    expect(head.indexOf(`.${inner}{color:red`)).toBeLessThan(head.indexOf(`.${outer}{color:blue`));
+    expect(ruleOf(head, outer)).toBe('color:blue !important');
+    expect(ruleOf(head, inner)).toBe('color:blue !important');
+  });
+
+  it("reads an outer query's rule with the variables a nested query redefines", () => {
+    const css = '@media (min-width:1px){.zx-text{color:var(--c,black)} @media (min-width:2px){:root{--c:blue}}}';
+    const { html, head } = render(css);
+    const [outer, inner] = queryClassesOf(html, 'zx-text zx-tone-default');
+    expect(ruleOf(head, outer)).toBe('color:black !important');
+    expect(head).toContain(
+      `@media (min-width:1px){@media (min-width:2px){${selectorOf(inner)}{color:blue !important}}}`,
+    );
+  });
+
+  it('writes one class of a fixed width for a selector of many classes', () => {
+    const wide = '.zx-text'.repeat(2000);
+    const { html, head } = render(`@media (max-width:600px){${wide}{color:red !important}}`);
+    const [narrow] = queryClassesOf(html, 'zx-text zx-tone-default');
+    expect(head).toContain(`${selectorOf(narrow)}{color:red !important}`);
+    expect(html).not.toContain('.zx-text.zx-text');
+    expect(html.length).toBeLessThan(render('').html.length + 300);
   });
 
   it('carries no property a shorthand does not set, such as border-collapse after border', () => {
@@ -127,7 +140,7 @@ describe("a product's query rules, drawn per element", () => {
     const { html, head } = render(css);
     const [dark] = queryClassesOf(html, 'zx-text zx-tone-default');
     expect(head).toContain(
-      `@supports (display:block){@media (prefers-color-scheme:dark){.${dark}{color:#EEEEEE !important}}}`,
+      `@supports (display:block){@media (prefers-color-scheme:dark){${selectorOf(dark)}{color:#EEEEEE !important}}}`,
     );
   });
 

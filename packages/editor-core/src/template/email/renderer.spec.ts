@@ -159,7 +159,7 @@ describe('createEmailRenderer', () => {
       input([{ id: 'c1', type: 'callout', attributes: {}, content: { text: 'Note' } }]),
     );
     expect(html).toContain('class="zx-callout zx-q0-0"');
-    expect(html).toContain('@media (max-width:600px){.zx-q0-0{padding:8px !important}}</style>');
+    expect(html).toContain('@media (max-width:600px){.zx-q0-0.zx-q0-0.zx-q0-0{padding:8px !important}}</style>');
   });
 
   it('refuses a stylesheet it cannot inline when it is composed', () => {
