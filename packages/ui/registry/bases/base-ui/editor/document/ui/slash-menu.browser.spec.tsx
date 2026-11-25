@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import type { IEditor, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
 
 import { SlashMenu } from './slash-menu';
@@ -10,11 +10,20 @@ import { SlashMenu } from './slash-menu';
  * in turn and then keeps its last answer.
  */
 function slashEditor(...carets: { top: number; bottom: number; left: number; right: number }[]): IEditor {
+  return slashEditorWhere(() => true, ...carets);
+}
+
+/** `slashEditor`, whose commands run where `runs` says. */
+function slashEditorWhere(
+  runs: (command: string) => boolean,
+  ...carets: { top: number; bottom: number; left: number; right: number }[]
+): IEditor {
   const reads = carets.length > 0 ? carets : [{ top: 10, bottom: 30, left: 20, right: 80 }];
   let read = 0;
   return {
     status: 'ready',
     run: vi.fn(() => true),
+    can: runs,
     isEditable: () => true,
     isFocused: () => true,
     onChange: () => () => {},
@@ -133,5 +142,18 @@ describe('SlashMenu with more items than it holds', () => {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     expect(popup.getBoundingClientRect().left).toBe(opened);
+  });
+});
+
+describe('SlashMenu at a caret where a command cannot run', () => {
+  it('leaves out the items of that command', async () => {
+    const offered: SlashItem[] = [
+      { id: 'heading', title: 'Heading', group: 'Basic', command: 'toggleHeading' },
+      { id: 'columns', title: 'Columns', group: 'Basic', command: 'insertColumns' },
+    ];
+    render(<SlashMenu editor={slashEditorWhere((command) => command !== 'insertColumns')} items={offered} />);
+
+    await expect.element(page.getByText('Heading', { exact: true })).toBeVisible();
+    expect(page.getByText('Columns', { exact: true }).elements()).toHaveLength(0);
   });
 });

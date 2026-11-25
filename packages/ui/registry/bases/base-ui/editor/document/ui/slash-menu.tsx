@@ -59,7 +59,11 @@ export function SlashMenu({
   // The trigger the menu's anchor was first read at, so a re-read keeps its left edge.
   const openedFrom = useRef<number | null>(null);
 
-  const filtered = useMemo(() => filterSlashItems(items, active?.query ?? ''), [items, active?.query]);
+  // Read again with each trigger state, so an item is offered only where its command can run at the caret.
+  const filtered = useMemo(
+    () => filterSlashItems(items, active?.query ?? '').filter((item) => editor.can(item.command, item.args)),
+    [editor, items, active],
+  );
   const groups = useMemo(() => groupByHeading(filtered), [filtered]);
   // The flattened render order — arrow-key nav walks this, so the highlight
   // tracks what's actually on screen even when items span multiple groups.

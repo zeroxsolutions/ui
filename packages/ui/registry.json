@@ -2269,6 +2269,27 @@
       ]
     },
     {
+      "name": "editor-presets",
+      "type": "registry:component",
+      "title": "Editor Presets",
+      "description": "Ready-made groups of blocks an author drags, clicks or picks from the slash menu into the Document Editor or the email editor.",
+      "categories": ["editor"],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"],
+      "registryDependencies": ["@zui/document-editor", "@zui/lucide-layout-panel-top-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/presets-feature.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/presets-feature.ts"
+        }
+      ]
+    },
+    {
       "name": "editor-callout",
       "type": "registry:component",
       "title": "Editor Callout",
@@ -2315,6 +2336,28 @@
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "zod"]
+    },
+    {
+      "name": "editor-presets-demo",
+      "type": "registry:example",
+      "title": "Editor Presets Demo",
+      "description": "A document whose slash menu offers two presets: two columns, and a tip in a callout.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-button",
+        "@zui/editor-callout",
+        "@zui/editor-columns",
+        "@zui/editor-presets"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-presets-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-presets-demo.tsx"
+        }
+      ]
     },
     {
       "name": "editor-callout-demo",

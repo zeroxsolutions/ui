@@ -61,6 +61,7 @@ function Nova({ children }: { children: ReactNode }) {
 const editor = {
   status: 'ready',
   run: vi.fn(() => true),
+  can: () => true,
   isActive: () => false,
   isEditable: () => true,
   isFocused: () => true,
