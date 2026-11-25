@@ -1,3 +1,4 @@
+import { createElement, type ReactNode } from 'react';
 import { z } from 'zod';
 import { AtSignIcon } from '@/registry/bases/base-ui/icons/lucide/at-sign-icon';
 import { ChevronsUpDownIcon } from '@/registry/bases/base-ui/icons/lucide/chevrons-up-down-icon';
@@ -61,7 +62,11 @@ import {
 import { heldMarks } from '../held-marks';
 import { codeMirrorVariables } from '../variables/code-mirror-variables';
 import { variableFeature, variableIcon, type VariableFeature } from '../variables/variable';
-import { emailBlockFeature } from './email-block-feature';
+import { emailBlockFeature, type EmailBlockViewProps } from './email-block-feature';
+import { EmailFeatureView } from './email-feature-view';
+import { EmailLegalFooterView } from './email-legal-footer-view';
+import { EmailSocialLinksView } from './email-social-links-view';
+import { EmailSpacerView } from './email-spacer-view';
 import {
   blockAt,
   cellAt,
@@ -215,6 +220,15 @@ const LIBRARY_ICONS: Readonly<Record<LibraryBlockType, unknown>> = {
   hero: LayoutPanelTopIcon,
   card: IdCardIcon,
   legalFooter: MailboxIcon,
+};
+
+/** How the editor draws each library block: as the email draws it, each field written in place or in a popover. */
+const LIBRARY_VIEWS: Readonly<Record<LibraryBlockType, (props: EmailBlockViewProps) => ReactNode>> = {
+  spacer: EmailSpacerView,
+  socialLinks: EmailSocialLinksView,
+  hero: (props) => createElement(EmailFeatureView, { ...props, variant: 'hero' }),
+  card: (props) => createElement(EmailFeatureView, { ...props, variant: 'card' }),
+  legalFooter: EmailLegalFooterView,
 };
 
 /** The toolbar and bubble items of the marks an email stores, by the words each is drawn in. */
@@ -652,6 +666,7 @@ export function emailKit(
   const library = (Object.keys(libraryBlocks) as LibraryBlockType[]).map((type) =>
     emailBlockFeature(libraryBlocks[type], {
       icon: LIBRARY_ICONS[type],
+      view: LIBRARY_VIEWS[type],
       messages,
       inLanes: type !== 'hero' && type !== 'card',
     }),

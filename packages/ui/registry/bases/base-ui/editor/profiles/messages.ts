@@ -108,10 +108,22 @@ export interface ProfileEditorMessages {
   /** Why Duplicate is disabled on a block of a kind the profile does not let the author add. */
   kindNotAllowed: string;
   buttonLabel: string;
-  /** Adds an item to a block's items field, such as one more social link. */
-  addItem: string;
-  /** Removes the item it sits beside. */
+  /** The faint hint in a block's button that has no label, such as a hero's. */
+  buttonPlaceholder: string;
+  /** Names the control that adds an item to a block's items field, such as one more social link. */
+  addItem(field: string): string;
+  /** Names the control in an item's popover that removes the item. */
   removeItem: string;
+  /** What an image-less block, or item, shows where its image goes. */
+  imagePlaceholder: string;
+  /** The hint an image's address field shows while it is empty. */
+  imageAddressPlaceholder: string;
+  /** What an image address the email cannot load is told. */
+  imageInvalid: string;
+  /** Names the control that opens a block's settings, such as a number it takes. */
+  blockSettings: string;
+  /** A spacer's size, shown as the pointer rests on it: the size's name and its height in px. */
+  spacerSize(size: string, px: number): string;
   /** The accessible name of one item's row: the field's name and the item's place, counted from 1. */
   itemRow(field: string, position: number): string;
   /** The heading over an HTML block's source. */
@@ -250,8 +262,14 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   deleteRequired: 'This block is required',
   kindNotAllowed: 'This kind of block is not allowed here',
   buttonLabel: 'Button label',
-  addItem: 'Add',
+  buttonPlaceholder: 'Add a button',
+  addItem: (field) => `Add to ${field}`,
   removeItem: 'Remove',
+  imagePlaceholder: 'Add an image',
+  imageAddressPlaceholder: 'Paste an image link or pick a variable',
+  imageInvalid: 'The image must load from https:// or a link variable',
+  blockSettings: 'Block settings',
+  spacerSize: (size, px) => `${size}, ${px}px`,
   itemRow: (field, position) => `${field} ${position}`,
   htmlBlock: 'HTML',
   unknownBlock: (type) => `A ${type} block this editor cannot show`,

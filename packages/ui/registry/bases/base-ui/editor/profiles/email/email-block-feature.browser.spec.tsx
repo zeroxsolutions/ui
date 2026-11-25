@@ -163,10 +163,21 @@ describe('emailBlockFeature', () => {
     await vi.waitFor(() => expect(last(probe.reported)?.[0].attributes).toEqual({ tone: 'brand', boxed: true }));
   });
 
-  it('loads a stored block as it was written, and sets a number in its field', async () => {
+  it('draws the block as the email does, named by its title and with no caption over its fields', async () => {
+    await mount([stored()]);
+
+    const block = page.getByRole('group', { name: 'Testimonial' });
+    await expect.element(block.getByText('Kind words')).toBeVisible();
+    await expect.element(block.getByRole('textbox', { name: 'Author' })).toHaveTextContent('Lan');
+    expect(document.querySelector('[data-slot=email-block]')?.textContent).not.toContain('Testimonial');
+    expect(document.querySelector('[data-slot=email-block] input, [data-slot=email-block] fieldset')).toBeNull();
+  });
+
+  it('loads a stored block as it was written, and sets a number in its settings popover', async () => {
     const probe = await mount([stored({ size: 1 })]);
 
     await expect.element(page.getByText('Kind words')).toBeVisible();
+    await userEvent.click(page.getByRole('button', { name: 'Block settings' }));
     const size = page.getByRole('spinbutton', { name: 'Size' });
     await expect.element(size).toHaveValue(1);
     await userEvent.fill(size, '3');
@@ -205,24 +216,24 @@ describe("an items field in the block's view", () => {
     content: { links: entries },
   });
 
-  it('draws a row per stored item, each field in a text field named for it', async () => {
+  it('draws a control per stored item, named for its label, that opens its fields in a popover', async () => {
     await mount([links([site, { label: 'Shop', href: '' }])]);
 
-    const first = page.getByRole('group', { name: 'Links 1' });
-    await expect.element(first.getByRole('textbox', { name: 'Label' })).toHaveTextContent('Site');
-    await expect.element(first.getByRole('textbox', { name: 'Href' })).toHaveTextContent('https://x.test');
-    await expect
-      .element(page.getByRole('group', { name: 'Links 2' }).getByRole('textbox', { name: 'Label' }))
-      .toHaveTextContent('Shop');
+    await expect.element(page.getByRole('button', { name: 'Shop' })).toBeVisible();
+    await userEvent.click(page.getByRole('button', { name: 'Site' }));
+    const popover = page.getByRole('dialog', { name: 'Links 1' });
+    await expect.element(popover.getByRole('textbox', { name: 'Label' })).toHaveTextContent('Site');
+    await expect.element(popover.getByRole('textbox', { name: 'Href' })).toHaveTextContent('https://x.test');
   });
 
-  it('adds an item of empty fields up to the most it takes, and exports what is typed in it', async () => {
+  it('adds an item of empty fields up to the most it takes, opens it, and exports what is typed in it', async () => {
     const probe = await mount([links([site])]);
 
-    const add = page.getByRole('button', { name: 'Add' });
+    const add = page.getByRole('button', { name: 'Add to Links' });
     await userEvent.click(add);
     await expect.element(add).toBeDisabled();
-    await userEvent.click(page.getByRole('group', { name: 'Links 2' }).getByRole('textbox', { name: 'Label' }));
+    const label = page.getByRole('dialog', { name: 'Links 2' }).getByRole('textbox', { name: 'Label' });
+    await expect.element(label).toHaveFocus();
     await userEvent.keyboard('Shop');
 
     await vi.waitFor(() =>
@@ -230,29 +241,46 @@ describe("an items field in the block's view", () => {
     );
   });
 
-  it('removes an item down to the fewest it takes', async () => {
+  it('writes an item link the email can send, and tells why it refuses one it cannot', async () => {
+    const probe = await mount([links([site])]);
+
+    await userEvent.click(page.getByRole('button', { name: 'Site' }));
+    const href = page.getByRole('dialog', { name: 'Links 1' }).getByRole('textbox', { name: 'Href' });
+    await userEvent.click(href);
+    await userEvent.keyboard('{Control>}a{/Control}{Meta>}a{/Meta}javascript:alert(1)');
+    await expect.element(href).toHaveAttribute('aria-invalid', 'true');
+    expect(last(probe.reported)?.[0].content ?? { links: [site] }).toEqual({ links: [site] });
+
+    await userEvent.keyboard('{Control>}a{/Control}{Meta>}a{/Meta}https://y.test');
+    await vi.waitFor(() =>
+      expect(last(probe.reported)?.[0].content).toEqual({ links: [{ label: 'Site', href: 'https://y.test' }] }),
+    );
+  });
+
+  it('removes an item down to the fewest it takes, and moves the focus to the add control', async () => {
     const probe = await mount([links([site, { label: 'Shop', href: 'https://y.test' }])]);
 
-    await userEvent.click(page.getByRole('group', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }));
+    await userEvent.click(page.getByRole('button', { name: 'Site' }));
+    await userEvent.click(page.getByRole('dialog', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }));
 
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[0].content).toEqual({ links: [{ label: 'Shop', href: 'https://y.test' }] }),
     );
+    await expect.element(page.getByRole('button', { name: 'Add to Links' })).toHaveFocus();
+    await userEvent.click(page.getByRole('button', { name: 'Shop' }));
     await expect
-      .element(page.getByRole('group', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }))
+      .element(page.getByRole('dialog', { name: 'Links 1' }).getByRole('button', { name: 'Remove' }))
       .toBeDisabled();
   });
 
   it('adds and removes nothing in locked structure, while its text stays editable', async () => {
     await mount([links([site, { label: 'Shop', href: '' }])], 'locked');
 
-    await expect.element(page.getByRole('button', { name: 'Add' })).toBeDisabled();
-    await expect
-      .element(page.getByRole('group', { name: 'Links 2' }).getByRole('button', { name: 'Remove' }))
-      .toBeDisabled();
-    await expect
-      .element(page.getByRole('group', { name: 'Links 1' }).getByRole('textbox', { name: 'Label' }))
-      .not.toHaveAttribute('aria-readonly', 'true');
+    await expect.element(page.getByRole('button', { name: 'Add to Links' })).toBeDisabled();
+    await userEvent.click(page.getByRole('button', { name: 'Shop' }));
+    const popover = page.getByRole('dialog', { name: 'Links 2' });
+    await expect.element(popover.getByRole('button', { name: 'Remove' })).toBeDisabled();
+    await expect.element(popover.getByRole('textbox', { name: 'Label' })).not.toHaveAttribute('aria-readonly', 'true');
   });
 });
 

@@ -1,8 +1,19 @@
 import { useId, useState, type ReactNode } from 'react';
 import { z } from 'zod';
 import { BlocksIcon } from '@/registry/bases/base-ui/icons/lucide/blocks-icon';
+import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
+import { LinkIcon } from '@/registry/bases/base-ui/icons/lucide/link-icon';
+import { SettingsIcon } from '@/registry/bases/base-ui/icons/lucide/settings-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/registry/bases/base-ui/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import {
   defineFeature,
@@ -18,21 +29,25 @@ import type {
   EmailBlockDefinition,
   BlockEditor,
   BlockEditorAttribute,
-  BlockEditorItems,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
-import type { VariableFeature } from '../variables/variable';
-import { VariableTextField } from '../variables/variable-text-field';
-import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
+import { EmailAddressPopover } from './email-address-popover';
+import { EmailBlockItems, emailBlockItemsOf } from './email-block-items';
+import { EmailInlineField } from './email-inline-field';
 import { blockAt, cellAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
 import { blockClasses } from './nodes/block-style';
 
 export interface EmailBlockFeatureOptions {
   /** The slash menu's icon for the block; a blocks icon when absent. */
   icon?: unknown;
-  /** Draws the block in the editor in place of the default frame; it gets the node's attributes and its body. */
+  /** Draws the block in the editor in place of `view`, from the node view's own props. */
   nodeView?(props: NodeViewProps<Record<string, unknown>>): ReactNode;
+  /**
+   * Draws the block's content in the editor and outside it, inside the root that names it; the default draws the
+   * fields as the email does, each written in place.
+   */
+  view?(props: EmailBlockViewProps): ReactNode;
   /** The words of the slash item, read once, when the feature is built; the kit's own in the editor's views. */
   messages?: () => ProfileEditorMessages;
   /** Whether a lane takes the block. Default true; a block drawn at the card's whole width sets false. */
@@ -75,17 +90,16 @@ function refusalOf(editor: IEditor, block: Found): string | null {
   return typeof id === 'string' && context.required().includes(id) ? words.deleteRequired : null;
 }
 
-/** The frame the block is drawn in, before the editor mounts and in it: its name over its body and its fields. */
-function EmailBlockFrame({ type, title, children }: { type: string; title: string; children: ReactNode }) {
+/** The root every product block is drawn in, in the editor and out of it: named by its title, with no caption. */
+function EmailBlock({ type, title, children }: { type: string; title: string; children: ReactNode }) {
   return (
     <div
       data-slot="email-block"
       data-type={type}
-      className={cn('cn-editor-block flex flex-col gap-2 border p-3', blockClasses({}))}
+      role="group"
+      aria-label={title}
+      className={cn('cn-editor-block group/email-block relative flex flex-col gap-2', blockClasses({}))}
     >
-      <span contentEditable={false} className="text-muted-foreground text-xs font-medium select-none">
-        {title}
-      </span>
       {children}
     </div>
   );
@@ -111,8 +125,8 @@ function EmailBlockNumberField({
   // takes it once it is in range, and the field shows the block's value again when it loses the focus.
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor={id} className="text-muted-foreground text-xs">
+    <div className="flex items-center justify-between gap-2">
+      <label htmlFor={id} className="text-sm">
         {label}
       </label>
       <Input
@@ -134,110 +148,223 @@ function EmailBlockNumberField({
   );
 }
 
-type Item = Readonly<Record<string, string>>;
+/** The words a block is drawn in: the host's for its type, the definition's labels under them. */
+export type EmailBlockWords = ReturnType<typeof wordsOf>;
 
-/** `value` as `items`' items: each stored entry an object of the item's fields, `''` where it holds none. */
-function itemsOf(items: BlockEditorItems, value: unknown): Item[] {
-  if (!Array.isArray(value)) return [];
-  return value.map((entry: unknown) => {
-    const stored = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
-    return Object.fromEntries(
-      items.fields.map(({ name }) => [name, typeof stored[name] === 'string' ? (stored[name] as string) : '']),
-    );
-  });
+/** What a block's view draws from, in the editor and outside it, where `editor` is null. */
+export interface EmailBlockViewProps {
+  readonly block: BlockEditor;
+  /** The node's attributes as stored: its fields' text, its items and its attributes. */
+  readonly values: Readonly<Record<string, unknown>>;
+  /** The body: the editable inline content in the editor, its text outside it; null for a block with none. */
+  readonly body: ReactNode;
+  readonly editable: boolean;
+  /** False in locked structure and on a required block: no item is added or removed, no setting changes. */
+  readonly restructure: boolean;
+  /** Why an address, an item or a setting cannot change, as in locked structure; null where it can. */
+  readonly refusal: string | null;
+  /** The email editor the block is in; null where it is drawn outside one. */
+  readonly editor: IEditor | null;
+  readonly words: EmailBlockWords;
+  readonly messages: ProfileEditorMessages;
+  /** Writes fields and attributes onto the block; does nothing outside an editor. */
+  update(patch: Readonly<Record<string, unknown>>): void;
 }
 
+/** The text field `name` holds on `values`, `''` where it holds none. */
+export function emailBlockText(values: Readonly<Record<string, unknown>>, name: string): string {
+  const value = values[name];
+  return typeof value === 'string' ? value : '';
+}
+
+/** An image the editor can draw: a literal web address; one that names a variable has nothing to draw yet. */
+const DRAWN_IMAGE = /^https?:\/\//i;
+
 /**
- * An items field: a row per item, its fields in variable text fields, with Remove beside it and Add under the
- * rows. `restructure` is false in locked structure and on a required block, where the rows' text still edits.
+ * A product block as the email draws it: its images, its body and its plain fields written in place, its items in
+ * a row, and its links and number settings behind small icons that open a popover.
  */
-function EmailBlockItemsField({
-  items,
-  entries,
-  label,
-  fieldLabel,
-  readOnly,
+function EmailBlockDefaultView({
+  block,
+  values,
+  body,
+  editable,
   restructure,
-  declarations,
-  variables,
+  refusal,
+  editor,
+  words,
   messages,
-  onValueChange,
-}: {
-  items: BlockEditorItems;
-  entries: readonly Item[];
-  label: string;
-  fieldLabel(field: string, fallback: string): string;
-  readOnly: boolean;
-  restructure: boolean;
-  declarations(): readonly VariableDeclaration[];
-  variables: VariableFeature | undefined;
-  messages: ProfileEditorMessages;
-  onValueChange(entries: Item[]): void;
-}): ReactNode {
-  const empty = (): Item => Object.fromEntries(items.fields.map(({ name }) => [name, '']));
+  update,
+}: EmailBlockViewProps): ReactNode {
+  const numbers = block.attributes.filter((attribute) => attribute.kind === 'number');
+  const images = block.fields.filter((field) => field.kind === 'imageUrl');
+  const plain = block.fields.filter((field) => field.kind === 'plainText');
+  const links = block.fields.filter((field) => field.kind === 'link');
+  const live = editor !== null && editable;
   return (
-    <fieldset data-slot="email-block-items" data-name={items.name} className="flex flex-col gap-2">
-      <legend className="text-muted-foreground mb-1 text-xs">{label}</legend>
-      {entries.map((entry, index) => (
-        <div
-          // An item has no identity of its own; its place is what the author sees and edits.
-          key={index}
-          role="group"
-          aria-label={messages.itemRow(label, index + 1)}
-          data-slot="email-block-item"
-          className="flex items-start gap-2"
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            {items.fields.map((field) => (
-              <VariableTextField
-                key={field.name}
-                value={entry[field.name] ?? ''}
-                onValueChange={(value) =>
-                  onValueChange(entries.map((item, at) => (at === index ? { ...item, [field.name]: value } : item)))
-                }
-                declarations={declarations}
-                variables={variables}
-                label={fieldLabel(field.name, field.label)}
-                placeholder={fieldLabel(field.name, field.label)}
-                readOnly={readOnly}
-                messages={messages}
-                className={cn('border-b', field.kind !== 'plainText' && 'font-mono text-sm')}
-              />
-            ))}
+    <>
+      {images.map((field) => {
+        const src = emailBlockText(values, field.name).trim();
+        const drawn = DRAWN_IMAGE.test(src) && <img src={src} alt="" className="block max-w-full" />;
+        if (!live) return drawn && <div key={field.name}>{drawn}</div>;
+        const label = words.field(field.name, field.label);
+        return (
+          <div key={field.name} contentEditable={false}>
+            <EmailAddressPopover
+              editor={editor}
+              kind="image"
+              label={label}
+              value={emailBlockText(values, field.name)}
+              tooltip={label}
+              onApply={(address) => update({ [field.name]: address })}
+              onRemove={field.required ? undefined : () => update({ [field.name]: '' })}
+              disabledReason={refusal}
+              trigger={
+                <button
+                  type="button"
+                  aria-label={label}
+                  className={cn(
+                    'focus-visible:ring-ring/50 block w-full outline-none focus-visible:ring-3',
+                    !drawn &&
+                      'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
+                  )}
+                >
+                  {drawn || (
+                    <>
+                      <ImageIcon size={16} aria-hidden />
+                      {messages.imagePlaceholder}
+                    </>
+                  )}
+                </button>
+              }
+            />
           </div>
-          {!readOnly && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={!restructure || entries.length <= items.min}
-              onClick={() => onValueChange(entries.filter((_item, at) => at !== index))}
-            >
-              {messages.removeItem}
-            </Button>
-          )}
+        );
+      })}
+      {block.body !== null && (
+        <div data-slot="email-block-body" className="min-h-6">
+          {body}
+        </div>
+      )}
+      {block.lanes !== null && <div data-slot="email-block-lanes">{body}</div>}
+      {plain.length > 0 && (
+        <div contentEditable={false} className="text-muted-foreground flex flex-col text-sm">
+          {plain.map((field) => (
+            <EmailInlineField
+              key={field.name}
+              editor={editor}
+              label={words.field(field.name, field.label)}
+              placeholder={words.field(field.name, field.label)}
+              value={emailBlockText(values, field.name)}
+              readOnly={!editable}
+              onValueChange={(value) => update({ [field.name]: value })}
+            />
+          ))}
+        </div>
+      )}
+      {block.items.map((items) => (
+        <div key={items.name} contentEditable={false}>
+          <EmailBlockItems
+            editor={editor}
+            items={items}
+            entries={emailBlockItemsOf(items, values[items.name])}
+            label={words.field(items.name, items.label)}
+            fieldLabel={(field, fallback) => words.field(`${items.name}.${field}`, fallback)}
+            readOnly={!editable}
+            restructure={restructure}
+            onValueChange={(entries) => update({ [items.name]: entries })}
+          />
         </div>
       ))}
-      {!readOnly && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="self-start"
-          disabled={!restructure || entries.length >= items.max}
-          onClick={() => onValueChange([...entries, empty()])}
+      {live && (links.length > 0 || numbers.length > 0) && (
+        <div
+          contentEditable={false}
+          data-slot="email-block-controls"
+          className="absolute top-1 right-1 flex gap-0.5"
+          onFocus={(event) => selectBlockOf(editor, event.currentTarget)}
         >
-          {messages.addItem}
-        </Button>
+          {links.map((field) => {
+            const label = words.field(field.name, field.label);
+            const value = emailBlockText(values, field.name);
+            return (
+              <EmailAddressPopover
+                key={field.name}
+                editor={editor}
+                kind="link"
+                label={label}
+                value={value}
+                tooltip={label}
+                onApply={(address) => update({ [field.name]: address })}
+                onRemove={field.required || value === '' ? undefined : () => update({ [field.name]: '' })}
+                disabledReason={refusal}
+                trigger={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={label}
+                    className={cn(value === '' && 'text-muted-foreground')}
+                  >
+                    <LinkIcon size={14} aria-hidden />
+                  </Button>
+                }
+              />
+            );
+          })}
+          {numbers.length > 0 && (
+            <Popover>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={messages.blockSettings}
+                          className="text-muted-foreground"
+                        />
+                      }
+                    />
+                  }
+                >
+                  <SettingsIcon size={14} aria-hidden />
+                </TooltipTrigger>
+                <TooltipContent>{messages.blockSettings}</TooltipContent>
+              </Tooltip>
+              <PopoverContent align="end" className="w-64 gap-3" aria-label={messages.blockSettings}>
+                <PopoverHeader>
+                  <PopoverTitle>{words.title}</PopoverTitle>
+                </PopoverHeader>
+                {numbers.map(
+                  (attribute) =>
+                    attribute.kind === 'number' && (
+                      <EmailBlockNumberField
+                        key={attribute.name}
+                        label={words.attribute(attribute)}
+                        value={current(values, attribute) as number}
+                        min={attribute.min}
+                        max={attribute.max}
+                        disabled={!restructure}
+                        onValueChange={(value) => update({ [attribute.name]: value })}
+                      />
+                    ),
+                )}
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
       )}
-    </fieldset>
+    </>
   );
 }
 
 /**
- * The feature of a product's block in the email editor: its node, with its body as the node's inline content
- * and its other fields and its number attributes in fields under it; its email codec; its slash item; and
- * block menu items, which `emailKit` draws among its own: a radio submenu per choice, a checkbox per toggle.
+ * The feature of a product's block in the email editor: its node, with its body as the node's inline content and
+ * its other fields drawn as the email draws them, each written in place or in a popover; its email codec; its slash
+ * item; and block menu items, which `emailKit` draws among its own: a radio submenu per choice, a checkbox per
+ * toggle.
  * Hand it to `emailKit`'s `extra`, or the definition to `EmailEditor`'s `blocks`, which builds this.
  */
 export function emailBlockFeature(
@@ -277,6 +404,8 @@ export function emailBlockFeature(
     return attributeSchema(attribute).safeParse(value).success ? { engine: found.engine, at } : undefined;
   };
 
+  const View = options.view ?? EmailBlockDefaultView;
+
   function EmailBlockView(props: NodeViewProps<Record<string, unknown>>) {
     const { attrs: values, updateAttrs, editable, editor, children } = props;
     if (options.nodeView) return options.nodeView(props);
@@ -284,100 +413,54 @@ export function emailBlockFeature(
     const messages = context?.messages() ?? DEFAULT_PROFILE_MESSAGES;
     const shown = wordsOf(block, messages);
     const required = typeof values.id === 'string' && (context?.required().includes(values.id) ?? false);
-    const restyle = editable && !(context?.locked() ?? false) && !required;
-    const numbers = block.attributes.filter((attribute) => attribute.kind === 'number');
+    const refusal = context?.locked() ? messages.deleteLocked : required ? messages.deleteRequired : null;
     return (
-      <EmailBlockFrame type={block.type} title={shown.title}>
-        {block.body !== null && (
-          <div data-slot="email-block-body" className="min-h-6">
-            {children as ReactNode}
-          </div>
-        )}
-        {block.lanes !== null && <div data-slot="email-block-lanes">{children as ReactNode}</div>}
-        {(block.fields.length > 0 || block.items.length > 0 || numbers.length > 0) && (
-          <div
-            contentEditable={false}
-            // A field takes the focus without moving the selection; Mod-/ acts on the selected block.
-            onFocus={(event) => selectBlockOf(editor, event.currentTarget)}
-            className="flex flex-col gap-2"
-          >
-            {block.fields.map((field) => (
-              <VariableTextField
-                key={field.name}
-                value={typeof values[field.name] === 'string' ? (values[field.name] as string) : ''}
-                onValueChange={(value) => updateAttrs({ [field.name]: value })}
-                declarations={() => context?.declarations() ?? []}
-                variables={context?.variables}
-                label={shown.field(field.name, field.label)}
-                placeholder={shown.field(field.name, field.label)}
-                readOnly={!editable}
-                messages={messages}
-                className={cn('border-b', field.kind !== 'plainText' && 'font-mono text-sm')}
-              />
-            ))}
-            {block.items.map((items) => (
-              <EmailBlockItemsField
-                key={items.name}
-                items={items}
-                entries={itemsOf(items, values[items.name])}
-                label={shown.field(items.name, items.label)}
-                fieldLabel={(field, fallback) => shown.field(`${items.name}.${field}`, fallback)}
-                readOnly={!editable}
-                restructure={restyle}
-                declarations={() => context?.declarations() ?? []}
-                variables={context?.variables}
-                messages={messages}
-                onValueChange={(entries) => updateAttrs({ [items.name]: entries })}
-              />
-            ))}
-            {numbers.map(
-              (attribute) =>
-                attribute.kind === 'number' && (
-                  <EmailBlockNumberField
-                    key={attribute.name}
-                    label={shown.attribute(attribute)}
-                    value={current(values, attribute) as number}
-                    min={attribute.min}
-                    max={attribute.max}
-                    disabled={!restyle}
-                    onValueChange={(value) => updateAttrs({ [attribute.name]: value })}
-                  />
-                ),
-            )}
-          </div>
-        )}
-      </EmailBlockFrame>
+      <EmailBlock type={block.type} title={shown.title}>
+        <View
+          block={block}
+          values={values}
+          body={children as ReactNode}
+          editable={editable}
+          restructure={editable && refusal === null}
+          refusal={refusal}
+          editor={editor}
+          words={shown}
+          messages={messages}
+          update={updateAttrs}
+        />
+      </EmailBlock>
     );
   }
 
   const reactCodec: ReactNodeCodec = {
     node: block.node,
-    toReact: (node, ctx) => (
-      <EmailBlockFrame type={block.type} title={words.title}>
-        {block.body !== null && <div data-slot="email-block-body">{ctx.renderChildren(node)}</div>}
-        {block.lanes !== null && (
-          <div data-slot="email-block-lanes">
-            <div data-node-view-content="">
-              <div data-node-view-content-react="">{ctx.renderChildren(node)}</div>
-            </div>
+    toReact: (node, ctx) => {
+      const children = ctx.renderChildren(node);
+      const body =
+        block.lanes === null ? (
+          children
+        ) : (
+          <div data-node-view-content="">
+            <div data-node-view-content-react="">{children}</div>
           </div>
-        )}
-        {block.fields.map((field) => (
-          <span key={field.name} className="border-b">
-            {String(node.attrs?.[field.name] ?? '')}
-          </span>
-        ))}
-        {block.items.flatMap((items) =>
-          itemsOf(items, node.attrs?.[items.name]).map((entry, index) => (
-            <span key={`${items.name}-${index}`} data-slot="email-block-item" className="flex flex-col border-b">
-              {items.fields.map((field) => (
-                <span key={field.name}>{entry[field.name]}</span>
-              ))}
-            </span>
-          )),
-        )}
-      </EmailBlockFrame>
-    ),
+        );
+      return (
+        <EmailBlock type={block.type} title={words.title}>
+          <View
+            block={block}
+            values={(node.attrs ?? {}) as Record<string, unknown>}
+            body={block.body === null && block.lanes === null ? null : body}
+            editable={false}
+            restructure={false}
+            refusal={null}
+            editor={null}
+            words={words}
+            messages={DEFAULT_PROFILE_MESSAGES}
+            update={() => {}}
+          />
+        </EmailBlock>
+      );
+    },
   };
 
   const feature = defineFeature({

@@ -2823,7 +2823,17 @@
       "title": "Block Library",
       "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/input", "@shadcn/utils", "@zui/document-editor", "@zui/lucide-blocks-icon"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/input",
+        "@shadcn/popover",
+        "@shadcn/tooltip",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/lucide-blocks-icon",
+        "@zui/lucide-trash-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/blocks/index.ts",
@@ -2844,6 +2854,11 @@
           "path": "registry/bases/base-ui/editor/document/blocks/block-address-field.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/blocks/block-address-field.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-address-popover.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-address-popover.tsx"
         }
       ],
       "dependencies": ["@zeroxsolutions/editor-core", "zod"]
@@ -2969,10 +2984,14 @@
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/input",
         "@shadcn/utils",
         "@zui/block-library",
         "@zui/document-editor",
-        "@zui/lucide-id-card-icon"
+        "@zui/lucide-id-card-icon",
+        "@zui/lucide-image-icon",
+        "@zui/lucide-link-icon"
       ],
       "files": [
         {
@@ -3642,10 +3661,12 @@
         "@shadcn/tabs",
         "@shadcn/tooltip",
         "@shadcn/utils",
+        "@zui/block-library",
         "@zui/chat-input",
         "@zui/document-editor",
         "@zui/editor-button",
         "@zui/editor-callout",
+        "@zui/editor-card",
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
@@ -3664,9 +3685,12 @@
         "@zui/lucide-mailbox-icon",
         "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-pencil-line-icon",
+        "@zui/lucide-plus-icon",
+        "@zui/lucide-settings-icon",
         "@zui/lucide-table-icon",
         "@zui/lucide-text-align-start-icon",
-        "@zui/lucide-text-quote-icon"
+        "@zui/lucide-text-quote-icon",
+        "@zui/lucide-trash-icon"
       ],
       "files": [
         {
@@ -3773,6 +3797,41 @@
           "path": "registry/bases/base-ui/editor/profiles/variables/code-mirror-variables.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/variables/code-mirror-variables.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-address-popover.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-address-popover.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-block-items.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-block-items.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-feature-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-feature-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-inline-field.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-inline-field.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-legal-footer-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-legal-footer-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-social-links-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-social-links-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-spacer-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-spacer-view.tsx"
         }
       ],
       "dependencies": [

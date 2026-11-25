@@ -8,21 +8,27 @@ import { card } from './card';
 import { card as cardDefinition } from '@zeroxsolutions/editor-core/blocks/index';
 
 describe('the card in the Document Editor', () => {
-  it('is inserted from the slash menu and takes its image, title, text and button', async () => {
+  it('is inserted from the slash menu and takes its image and its button link in popovers, its text in place', async () => {
     const editor = await mountDocumentEditor([standardKit(), card(cardDefinition)]);
 
     await insertFromSlashMenu('Card');
-    await userEvent.click(page.getByRole('textbox', { name: 'Image link' }));
-    await userEvent.keyboard('https://i.test/hoi-an.jpg{Enter}');
+    await userEvent.click(page.getByRole('button', { name: 'Image', exact: true }));
+    await userEvent.click(page.getByRole('textbox', { name: 'Image', exact: true }));
+    await userEvent.keyboard('javascript:alert(1){Enter}');
+    await expect
+      .element(page.getByRole('textbox', { name: 'Image', exact: true }))
+      .toHaveAttribute('aria-invalid', 'true');
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}https://i.test/hoi-an.jpg{Enter}');
     await findElement('[data-slot=card-image]');
     await userEvent.click(page.getByRole('textbox', { name: 'Title' }));
     await userEvent.keyboard('Hoi An');
     await userEvent.click(await findElement('[data-slot=card-text]'));
     await userEvent.keyboard('Lanterns');
-    await userEvent.click(page.getByRole('textbox', { name: 'Button label' }));
+    await userEvent.click(page.getByRole('textbox', { name: 'Add a button' }));
     await userEvent.keyboard('Read more');
+    await userEvent.click(page.getByRole('button', { name: 'Button link' }));
     await userEvent.click(page.getByRole('textbox', { name: 'Button link' }));
-    await userEvent.keyboard('https://guide.test');
+    await userEvent.keyboard('https://guide.test{Enter}');
 
     await expect
       .poll(() => editor.getJSON().content?.find((node) => node.type === 'card'))

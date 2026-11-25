@@ -122,10 +122,10 @@ const text = (id: string, content: string): EditorEmailBlock => ({
   content: { text: content },
 });
 
-// The hero's and the card's images are the docs' own share cards, and the social icons the house's emoji artwork:
-// a mail client loads only a hosted https image.
+// The hero's and the card's images are the docs' own share cards, and the social icons Fluent Emoji's PNGs: a mail
+// client loads only a hosted https image, and Outlook draws no WebP.
 const SHARE = 'https://ui.zeroxsolutions.com/og/docs/editor';
-const EMOJI = 'https://fluent-emoji.zeroxsolutions.com/3d';
+const EMOJI = 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets';
 
 const initial: EditorEmailBlock[] = [
   {
@@ -197,9 +197,17 @@ const initial: EditorEmailBlock[] = [
     attributes: { align: 'center', size: 'small' },
     content: {
       links: [
-        { label: 'Website', icon: `${EMOJI}/1f310.webp`, href: 'https://example.com' },
-        { label: 'Community', icon: `${EMOJI}/1f4ac.webp`, href: 'https://example.com/community' },
-        { label: 'Email us', icon: `${EMOJI}/2709-fe0f.webp`, href: 'mailto:hello@example.com' },
+        {
+          label: 'Website',
+          icon: `${EMOJI}/Globe%20with%20meridians/3D/globe_with_meridians_3d.png`,
+          href: 'https://example.com',
+        },
+        {
+          label: 'Community',
+          icon: `${EMOJI}/Speech%20balloon/3D/speech_balloon_3d.png`,
+          href: 'https://example.com/community',
+        },
+        { label: 'Email us', icon: `${EMOJI}/Envelope/3D/envelope_3d.png`, href: 'mailto:hello@example.com' },
       ],
     },
   },

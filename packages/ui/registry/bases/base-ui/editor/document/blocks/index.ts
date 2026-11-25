@@ -7,3 +7,8 @@ export {
 } from './block-feature';
 export { linkAddress, sourceAddress } from './block-address';
 export { BlockAddressField, type BlockAddressFieldProps } from './block-address-field';
+export {
+  BlockAddressPopover,
+  type BlockAddressPopoverFieldProps,
+  type BlockAddressPopoverProps,
+} from './block-address-popover';

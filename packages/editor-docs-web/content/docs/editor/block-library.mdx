@@ -69,7 +69,7 @@ pnpm add @zeroxsolutions/editor-core zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add input utils @zui/document-editor @zui/lucide-blocks-icon
+pnpm dlx shadcn@latest add button field input popover tooltip utils @zui/document-editor @zui/lucide-blocks-icon @zui/lucide-trash-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -92,6 +92,12 @@ pnpm dlx shadcn@latest add input utils @zui/document-editor @zui/lucide-blocks-i
   name="block-library"
   file="registry/bases/base-ui/editor/document/blocks/block-address-field.tsx"
   title="components/editor/document/blocks/block-address-field.tsx"
+/>
+
+<ComponentSource
+  name="block-library"
+  file="registry/bases/base-ui/editor/document/blocks/block-address-popover.tsx"
+  title="components/editor/document/blocks/block-address-popover.tsx"
 />
 
 <Step>Update the import paths to match your project.</Step>
