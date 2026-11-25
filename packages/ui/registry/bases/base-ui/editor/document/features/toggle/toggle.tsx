@@ -79,7 +79,8 @@ const toggleCodec: ReactNodeCodec<ToggleAttrs> = {
   // `html` token, so HTML import is the two-way path — never parse it here.
   fromMarkdown: () => null,
   fromHTML: (element, ctx) => {
-    if (element.tagName !== 'DETAILS') return null;
+    // A toggle heading's `<details>` is the toggle heading's to read.
+    if (element.tagName !== 'DETAILS' || element.hasAttribute('data-toggle-heading')) return null;
     return {
       type: 'toggle',
       attrs: { open: element.hasAttribute('open') },

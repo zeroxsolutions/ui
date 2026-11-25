@@ -27,6 +27,7 @@ export function renderToReact(doc: NodeJSON, registry: CodecRegistry): ReactNode
     format: 'html',
     serializeNode: () => '',
     serializeChildren: () => '',
+    doc,
     renderChildren: (node) =>
       (node.content ?? []).map((child, index) => <Fragment key={index}>{renderNode(child, registry, ctx)}</Fragment>),
   };
