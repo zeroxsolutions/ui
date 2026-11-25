@@ -5,7 +5,7 @@ import '../../../styles.css';
 import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { card } from './card';
-import { cardDefinition } from '../../../../../../../src/test/card-definition';
+import { card as cardDefinition } from '@zeroxsolutions/editor-core/blocks/index';
 
 describe('the card in the Document Editor', () => {
   it('is inserted from the slash menu and takes its image, title, text and button', async () => {
