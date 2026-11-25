@@ -96,6 +96,8 @@ interface Probe {
   declare(profile: EditorProfile): void;
   /** Turns read-only on or off, as a host opening a draft does. */
   lock(readOnly: boolean): void;
+  /** Locks or frees the structure, as a host opening a template's locked copy does. */
+  restructure(structure: 'free' | 'locked'): void;
 }
 
 interface HarnessProps {
@@ -120,8 +122,11 @@ function Host({
   profile: first,
   preview,
   readOnly: locked,
+  structure: initialStructure,
   ...props
 }: HarnessProps) {
+  const [structure, setStructure] = useState(initialStructure);
+  probe.restructure = setStructure;
   const [value, setValue] = useState(initial);
   const [current, setProfile] = useState(first);
   probe.declare = setProfile;
@@ -140,6 +145,7 @@ function Host({
         {...previewProps}
         label="Body"
         readOnly={readOnly}
+        structure={structure}
         profile={current}
         value={value}
         renderBlockAdornment={adornment}
@@ -172,6 +178,7 @@ async function mount(
     adorn: () => {},
     declare: () => {},
     lock: () => {},
+    restructure: () => {},
   };
   await render(<Host profile={profile} {...props} initial={initial} probe={probe} />);
   await vi.waitFor(() => {
@@ -1065,13 +1072,18 @@ describe('EmailEditor presets', () => {
     expect(slash()).not.toContain('Call to action');
   });
 
-  it('leaves out a preset holding a card while the caret is in a column', async () => {
-    await mount([paragraph('Top', 'p1'), columns()], { presets });
-
-    await caretAfter('Top');
-    await vi.waitFor(() => expect(offered()).toEqual(['Call to action', 'Action', 'Card']));
+  it('lists a preset holding a card while the caret is in a column, refusing its click and saying why', async () => {
+    const probe = await mount([paragraph('Top', 'p1'), columns()], { presets });
     await caretAfter('Left');
-    await vi.waitFor(() => expect(offered()).toEqual(['Call to action', 'Action']));
+
+    await vi.waitFor(() => expect(row('Card').element().getAttribute('aria-disabled')).toBe('true'));
+    await expect.element(row('Card')).toHaveAccessibleDescription(/caret/);
+    expect(offered()).toEqual(['Call to action', 'Action', 'Card']);
+    expect(row('Action').element().getAttribute('aria-disabled')).toBeNull();
+
+    // Playwright clicks no aria-disabled element unless forced; the click a person makes still reaches the row.
+    await userEvent.click(row('Card'), { force: true });
+    expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns']);
   });
 
   it('drops a card over a column at the top level, before the columns, and a call to action in the column', async () => {
@@ -1152,6 +1164,19 @@ describe('EmailEditor presets', () => {
 
     await expect.element(page.getByText('No presets fit here')).toBeVisible();
     expect(offered()).toEqual([]);
+  });
+
+  it('takes its presets away as the host locks the structure or turns read-only on', async () => {
+    const probe = await mount([paragraph('Hi', 'p1')], { presets });
+    await expect.element(row('Action')).toBeVisible();
+
+    probe.restructure('locked');
+    await expect.element(page.getByText('No presets fit here')).toBeVisible();
+    probe.restructure('free');
+    await expect.element(row('Action')).toBeVisible();
+
+    probe.lock(true);
+    await expect.element(page.getByText('No presets fit here')).toBeVisible();
   });
 
   it('inserts a preset as new blocks the export carries, with no problem and no id from where it came', async () => {

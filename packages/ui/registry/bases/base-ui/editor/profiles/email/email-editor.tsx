@@ -129,7 +129,8 @@ interface EmailEditorBaseProps {
    * Ready-made groups of blocks, from `definePreset` or `emailPreset`, offered in the slash menu, the "+" and an
    * `EditorPresetsPanel` given the same list. One is offered where the profile allows every kind it holds and
    * the export carries it; never in locked structure, and in a column only without a columns block, a hero or a
-   * card. Read once: a change needs a remount.
+   * card. The panel still lists such a preset while the caret is in a column, for a drag to the top level. Read
+   * once: a change needs a remount.
    *
    * @throws {EditorError} `editor.presets.duplicate_id` for two presets with one id
    */

@@ -155,4 +155,28 @@ describe('EditorPresetsPanel', () => {
     await expect.element(page.getByRole('region', { name: 'Blocks' })).toBeVisible();
     expect(page.getByRole('button', { name: /Title and text/ }).elements()).toHaveLength(0);
   });
+
+  it('inserts the preset a keyboard user presses Enter or Space on', async () => {
+    const editor = await mount({ presets: [intro] });
+    await userEvent.click(await lineHolding('First'));
+    const row = page.getByRole('button', { name: /Title and text/ });
+
+    row.element().focus();
+    await userEvent.keyboard('{Enter}');
+    await vi.waitFor(() => expect(summary(editor)).toHaveLength(4));
+    row.element().focus();
+    await userEvent.keyboard(' ');
+
+    await vi.waitFor(() => expect(summary(editor)).toHaveLength(6));
+  });
+
+  it('reads the presets again as the pointer comes over it, after the editor stopped taking edits', async () => {
+    const editor = await mount({ presets: [intro] });
+    await expect.element(page.getByRole('button', { name: /Title and text/ })).toBeVisible();
+
+    editor.setEditable(false);
+    await userEvent.hover(page.getByRole('region', { name: 'Presets' }));
+
+    await expect.element(page.getByText('No presets fit here')).toBeVisible();
+  });
 });
