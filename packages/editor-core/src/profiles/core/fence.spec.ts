@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 
 const root = resolve(import.meta.dirname, '../..');
 const coreRoot = join(root, 'profiles/core');
-const allowedFolders = [coreRoot, join(root, 'template'), join(root, 'document/core/types')];
+// The block library imports none of the profiles, which its own fence holds, so reading it here makes no cycle.
+const allowedFolders = [coreRoot, join(root, 'blocks'), join(root, 'template'), join(root, 'document/core/types')];
 // The profile throws EditorError; the file holds plain error classes and imports nothing.
 const allowedFiles = [join(root, 'document/core/errors.js')];
 const allowedPackages = ['zod'];
@@ -57,11 +58,12 @@ describe('the profile core fence', () => {
     ).toEqual(['../../document/core/index.js', '../editor/index.js', '../../composer/index.js']);
   });
 
-  it('allows the core, the template, the document types, the errors and zod', () => {
+  it('allows the core, the block library, the template, the document types, the errors and zod', () => {
     const file = join(coreRoot, 'profile.ts');
     expect(
       fenceViolations(file, [
         './types.js',
+        '../../blocks/preset.js',
         '../../template/email/index.js',
         '../../document/core/types/index.js',
         '../../document/core/errors.js',

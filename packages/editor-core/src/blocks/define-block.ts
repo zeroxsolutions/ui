@@ -17,6 +17,21 @@ import {
 } from '../template/email/define-email-block.js';
 import { documentAttributes, documentCodecOf, type DocumentBlockHtml } from './document-codec.js';
 
+/** The mark names the Document Editor's own marks and the email editor's take. */
+export const DOCUMENT_MARKS: ReadonlySet<string> = new Set([
+  'link',
+  'emailLink',
+  'bold',
+  'italic',
+  'strike',
+  'code',
+  'underline',
+  'highlight',
+  'subscript',
+  'superscript',
+  'textStyle',
+]);
+
 /**
  * The node names the Document Editor's own blocks, the email editor's and the library's take. A defined block's node beside one of
  * them would be a second node of that name in one schema.
@@ -55,18 +70,8 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'toggleHeading',
   'emailHtml',
   'emailUnknown',
-  // The marks' names, which the engine keeps in the same namespace as the nodes'.
-  'link',
-  'emailLink',
-  'bold',
-  'italic',
-  'strike',
-  'code',
-  'underline',
-  'highlight',
-  'subscript',
-  'superscript',
-  'textStyle',
+  // The engine keeps the marks' names in the same namespace as the nodes'.
+  ...DOCUMENT_MARKS,
 ]);
 
 /**

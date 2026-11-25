@@ -2,3 +2,10 @@
 export { defineBlock, type Block, type BlockOptions, type DocumentBlock, type DocumentSide } from './define-block.js';
 export type { DocumentBlockView, Markup, MarkupValue } from './document-codec.js';
 export { card } from './card.js';
+export {
+  definePreset,
+  PresetDefinitionInvalid,
+  presetContent,
+  type BlockPreset,
+  type PresetOptions,
+} from './preset.js';
