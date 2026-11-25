@@ -2269,6 +2269,41 @@
       ]
     },
     {
+      "name": "editor-presets",
+      "type": "registry:component",
+      "title": "Editor Presets",
+      "description": "Ready-made groups of blocks an author drags, clicks or picks from the slash menu into the Document Editor or the email editor.",
+      "categories": ["editor"],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"],
+      "registryDependencies": [
+        "@shadcn/card",
+        "@shadcn/empty",
+        "@shadcn/input-group",
+        "@shadcn/item",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/lucide-layout-panel-top-icon",
+        "@zui/lucide-search-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/presets-feature.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/presets-feature.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/presets-panel.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/presets-panel.tsx"
+        }
+      ]
+    },
+    {
       "name": "editor-callout",
       "type": "registry:component",
       "title": "Editor Callout",
@@ -2315,6 +2350,28 @@
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "zod"]
+    },
+    {
+      "name": "editor-presets-demo",
+      "type": "registry:example",
+      "title": "Editor Presets Demo",
+      "description": "A document beside a panel of two presets, two columns and a tip in a callout, which its slash menu offers too.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-button",
+        "@zui/editor-callout",
+        "@zui/editor-columns",
+        "@zui/editor-presets"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-presets-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-presets-demo.tsx"
+        }
+      ]
     },
     {
       "name": "editor-callout-demo",
@@ -3670,6 +3727,7 @@
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
+        "@zui/editor-presets",
         "@zui/editor-table",
         "@zui/lucide-at-sign-icon",
         "@zui/lucide-blocks-icon",
@@ -3697,6 +3755,11 @@
           "path": "registry/bases/base-ui/editor/profiles/email/email-editor.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/email-editor.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-presets.ts",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-presets.ts"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/email/email-preview.tsx",

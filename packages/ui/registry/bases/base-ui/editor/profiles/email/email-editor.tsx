@@ -32,7 +32,7 @@ import {
   type EditorFeature,
   type IEditor,
 } from '@zeroxsolutions/editor-core/document/core/index';
-import type { Block } from '@zeroxsolutions/editor-core/blocks/index';
+import type { Block, BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -51,6 +51,7 @@ import {
   type RenderEmailInput,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import { TriggerLayer } from '../../composer/triggers/trigger-layer';
+import { presetsFeature } from '../../document/features/presets/presets-feature';
 import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { ChromeControl } from '../../document/ui/chrome-icon';
@@ -64,6 +65,7 @@ import { refreshVariables, variableFeature } from '../variables/variable';
 import { VariableMenu } from '../variables/variable-menu';
 import { emailBlockFeature } from './email-block-feature';
 import { emailKit, emailUi, type EmailUi } from './email-kit';
+import { emailPresetFits } from './email-presets';
 import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { EmailLinkPopover } from './email-link-popover';
@@ -123,6 +125,13 @@ interface EmailEditorBaseProps {
    * `blocks`. Read once: a change needs a remount.
    */
   features?: EditorFeature[];
+  /**
+   * Ready-made groups of blocks, from `definePreset` or `emailPreset`, offered in the slash menu, the "+" and an
+   * `EditorPresetsPanel` given the same list. One is offered where the profile allows every kind it holds and
+   * the export carries it; never in locked structure, and in a column only without a columns block, a hero or a
+   * card. Read once: a change needs a remount.
+   */
+  presets?: readonly BlockPreset[];
   /** The ids of the blocks the author may not remove. */
   required?: readonly string[];
   /** `locked` lets the author edit text and variables only; nothing is inserted, removed or restyled. */
@@ -321,6 +330,7 @@ export function EmailEditor({
   readOnly = false,
   features: hosted,
   blocks,
+  presets,
   required = [],
   structure = 'free',
   renderer,
@@ -378,7 +388,15 @@ export function EmailEditor({
       structure: () => live.current.structure,
       messages: () => live.current.text,
     });
-    const features = [...kit, overlayFeature(() => overlay.current)];
+    const offered = presets?.length
+      ? [
+          presetsFeature(presets, {
+            fits: emailPresetFits(() => live.current.profile),
+            group: live.current.text.presetsGroup,
+          }),
+        ]
+      : [];
+    const features = [...kit, ...offered, overlayFeature(() => overlay.current)];
     return { codecs, variables, features, profile, ui: collectUiContributions(features) };
   });
   // The editor reads its content once, on mount; a later value loads through setContent below.
@@ -565,7 +583,14 @@ export function EmailEditor({
     () => ({ ...setup.variables.token, emptyText: text.noVariables }),
     [setup, text.noVariables],
   );
-  const items = useMemo(() => emailUi(setup.ui, setup.profile, text), [setup, text]);
+  const items = useMemo(() => {
+    const narrowed = emailUi(setup.ui, setup.profile, text);
+    // The features were built once; the presets' heading follows the host's words.
+    const slash = narrowed.slash.map((item) =>
+      item.command === 'insertPreset' ? { ...item, group: text.presetsGroup } : item,
+    );
+    return { ...narrowed, slash };
+  }, [setup, text]);
 
   const focus = useFocusLeave(() => live.current.onBlur?.());
 
