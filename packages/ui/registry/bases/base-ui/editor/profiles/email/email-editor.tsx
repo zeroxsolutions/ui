@@ -130,6 +130,8 @@ interface EmailEditorBaseProps {
    * `EditorPresetsPanel` given the same list. One is offered where the profile allows every kind it holds and
    * the export carries it; never in locked structure, and in a column only without a columns block, a hero or a
    * card. Read once: a change needs a remount.
+   *
+   * @throws {EditorError} `editor.presets.duplicate_id` for two presets with one id
    */
   presets?: readonly BlockPreset[];
   /** The ids of the blocks the author may not remove. */

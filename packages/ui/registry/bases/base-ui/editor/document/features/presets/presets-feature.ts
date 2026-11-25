@@ -15,7 +15,12 @@ import {
   type EngineHandle,
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
-import { defineFeature, type EditorFeature, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import {
+  defineFeature,
+  EditorError,
+  type EditorFeature,
+  type IEditor,
+} from '@zeroxsolutions/editor-core/document/core/index';
 import { presetFits } from '@zeroxsolutions/editor-core/profiles/core/index';
 
 /** The drag type a preset travels under; its data is the preset's id. */
@@ -108,9 +113,18 @@ type InsertArgs = z.infer<typeof insertArgs>;
  * Presets, and dropped from a presets panel onto the document. A preset is offered where the schema holds
  * every node of it and `options.fits` agrees. Inserted blocks are new ones: no id, no key, nothing tying them
  * back to the preset; one insert is one undo step.
+ *
+ * @throws {EditorError} `editor.presets.duplicate_id` for two presets with one id, which a slash item and a drag
+ * could not tell apart
  */
 export function presetsFeature(presets: readonly BlockPreset[], options: PresetsFeatureOptions = {}): EditorFeature {
-  const byId = new Map(presets.map((preset) => [preset.id, preset]));
+  const byId = new Map<string, BlockPreset>();
+  for (const preset of presets) {
+    if (byId.has(preset.id)) {
+      throw new EditorError('editor.presets.duplicate_id', `Two of the presets have the id "${preset.id}".`);
+    }
+    byId.set(preset.id, preset);
+  }
   // Commands receive the facade; this is how they reach the engine behind it.
   const engines = new Set<Editor>();
   const engineOf = (facade: IEditor) =>
