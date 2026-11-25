@@ -1111,6 +1111,25 @@ describe('EmailEditor presets', () => {
     expect(taken()).toBe(true);
   });
 
+  it('drops a card over the lower half of a column after the columns, the last block of the mail', async () => {
+    const tall: EditorEmailBlock = {
+      ...columns(),
+      lanes: [['One', 'Two', 'Three', 'Four', 'Left'].map((text) => paragraph(text)), [paragraph('Right', 'l2')]],
+    };
+    const probe = await mount([paragraph('Top', 'p1'), tall], { presets });
+    const last = await vi.waitFor(() => find('[contenteditable=true] [data-slot=column] p', 'Left'));
+    await expect.element(row('Card')).toBeVisible();
+
+    await userEvent.dragAndDrop(row('Card'), last, {
+      steps: 10,
+      targetPosition: { x: 2, y: last.getBoundingClientRect().height - 2 },
+    });
+
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns', 'card']),
+    );
+  });
+
   it('drops a preset over a table before or after the table, never in a cell', async () => {
     const table: EditorEmailBlock = {
       id: 't1',
