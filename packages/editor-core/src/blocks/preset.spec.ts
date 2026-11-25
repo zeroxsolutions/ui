@@ -115,6 +115,15 @@ describe('presetContent', () => {
     expect(presetContent(content)).toEqual(content);
   });
 
+  it("keeps the id of a mention alone in a card's inline body", () => {
+    const content: NodeJSON[] = [
+      { type: 'card', attrs: { id: 'c1' }, content: [{ type: 'mention', attrs: { id: 'user-1', label: 'Lan' } }] },
+    ];
+    expect(presetContent(content)).toEqual([
+      { type: 'card', attrs: { id: null }, content: [{ type: 'mention', attrs: { id: 'user-1', label: 'Lan' } }] },
+    ]);
+  });
+
   it('leaves its input as it was', () => {
     const content: NodeJSON[] = [{ type: 'paragraph', attrs: { id: 'b1', key: 'k' } }];
     presetContent(content);

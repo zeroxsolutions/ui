@@ -10,6 +10,12 @@ const PRESET_ID = /^[a-z0-9][a-z0-9-]*$/;
  */
 const TEXTBLOCKS: ReadonlySet<string> = new Set(['paragraph', 'heading']);
 
+/**
+ * The inline nodes the house editors declare, besides text: one of them in a block's content marks that content
+ * inline, as a text node does, so a card's body holding only a mention keeps the mention's id.
+ */
+const INLINE_NODES: ReadonlySet<string> = new Set(['text', 'hardBreak', 'mention', 'variable', 'mathInline']);
+
 /** A ready-made group of blocks an author inserts as one, in either editor. */
 export interface BlockPreset {
   /** Unique among an editor's presets; a slash item and a drag name the preset by it. */
@@ -48,12 +54,13 @@ export class PresetDefinitionInvalid extends Error {
 
 function withoutIdentity(node: NodeJSON): NodeJSON {
   const copy = structuredClone(node);
+  if (INLINE_NODES.has(copy.type)) return copy;
   if (copy.attrs !== undefined) {
     delete copy.attrs.key;
     delete copy.attrs.stored;
     if ('id' in copy.attrs) copy.attrs.id = null;
   }
-  const inline = TEXTBLOCKS.has(copy.type) || (copy.content ?? []).some((child) => child.type === 'text');
+  const inline = TEXTBLOCKS.has(copy.type) || (copy.content ?? []).some((child) => INLINE_NODES.has(child.type));
   if (copy.content !== undefined && !inline) copy.content = copy.content.map(withoutIdentity);
   return copy;
 }
@@ -61,7 +68,8 @@ function withoutIdentity(node: NodeJSON): NodeJSON {
 /**
  * A copy of `content` to insert as new blocks: every block's `id` set to null and its `key` and `stored`
  * attributes dropped, at any depth, so the host names the blocks and the editor keys them afresh. An inline node,
- * one in a paragraph, a heading or beside a text node, keeps its `id`, which names what it points at.
+ * one in a paragraph or a heading, beside a text node, or of a known inline type (a mention, a variable, an
+ * inline formula, a hard break), keeps its `id`, which names what it points at.
  */
 export function presetContent(content: readonly NodeJSON[]): NodeJSON[] {
   return content.map(withoutIdentity);
