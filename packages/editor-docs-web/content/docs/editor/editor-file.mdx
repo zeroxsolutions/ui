@@ -1,0 +1,102 @@
+---
+title: Editor File
+description: A file to download, drawn as a row with its icon, its name and its size.
+---
+
+<ComponentPreview name="editor-file-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-file
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/block-library @zui/lucide-file-text-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-file" title="components/editor/document/features/file/index.ts" />
+
+<ComponentSource
+  name="editor-file"
+  file="registry/bases/base-ui/editor/document/features/file/file.tsx"
+  title="components/editor/document/features/file/file.tsx"
+/>
+
+<ComponentSource
+  name="editor-file"
+  file="registry/bases/base-ui/hooks/use-animated-icon.ts"
+  title="hooks/use-animated-icon.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+
+import { file } from '@/components/editor/document/features/file';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), file()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`file` adds the `file` block: a file to download, drawn as a row with its icon, name and size, the whole row a
+link. Its slash item is "File". The author pastes the file's link into the empty block, and its name is read from
+the last part of the address. `size` is the file's size in bytes, from 0 to 2^31, which your upload sets with the
+`insertBlock:file` command, which takes the block's fields and attributes in `attributes`:
+
+```tsx
+editor.run('insertBlock:file', {
+  attributes: { name: 'itinerary.pdf', href: 'https://files.example.com/itinerary.pdf', size: 482133 },
+});
+```
+
+HTML writes the file as a `download` link with its name and size. Markdown writes the same HTML on one line.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

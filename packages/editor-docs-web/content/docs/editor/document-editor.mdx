@@ -364,7 +364,8 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `Editor` builds the editor once, on mount, from `features` and `content`; to load another document, give
 it a new `key`. The toolbar and the menus read the editor it hands to `onReady`, and draw the items the
-features contribute. A feature item adds its own feature to `features` beside the standard kit.
+features contribute. A feature item adds its own feature to `features` beside the standard kit; [Block
+Library](/docs/editor/block-library) lists them all.
 
 To show a stored document without the editing engine, render `Viewer`, which a server can render:
 

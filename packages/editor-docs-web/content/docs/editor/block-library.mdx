@@ -1,0 +1,152 @@
+---
+title: Block Library
+description: "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with."
+---
+
+<ComponentPreview name="block-library-demo" />
+
+## Blocks
+
+Each block below works in the editors it names. A Document Editor block is a feature you add to `features`,
+installed from its page. The [Email Editor](/docs/editor/email-editor) holds each of its blocks already, and a
+profile's `allow` picks the ones a mail may hold.
+
+| Block                                            | Document Editor                                                   | Email editor                                                                                   |
+| ------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Paragraph, heading 1 to 3, quote, lists, divider | in [Document Editor](/docs/editor/document-editor)'s standard kit | [`paragraph`, `heading`, `quote`, `list`, `divider`](/docs/editor/email-editor#library-blocks) |
+| Callout                                          | [Editor Callout](/docs/editor/editor-callout)                     | `callout`                                                                                      |
+| Code block                                       | [Editor Code Block](/docs/editor/editor-code-block)               | `code`                                                                                         |
+| Image, with a caption and a link                 | [Editor Image](/docs/editor/editor-image)                         | [`image`](/docs/editor/email-editor#library-blocks)                                            |
+| Table                                            | [Editor Table](/docs/editor/editor-table)                         | [`table`](/docs/editor/email-editor#library-blocks)                                            |
+| Button                                           | [Editor Button](/docs/editor/editor-button)                       | `button`                                                                                       |
+| Columns                                          | [Editor Columns](/docs/editor/editor-columns)                     | `columns`                                                                                      |
+| Card                                             | [Editor Card](/docs/editor/editor-card)                           | [`card`](/docs/editor/email-editor#library-blocks)                                             |
+| Toggle                                           | [Editor Toggle](/docs/editor/editor-toggle)                       | -                                                                                              |
+| Toggle heading                                   | [Editor Toggle Heading](/docs/editor/editor-toggle-heading)       | -                                                                                              |
+| Bookmark                                         | [Editor Bookmark](/docs/editor/editor-bookmark)                   | -                                                                                              |
+| File                                             | [Editor File](/docs/editor/editor-file)                           | -                                                                                              |
+| Video and audio                                  | [Editor Media](/docs/editor/editor-media)                         | -                                                                                              |
+| Table of contents                                | [Editor Table of Contents](/docs/editor/editor-table-of-contents) | -                                                                                              |
+| Embed                                            | [Editor Embed](/docs/editor/editor-embed)                         | -                                                                                              |
+| Math                                             | [Editor Math](/docs/editor/editor-math)                           | -                                                                                              |
+| Mermaid diagram                                  | [Editor Mermaid](/docs/editor/editor-mermaid)                     | -                                                                                              |
+| Hero                                             | -                                                                 | [`hero`](/docs/editor/email-editor#library-blocks)                                             |
+| Social links                                     | -                                                                 | [`socialLinks`](/docs/editor/email-editor#library-blocks)                                      |
+| Spacer                                           | -                                                                 | [`spacer`](/docs/editor/email-editor#library-blocks)                                           |
+| Legal footer                                     | -                                                                 | [`legalFooter`](/docs/editor/email-editor#library-blocks)                                      |
+| HTML                                             | -                                                                 | `html`                                                                                         |
+
+The card is one definition for both editors: `card` from `@zeroxsolutions/editor-core/blocks/index` is the email's
+card and, through [Editor Card](/docs/editor/editor-card), the document's.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/block-library
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add input utils @zui/document-editor @zui/lucide-blocks-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="block-library" title="components/editor/document/blocks/index.ts" />
+
+<ComponentSource
+  name="block-library"
+  file="registry/bases/base-ui/editor/document/blocks/block-feature.tsx"
+  title="components/editor/document/blocks/block-feature.tsx"
+/>
+
+<ComponentSource
+  name="block-library"
+  file="registry/bases/base-ui/editor/document/blocks/block-address.ts"
+  title="components/editor/document/blocks/block-address.ts"
+/>
+
+<ComponentSource
+  name="block-library"
+  file="registry/bases/base-ui/editor/document/blocks/block-address-field.tsx"
+  title="components/editor/document/blocks/block-address-field.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Your own block
+
+`defineBlock` from `@zeroxsolutions/editor-core/blocks/index` declares a block once, with its fields and
+attributes, a `document` side for the Document Editor, an `email` side for the email editor, or both.
+`blockFeature` turns a definition with a document side into a Document Editor feature. It builds the node, the
+slash item, the block menu's settings and the HTML and Markdown codecs from the definition, and draws the block
+with your `view` in the editor and the `Viewer` alike.
+
+```tsx
+import type { ReactNode } from 'react';
+
+import { defineBlock } from '@zeroxsolutions/editor-core/blocks/index';
+import { link, plainText } from '@zeroxsolutions/editor-core/template/email/index';
+
+import { blockFeature, type BlockViewPropsOf } from '@/components/editor/document/blocks';
+```
+
+```tsx
+const place = defineBlock({
+  type: 'place',
+  label: 'Place',
+  description: 'A place to visit',
+  fields: { name: plainText({ required: true }), map: link() },
+  document: {
+    html: ({ fields }, markup) => markup`<p data-place><a href="${markup.url(fields.map)}">${fields.name}</a></p>`,
+  },
+});
+
+function PlaceView({ fields, editable, update }: BlockViewPropsOf<typeof place>): ReactNode {
+  return editable ? (
+    <input value={fields.name} placeholder="Place" onChange={(event) => update({ name: event.currentTarget.value })} />
+  ) : (
+    <p>{fields.name}</p>
+  );
+}
+
+const placeFeature = blockFeature(place, { view: PlaceView });
+```
+
+`markup` escapes every value it is handed. A value goes in text or in a quoted attribute that holds no address,
+and an address goes through `markup.url` as the whole of an `href`, a `src` or a `poster`: `href` takes a web or
+mail address, `src` and `poster` a web one, and any other address leaves the attribute out. `defineBlock` throws
+`BlockDefinitionInvalid` for a definition that breaks these rules, and for a type a Document Editor node or a
+library block already takes. HTML carries the block's fields in `data-block-attrs`, and Markdown writes the same
+HTML on one line, so the block reads back whole from either.
+
+A block with an `email` side goes in `emailProfile({ blocks })`, in the email editor's `blocks` and in
+`createEmailRenderer`'s `extraBlocks`, as [Email Editor](/docs/editor/email-editor#your-own-blocks) shows.

@@ -1,0 +1,94 @@
+---
+title: Editor Table of Contents
+description: The document's headings of level 1 to 3, each a link that scrolls to it.
+---
+
+<ComponentPreview name="editor-table-of-contents-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-table-of-contents
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils @zui/block-library @zui/lucide-list-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource
+  name="editor-table-of-contents"
+  title="components/editor/document/features/table-of-contents/index.ts"
+/>
+
+<ComponentSource
+  name="editor-table-of-contents"
+  file="registry/bases/base-ui/editor/document/features/table-of-contents/table-of-contents.tsx"
+  title="components/editor/document/features/table-of-contents/table-of-contents.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+
+import { tableOfContents } from '@/components/editor/document/features/table-of-contents';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), tableOfContents()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`tableOfContents` adds the `tableOfContents` block: the document's headings of level 1 to 3, a toggle heading's
+included, each a link that scrolls to its heading. Its slash item is "Table of contents". The list is read from
+the document wherever it is drawn, so it follows a heading that is renamed, moved or deleted. `words` names the
+list for a screen reader and sets the line the editor shows while the document has no heading.
+
+A block's HTML is written from the block alone, so HTML and Markdown keep the block's place as an empty `nav`,
+which reads back as the block.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

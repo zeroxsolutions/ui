@@ -1,0 +1,91 @@
+---
+title: Editor Toggle Heading
+description: A heading of level 1 to 3 that folds away the blocks under it.
+---
+
+<ComponentPreview name="editor-toggle-heading-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-toggle-heading
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add utils @zui/lucide-chevron-right-icon @zui/lucide-heading-1-icon @zui/lucide-heading-2-icon @zui/lucide-heading-3-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-toggle-heading" title="components/editor/document/features/toggle-heading/index.ts" />
+
+<ComponentSource
+  name="editor-toggle-heading"
+  file="registry/bases/base-ui/editor/document/features/toggle-heading/toggle-heading.tsx"
+  title="components/editor/document/features/toggle-heading/toggle-heading.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+
+import { toggleHeading } from '@/components/editor/document/features/toggle-heading';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), toggleHeading()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`toggleHeading` adds the `toggleHeading` block: a heading of level 1 to 3 that folds away the blocks under it.
+Its slash items are "Toggle heading 1" to "Toggle heading 3", and its command `insertToggleHeading` takes the
+`level`. `open` is whether it is unfolded. A table of contents lists the heading as it lists any other.
+
+HTML writes `<details data-toggle-heading>` with the heading in its `summary` and the folded blocks after it,
+which the Toggle's `details` leaves alone. Markdown writes the opening and the summary as HTML and the folded
+blocks as Markdown, and reads them back together.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

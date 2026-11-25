@@ -1,0 +1,101 @@
+---
+title: Editor Button
+description: A link drawn as a button, its label edited in place and its address in a popover, aligned left, center or right.
+---
+
+<ComponentPreview name="editor-button-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-button
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button field input popover utils @zui/lucide-mouse-pointer-click-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-button" title="components/editor/document/features/button/index.ts" />
+
+<ComponentSource
+  name="editor-button"
+  file="registry/bases/base-ui/editor/document/features/button/button.tsx"
+  title="components/editor/document/features/button/button.tsx"
+/>
+
+<ComponentSource
+  name="editor-button"
+  file="registry/bases/base-ui/editor/document/features/button/block-style.ts"
+  title="components/editor/document/features/button/block-style.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+
+import { button } from '@/components/editor/document/features/button';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), button()];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`button` adds the `button` block: a link drawn as a button. Its slash item is "Button", and its command
+`insertButton` takes an optional `label` and `href`. The author writes the label in the button and its link in
+the popover beside it. `align`, left, center or right, places it in its row, and `spaceAfter` sets the space
+under it; the email editor's block menu sets both.
+
+HTML keeps the button whole. Markdown, which has no button, writes it as a link on a line of its own, which reads
+back as a paragraph. A link a browser would not open as a page or a mail, `javascript:` among them, is never
+written into HTML, Markdown or the `Viewer`.
+
+The email editor draws its button with this same block, its label a field that holds variables:
+`labelField` takes that field, and `linkField: false` leaves the link to the host's own popover.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

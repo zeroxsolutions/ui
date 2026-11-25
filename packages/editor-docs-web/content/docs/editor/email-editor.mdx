@@ -35,21 +35,23 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip utils @zui/chat-input @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/lucide-braces-icon @zui/lucide-eye-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-text-align-start-icon
+pnpm dlx shadcn@latest add badge button combobox field input popover tabs tooltip utils @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-table @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon
 ```
 
 <Step>Copy the files into your project.</Step>
 
-<ComponentSource
-  name="email-editor"
-  file="registry/bases/base-ui/editor/profiles/email/email-editor.tsx"
-  title="components/editor/profiles/email/email-editor.tsx"
-/>
+<ComponentSource name="email-editor" title="components/editor/profiles/email/email-editor.tsx" />
 
 <ComponentSource
   name="email-editor"
   file="registry/bases/base-ui/editor/profiles/email/email-preview.tsx"
   title="components/editor/profiles/email/email-preview.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-block-feature.tsx"
+  title="components/editor/profiles/email/email-block-feature.tsx"
 />
 
 <ComponentSource
@@ -160,6 +162,57 @@ pnpm dlx shadcn@latest add badge button combobox field popover tabs tooltip util
   title="components/editor/profiles/variables/code-mirror-variables.tsx"
 />
 
+<Step>Add its styles to your global CSS.</Step>
+
+```css
+.document-editor .ProseMirror [data-align='left'],
+.document-editor .ProseMirror [data-align='left'] p {
+  text-align: left;
+}
+.document-editor .ProseMirror [data-align='center'],
+.document-editor .ProseMirror [data-align='center'] p {
+  text-align: center;
+}
+.document-editor .ProseMirror [data-align='right'],
+.document-editor .ProseMirror [data-align='right'] p {
+  text-align: right;
+}
+.document-editor .ProseMirror [data-tone='muted'] {
+  color: var(--muted-foreground);
+}
+.document-editor .ProseMirror [data-space-after='small'] {
+  margin-bottom: 0.5rem;
+}
+.document-editor .ProseMirror [data-space-after='medium'] {
+  margin-bottom: 1rem;
+}
+.document-editor .ProseMirror [data-space-after='large'] {
+  margin-bottom: 2rem;
+}
+.variable-text-field .ProseMirror,
+.variable-text-field .ProseMirror[contenteditable='true'] {
+  outline: none;
+  padding-inline: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.variable-text-field .ProseMirror p {
+  margin: 0;
+}
+.variable-text-field .ProseMirror .is-empty::before,
+.variable-text-field .ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+.variable-text-field .slash-active {
+  background: color-mix(in oklab, currentColor 16%, transparent);
+  padding: 0.05rem 0.1rem;
+}
+```
+
 <Step>Update the import paths to match your project.</Step>
 
 </Steps>
@@ -241,6 +294,11 @@ card, which are drawn at the card's whole width. The card is also a block for th
 `@zeroxsolutions/editor-core/blocks/index` is one definition for both editors. The email editor holds it already,
 so it goes in neither `emailProfile`'s `blocks` nor the editor's, which throw for it. In a table cell the editor keeps
 to a line of text, since the email writes each cell as one.
+
+`MAIL_LAYOUT_KINDS` is the `allow` of a mail layout's header and footer regions: paragraph, list, callout,
+divider, columns and the legal footer, so the sender's address and the unsubscribe link can live once in the
+footer every mail of a product shares. [Block Library](/docs/editor/block-library) lists these blocks beside the
+Document Editor's. The demo above opens on a hero and ends on a card, a spacer, social links and the legal footer.
 
 ## Theme
 

@@ -1,0 +1,98 @@
+---
+title: Editor Bookmark
+description: A link drawn as a card with the page's title, description and image, which the host reads when the author pastes the address.
+---
+
+<ComponentPreview name="editor-bookmark-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-bookmark
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/block-library @zui/lucide-bookmark-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-bookmark" title="components/editor/document/features/bookmark/index.ts" />
+
+<ComponentSource
+  name="editor-bookmark"
+  file="registry/bases/base-ui/editor/document/features/bookmark/bookmark.tsx"
+  title="components/editor/document/features/bookmark/bookmark.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+
+import { bookmark, type LinkPreview } from '@/components/editor/document/features/bookmark';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+async function readLink(url: string): Promise<LinkPreview> {
+  const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+  return response.ok ? ((await response.json()) as LinkPreview) : {};
+}
+
+const features = [standardKit(), bookmark({ readLink })];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`bookmark` adds the `bookmark` block: a link drawn as a card with the page's title, description and image. Its
+slash item is "Bookmark". The author pastes an address into the empty block, and `readLink` reads the page's
+preview, once. Fetch the page on your server, which decides what it may reach; `/api/link-preview` above stands
+for that route. Until `readLink` answers, and when it throws, the bookmark shows the address alone. Without
+`readLink` it always does.
+
+HTML writes the bookmark as a link holding its title, description, address and image, with its fields in
+`data-block-attrs`, so it reads back whole. Markdown writes the same HTML on one line. Only a web or mail address
+is linked, and only a web image is loaded.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

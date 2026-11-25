@@ -1,0 +1,88 @@
+---
+title: Editor Card
+description: 'An image over a title, a text and a link button: the same card the email editor draws, from one shared definition.'
+---
+
+<ComponentPreview name="editor-card-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-card
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button utils @zui/block-library @zui/lucide-id-card-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-card" title="components/editor/document/features/card/index.ts" />
+
+<ComponentSource
+  name="editor-card"
+  file="registry/bases/base-ui/editor/document/features/card/card.tsx"
+  title="components/editor/document/features/card/card.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+```tsx
+import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import { card as cardBlock } from '@zeroxsolutions/editor-core/blocks/index';
+
+import { card } from '@/components/editor/document/features/card';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+```
+
+```tsx
+const features = [standardKit(), card(cardBlock)];
+
+function NotesEditor({ content }: { content: DocJSON }) {
+  return <Editor features={features} content={content} />;
+}
+```
+
+`card` adds the `card` block: an image over a title, a text and a link button. It takes the card's shared
+definition, `card` from `@zeroxsolutions/editor-core/blocks/index`, which is the email editor's card too, so a
+card reads the same in a document and in an email. Its slash item is "Card". The author pastes the image's link
+into the empty card, then writes the alt text, the title, the text, the button's label and the button's link in
+place. `words` renames those fields.
+
+The button is drawn only with both a label and a web or mail link, and the image only from a web address. HTML
+writes the card as a `figure` with its image, a `figcaption` holding the title, the text and the button, and the
+card's fields in `data-block-attrs`, so it reads back whole. Markdown writes the same HTML on one line.
+
+The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

@@ -3870,7 +3870,7 @@
       "name": "email-editor-demo",
       "type": "registry:example",
       "title": "Email Editor Demo",
-      "description": "A welcome email with a button and a text link to url variables, a callout and two columns, and its preview.",
+      "description": "A welcome email opening on a hero, with a button and a text link to url variables, a callout, two columns, a card, social links and the legal footer, and its preview.",
       "categories": ["examples"],
       "registryDependencies": ["@zui/email-editor"],
       "files": [

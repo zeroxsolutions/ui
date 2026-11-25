@@ -29,6 +29,13 @@ const variables: VariableDeclaration[] = [
     required: true,
   },
   { name: 'guide_url', type: 'url', label: 'guide link', sampleValue: 'https://example.com/guide' },
+  {
+    name: 'unsubscribe_url',
+    type: 'url',
+    label: 'unsubscribe link',
+    sampleValue: 'https://example.com/unsubscribe',
+    required: true,
+  },
 ];
 
 const theme: EmailTheme = {
@@ -115,7 +122,26 @@ const text = (id: string, content: string): EditorEmailBlock => ({
   content: { text: content },
 });
 
+// The hero's and the card's images are the docs' own share cards, and the social icons the house's emoji artwork:
+// a mail client loads only a hosted https image.
+const SHARE = 'https://ui.zeroxsolutions.com/og/docs/editor';
+const EMOJI = 'https://fluent-emoji.zeroxsolutions.com/3d';
+
 const initial: EditorEmailBlock[] = [
+  {
+    id: 'hero',
+    key: 'hero',
+    type: 'hero',
+    attributes: { align: 'left' },
+    content: {
+      image: `${SHARE}/email-editor/image.png`,
+      alt: 'ZUI',
+      heading: 'Welcome to ZUI, {{first_name}}',
+      text: 'Everything your team needs to write and send mail, in one place.',
+      buttonLabel: '',
+      buttonHref: '',
+    },
+  },
   text('greeting', 'Hi {{first_name}}, your **{{plan}}** plan is ready.'),
   {
     id: 'open',
@@ -149,11 +175,53 @@ const initial: EditorEmailBlock[] = [
       [text('help', '**Need help?** Read the [getting started guide]({{guide_url}}).')],
     ],
   },
+  {
+    id: 'guide',
+    key: 'guide',
+    type: 'card',
+    attributes: {},
+    content: {
+      image: `${SHARE}/document-editor/image.png`,
+      alt: 'The Document Editor',
+      heading: 'Write your first document',
+      text: 'Headings, tables and callouts, with a Viewer that draws them the same way.',
+      buttonLabel: 'Read the guide',
+      buttonHref: '{{guide_url}}',
+    },
+  },
+  { id: 'gap', key: 'gap', type: 'spacer', attributes: { height: 'medium' }, content: {} },
+  {
+    id: 'social',
+    key: 'social',
+    type: 'socialLinks',
+    attributes: { align: 'center', size: 'small' },
+    content: {
+      links: [
+        { label: 'Website', icon: `${EMOJI}/1f310.webp`, href: 'https://example.com' },
+        { label: 'Community', icon: `${EMOJI}/1f4ac.webp`, href: 'https://example.com/community' },
+        { label: 'Email us', icon: `${EMOJI}/2709-fe0f.webp`, href: 'mailto:hello@example.com' },
+      ],
+    },
+  },
+  {
+    id: 'legal',
+    key: 'legal',
+    type: 'legalFooter',
+    attributes: {},
+    content: {
+      sender: 'ZUI sends this to {{first_name}}.',
+      reason: 'You get it because you made a ZUI account.',
+      address: '1 Harbour Road, Bayside',
+      unsubscribe: '{{unsubscribe_url}}',
+      unsubscribeLabel: '',
+    },
+  },
 ];
 
 /**
- * A welcome email with a button and a text link to url variables, a callout, a testimonial block of its own, two
- * columns, and its preview, styled by a stylesheet of its own over the theme.
+ * A welcome email opening on a hero, with a button and a text link to url variables, a callout, a testimonial block
+ * of its own, two columns, a card, social links and the legal footer, and its preview, styled by a stylesheet of its
+ * own over the theme.
  */
 function EmailEditorDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
