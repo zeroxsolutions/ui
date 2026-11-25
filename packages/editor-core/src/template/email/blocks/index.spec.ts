@@ -507,6 +507,10 @@ describe('a card', () => {
   it('frames its content in a bordered box', () => {
     const { html } = render('card', {}, feature);
     expect(html).toMatch(/class="zx-card-block" style="[^"]*border:1px solid #E4E4E7;/);
+    // Its image's top corners follow the frame's, which are rounded.
+    expect(html).toMatch(
+      /class="zx-image zx-image-fluid zx-card-block-image" style="[^"]*border-radius:10px 10px 0 0;/,
+    );
   });
 });
 

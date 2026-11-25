@@ -101,6 +101,7 @@ export function baseStylesheet(theme: EmailTheme): string {
     '.zx-hero-heading,.zx-card-block-heading{padding:12px 0 4px;}' +
     '.zx-hero-action,.zx-card-block-action{padding:12px 0 0;}' +
     `.zx-card-block{border:1px solid ${c.border};border-radius:${radius}px;}` +
+    `.zx-card-block-image{border-radius:${radius}px ${radius}px 0 0;}` +
     '.zx-card-block-body{padding:0 16px 16px;}' +
     '.zx-legal-text{padding:0 0 4px;font-size:12px;line-height:17px;}' +
     '.zx-lane{padding:0 8px 0 0;}' +
