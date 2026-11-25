@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { frameData } from 'motion/react';
+import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { cdp } from 'vitest/browser';
 import { card as cardBlock } from '@zeroxsolutions/editor-core/blocks/index';
@@ -29,6 +30,23 @@ const documentSlash = collectUiContributions([
   presetsFeature(documentPresets()),
 ]).slash;
 
+const nextFrame = () => new Promise<number>((drawn) => requestAnimationFrame(drawn));
+
+/** Resolves once motion's frame loop has let a whole animation frame pass without processing one. */
+async function frameLoopIdle(): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const last = frameData.timestamp;
+        await nextFrame();
+        await nextFrame();
+        return frameData.timestamp === last;
+      },
+      { timeout: 5000 },
+    )
+    .toBe(true);
+}
+
 /** Each slash item's icon once, by the item that first offers it. */
 const icons = [
   ...new Map([...emailSlash, ...documentSlash].reverse().map((item) => [item.icon, item.id] as const)),
@@ -43,7 +61,7 @@ describe('ChromeIcon', () => {
         features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
       });
       // A frame loop still running from the case before draws the first frame in another order, hiding the fault.
-      await new Promise((idle) => setTimeout(idle, 500));
+      await frameLoopIdle();
       const unset: string[] = [];
       const observer = new MutationObserver((records) => {
         for (const record of records) {
@@ -54,7 +72,7 @@ describe('ChromeIcon', () => {
       observer.observe(document.body, { subtree: true, attributes: true });
 
       const { unmount } = await render(<ChromeIcon icon={icon} active />);
-      await new Promise((settled) => setTimeout(settled, 100));
+      await frameLoopIdle();
       observer.disconnect();
       await unmount();
       await cdp().send('Emulation.setEmulatedMedia', {
