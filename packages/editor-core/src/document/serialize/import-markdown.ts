@@ -49,6 +49,10 @@ export function importMarkdown(markdown: string, registry: CodecRegistry): Impor
       report.dropped.push({ source: 'image', reason: 'no-markdown-codec' });
       return [];
     }
+    // GFM links an address written as plain text; an export writes an author's text so, and it reads back as text.
+    if (token.type === 'link' && isLiteralAddress(token, markdown)) {
+      return (token.children ?? []).flatMap((child) => convertInline(child, marks));
+    }
     const mark = matchMark(token);
     if (!mark) {
       report.warnings.push({
@@ -77,7 +81,7 @@ export function importMarkdown(markdown: string, registry: CodecRegistry): Impor
     const out: NodeJSON[] = [];
     for (const child of token.children ?? []) {
       if (INLINE_TYPES.has(child.type)) {
-        out.push(...convertInline(child, []));
+        for (const node of convertInline(child, [])) pushInline(out, node);
       } else {
         const block = convertBlock(child);
         if (block) out.push(block);
@@ -92,6 +96,26 @@ export function importMarkdown(markdown: string, registry: CodecRegistry): Impor
   };
   const doc = validateDoc(rawDoc, registry, report);
   return { doc, warnings: report.warnings, dropped: report.dropped };
+}
+
+/** Appends `node`, joined to the text before it where both carry the same marks, as the editor holds text. */
+function pushInline(out: NodeJSON[], node: NodeJSON): void {
+  const last = out.at(-1);
+  if (
+    last?.type === 'text' &&
+    node.type === 'text' &&
+    JSON.stringify(last.marks ?? []) === JSON.stringify(node.marks ?? [])
+  ) {
+    out[out.length - 1] = { ...last, text: `${last.text ?? ''}${node.text ?? ''}` };
+  } else {
+    out.push(node);
+  }
+}
+
+/** Whether a link token is an address GFM found in plain text, written with neither `[` nor `<` around it. */
+function isLiteralAddress(token: MarkdownToken, markdown: string): boolean {
+  const offset = (token.position as { start?: { offset?: number } } | undefined)?.start?.offset;
+  return offset !== undefined && markdown[offset] !== '[' && markdown[offset] !== '<';
 }
 
 function textNode(text: string, marks: MarkJSON[]): NodeJSON {

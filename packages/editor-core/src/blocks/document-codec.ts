@@ -74,8 +74,8 @@ function unescaped(value: string): string {
 const LINK_ADDRESS = /^(?:https?:|mailto:)/i;
 /** What a source attribute loads: a web address. */
 const SOURCE_ADDRESS = /^https?:/i;
-/** The opening of the quoted attribute value a template ends in, from the space before its name. */
-const ATTRIBUTE_OPENING = /[\t\n\f\r ]+[^\t\n\f\r "'<>/=]+[\t\n\f\r ]*=[\t\n\f\r ]*["']$/;
+/** The opening of the quoted attribute value a template ends in, from the space before its name, if any. */
+const ATTRIBUTE_OPENING = /[\t\n\f\r ]*[^\t\n\f\r "'<>/=]+[\t\n\f\r ]*=[\t\n\f\r ]*["']$/;
 /**
  * Elements whose content a browser reads as code, style or a document, or which load or redirect what the page
  * loads; with a comment or a declaration, a template that has opened one takes no value after it.

@@ -17,7 +17,7 @@ const marks: EditorFeature = {
     },
     {
       mark: 'code',
-      toMarkdown: () => ({ open: '`', close: '`', verbatim: true }),
+      toMarkdown: () => ({ open: '`', close: '`', codeSpan: true }),
       fromMarkdown: (token) => (token.type === 'inlineCode' ? { type: 'code' } : null),
     },
     {
@@ -123,5 +123,64 @@ describe('serialize', () => {
     const doc = docOf(text('see '), text('*a* [b](c) <d>', { type: 'code' }));
     expect(markdownOf(doc)).toBe('see `*a* [b](c) <d>`');
     expect(readBack(doc)).toEqual(doc);
+  });
+
+  it.each([
+    ['a backtick', 'x` <img src=x onerror=alert(1)> `'],
+    ['a run of backticks', 'a``b```c'],
+    ['an opening backtick', '`a'],
+    ['spaces around it', ' a '],
+    ['HTML', '<b>bold</b>'],
+  ])('keeps inline code holding %s inside one code span', (_kind, value) => {
+    const doc = docOf(text('see '), text(value, { type: 'code' }), text(' after'));
+    expect(markdownOf(doc)).not.toMatch(/(^|[^`\\])<(img|b)\b[^`]*$/);
+    expect(readBack(doc)).toEqual(doc);
+  });
+
+  it('writes bold inline code as code inside the bold', () => {
+    const doc = docOf(text('a*b', { type: 'bold' }, { type: 'code' }));
+    expect(markdownOf(doc)).toBe('**`a*b`**');
+    expect(readBack(doc)).toEqual(docOf(text('a*b', { type: 'bold' }, { type: 'code' })));
+  });
+
+  it.each([
+    ['1', '. an item'],
+    ['12', ') an item'],
+  ])('starts no ordered list from a number and its delimiter in two text nodes', (number, rest) => {
+    const doc = docOf(text(number), text(rest));
+    expect(readBack(doc)).toEqual(docOf(text(number + rest)));
+  });
+
+  it.each([
+    ['a web address', 'see https://x.test/a now'],
+    ['a www address', 'see www.x.test now'],
+    ['a mail address', 'write to a@x.test now'],
+  ])('reads %s written as text back as text, with no link', (_kind, value) => {
+    const doc = docOf(text(value));
+    expect(readBack(doc)).toEqual(doc);
+  });
+
+  it('keeps a link written as a link a link', () => {
+    const doc = docOf(text('https://x.test', { type: 'link', attrs: { href: 'https://x.test' } }));
+    expect(readBack(doc)).toEqual(doc);
+  });
+
+  it("keeps a closing # in a heading's text", () => {
+    const headings = createCodecRegistry([
+      marks,
+      {
+        id: 'heading',
+        codecs: [
+          {
+            node: 'heading',
+            toMarkdown: (node, ctx) => `## ${ctx.serializeChildren(node)}`,
+            fromMarkdown: (token, ctx) =>
+              token.type === 'heading' ? { type: 'heading', content: ctx.fromMarkdownChildren(token) } : null,
+          },
+        ],
+      },
+    ]);
+    const doc: DocJSON = { type: 'doc', content: [{ type: 'heading', content: [text('Title #')] }] };
+    expect(importMarkdown(serialize(doc, 'markdown', headings), headings).doc).toEqual(doc);
   });
 });

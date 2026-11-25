@@ -308,6 +308,13 @@ describe('markup.url', () => {
     expect(exportedWith(template, 'http://x.test/a.png')).toContain('http://x.test/a.png');
   });
 
+  it.each([
+    ['after a slash', '<a/href="\u0000">x</a>', '<a/>x</a>'],
+    ['right after a quoted value', '<a title="t"href="\u0000">x</a>', '<a title="t">x</a>'],
+  ])('leaves out a refused link written %s', (_where, template, written) => {
+    expect(exportedWith(template, 'javascript:alert(1)')).toContain(written);
+  });
+
   it('takes a mail address in a link, and leaves out a link it refuses', () => {
     expect(exportedWith('<a href="\u0000" data-x>x</a>', 'mailto:a@x.test')).toContain(
       '<a href="mailto:a@x.test" data-x>x</a>',

@@ -44,7 +44,7 @@ const LINK_SCHEMES: ReadonlySet<string> = new Set(['http', 'https', 'mailto', 't
 /**
  * Whether `href` opens a web, mail or phone address or one in the site, as the document's link mark keeps it. The
  * scheme is read as a browser reads it, after the control characters and spaces around the address and the tabs and
- * newlines inside it are dropped, so `java&#9;script:` is refused as `javascript:` is. Any other keeps its text and
+ * newlines inside it are dropped, so `java<tab>script:` is refused as `javascript:` is. Any other keeps its text and
  * loses the link.
  */
 function opensLink(href: string): boolean {

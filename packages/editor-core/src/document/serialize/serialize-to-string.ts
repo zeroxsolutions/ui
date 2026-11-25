@@ -16,11 +16,15 @@ const MARK_METHOD = { markdown: 'toMarkdown', html: 'toHTML' } as const;
 export function serialize(doc: NodeJSON, format: Format, registry: CodecRegistry): string {
   const ctx: SerializeContext = {
     format,
-    serializeNode: (node) => serializeNode(node, format, registry, ctx, true),
+    serializeNode: (node) => serializeNode(node, format, registry, ctx, LINE_START),
     serializeChildren: (node) => {
       let out = '';
       for (const child of node.content ?? []) {
-        out += serializeNode(child, format, registry, ctx, out === '' || out.endsWith('\n'));
+        const line = out.slice(out.lastIndexOf('\n') + 1);
+        out += serializeNode(child, format, registry, ctx, {
+          atLineStart: line === '',
+          afterNumber: NUMBER.test(line),
+        });
       }
       return out;
     },
@@ -29,17 +33,27 @@ export function serialize(doc: NodeJSON, format: Format, registry: CodecRegistry
 }
 
 /**
- * `atLineStart` is false only where the text is known to follow other output on its line; a text node handed to
- * `serializeNode` alone is taken to open one, and escaping a marker that opens no line still reads back the same.
+ * Where a text node lands on its Markdown line: at its start, or after a number alone, where a `.` or `)` would
+ * open an ordered list item.
  */
+interface LinePlace {
+  readonly atLineStart: boolean;
+  readonly afterNumber: boolean;
+}
+
+/** A text node handed to `serializeNode` alone is taken to open a line: escaping a marker that opens none reads back the same. */
+const LINE_START: LinePlace = { atLineStart: true, afterNumber: false };
+/** A line so far that an ordered list item's delimiter would follow. */
+const NUMBER = /^[0-9]{1,9}$/;
+
 function serializeNode(
   node: NodeJSON,
   format: Format,
   registry: CodecRegistry,
   ctx: SerializeContext,
-  atLineStart: boolean,
+  place: LinePlace,
 ): string {
-  if (node.type === 'text') return applyMarks(node, format, registry, ctx, atLineStart);
+  if (node.type === 'text') return applyMarks(node, format, registry, ctx, place);
 
   const custom = registry.customNodeSerializer(format, node.type);
   if (custom) return custom(node, ctx);
@@ -66,6 +80,8 @@ const MARKDOWN_ENTITY = /&(?=#[0-9]{1,7};|#[xX][0-9a-fA-F]{1,6};|[A-Za-z][A-Za-z
  * a list item, a thematic break or a setext underline. `*`, `>` and the fences are inline specials, escaped already.
  */
 const MARKDOWN_LINE_START = /(^|\n)([ \t]*)(?:([#+=-])|([0-9]+)([.)]))?/g;
+/** A `#` closing a line, which a reader strips from a heading as its closing sequence. */
+const MARKDOWN_CLOSING_HASH = /#(?=[ \t]*(?:\n|$))/g;
 /** Whitespace closing a line, which a reader strips, or reads as a hard break when it is two spaces. */
 const MARKDOWN_LINE_END = /[ \t]+(?=\n)/g;
 
@@ -76,10 +92,12 @@ const entities = (whitespace: string): string => whitespace.replace(/ /g, '&#32;
  * block they spell. Each special is backslash-escaped as CommonMark allows for any ASCII punctuation; whitespace a
  * reader would drop at a line's edge is written as character references.
  */
-function markdownText(text: string, atLineStart: boolean): string {
+function markdownText(text: string, { atLineStart, afterNumber }: LinePlace): string {
   return text
     .replace(MARKDOWN_INLINE, '\\$&')
     .replace(MARKDOWN_ENTITY, '\\&')
+    .replace(MARKDOWN_CLOSING_HASH, '\\#')
+    .replace(/^[.)]/, (delimiter) => (afterNumber ? `\\${delimiter}` : delimiter))
     .replace(MARKDOWN_LINE_END, entities)
     .replace(
       MARKDOWN_LINE_START,
@@ -91,12 +109,25 @@ function markdownText(text: string, atLineStart: boolean): string {
     );
 }
 
+/**
+ * `text` as a CommonMark code span: between backtick fences longer than any run of backticks inside it, with a
+ * space inside each fence where the text opens or closes with a backtick, or with a space at both ends, which a
+ * reader would otherwise strip.
+ */
+function codeSpan(text: string): string {
+  const longest = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = '`'.repeat(longest + 1);
+  const padded = /^`|`$/.test(text) || (/^ [\s\S]* $/.test(text) && text.trim() !== '');
+  const pad = padded ? ' ' : '';
+  return `${fence}${pad}${text}${pad}${fence}`;
+}
+
 function applyMarks(
   node: NodeJSON,
   format: Format,
   registry: CodecRegistry,
   ctx: SerializeContext,
-  atLineStart: boolean,
+  place: LinePlace,
 ): string {
   const method = MARK_METHOD[format as keyof typeof MARK_METHOD];
   const delimiters = (node.marks ?? []).map((mark) => {
@@ -104,13 +135,18 @@ function applyMarks(
     return { mark, delimiter: method && codec?.[method] ? codec[method]!(mark, ctx) : undefined };
   });
   const raw = node.text ?? '';
+  // A code span holds its text as it is, so it is written first and every other mark wraps it.
+  const code = format === 'markdown' && delimiters.some(({ delimiter }) => delimiter?.codeSpan);
   let text =
     format === 'html'
       ? escapedText(raw)
-      : format === 'markdown' && !delimiters.some(({ delimiter }) => delimiter?.verbatim)
-        ? markdownText(raw, atLineStart)
-        : raw;
+      : code
+        ? codeSpan(raw)
+        : format === 'markdown'
+          ? markdownText(raw, place)
+          : raw;
   for (const { mark, delimiter } of delimiters) {
+    if (delimiter?.codeSpan && code) continue;
     if (delimiter) {
       text = `${delimiter.open}${text}${delimiter.close}`;
     } else if (format === 'html') {

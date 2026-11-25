@@ -52,8 +52,11 @@ export interface DeserializeContext {
 export interface MarkDelimiters {
   open: string;
   close: string;
-  /** The text inside is written as it is, unescaped, as Markdown reads a code span. */
-  verbatim?: boolean;
+  /**
+   * The mark is inline code: in Markdown its text is written as it is, as a code span with as many backticks as it
+   * needs, in place of `open` and `close`, inside every other mark.
+   */
+  codeSpan?: boolean;
 }
 
 /** The wire shape of one email block, as a node codec reads and writes it. `lanes` is set on columns only. */
