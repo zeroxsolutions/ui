@@ -38,7 +38,8 @@ export function EmailLegalFooterView({
     <div
       data-slot="email-legal-footer"
       data-align={align}
-      className="group/legal-footer text-muted-foreground flex flex-col gap-1 text-xs data-[align=center]:text-center"
+      // An empty line's hint floats left wherever the line is drawn, so a centred footer lays it across the line.
+      className="group/legal-footer text-muted-foreground flex flex-col gap-1 text-xs data-[align=center]:text-center data-[align=center]:[&_.is-empty]:relative data-[align=center]:[&_.is-empty]:before:absolute data-[align=center]:[&_.is-empty]:before:inset-x-0"
     >
       <div data-slot="email-block-body" className="min-h-4">
         {body}
