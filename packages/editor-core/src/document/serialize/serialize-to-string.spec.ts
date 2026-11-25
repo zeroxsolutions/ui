@@ -146,6 +146,7 @@ describe('serialize', () => {
   it.each([
     ['1', '. an item'],
     ['12', ') an item'],
+    ['1', '2. an item'],
   ])('starts no ordered list from a number and its delimiter in two text nodes', (number, rest) => {
     const doc = docOf(text(number), text(rest));
     expect(readBack(doc)).toEqual(docOf(text(number + rest)));
@@ -182,5 +183,20 @@ describe('serialize', () => {
     ]);
     const doc: DocJSON = { type: 'doc', content: [{ type: 'heading', content: [text('Title #')] }] };
     expect(importMarkdown(serialize(doc, 'markdown', headings), headings).doc).toEqual(doc);
+  });
+
+  it('writes a line break inside inline code as a space, so the code opens no block', () => {
+    const doc = docOf(text('a\n# b', { type: 'code' }));
+    expect(readBack(doc)).toEqual(docOf(text('a # b', { type: 'code' })));
+  });
+
+  it('keeps the links of a file that opens with a byte order mark', () => {
+    expect(importMarkdown('\uFEFF[a](https://x.test) and <https://y.test>', registry).doc).toEqual(
+      docOf(
+        text('a', { type: 'link', attrs: { href: 'https://x.test' } }),
+        text(' and '),
+        text('https://y.test', { type: 'link', attrs: { href: 'https://y.test' } }),
+      ),
+    );
   });
 });

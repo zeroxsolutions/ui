@@ -18,7 +18,9 @@ const INLINE_TYPES = new Set(['text', 'emphasis', 'strong', 'delete', 'inlineCod
 
 export function importMarkdown(markdown: string, registry: CodecRegistry): ImportResult {
   const report: ImportReport = { warnings: [], dropped: [] };
-  const tree = remark().use(remarkGfm).parse(markdown) as unknown as MarkdownToken;
+  // The parser drops a byte order mark, so the positions it reports are in the text after it.
+  const source = markdown.replace(/^\uFEFF/, '');
+  const tree = remark().use(remarkGfm).parse(source) as unknown as MarkdownToken;
 
   const ctx: DeserializeContext = {
     warn: (message, source) => report.warnings.push({ message, source }),
@@ -50,7 +52,7 @@ export function importMarkdown(markdown: string, registry: CodecRegistry): Impor
       return [];
     }
     // GFM links an address written as plain text; an export writes an author's text so, and it reads back as text.
-    if (token.type === 'link' && isLiteralAddress(token, markdown)) {
+    if (token.type === 'link' && isLiteralAddress(token, source)) {
       return (token.children ?? []).flatMap((child) => convertInline(child, marks));
     }
     const mark = matchMark(token);

@@ -97,7 +97,9 @@ function markdownText(text: string, { atLineStart, afterNumber }: LinePlace): st
     .replace(MARKDOWN_INLINE, '\\$&')
     .replace(MARKDOWN_ENTITY, '\\&')
     .replace(MARKDOWN_CLOSING_HASH, '\\#')
-    .replace(/^[.)]/, (delimiter) => (afterNumber ? `\\${delimiter}` : delimiter))
+    .replace(/^([0-9]*)([.)])/, (opening, digits: string, delimiter: string) =>
+      afterNumber ? `${digits}\\${delimiter}` : opening,
+    )
     .replace(MARKDOWN_LINE_END, entities)
     .replace(
       MARKDOWN_LINE_START,
@@ -112,9 +114,11 @@ function markdownText(text: string, { atLineStart, afterNumber }: LinePlace): st
 /**
  * `text` as a CommonMark code span: between backtick fences longer than any run of backticks inside it, with a
  * space inside each fence where the text opens or closes with a backtick, or with a space at both ends, which a
- * reader would otherwise strip.
+ * reader would otherwise strip. A line break, which a reader takes as a space and which could open a block on the
+ * next line, is written as a space.
  */
-function codeSpan(text: string): string {
+function codeSpan(code: string): string {
+  const text = code.replace(/\r\n?|\n/g, ' ');
   const longest = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
   const fence = '`'.repeat(longest + 1);
   const padded = /^`|`$/.test(text) || (/^ [\s\S]* $/.test(text) && text.trim() !== '');
