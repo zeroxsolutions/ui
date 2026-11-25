@@ -53,6 +53,7 @@ async function readLink(url: string): Promise<LinkPreview> {
 const content: DocJSON = {
   type: 'doc',
   content: [
+    paragraph('Type / to add any block of the library.'),
     { type: 'tableOfContents' },
     { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Links and files' }] },
     {
@@ -123,7 +124,7 @@ const content: DocJSON = {
   ],
 };
 
-/** A document holding every block of the library, as the Document Editor draws it. */
+/** A document holding each block the library adds to the Document Editor. */
 function BlockLibraryDemo(): ReactNode {
   const [editor, setEditor] = useState<IEditor | null>(null);
   const [root, setRoot] = useState<HTMLDivElement | null>(null);

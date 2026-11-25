@@ -2852,7 +2852,7 @@
       "name": "block-library-demo",
       "type": "registry:example",
       "title": "Block Library Demo",
-      "description": "A document holding every block of the library, as the Document Editor draws it.",
+      "description": "A document holding each block the library adds to the Document Editor.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
       "registryDependencies": [

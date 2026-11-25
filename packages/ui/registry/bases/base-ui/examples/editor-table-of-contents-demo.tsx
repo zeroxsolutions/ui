@@ -22,13 +22,14 @@ function paragraph(text: string): NodeJSON {
 const content: DocJSON = {
   type: 'doc',
   content: [
+    paragraph('Rename a heading and the list follows.'),
     { type: 'tableOfContents' },
     { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Install' }] },
     paragraph('Add the editor and the features you want.'),
     { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Styles' }] },
     paragraph('Copy the styles into your global CSS.'),
     { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Use' }] },
-    paragraph('Rename a heading and the list follows.'),
+    paragraph('Each entry scrolls to its heading.'),
   ],
 };
 

@@ -85,7 +85,7 @@ Its slash items are "Toggle heading 1" to "Toggle heading 3", and its command `i
 `level`. `open` is whether it is unfolded. A table of contents lists the heading as it lists any other.
 
 HTML writes `<details data-toggle-heading>` with the heading in its `summary` and the folded blocks after it,
-which the Toggle's `details` leaves alone. Markdown writes the opening and the summary as HTML and the folded
-blocks as Markdown, and reads them back together.
+which the Toggle's `details` leaves alone. Markdown writes the opening and the summary as HTML, the heading as its
+plain text, and the folded blocks as Markdown, and reads them back together.
 
 The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

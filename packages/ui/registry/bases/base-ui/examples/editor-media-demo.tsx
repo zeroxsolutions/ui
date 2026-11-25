@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 
-import type { IEditor, DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import type { IEditor, DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 
 import { media } from '@/registry/bases/base-ui/editor/document/features/media';
@@ -14,10 +14,6 @@ import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-men
 
 const features = [standardKit(), media()];
 const contributions = collectUiContributions(features);
-
-function paragraph(text: string): NodeJSON {
-  return { type: 'paragraph', content: [{ type: 'text', text }] };
-}
 
 const content: DocJSON = {
   type: 'doc',

@@ -124,7 +124,7 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `columns` adds the `columns` block, which holds `column` blocks, each holding any blocks. Its slash item is
 "Columns", and its command `insertColumns` takes an optional `count` from 2 to 4, 2 by default. `ratio` weighs the
-columns against each other, as whole numbers from 1 to 12, and equal columns leave it out. Below 40rem the
+columns against each other, as whole numbers from 1 to 12, and `insertColumns` writes equal weights. Below 40rem the
 columns stack.
 
 HTML keeps the columns whole. Markdown has no columns, so it writes each column's blocks in order, and they read
