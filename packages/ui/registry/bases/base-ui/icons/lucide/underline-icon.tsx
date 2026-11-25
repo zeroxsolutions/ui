@@ -87,12 +87,14 @@ const UnderlineIcon = forwardRef<UnderlineIconHandle, UnderlineIconProps>(
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="M6 4v6a6 6 0 0 0 12 0V4"
             transition={{ duration: 0.3 }}
             variants={VARIANTS}
           />
           <motion.line
             animate={controls}
+            initial="normal"
             transition={{
               delay: 0.2,
               duration: 0.4,

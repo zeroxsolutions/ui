@@ -103,7 +103,14 @@ const KeyboardIcon = forwardRef<KeyboardIconHandle, KeyboardIconProps>(
         >
           <rect height="16" rx="2" width="20" x="2" y="4" />
           {KEYBOARD_PATHS.map((path, index) => (
-            <motion.path animate={controls} custom={index} d={path.d} key={path.id} variants={KEY_VARIANTS} />
+            <motion.path
+              animate={controls}
+              initial="normal"
+              custom={index}
+              d={path.d}
+              key={path.id}
+              variants={KEY_VARIANTS}
+            />
           ))}
         </svg>
       </span>

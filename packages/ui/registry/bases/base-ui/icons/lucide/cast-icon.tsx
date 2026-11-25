@@ -87,9 +87,18 @@ const CastIcon = forwardRef<CastIconHandle, CastIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6" />
-          <motion.path animate={controls} custom={0.2} d="M2 12a9 9 0 0 1 8 8" variants={VARIANTS} />
-          <motion.path animate={controls} custom={0.1} d="M2 16a5 5 0 0 1 4 4" variants={VARIANTS} />
-          <motion.line animate={controls} custom={0} variants={VARIANTS} x1="2" x2="2.01" y1="20" y2="20" />
+          <motion.path animate={controls} initial="normal" custom={0.2} d="M2 12a9 9 0 0 1 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0.1} d="M2 16a5 5 0 0 1 4 4" variants={VARIANTS} />
+          <motion.line
+            animate={controls}
+            initial="normal"
+            custom={0}
+            variants={VARIANTS}
+            x1="2"
+            x2="2.01"
+            y1="20"
+            y2="20"
+          />
         </svg>
       </span>
     );

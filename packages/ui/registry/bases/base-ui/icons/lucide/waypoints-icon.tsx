@@ -91,13 +91,25 @@ const WaypointsIcon = forwardRef<WaypointsIconHandle, WaypointsIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.circle animate={controls} custom={0} cx="12" cy="4" r="2" variants={VARIANTS} />
-          <motion.path animate={controls} custom={1} d="m10.586 5.414-5.172 5.172" variants={VARIANTS} />
-          <motion.circle animate={controls} custom={0} cx="4" cy="12" r="2" variants={VARIANTS} />
-          <motion.path animate={controls} custom={2} d="M6 12h12" variants={VARIANTS} />
-          <motion.circle animate={controls} custom={0} cx="20" cy="12" r="2" variants={VARIANTS} />
-          <motion.path animate={controls} custom={3} d="m18.586 13.414-5.172 5.172" variants={VARIANTS} />
-          <motion.circle animate={controls} custom={0} cx="12" cy="20" r="2" variants={VARIANTS} />
+          <motion.circle animate={controls} initial="normal" custom={0} cx="12" cy="4" r="2" variants={VARIANTS} />
+          <motion.path
+            animate={controls}
+            initial="normal"
+            custom={1}
+            d="m10.586 5.414-5.172 5.172"
+            variants={VARIANTS}
+          />
+          <motion.circle animate={controls} initial="normal" custom={0} cx="4" cy="12" r="2" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="M6 12h12" variants={VARIANTS} />
+          <motion.circle animate={controls} initial="normal" custom={0} cx="20" cy="12" r="2" variants={VARIANTS} />
+          <motion.path
+            animate={controls}
+            initial="normal"
+            custom={3}
+            d="m18.586 13.414-5.172 5.172"
+            variants={VARIANTS}
+          />
+          <motion.circle animate={controls} initial="normal" custom={0} cx="12" cy="20" r="2" variants={VARIANTS} />
         </svg>
       </span>
     );

@@ -97,10 +97,11 @@ const UserIcon = forwardRef<UserIconHandle, UserIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.circle animate={controls} cx="12" cy="7" r="4" variants={CIRCLE_VARIANT} />
+          <motion.circle animate={controls} initial="normal" cx="12" cy="7" r="4" variants={CIRCLE_VARIANT} />
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"
             transition={{
               delay: 0.2,

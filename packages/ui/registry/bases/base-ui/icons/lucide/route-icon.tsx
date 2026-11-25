@@ -95,6 +95,7 @@ const RouteIcon = forwardRef<RouteIconHandle, RouteIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="5"
             r="3"
@@ -103,6 +104,7 @@ const RouteIcon = forwardRef<RouteIconHandle, RouteIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M9 5h8.5a1 1 0 010 7h-11a1 1 0 000 7H15"
             transition={{ duration: 0.7, delay: 0.5, opacity: { delay: 0.5 } }}
             variants={{
@@ -120,6 +122,7 @@ const RouteIcon = forwardRef<RouteIconHandle, RouteIconProps>(
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="19"
             r="3"

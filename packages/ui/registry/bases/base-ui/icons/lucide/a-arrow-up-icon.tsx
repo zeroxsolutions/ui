@@ -94,11 +94,16 @@ const AArrowUpIcon = forwardRef<AArrowUpIconHandle, AArrowUpIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} d="M3.304 13h6.392" variants={LETTER_VARIANTS} />
-          <motion.path animate={controls} d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16" variants={LETTER_VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="M3.304 13h6.392" variants={LETTER_VARIANTS} />
+          <motion.path
+            animate={controls}
+            initial="normal"
+            d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"
+            variants={LETTER_VARIANTS}
+          />
 
-          <motion.path animate={controls} d="M18 16V7" variants={ARROW_VARIANTS} />
-          <motion.path animate={controls} d="m14 11 4-4 4 4" variants={ARROW_VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="M18 16V7" variants={ARROW_VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="m14 11 4-4 4 4" variants={ARROW_VARIANTS} />
         </svg>
       </span>
     );

@@ -94,7 +94,7 @@ const FileChartLineIcon = forwardRef<FileChartLineIconHandle, FileChartLineIconP
         >
           <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
           <path d="M14 2v5a1 1 0 0 0 1 1h5" />
-          <motion.path animate={controls} d="m8 17 2.5-2.5 2 2L16 13" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="m8 17 2.5-2.5 2 2L16 13" variants={VARIANTS} />
         </svg>
       </span>
     );

@@ -85,54 +85,63 @@ const SlidersHorizontalIcon = forwardRef<SlidersHorizontalIconHandle, SlidersHor
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 5h-7"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M21 5h-7' }, animate: { d: 'M21 5h-11' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M10 5H3"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M10 5H3' }, animate: { d: 'M5 5H3' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 12h-9"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M21 12h-9' }, animate: { d: 'M21 12h-3' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M8 12H3"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M8 12H3' }, animate: { d: 'M13 12H3' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M12 19H3"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M12 19H3' }, animate: { d: 'M4 19H3' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 19h-5"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M21 19h-5' }, animate: { d: 'M21 19h-13' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M14 3v4"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M14 3v4' }, animate: { d: 'M9 3v4' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M8 10v4"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M8 10v4' }, animate: { d: 'M14 10v4' } }}
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M16 17v4"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { d: 'M16 17v4' }, animate: { d: 'M8 17v4' } }}

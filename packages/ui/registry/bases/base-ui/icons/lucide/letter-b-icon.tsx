@@ -86,6 +86,7 @@ const LetterBIcon = forwardRef<LetterBIconHandle, LetterBIconProps>(
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="M6 12h9a4 4 0 010 8H7a1 1 0 01-1-1V5a1 1 0 011-1h7a4 4 0 010 8"
             transition={{ duration: 0.6 }}
             variants={PATH_VARIANTS}

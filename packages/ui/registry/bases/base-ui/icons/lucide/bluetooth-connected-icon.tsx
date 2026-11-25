@@ -89,9 +89,10 @@ const BluetoothConnectedIcon = forwardRef<BluetoothConnectedIconHandle, Bluetoot
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} d="m7 7 10 10-5 5V2l5 5L7 17" variants={PATH_VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="m7 7 10 10-5 5V2l5 5L7 17" variants={PATH_VARIANTS} />
           <motion.line
             animate={controls}
+            initial="normal"
             variants={{
               normal: { pathLength: 1, opacity: 1, pathOffset: 0 },
               animate: {
@@ -110,6 +111,7 @@ const BluetoothConnectedIcon = forwardRef<BluetoothConnectedIconHandle, Bluetoot
           />
           <motion.line
             animate={controls}
+            initial="normal"
             variants={{
               normal: { pathLength: 1, opacity: 1, pathOffset: 0 },
               animate: {

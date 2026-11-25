@@ -84,6 +84,7 @@ const PenToolIcon = forwardRef<PenToolIconHandle, PenToolIconProps>(
       >
         <motion.svg
           animate={controls}
+          initial="normal"
           fill="none"
           height={size}
           stroke="currentColor"
@@ -102,6 +103,7 @@ const PenToolIcon = forwardRef<PenToolIconHandle, PenToolIconProps>(
           <path d="M18.648 12.352a1.205 1.205 0 011.704 0l1.296 1.296a1.205 1.205 0 010 1.704l-6.296 6.296a1.205 1.205 0 01-1.704 0l-1.296-1.296a1.205 1.205 0 010-1.704z" />
           <motion.path
             animate={controls}
+            initial="normal"
             d="m3 3 6.586 6.586"
             transition={{
               duration: 0.8,

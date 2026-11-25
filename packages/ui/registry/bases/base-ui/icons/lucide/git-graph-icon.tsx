@@ -84,6 +84,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="5"
             cy="6"
             r="3"
@@ -103,6 +104,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M5 9v6"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="5"
             cy="18"
             r="3"
@@ -145,6 +148,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M12 3v18"
             transition={{
               duration: DURATION,
@@ -168,6 +172,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="19"
             cy="6"
             r="3"
@@ -187,6 +192,7 @@ const GitGraphIcon = forwardRef<GitGraphIconHandle, GitGraphIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M16 15.7A9 9 0 0 0 19 9"
             transition={{
               duration: DURATION,

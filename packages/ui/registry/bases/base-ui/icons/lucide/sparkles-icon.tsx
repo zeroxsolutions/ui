@@ -119,12 +119,13 @@ const SparklesIcon = forwardRef<SparklesIconHandle, SparklesIconProps>(
         >
           <motion.path
             animate={sparkleControls}
+            initial="initial"
             d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"
             variants={SPARKLE_VARIANTS}
           />
-          <motion.path animate={starControls} d="M20 2v4" variants={STAR_VARIANTS} />
-          <motion.path animate={starControls} d="M22 4h-4" variants={STAR_VARIANTS} />
-          <motion.circle animate={starControls} cx="4" cy="20" r="2" variants={STAR_VARIANTS} />
+          <motion.path animate={starControls} initial="initial" d="M20 2v4" variants={STAR_VARIANTS} />
+          <motion.path animate={starControls} initial="initial" d="M22 4h-4" variants={STAR_VARIANTS} />
+          <motion.circle animate={starControls} initial="initial" cx="4" cy="20" r="2" variants={STAR_VARIANTS} />
         </svg>
       </span>
     );

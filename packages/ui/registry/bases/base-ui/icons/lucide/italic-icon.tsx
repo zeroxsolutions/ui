@@ -87,6 +87,7 @@ const ItalicIcon = forwardRef<ItalicIconHandle, ItalicIconProps>(
         >
           <motion.line
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.2 }}
             variants={LINE_VARIANTS}
             x1="19"
@@ -96,6 +97,7 @@ const ItalicIcon = forwardRef<ItalicIconHandle, ItalicIconProps>(
           />
           <motion.line
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.2 }}
             variants={LINE_VARIANTS}
             x1="14"
@@ -105,6 +107,7 @@ const ItalicIcon = forwardRef<ItalicIconHandle, ItalicIconProps>(
           />
           <motion.line
             animate={controls}
+            initial="normal"
             transition={{
               delay: 0.1,
               duration: 0.4,

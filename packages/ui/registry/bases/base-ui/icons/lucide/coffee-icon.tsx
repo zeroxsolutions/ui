@@ -94,9 +94,9 @@ const CoffeeIcon = forwardRef<CoffeeIconHandle, CoffeeIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} custom={0.2} d="M10 2v2" variants={PATH_VARIANTS} />
-          <motion.path animate={controls} custom={0.4} d="M14 2v2" variants={PATH_VARIANTS} />
-          <motion.path animate={controls} custom={0} d="M6 2v2" variants={PATH_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0.2} d="M10 2v2" variants={PATH_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0.4} d="M14 2v2" variants={PATH_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0} d="M6 2v2" variants={PATH_VARIANTS} />
           <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
         </svg>
       </span>

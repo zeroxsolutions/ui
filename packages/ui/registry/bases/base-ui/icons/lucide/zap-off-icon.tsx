@@ -103,7 +103,7 @@ const ZapOffIcon = forwardRef<ZapOffIconHandle, ZapOffIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           {PATHS.map((d, i) => (
-            <motion.path animate={controls} custom={i * 0.15} d={d} key={d} variants={PATH_VARIANTS} />
+            <motion.path animate={controls} initial="normal" custom={i * 0.15} d={d} key={d} variants={PATH_VARIANTS} />
           ))}
         </svg>
       </span>

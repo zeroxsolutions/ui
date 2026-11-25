@@ -77,6 +77,7 @@ const WorkflowIcon = forwardRef<WorkflowIconHandle, WorkflowIconProps>(
         >
           <motion.rect
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.3, delay: 0, opacity: { duration: 0.3, delay: 0.05 } }}
             variants={{ normal: { pathLength: 1, opacity: 1 }, animate: { pathLength: [0, 1], opacity: [0, 1] } }}
             width="8"
@@ -87,12 +88,14 @@ const WorkflowIcon = forwardRef<WorkflowIconHandle, WorkflowIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.3, delay: 0.18, opacity: { duration: 0.3, delay: 0.23 } }}
             variants={{ normal: { pathLength: 1, opacity: 1 }, animate: { pathLength: [0, 1], opacity: [0, 1] } }}
             d="M7 11v4a2 2 0 0 0 2 2h4"
           />
           <motion.rect
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.3, delay: 0.06, opacity: { duration: 0.3, delay: 0.11 } }}
             variants={{ normal: { pathLength: 1, opacity: 1 }, animate: { pathLength: [0, 1], opacity: [0, 1] } }}
             width="8"

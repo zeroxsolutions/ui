@@ -76,6 +76,7 @@ const EyeIcon = forwardRef<EyeIconHandle, EyeIconProps>(
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
             style={{ originY: '50%' }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
@@ -86,6 +87,7 @@ const EyeIcon = forwardRef<EyeIconHandle, EyeIconProps>(
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="12"
             cy="12"
             r="3"

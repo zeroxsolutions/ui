@@ -84,6 +84,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="6"
             r="3"
@@ -103,6 +104,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M6 9v12"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="m15.5 8.5 5-5"
             transition={{
               duration: DURATION,
@@ -140,6 +143,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="m15.5 3.5 5 5"
             transition={{
               duration: DURATION,
@@ -154,6 +158,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M18 11.62V15"
             transition={{
               duration: DURATION,
@@ -177,6 +182,7 @@ const GitPullRequestClosedIcon = forwardRef<GitPullRequestClosedIconHandle, GitP
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="18"
             r="3"
