@@ -50,10 +50,12 @@ const content: DocJSON = {
 function BlockPresetsDemo(): ReactNode {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    <div className="grid w-full max-w-4xl items-start gap-4 md:grid-cols-[minmax(0,1fr)_16rem]">
-      <Editor features={features} content={content} onReady={setEditor} />
-      {editor && <SlashMenu editor={editor} items={contributions.slash} />}
-      {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+    <div className="@container w-full max-w-4xl">
+      <div className="grid items-start gap-4 @2xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <Editor features={features} content={content} onReady={setEditor} />
+        {editor && <SlashMenu editor={editor} items={contributions.slash} />}
+        {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+      </div>
     </div>
   );
 }

@@ -26,16 +26,18 @@ function BlockPresetsEmailDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    <div className="grid w-full max-w-4xl items-start gap-4 md:grid-cols-[minmax(0,1fr)_16rem]">
-      <EmailEditor
-        label="Email body"
-        profile={profile}
-        presets={presets}
-        value={blocks}
-        onChange={setBlocks}
-        onReady={setEditor}
-      />
-      {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+    <div className="@container w-full max-w-4xl">
+      <div className="grid items-start gap-4 @2xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <EmailEditor
+          label="Email body"
+          profile={profile}
+          presets={presets}
+          value={blocks}
+          onChange={setBlocks}
+          onReady={setEditor}
+        />
+        {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+      </div>
     </div>
   );
 }
