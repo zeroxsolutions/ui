@@ -198,7 +198,7 @@ const strike: MarkCodec = {
 
 const code: MarkCodec = {
   mark: 'code',
-  toMarkdown: () => ({ open: '`', close: '`' }),
+  toMarkdown: () => ({ open: '`', close: '`', verbatim: true }),
   toHTML: () => ({ open: '<code>', close: '</code>' }),
   toReact: wrap('code'),
   fromMarkdown: (token) => (token.type === 'inlineCode' ? { type: 'code' } : null),

@@ -20,8 +20,14 @@ import type { ReactNodeCodec } from '../../../react-types';
  * call `ctx.renderChildren`) and are cast to the core `NodeCodec` at the
  * registration boundary.
  */
+/** A cell's Markdown on one line, every `|` that would end the cell escaped; the serializer escaped its text's own. */
 const cellText = (cell: NodeJSON, serialize: (n: NodeJSON) => string): string =>
-  (cell.content ?? []).map(serialize).join(' ').replace(/\n+/g, ' ').replace(/\|/g, '\\|').trim();
+  (cell.content ?? [])
+    .map(serialize)
+    .join(' ')
+    .replace(/\n+/g, ' ')
+    .replace(/(\\*)\|/g, (pipe, slashes: string) => (slashes.length % 2 === 0 ? `${slashes}\\|` : pipe))
+    .trim();
 
 const tableCodec: ReactNodeCodec = {
   node: 'table',

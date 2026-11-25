@@ -72,4 +72,35 @@ describe('table', () => {
     expect(node?.content?.[0]?.content?.[0]?.type).toBe('tableHeader');
     expect(node?.content?.[1]?.content?.[0]?.type).toBe('tableCell');
   });
+
+  it('keeps a pipe in a cell, plain, escaped by the author or in code, inside its cell', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'table',
+          content: [
+            {
+              type: 'tableRow',
+              content: [
+                { type: 'tableHeader', content: cell('| a | b') },
+                { type: 'tableHeader', content: cell('back\\|slash') },
+              ],
+            },
+            {
+              type: 'tableRow',
+              content: [
+                {
+                  type: 'tableCell',
+                  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x|y', marks: [{ type: 'code' }] }] }],
+                },
+                { type: 'tableCell', content: cell('2') },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(importMarkdown(serialize(doc, 'markdown', registry), registry).doc).toEqual(doc);
+  });
 });
