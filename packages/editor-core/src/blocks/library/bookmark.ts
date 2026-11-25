@@ -1,11 +1,11 @@
 import { imageUrl, link, plainText } from '../../template/email/fields.js';
-import { defineBlock } from '../define-block.js';
+import { defineLibraryBlock } from '../define-block.js';
 
 /**
  * A link drawn as a card: its title, its description and its image, which the host reads from the page when the
  * author pastes the address. Without a title the card shows the address.
  */
-export const bookmark = defineBlock({
+export const bookmark = defineLibraryBlock({
   type: 'bookmark',
   label: 'Bookmark',
   description: 'A link with its preview',

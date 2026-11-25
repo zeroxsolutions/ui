@@ -52,9 +52,7 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'mathBlock',
   'mathInline',
   'variable',
-  'emailButton',
-  'emailColumns',
-  'emailLane',
+  'toggleHeading',
   'emailHtml',
   'emailUnknown',
   // The marks' names, which the engine keeps in the same namespace as the nodes'.
@@ -70,6 +68,12 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'superscript',
   'textStyle',
 ]);
+
+/**
+ * The node names the library's own document blocks take. A product's block of one of these types would be a second
+ * node of that name beside the library's; the library declares its own through `defineLibraryBlock`.
+ */
+const LIBRARY_NODES: ReadonlySet<string> = new Set(['card', 'bookmark', 'file', 'media', 'tableOfContents']);
 
 /** How a block draws in a document's exports: its HTML, which Markdown also carries. */
 export interface DocumentSide<F extends FieldMap, A extends AttributeMap> {
@@ -121,7 +125,7 @@ export interface Block<
  * editors; pass `email` to `createEmailRenderer`.
  *
  * @throws {BlockDefinitionInvalid} for a block with neither side; with a document side, for a lanes field or a
- * type the Document Editor's own nodes take; and for what `defineEmailBlock` refuses, the default types for an
+ * type the Document Editor's own nodes or the library's blocks take; and for what `defineEmailBlock` refuses, the default types for an
  * email side only
  */
 export function defineBlock<
@@ -129,14 +133,18 @@ export function defineBlock<
   const F extends FieldMap,
   const A extends AttributeMap = Record<never, never>,
 >(options: BlockOptions<Type, F, A>): Block<Type, F, A> {
+  if (options.document !== undefined && LIBRARY_NODES.has(options.type)) {
+    throw new BlockDefinitionInvalid(options.type, 'the type names a library block');
+  }
   return blockOf(options, emailBlockOf);
 }
 
 /**
- * A block of the library itself, whose type is one the renderer knows by default, so its email side is built
- * without the check `defineBlock` makes against those types, under the library's `rules`.
+ * A block of the library itself, whose type the renderer knows by default or the library reserves for its own
+ * document block, so it is built without the checks `defineBlock` makes against those types, its email side under
+ * the library's `rules`.
  *
- * @throws {BlockDefinitionInvalid} as `defineBlock` does, but for a default type
+ * @throws {BlockDefinitionInvalid} as `defineBlock` does, but for a default or library type
  */
 export function defineLibraryBlock<
   const Type extends string,

@@ -1,8 +1,8 @@
 import { choice, imageUrl, link, plainText } from '../../template/email/fields.js';
-import { defineBlock } from '../define-block.js';
+import { defineLibraryBlock } from '../define-block.js';
 
 /** A video or a sound played in place, with its controls, and a caption under it. */
-export const media = defineBlock({
+export const media = defineLibraryBlock({
   type: 'media',
   label: 'Video',
   description: 'A video or audio player',

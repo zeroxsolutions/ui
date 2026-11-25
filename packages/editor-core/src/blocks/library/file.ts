@@ -1,5 +1,5 @@
 import { link, number, plainText } from '../../template/email/fields.js';
-import { defineBlock } from '../define-block.js';
+import { defineLibraryBlock } from '../define-block.js';
 
 /** The largest size a file block records, in bytes. */
 export const FILE_SIZE_MAX = 2 ** 31;
@@ -23,7 +23,7 @@ export function fileSizeText(bytes: number): string {
 }
 
 /** A file to download: its name, its size and a link to it. */
-export const file = defineBlock({
+export const file = defineLibraryBlock({
   type: 'file',
   label: 'File',
   description: 'A file to download',

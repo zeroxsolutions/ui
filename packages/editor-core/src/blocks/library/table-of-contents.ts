@@ -1,5 +1,5 @@
 import type { NodeJSON } from '../../document/core/types/index.js';
-import { defineBlock } from '../define-block.js';
+import { defineLibraryBlock } from '../define-block.js';
 
 /** One heading a table of contents lists. */
 export interface ContentsEntry {
@@ -43,7 +43,7 @@ export function contentsOf(doc: NodeJSON): ContentsEntry[] {
  * The document's headings as a list of links to them, drawn from the document where it is shown. Its exports
  * hold the place only, since a block's HTML is written from the block alone.
  */
-export const tableOfContents = defineBlock({
+export const tableOfContents = defineLibraryBlock({
   type: 'tableOfContents',
   label: 'Table of contents',
   description: "The document's headings",
