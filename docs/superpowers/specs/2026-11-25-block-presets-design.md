@@ -76,7 +76,7 @@ inserted in one move.
   a sheet on narrow screens); the editor takes `presets` and the panel reads them from the editor.
 - `Editor` and `EmailEditor` take `presets?: readonly BlockPreset[]`; the slash menu and "+" list the fitting
   ones under "Presets".
-- Ships as a registry item `@zui/editor-presets` (panel and the library's presets).
+- Ships as a registry item `@zui/block-presets` (panel and the library's presets).
 
 ### The library's presets
 

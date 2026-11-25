@@ -2269,9 +2269,9 @@
       ]
     },
     {
-      "name": "editor-presets",
+      "name": "block-presets",
       "type": "registry:component",
-      "title": "Editor Presets",
+      "title": "Block Presets",
       "description": "Ready-made groups of blocks an author drags, clicks or picks from the slash menu into the Document Editor or the email editor.",
       "categories": ["editor"],
       "dependencies": ["@zeroxsolutions/editor-core", "zod"],
@@ -2282,7 +2282,14 @@
         "@shadcn/item",
         "@shadcn/utils",
         "@zui/document-editor",
+        "@zui/lucide-circle-question-mark-icon",
+        "@zui/lucide-id-card-icon",
+        "@zui/lucide-image-icon",
+        "@zui/lucide-info-icon",
+        "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
+        "@zui/lucide-mailbox-icon",
+        "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-search-icon"
       ],
       "files": [
@@ -2290,6 +2297,11 @@
           "path": "registry/bases/base-ui/editor/document/features/presets/index.ts",
           "type": "registry:component",
           "target": "@components/editor/document/features/presets/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/presets/library-presets.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/presets/library-presets.ts"
         },
         {
           "path": "registry/bases/base-ui/editor/document/features/presets/presets-feature.ts",
@@ -2352,24 +2364,42 @@
       "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "zod"]
     },
     {
-      "name": "editor-presets-demo",
+      "name": "block-presets-demo",
       "type": "registry:example",
-      "title": "Editor Presets Demo",
-      "description": "A document beside a panel of two presets, two columns and a tip in a callout, which its slash menu offers too.",
+      "title": "Block Presets Demo",
+      "description": "A document beside a panel of the library's presets: two columns, an FAQ, a callout with a button and two cards in columns, which its slash menu offers too.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
       "registryDependencies": [
+        "@zui/block-presets",
         "@zui/document-editor",
         "@zui/editor-button",
         "@zui/editor-callout",
+        "@zui/editor-card",
         "@zui/editor-columns",
-        "@zui/editor-presets"
+        "@zui/editor-toggle-heading"
       ],
       "files": [
         {
-          "path": "registry/bases/base-ui/examples/editor-presets-demo.tsx",
+          "path": "registry/bases/base-ui/examples/block-presets-demo.tsx",
           "type": "registry:example",
-          "target": "@components/editor-presets-demo.tsx"
+          "target": "@components/block-presets-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "block-presets-email",
+      "type": "registry:example",
+      "title": "Block Presets Email",
+      "description": "An email beside a panel of the library's email presets: a header, a hero, a call to action, a two-up and a footer.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/block-presets", "@zui/email-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/block-presets-email.tsx",
+          "type": "registry:example",
+          "target": "@components/block-presets-email.tsx"
         }
       ]
     },
@@ -3719,6 +3749,7 @@
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/block-library",
+        "@zui/block-presets",
         "@zui/chat-input",
         "@zui/document-editor",
         "@zui/editor-button",
@@ -3727,7 +3758,6 @@
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
-        "@zui/editor-presets",
         "@zui/editor-table",
         "@zui/lucide-at-sign-icon",
         "@zui/lucide-blocks-icon",

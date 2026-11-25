@@ -115,7 +115,7 @@
 
 **Files:**
 
-- Modify: registry item list for `editor-presets` (as `editor-callout` is registered), `packages/ui/src/site/constants/editor-docs-sections.ts`
+- Modify: registry item list for `block-presets` (as `editor-callout` is registered), `packages/ui/src/site/constants/editor-docs-sections.ts`
 - Create: `packages/editor-docs-web/content/docs/editor/block-presets.mdx` and its demos (Document Editor with panel; email editor with panel)
 - Modify: `block-library.mdx` (link), `email-editor.mdx` (`presets` prop)
 
