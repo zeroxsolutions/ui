@@ -2,7 +2,7 @@ import type { EmailBlockKind, ProblemKind, ProfileProblem } from '@zeroxsolution
 import type { RenderProblem, RenderProblemKind } from '@zeroxsolutions/editor-core/template/email/index';
 
 /** The attributes the email block menu sets. */
-export type EmailBlockAttribute = 'align' | 'spaceAfter' | 'tone' | 'width';
+export type EmailBlockAttribute = 'align' | 'spaceAfter' | 'tone' | 'width' | 'level';
 
 /** The values those attributes take. */
 export type EmailBlockAttributeValue =
@@ -15,7 +15,10 @@ export type EmailBlockAttributeValue =
   | 'default'
   | 'muted'
   | 'inline'
-  | 'full';
+  | 'full'
+  | '1'
+  | '2'
+  | '3';
 
 /** What the SMS meter reads: the units used of a segment's limit, and the segments against the profile's cap. */
 export interface SmsMeterReading {
@@ -135,6 +138,7 @@ const PROBLEMS: Readonly<Record<ProblemKind, string>> = {
   'text-empty': 'This block is empty',
   'text-too-long': 'This text is too long',
   'list-too-long': 'This list has too many items',
+  'table-too-large': 'This table has more than 20 rows or 6 columns',
   'too-many-blocks': 'The email has too many blocks',
   'block-not-carried': 'The email keeps only the text of this block',
   'sms-segment-exceeded': 'The message is longer than allowed',
@@ -198,6 +202,18 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     divider: { title: 'Divider', description: 'A rule between two parts' },
     columns: { title: 'Columns', description: 'Two to four lanes side by side' },
     html: { title: 'HTML', description: 'Markup the email prints as written' },
+    heading: { title: 'Heading', description: 'A title over what follows' },
+    quote: { title: 'Quote', description: 'Words quoted from someone' },
+    image: { title: 'Image', description: 'A hosted image, with its alt text' },
+    table: { title: 'Table', description: 'Rows and columns of short text' },
+    spacer: { title: 'Spacer', description: 'Empty space between two blocks' },
+    socialLinks: { title: 'Social links', description: 'A row of icon links' },
+    hero: { title: 'Hero', description: 'A wide image, a heading, text and a button' },
+    card: { title: 'Card', description: 'An image, a heading, text and a button in a frame' },
+    legalFooter: {
+      title: 'Legal footer',
+      description: 'Who sends this and why, the address and an unsubscribe link',
+    },
   },
   bold: 'Bold',
   italic: 'Italic',
@@ -211,7 +227,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   noVariables: 'No variables found',
   blockActions: 'Block actions',
   turnInto: 'Turn into',
-  attributes: { align: 'Align', spaceAfter: 'Space after', tone: 'Tone', width: 'Width' },
+  attributes: { align: 'Align', spaceAfter: 'Space after', tone: 'Tone', width: 'Width', level: 'Level' },
   attributeValues: {
     left: 'Left',
     center: 'Center',
@@ -223,6 +239,9 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     muted: 'Muted',
     inline: 'Fit the label',
     full: 'Full width',
+    '1': 'Heading 1',
+    '2': 'Heading 2',
+    '3': 'Heading 3',
   },
   columns: 'Lanes',
   duplicate: 'Duplicate',

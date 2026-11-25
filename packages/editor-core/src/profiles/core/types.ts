@@ -2,7 +2,24 @@ import type { EmailBlockJSON, Format } from '../../document/core/types/codec.js'
 import type { BlockEditor } from '../../template/email/define-email-block.js';
 import type { VariableType } from '../../template/index.js';
 
-export type EmailBlockKind = 'paragraph' | 'button' | 'code' | 'list' | 'callout' | 'divider' | 'columns' | 'html';
+export type EmailBlockKind =
+  | 'paragraph'
+  | 'button'
+  | 'code'
+  | 'list'
+  | 'callout'
+  | 'divider'
+  | 'columns'
+  | 'html'
+  | 'heading'
+  | 'quote'
+  | 'image'
+  | 'table'
+  | 'spacer'
+  | 'socialLinks'
+  | 'hero'
+  | 'card'
+  | 'legalFooter';
 
 export type ProblemKind =
   | 'variable-undeclared'
@@ -20,6 +37,7 @@ export type ProblemKind =
   | 'text-empty'
   | 'text-too-long'
   | 'list-too-long'
+  | 'table-too-large'
   | 'too-many-blocks'
   | 'sms-segment-exceeded'
   | 'sms-placeholder-malformed'

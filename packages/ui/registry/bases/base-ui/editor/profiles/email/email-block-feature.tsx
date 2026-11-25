@@ -25,7 +25,7 @@ import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorM
 import type { VariableFeature } from '../variables/variable';
 import { VariableTextField } from '../variables/variable-text-field';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
-import { blockAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
+import { blockAt, cellAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
 import { blockClasses } from './nodes/block-style';
 
 export interface EmailBlockFeatureOptions {
@@ -35,6 +35,8 @@ export interface EmailBlockFeatureOptions {
   nodeView?(props: NodeViewProps<Record<string, unknown>>): ReactNode;
   /** The words of the slash item, read once, when the feature is built; the kit's own in the editor's views. */
   messages?: () => ProfileEditorMessages;
+  /** Whether a lane takes the block. Default true; a block drawn at the card's whole width sets false. */
+  inLanes?: boolean;
 }
 
 type AttributeValue = string | boolean | number;
@@ -262,8 +264,10 @@ export function emailBlockFeature(
   const insertable = (editor: IEditor): boolean => {
     const found = contextOf(editor);
     if (!found || found.context.locked() || !found.context.admitted.has(block.node)) return false;
-    // A lane holds no block of lanes, as it holds no columns block.
-    return block.lanes === null || laneAt(found.engine.state) === undefined;
+    if (cellAt(found.engine.state) !== undefined) return false;
+    // A lane holds no block of lanes, as it holds no columns block, and no block drawn at the card's width.
+    const lanes = block.lanes !== null || options.inLanes === false;
+    return !lanes || laneAt(found.engine.state) === undefined;
   };
   const settable = (editor: IEditor, name: string, value: AttributeValue) => {
     const found = contextOf(editor);
@@ -388,7 +392,7 @@ export function emailBlockFeature(
         ...(block.body !== null
           ? { content: 'inline*' }
           : block.lanes !== null
-            ? { content: `emailLane{${block.lanes.min},${block.lanes.max}}` }
+            ? { content: `column{${block.lanes.min},${block.lanes.max}}` }
             : { atom: true }),
         render: EmailBlockView,
       },
@@ -398,7 +402,7 @@ export function emailBlockFeature(
       [insertCommand]: {
         run: (editor) => {
           if (!insertable(editor)) return false;
-          const lane = (): NodeJSON => ({ type: 'emailLane', content: [{ type: 'paragraph' }] });
+          const lane = (): NodeJSON => ({ type: 'column', content: [{ type: 'paragraph' }] });
           const content =
             block.lanes === null ? {} : { content: Array.from({ length: block.lanes.min }, () => lane()) };
           return editor.run('insertContent', { content: { type: block.node, ...content } });

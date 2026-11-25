@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
 import { sameBlockContent } from '../../template/email/index.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
+import { MAIL_LAYOUT_KINDS } from './profile.js';
 import { TRAVEL_DEFAULT_BLOCKS } from './fixtures/travel-defaults.fixture.js';
 import type { EditorEmailBlock } from './types.js';
+
+/** A mail layout's kinds, which carry no heading or quote. */
+const LAYOUT = { kinds: MAIL_LAYOUT_KINDS };
 
 function block(overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'type'>): EditorEmailBlock {
   return { id: null, key: 'k', attributes: {}, content: {}, ...overrides };
@@ -149,26 +153,28 @@ describe('email blocks', () => {
   });
 
   it('a custom node with an email codec round-trips', () => {
-    const quote: NodeCodec = {
-      node: 'quote',
+    const testimonial: NodeCodec = {
+      node: 'testimonial',
       toEmailBlock: (node) => ({
         id: null,
         key: String(node.attrs?.key),
-        type: 'quote',
+        type: 'testimonial',
         attributes: {},
         content: { text: String(node.attrs?.text) },
       }),
       fromEmailBlock: (b) =>
-        b.type === 'quote' ? { type: 'quote', attrs: { key: b.key, text: String(b.content.text) } } : null,
+        b.type === 'testimonial' ? { type: 'testimonial', attrs: { key: b.key, text: String(b.content.text) } } : null,
     };
-    const blocks = [block({ key: 'q', type: 'quote', content: { text: 'hello' } })];
-    const doc = fromEmailBlocks(blocks, [quote]);
-    expect(doc.content?.[0].type).toBe('quote');
-    expect(toEmailBlocks(doc, [quote])).toEqual(blocks);
+    const blocks = [block({ key: 'q', type: 'testimonial', content: { text: 'hello' } })];
+    const doc = fromEmailBlocks(blocks, [testimonial]);
+    expect(doc.content?.[0].type).toBe('testimonial');
+    expect(toEmailBlocks(doc, [testimonial])).toEqual(blocks);
   });
 
   it('a block type with no codec imports as unknown-block-type content kept, not dropped', () => {
-    const blocks = [block({ id: 'x', key: 'x', type: 'quote', attributes: { a: 1 }, content: { text: 'hello' } })];
+    const blocks = [
+      block({ id: 'x', key: 'x', type: 'testimonial', attributes: { a: 1 }, content: { text: 'hello' } }),
+    ];
     const doc = fromEmailBlocks(blocks);
     expect(doc.content?.[0].type).toBe('emailUnknown');
     expect(doc.content?.[0].attrs?.block).toEqual(blocks[0]);
@@ -176,9 +182,14 @@ describe('email blocks', () => {
   });
 
   it('exports an unknown block under its node identity', () => {
-    const doc = fromEmailBlocks([block({ id: 'x', key: 'x', type: 'quote', content: { text: 'hi' } })]);
+    const doc = fromEmailBlocks([block({ id: 'x', key: 'x', type: 'testimonial', content: { text: 'hi' } })]);
     doc.content![0].attrs = { ...doc.content![0].attrs, id: 'copy', key: 'x-2' };
-    expect(toEmailBlocks(doc)[0]).toMatchObject({ id: 'copy', key: 'x-2', type: 'quote', content: { text: 'hi' } });
+    expect(toEmailBlocks(doc)[0]).toMatchObject({
+      id: 'copy',
+      key: 'x-2',
+      type: 'testimonial',
+      content: { text: 'hi' },
+    });
   });
 
   it('keeps a stored attribute from overwriting identity or content', () => {
@@ -222,18 +233,40 @@ describe('email blocks', () => {
       expect(code.content).toBeUndefined();
     });
 
+    it('reads a button as the shared button node, its label and href as attributes', () => {
+      const [button] = fromEmailBlocks([
+        block({ type: 'button', attributes: { width: 'full' }, content: { label: 'Go', href: '{{u}}' } }),
+      ]).content!;
+      expect(button).toMatchObject({ type: 'button', attrs: { width: 'full', label: 'Go', href: '{{u}}' } });
+    });
+
+    it('reads columns as the shared columns node holding a column per lane', () => {
+      const [columns] = fromEmailBlocks([
+        block({ type: 'columns', attributes: { ratio: [1, 2] }, lanes: [[block({ type: 'divider' })], []] }),
+      ]).content!;
+      expect(columns).toMatchObject({ type: 'columns', attrs: { ratio: [1, 2] } });
+      expect(columns.content?.map((lane) => lane.type)).toEqual(['column', 'column']);
+    });
+
     it('reads a divider as a horizontalRule', () => {
       expect(fromEmailBlocks([block({ type: 'divider' })]).content?.[0].type).toBe('horizontalRule');
     });
 
-    it('exports a heading as a paragraph keeping its text', () => {
+    it('exports a heading as a paragraph keeping its text where the kinds hold no heading', () => {
       const heading: NodeJSON = { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Hi' }] };
-      expect(only(docOf(heading))).toMatchObject({ type: 'paragraph', attributes: {}, content: { text: 'Hi' } });
+      expect(toEmailBlocks(docOf(heading), [], LAYOUT)[0]).toMatchObject({
+        type: 'paragraph',
+        attributes: {},
+        content: { text: 'Hi' },
+      });
     });
 
-    it('exports a blockquote as a paragraph joining its paragraphs with a space', () => {
-      const quote: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
-      expect(only(docOf(quote))).toMatchObject({ type: 'paragraph', content: { text: 'a b' } });
+    it('exports a blockquote as a paragraph joining its paragraphs with a space where the kinds hold no quote', () => {
+      const testimonial: NodeJSON = { type: 'blockquote', content: [para('a'), para('b')] };
+      expect(toEmailBlocks(docOf(testimonial), [], LAYOUT)[0]).toMatchObject({
+        type: 'paragraph',
+        content: { text: 'a b' },
+      });
     });
 
     it('exports an orderedList as a list', () => {

@@ -18,6 +18,15 @@ export const EMAIL_KINDS: readonly EmailBlockKind[] = [
   'divider',
   'columns',
   'html',
+  'heading',
+  'quote',
+  'image',
+  'table',
+  'spacer',
+  'socialLinks',
+  'hero',
+  'card',
+  'legalFooter',
 ];
 
 /** What a mail-layout region (header, footer) may hold. */
@@ -114,6 +123,9 @@ export function emailProfile(
   const blocks = (options.blocks ?? []).map((definition) => definition.editor);
   const types = new Set<string>();
   for (const { type } of blocks) {
+    if ((EMAIL_KINDS as readonly string[]).includes(type)) {
+      throw new EditorError('editor.profile.block_is_kind', `Block type "${type}" is already an email kind.`);
+    }
     if (types.has(type)) {
       throw new EditorError('editor.profile.block_duplicate', `Block type "${type}" is declared twice.`);
     }

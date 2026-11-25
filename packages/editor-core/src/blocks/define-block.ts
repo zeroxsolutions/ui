@@ -3,6 +3,7 @@ import {
   assertBlockShape,
   BlockDefinitionInvalid,
   blockEditorOf,
+  builtInEmailBlockOf,
   emailBlockOf,
   type AttributeMap,
   type BlockEditor,
@@ -12,6 +13,7 @@ import {
   type EmailBlockDefinition,
   type EmailBlockOptions,
   type FieldMap,
+  type LibraryRules,
 } from '../template/email/define-email-block.js';
 import { documentAttributes, documentCodecOf, type DocumentBlockHtml } from './document-codec.js';
 
@@ -127,6 +129,27 @@ export function defineBlock<
   const F extends FieldMap,
   const A extends AttributeMap = Record<never, never>,
 >(options: BlockOptions<Type, F, A>): Block<Type, F, A> {
+  return blockOf(options, emailBlockOf);
+}
+
+/**
+ * A block of the library itself, whose type is one the renderer knows by default, so its email side is built
+ * without the check `defineBlock` makes against those types, under the library's `rules`.
+ *
+ * @throws {BlockDefinitionInvalid} as `defineBlock` does, but for a default type
+ */
+export function defineLibraryBlock<
+  const Type extends string,
+  const F extends FieldMap,
+  const A extends AttributeMap = Record<never, never>,
+>(options: BlockOptions<Type, F, A>, rules: LibraryRules = {}): Block<Type, F, A> {
+  return blockOf(options, (email, node) => builtInEmailBlockOf(email, node, rules));
+}
+
+function blockOf<const Type extends string, const F extends FieldMap, const A extends AttributeMap>(
+  options: BlockOptions<Type, F, A>,
+  emailOf: (options: EmailBlockOptions<Type, F, A>, node: string) => EmailBlockDefinition<Type, F, A>,
+): Block<Type, F, A> {
   const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
   const refuse = (reason: string): never => {
     throw new BlockDefinitionInvalid(options.type, reason);
@@ -145,7 +168,7 @@ export function defineBlock<
   const email =
     options.email === undefined
       ? null
-      : emailBlockOf({ ...options, ...options.email } as EmailBlockOptions<Type, F, A>, node);
+      : emailOf({ ...options, ...options.email } as EmailBlockOptions<Type, F, A>, node);
   const editor = email?.editor ?? blockEditorOf(shape, node);
   return {
     type: options.type,

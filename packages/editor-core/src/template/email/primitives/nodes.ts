@@ -78,6 +78,21 @@ export type EmailNode =
       readonly items: readonly (readonly TextRun[])[];
     }
   | { readonly kind: 'code'; readonly classes: readonly string[]; readonly text: string }
+  /** A data table: each row's cells as runs, the first row drawn as headers where `header` is set. */
+  | {
+      readonly kind: 'table';
+      readonly classes: readonly string[];
+      readonly header: boolean;
+      readonly rows: readonly (readonly (readonly TextRun[])[])[];
+    }
+  /** Linked images in a row, as social icons are drawn; an item whose image or link is refused is left out. */
+  | {
+      readonly kind: 'icons';
+      readonly classes: readonly string[];
+      readonly size: number;
+      readonly align: 'left' | 'center' | 'right';
+      readonly items: readonly { readonly src: string; readonly alt: string; readonly href: string }[];
+    }
   | { readonly kind: 'spacer'; readonly classes: readonly string[]; readonly height: number }
   /**
    * Markup written as it is, on no stylesheet's terms, and its text arm. `rows` marks the table rows a render
@@ -376,6 +391,20 @@ export interface EmailPrimitives {
   /** Each item is inline markup. */
   list(options: Classed & { readonly items: readonly string[]; readonly ordered?: boolean }): EmailNode;
   code(options: Classed & { readonly text: string }): EmailNode;
+  /** A data table; each cell is inline markup, and `header` draws the first row as headers. */
+  table(options: Classed & { readonly rows: readonly (readonly string[])[]; readonly header?: boolean }): EmailNode;
+  /**
+   * Linked images side by side, each `size` px square, as social icons are drawn. An item whose image or link is
+   * refused is left out; its text arm is a `alt: href` line per item.
+   */
+  icons(
+    options: Classed & {
+      readonly size: number;
+      /** Where the row sits in its block; left when absent. */
+      readonly align?: 'left' | 'center' | 'right';
+      readonly items: readonly { readonly src: string; readonly alt: string; readonly href: string }[];
+    },
+  ): EmailNode;
   /** Vertical space, `height` in px. */
   spacer(options: Classed & { readonly height: number }): EmailNode;
   /**
@@ -487,6 +516,23 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       text: reader.text(options.text),
     }),
     spacer: (options) => ({ kind: 'spacer', classes: classesOf(options.class, 'zx-spacer'), height: options.height }),
+    table: (options) => ({
+      kind: 'table',
+      classes: classesOf(options.class, 'zx-table'),
+      header: options.header ?? false,
+      rows: options.rows.map((row) => row.map((cell) => reader.runs(cell))),
+    }),
+    icons: (options) => ({
+      kind: 'icons',
+      classes: classesOf(options.class, 'zx-icons', `zx-icons-${options.align ?? 'left'}`),
+      size: Math.round(options.size),
+      align: options.align ?? 'left',
+      items: options.items.flatMap((item) => {
+        const src = reader.imageSrc(item.src);
+        const href = reader.href(item.href);
+        return src === null || href === null ? [] : [{ src, href, alt: reader.text(item.alt) }];
+      }),
+    }),
     raw: ((
       first: { readonly markup: string } | TemplateStringsArray,
       ...values: readonly (string | number | null | undefined)[]

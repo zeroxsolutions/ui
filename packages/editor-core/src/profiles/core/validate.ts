@@ -1,6 +1,14 @@
 import { hrefProblems, parseInlineMarkup, variableTokens, type VariableType } from '../../template/index.js';
 import { leadingToken } from '../../template/markup/href.js';
-import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
+import {
+  defaultBlocks,
+  LIBRARY_BLOCK_PAIRS,
+  libraryBlocks,
+  type DefaultBlockType,
+  type LibraryBlockType,
+} from '../../template/email/blocks/index.js';
+import { IMAGE_TEXT_MAX_LENGTH } from '../../template/email/blocks/image.js';
+import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '../../template/email/blocks/table.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type {
@@ -42,21 +50,24 @@ function checkField(walk: Walk, block: string, { field, item, value, max, marked
   if (value === '') walk.problems.push({ kind: 'text-empty', ...where });
   else if (value.length > max) walk.problems.push({ kind: 'text-too-long', ...where });
 
-  if (marked) {
-    const parsed = parseInlineMarkup(value);
-    if (!parsed.ok) walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
-    else {
-      const flagged = new Set<string>();
-      for (const run of parsed.runs) {
-        if (run.kind !== 'link' || flagged.has(run.href) || !hrefFaulty(walk, run.href)) continue;
-        flagged.add(run.href);
-        const name = leadingToken(run.href);
-        walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
-      }
-    }
-  }
-
+  if (marked) checkMarkup(walk, where, value);
   checkTokens(walk, where, value);
+}
+
+/** What the write check refuses in inline markup: markup that does not parse, and each link it would not open. */
+function checkMarkup(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' | 'item'>, value: string): void {
+  const parsed = parseInlineMarkup(value);
+  if (!parsed.ok) {
+    walk.problems.push({ kind: 'markup-malformed', ...where, offset: parsed.offset });
+    return;
+  }
+  const flagged = new Set<string>();
+  for (const run of parsed.runs) {
+    if (run.kind !== 'link' || flagged.has(run.href) || !hrefFaulty(walk, run.href)) continue;
+    flagged.add(run.href);
+    const name = leadingToken(run.href);
+    walk.problems.push({ kind: 'link-invalid', ...where, ...(name === undefined ? {} : { name }) });
+  }
 }
 
 function checkTokens(walk: Walk, where: Pick<ProfileProblem, 'block' | 'field' | 'item'>, value: string): void {
@@ -88,6 +99,7 @@ function checkOwnField(
   field: BlockEditorField,
   stored: unknown,
   where: Pick<ProfileProblem, 'block' | 'field' | 'item'>,
+  secure = false,
 ): void {
   const value = text(stored);
   // Left out, a field reads as empty; a value that is not text cannot be read at all.
@@ -95,9 +107,69 @@ function checkOwnField(
   else if (field.required && value.trim() === '') walk.problems.push({ kind: 'text-empty', ...where });
   if (value.length > field.max) walk.problems.push({ kind: 'text-too-long', ...where });
   if (field.kind === 'plainText' || value === '') return;
+  const literal = leadingToken(value) === undefined;
   const faulty =
-    /[\r\n]/.test(value) || hrefFaulty(walk, value) || (field.kind === 'imageUrl' && MAIL.test(value.trim()));
+    /[\r\n]/.test(value) ||
+    hrefFaulty(walk, value) ||
+    (field.kind === 'imageUrl' && MAIL.test(value.trim())) ||
+    // A library block's image loads over a secure connection only, as the image block's does.
+    (secure && field.kind === 'imageUrl' && literal && !SECURE_IMAGE.test(value.trim()));
   if (faulty) walk.problems.push({ kind: 'href-invalid', ...where });
+}
+
+/** An image the built-in image block loads: a literal `https:` address, or a url variable. */
+const SECURE_IMAGE = /^https:\/\//i;
+
+/** What the write check refuses in an image block: a missing or refused source, an empty alt, and each bound. */
+function checkImage(walk: Walk, content: Record<string, unknown>, id: string): void {
+  const fields: readonly BlockEditorField[] = [
+    { name: 'src', kind: 'imageUrl', label: '', max: walk.profile.bounds.href, required: true },
+    { name: 'alt', kind: 'plainText', label: '', max: IMAGE_TEXT_MAX_LENGTH, required: true },
+    { name: 'caption', kind: 'plainText', label: '', max: IMAGE_TEXT_MAX_LENGTH, required: false },
+    { name: 'href', kind: 'link', label: '', max: walk.profile.bounds.href, required: false },
+  ];
+  for (const field of fields) checkTokens(walk, { block: id, field: field.name }, text(content[field.name]));
+  for (const field of fields) {
+    const before = walk.problems.length;
+    checkOwnField(walk, field, content[field.name], { block: id, field: field.name });
+    const src = text(content.src).trim();
+    // A plain page address loads over no secure connection, which the image block refuses on write.
+    if (field.name === 'src' && walk.problems.length === before && src !== '' && leadingToken(src) === undefined) {
+      if (!SECURE_IMAGE.test(src)) walk.problems.push({ kind: 'href-invalid', block: id, field: 'src' });
+    }
+  }
+}
+
+/**
+ * What the write check refuses in a table block: rows that are not a list (`content-invalid`), none
+ * (`text-empty`), more rows or columns than it holds (`table-too-large`), rows of two widths or a row that is not
+ * a list of text (`content-invalid`, the row as `item`), and in each cell what a paragraph's text is refused for.
+ */
+function checkTable(walk: Walk, content: Record<string, unknown>, id: string): void {
+  const where = { block: id, field: 'rows' };
+  const rows: unknown = content.rows;
+  if (!Array.isArray(rows)) {
+    walk.problems.push({ kind: 'content-invalid', ...where });
+    return;
+  }
+  if (rows.length === 0) walk.problems.push({ kind: 'text-empty', ...where });
+  const lists = rows.filter((row): row is unknown[] => Array.isArray(row));
+  if (rows.length > TABLE_MAX_ROWS || lists.some((row) => row.length > TABLE_MAX_COLUMNS)) {
+    walk.problems.push({ kind: 'table-too-large', ...where });
+  }
+  if (lists.some((row) => row.length !== lists[0].length)) walk.problems.push({ kind: 'content-invalid', ...where });
+  rows.forEach((row: unknown, item) => {
+    if (!Array.isArray(row) || row.length === 0 || row.some((cell) => typeof cell !== 'string')) {
+      walk.problems.push({ kind: 'content-invalid', ...where, item });
+      return;
+    }
+    for (const cell of row as string[]) {
+      if (cell === '') continue;
+      if (cell.length > walk.profile.bounds.text) walk.problems.push({ kind: 'text-too-long', ...where, item });
+      checkMarkup(walk, { ...where, item }, cell);
+      checkTokens(walk, { ...where, item }, cell);
+    }
+  });
 }
 
 /**
@@ -105,7 +177,7 @@ function checkOwnField(
  * of the item's fields (`content-invalid`), fewer items than `min` (`text-empty`) or more than `max`
  * (`list-too-long`), and each item's fields, under the item's index.
  */
-function checkItems(walk: Walk, items: BlockEditorItems, stored: unknown, id: string): void {
+function checkItems(walk: Walk, items: BlockEditorItems, stored: unknown, id: string, secure = false): void {
   const where = { block: id, field: items.name };
   // Left out, an items field reads as none; null is a value, which the write check refuses.
   const entries: unknown = stored === undefined ? [] : stored;
@@ -119,7 +191,7 @@ function checkItems(walk: Walk, items: BlockEditorItems, stored: unknown, id: st
     const known = isRecord(entry) && Object.keys(entry).every((key) => items.fields.some(({ name }) => name === key));
     if (!known) walk.problems.push({ kind: 'content-invalid', ...where, item });
     if (!isRecord(entry)) return;
-    for (const field of items.fields) checkOwnField(walk, field, entry[field.name], { ...where, item });
+    for (const field of items.fields) checkOwnField(walk, field, entry[field.name], { ...where, item }, secure);
   });
 }
 
@@ -166,14 +238,31 @@ function checkOwnBlock(
       }
     }
   }
-  for (const field of own.fields) checkOwnField(walk, field, content[field.name], { block: id, field: field.name });
-  for (const items of own.items) checkItems(walk, items, content[items.name], id);
+  const secure = Object.hasOwn(libraryBlocks, own.type);
+  for (const field of own.fields) {
+    checkOwnField(walk, field, content[field.name], { block: id, field: field.name }, secure);
+  }
+  // A library block's paired fields, such as a button's label and link, are filled together; the empty one is flagged.
+  for (const [one, other] of LIBRARY_BLOCK_PAIRS[own.type as LibraryBlockType] ?? []) {
+    const filled = (name: string) => text(content[name]).trim() !== '';
+    if (filled(one) !== filled(other)) {
+      walk.problems.push({ kind: 'text-empty', block: id, field: filled(one) ? other : one });
+    }
+  }
+  for (const items of own.items) checkItems(walk, items, content[items.name], id, secure);
   if (own.lanes !== null) {
     const count = Array.isArray(block.lanes) ? block.lanes.length : 0;
     if (count < own.lanes.min || count > own.lanes.max) {
       walk.problems.push({ kind: 'lanes-count', block: id, field: own.lanes.name });
     }
   }
+}
+
+/** The editor of a block built as a product's is: a profile's own block, or one of the library's. */
+function ownEditorOf(walk: Walk, type: string): BlockEditor | undefined {
+  const own = walk.profile.blocks?.find((candidate) => candidate.type === type);
+  if (own) return own;
+  return Object.hasOwn(libraryBlocks, type) ? libraryBlocks[type as LibraryBlockType].editor : undefined;
 }
 
 /** The keys each default kind's strict content schema has. */
@@ -186,6 +275,10 @@ const CONTENT_KEYS: Readonly<Record<string, readonly string[]>> = {
   html: ['html'],
   divider: [],
   columns: [],
+  heading: ['text'],
+  quote: ['text'],
+  image: ['src', 'alt', 'caption', 'href'],
+  table: ['rows'],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -203,7 +296,7 @@ function contentOf(walk: Walk, block: EditorEmailBlock, id: string): Record<stri
     walk.problems.push({ kind: 'content-invalid', block: id });
     return {};
   }
-  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  const own = ownEditorOf(walk, block.type);
   const keys = own
     ? [
         ...(own.body === null ? [] : [own.body.name]),
@@ -239,7 +332,7 @@ function checkAttributes(walk: Walk, block: EditorEmailBlock, id: string): void 
     return;
   }
   const fields = new Set<string>();
-  const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+  const own = ownEditorOf(walk, block.type);
   if (own) {
     for (const attribute of own.attributes) {
       if (raw[attribute.name] !== undefined && !attributeTakes(attribute, raw[attribute.name])) {
@@ -279,7 +372,9 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
   walk.count += 1;
 
   // A lane holds no block of lanes: the renderer draws a columns block, or a product's lanes block, at the top only.
-  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined)) {
+  // A hero's and a card's image is drawn at the card's width, which Outlook would push a lane past.
+  const wide = Object.hasOwn(defaultBlocks, block.type) && defaultBlocks[block.type as DefaultBlockType].wide === true;
+  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined || wide)) {
     walk.problems.push({ kind: 'block-nested-too-deep', block: id });
     return;
   }
@@ -297,6 +392,8 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
   switch (block.type) {
     case 'paragraph':
     case 'callout':
+    case 'heading':
+    case 'quote':
       checkField(walk, id, { field: 'text', value: text(content.text), max: bounds.text, marked: true });
       break;
     case 'list': {
@@ -323,8 +420,14 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
       break;
     case 'divider':
       break;
+    case 'image':
+      checkImage(walk, content, id);
+      break;
+    case 'table':
+      checkTable(walk, content, id);
+      break;
     default: {
-      const own = walk.profile.blocks?.find((candidate) => candidate.type === block.type);
+      const own = ownEditorOf(walk, block.type);
       if (own) checkOwnBlock(walk, own, block, content, id);
       else {
         for (const name of new Set(variableTokens(content))) {

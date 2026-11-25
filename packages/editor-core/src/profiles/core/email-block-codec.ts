@@ -47,7 +47,7 @@ export function emailBlockCodec(editor: BlockEditor): NodeCodec {
       // A lanes block's lanes, which the import fills with their blocks; a block of no lanes holds its body.
       const content: NodeJSON[] =
         editor.lanes !== null
-          ? (block.lanes ?? []).map(() => ({ type: 'emailLane' }))
+          ? (block.lanes ?? []).map(() => ({ type: 'column' }))
           : editor.body === null
             ? []
             : inlineOf(source);

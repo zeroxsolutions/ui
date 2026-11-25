@@ -61,7 +61,7 @@ const PIECES: Record<string, string[]> = {
   'document/features/mention/mention.tsx': ['<Badge'],
   'composer/triggers/inline-token.tsx': ['<Badge'],
   'profiles/variables/variable.tsx': ['<Badge'],
-  'profiles/email/nodes/button.tsx': ['buttonVariants'],
+  'document/features/button/button.tsx': ['buttonVariants'],
   'profiles/email/nodes/html.tsx': ['cn-editor-block'],
   'profiles/email/nodes/unknown.tsx': ['cn-editor-block'],
   'profiles/email/email-link-popover.tsx': ['<RectPopover', '<Button'],

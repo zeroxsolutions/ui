@@ -20,6 +20,8 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
+import { libraryBlocks } from '@zeroxsolutions/editor-core/template/email/index';
+import { emailBlockFeature } from './email-block-feature';
 import { emailKit, emailUi, type EmailKitOptions } from './email-kit';
 import { EmailLinkPopover } from './email-link-popover';
 
@@ -134,6 +136,9 @@ async function mount(
 }
 
 const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON(), codecs);
+/** The blocks `editor` exports under `profile`, which decides what folds into a paragraph. */
+const exportedFor = (editor: IEditor, profile: EditorProfile = fullProfile) =>
+  toEmailBlocks(editor.getJSON(), codecs, { kinds: profile.kinds });
 
 /** Pastes `html` at the caret, as the clipboard of another editor carries it. */
 function pasteHtml(html: string): void {
@@ -144,7 +149,7 @@ function pasteHtml(html: string): void {
   );
 }
 
-const buttonHtml = '<div data-type="emailButton" label="Go" href="{{resetUrl}}"></div>';
+const buttonHtml = '<div data-type="button" label="Go" href="{{resetUrl}}"></div>';
 const typesOf = (editor: IEditor) => (editor.getJSON().content ?? []).map((node) => node.type);
 
 function find(selector: string, text?: string): HTMLElement {
@@ -187,7 +192,7 @@ async function chooseInBlockMenu(text: string, group: string, title: string, sel
 
 /** Opens the link popover of the only button from its block menu. */
 async function openButtonLink() {
-  await openBlockMenu('', '[data-slot=email-button]');
+  await openBlockMenu('', '[data-slot=link-button]');
   await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
   const popover = page.getByRole('dialog', { name: 'Link' });
   await expect.element(popover).toBeVisible();
@@ -218,13 +223,175 @@ describe('the email kit', () => {
       'Button',
       'Columns',
       'HTML',
+      'Heading',
+      'Quote',
+      'Image',
+      'Table',
+      'Hero',
+      'Card',
+      'Social links',
+      'Spacer',
+      'Legal footer',
     ]);
+  });
+
+  it.each([
+    ['Hero', 'hero'],
+    ['Card', 'card'],
+    ['Social links', 'socialLinks'],
+    ['Spacer', 'spacer'],
+    ['Legal footer', 'legalFooter'],
+  ])('inserts a %s from the slash menu, exported as its email block', async (title, type) => {
+    const editor = await mount([paragraph('')]);
+    await userEvent.click(find('[contenteditable=true] p'));
+    await userEvent.keyboard('/');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain(type));
+  });
+
+  it('keeps a hero and a card out of a lane, as wide as the card', async () => {
+    const editor = await mount([block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] })]);
+    await caretAfter('left');
+    for (const kind of ['hero', 'card'] as const) {
+      expect(editor.can('insertEmailBlock', { kind })).toBe(false);
+      expect(editor.can(`insertEmailBlock:${kind}`)).toBe(false);
+    }
+    expect(editor.can('insertEmailBlock', { kind: 'spacer' })).toBe(true);
+
+    editor.run('insertContent', { content: { type: 'hero' } });
+    const lanes = editor.getJSON().content?.[0].content ?? [];
+    expect(lanes.flatMap((lane) => (lane.content ?? []).map((child) => child.type))).not.toContain('hero');
+  });
+
+  it("refuses a host's own feature holding a library block's node", () => {
+    const own = emailBlockFeature(libraryBlocks.card);
+    expect(() => emailKit(fullProfile, [own])).toThrow(/already holds/);
+  });
+
+  it("inserts a library block through the kit's own command where the profile allows it", async () => {
+    const editor = await mount([paragraph('Hi')]);
+    await caretAfter('Hi');
+    expect(editor.run('insertEmailBlock', { kind: 'spacer' })).toBe(true);
+    await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain('spacer'));
+
+    const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+    await caretAfter('Header');
+    expect(layout.can('insertEmailBlock', { kind: 'hero' })).toBe(false);
+  });
+
+  it('carries a stored hero, card, social links, spacer and legal footer through the editor unchanged', async () => {
+    const feature = {
+      image: 'https://x.test/h.png',
+      alt: 'A bay',
+      heading: 'Hello {{name}}',
+      text: 'Come **soon**',
+      buttonLabel: 'Go',
+      buttonHref: '{{resetUrl}}',
+    };
+    const stored: EditorEmailBlock[] = [
+      block({ id: 'h', key: 'h', type: 'hero', attributes: { align: 'center' }, content: feature }),
+      block({ id: 'c', key: 'c', type: 'card', content: { ...feature, buttonLabel: '', buttonHref: '' } }),
+      block({
+        id: 's',
+        key: 's',
+        type: 'socialLinks',
+        attributes: { size: 'small' },
+        content: { links: [{ label: 'Blog', icon: 'https://x.test/i.png', href: 'https://x.test/b' }] },
+      }),
+      block({ id: 'p', key: 'p', type: 'spacer', attributes: { height: 'large' } }),
+      block({
+        id: 'f',
+        key: 'f',
+        type: 'legalFooter',
+        content: { sender: 'You joined.', address: '1 Road', unsubscribe: '{{resetUrl}}' },
+      }),
+    ];
+    const editor = await mount(stored);
+    expect(exportedFor(editor)).toEqual(stored);
+    expect(exported(editor)).toEqual(stored);
+  });
+
+  it.each([
+    ['Heading', { type: 'heading', attributes: { level: 2 }, content: { text: '' } }],
+    ['Quote', { type: 'quote', attributes: {}, content: { text: '' } }],
+    ['Image', { type: 'image', attributes: {}, content: { src: '', alt: '' } }],
+    [
+      'Table',
+      {
+        type: 'table',
+        attributes: { header: true },
+        content: {
+          rows: [
+            ['', ''],
+            ['', ''],
+          ],
+        },
+      },
+    ],
+  ])('inserts a %s from the slash menu, exported as its email block', async (title, block) => {
+    const editor = await mount([paragraph('')]);
+    await userEvent.click(find('[contenteditable=true] p'));
+    await userEvent.keyboard('/');
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await vi.waitFor(() =>
+      expect(exportedFor(editor).map(({ id: _id, key: _key, ...rest }) => rest)).toContainEqual(block),
+    );
+  });
+
+  it('carries a stored heading, quote, image and table through the editor unchanged', async () => {
+    const stored: EditorEmailBlock[] = [
+      block({
+        id: 'h',
+        key: 'h',
+        type: 'heading',
+        attributes: { level: 1, align: 'center' },
+        content: { text: 'Hi **{{name}}**' },
+      }),
+      block({ id: 'q', key: 'q', type: 'quote', attributes: { spaceAfter: 'large' }, content: { text: '_Said_' } }),
+      block({
+        id: 'i',
+        key: 'i',
+        type: 'image',
+        attributes: { align: 'center', width: 300 },
+        content: { src: 'https://x.test/a.png', alt: 'A bay', caption: 'Morning', href: '{{resetUrl}}' },
+      }),
+      block({
+        id: 't',
+        key: 't',
+        type: 'table',
+        attributes: { header: true },
+        content: {
+          rows: [
+            ['a', 'b'],
+            ['**c**', ''],
+          ],
+        },
+      }),
+    ];
+    const editor = await mount(stored);
+    expect(exportedFor(editor)).toEqual(stored);
+  });
+
+  it("sets a heading's level from the block menu", async () => {
+    const editor = await mount([
+      block({ id: 'h', key: 'h', type: 'heading', attributes: { level: 2 }, content: { text: 'Title' } }),
+    ]);
+    await chooseInBlockMenu('Title', 'Level', 'Heading 1', '[contenteditable=true] h2');
+    await vi.waitFor(() => expect(exportedFor(editor)[0].attributes).toEqual({ level: 1 }));
   });
 
   it('offers in the slash menu only the kinds a mail-layout region holds', async () => {
     await mount([paragraph('')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
 
     expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns']);
+  });
+
+  it('folds a heading pasted into a mail-layout region into a paragraph, and marks it', async () => {
+    const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
+    const editor = await mount([paragraph('')], { profile: layout });
+    await userEvent.click(find('[contenteditable=true] p'));
+    pasteHtml('<h2>Pasted</h2>');
+    await vi.waitFor(() => expect(exportedFor(editor, layout).map((one) => one.type)).toEqual(['paragraph']));
   });
 
   it("draws the document editor's grip and its insert button beside a block", async () => {
@@ -488,8 +655,22 @@ describe('the email kit', () => {
     expect(JSON.stringify(editor.getJSON())).not.toContain('"marks"');
   });
 
-  it('turns no typed shortcut into a heading and keeps no underline', async () => {
+  it('turns a typed shortcut into a heading where the profile holds one', async () => {
     const editor = await mount([paragraph('Hello')]);
+    await caretAfter('Hello');
+    await userEvent.keyboard('{Enter}# Title');
+
+    await vi.waitFor(() =>
+      expect(exportedFor(editor)[1]).toMatchObject({
+        type: 'heading',
+        attributes: { level: 1 },
+        content: { text: 'Title' },
+      }),
+    );
+  });
+
+  it('turns no typed shortcut into a heading where the profile holds none, and keeps no underline', async () => {
+    const editor = await mount([paragraph('Hello')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Hello');
     await userEvent.keyboard('{Enter}# Title');
     await userEvent.keyboard('{Shift>}{Home}{/Shift}{ControlOrMeta>}u{/ControlOrMeta}');
@@ -545,15 +726,20 @@ describe('the email kit', () => {
     );
   });
 
-  it('keeps a pasted heading as a heading, which exports as its text', async () => {
-    const editor = await mount([paragraph('Body')]);
+  it('keeps a pasted heading as a heading, which a mail layout exports as its text', async () => {
+    const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
+    const editor = await mount([paragraph('Body')], { profile: layout });
     await caretAfter('Body');
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
     pasteHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
 
     await vi.waitFor(() => expect(typesOf(editor)).toContain('heading'));
-    expect(exported(editor).map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
+    expect(exportedFor(editor, layout).map(({ type, content }) => [type, content])).toContainEqual([
+      'paragraph',
+      { text: 'Hi' },
+    ]);
   });
+
   it('sets align, space after and tone on a paragraph from the block menu', async () => {
     const editor = await mount([paragraph('Hi there', 'p')]);
 
@@ -585,7 +771,7 @@ describe('the email kit', () => {
     ]);
     await caretAfter('Before');
 
-    await chooseInBlockMenu('', 'Width', 'Full width', '[data-slot=email-button]');
+    await chooseInBlockMenu('', 'Width', 'Full width', '[data-slot=link-button]');
 
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ width: 'full' }));
     expect(exported(editor)[0].attributes).toEqual({});
@@ -643,14 +829,44 @@ describe('the email kit', () => {
     expect(editor.can('insertEmailBlock', { kind: 'columns' })).toBe(false);
     expect(editor.run('insertEmailBlock', { kind: 'columns' })).toBe(false);
     editor.run('insertContent', {
-      content: { type: 'emailColumns', content: [{ type: 'emailLane', content: [{ type: 'paragraph' }] }] },
+      content: { type: 'columns', content: [{ type: 'column', content: [{ type: 'paragraph' }] }] },
     });
 
     const lanes = editor.getJSON().content?.flatMap((node) => node.content ?? []) ?? [];
-    expect(lanes.filter((lane) => lane.type === 'emailLane').length).toBeGreaterThan(0);
+    expect(lanes.filter((lane) => lane.type === 'column').length).toBeGreaterThan(0);
     for (const lane of lanes) {
-      expect((lane.content ?? []).map((child) => child.type)).not.toContain('emailColumns');
+      expect((lane.content ?? []).map((child) => child.type)).not.toContain('columns');
     }
+  });
+
+  it('keeps every block but a line out of a table cell, where the export would lose it', async () => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })]);
+    await caretAfter('cellA');
+
+    for (const kind of ['image', 'columns', 'table', 'button', 'divider', 'heading', 'quote', 'list'] as const) {
+      expect(editor.can('insertEmailBlock', { kind })).toBe(false);
+      expect(editor.run('insertEmailBlock', { kind })).toBe(false);
+    }
+    expect(editor.can('insertEmailBlock', { kind: 'paragraph' })).toBe(true);
+  });
+
+  it.each([
+    ['# ', 'heading'],
+    ['- ', 'bulletList'],
+    ['> ', 'blockquote'],
+  ])('keeps a typed %s shortcut from turning a table cell into a %s', async (typed, type) => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['', 'cellB']] } })]);
+    await userEvent.click(find('[contenteditable=true] td p'));
+    await userEvent.keyboard(typed);
+    await vi.waitFor(() => expect(JSON.stringify(editor.getJSON())).toContain(typed.trim()));
+    expect(JSON.stringify(editor.getJSON())).not.toContain(`"type":"${type}"`);
+  });
+
+  it("offers no way around the kit's own insert for a button or columns", async () => {
+    const editor = await mount([block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] })]);
+    await caretAfter('left');
+    expect(() => editor.run('insertColumns', { count: 2 })).toThrow(/Unknown command/);
+    expect(() => editor.run('insertButton')).toThrow(/Unknown command/);
   });
 
   it("turns a text block into the email's text kinds only", async () => {
@@ -672,7 +888,7 @@ describe('the email kit', () => {
       block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[], []] }),
     ]);
 
-    for (const slot of ['email-button', 'code-card', 'email-html', 'divider', 'email-columns']) {
+    for (const slot of ['link-button', 'code-card', 'email-html', 'divider', 'columns']) {
       const selector =
         slot === 'divider'
           ? '[contenteditable=true] hr'
@@ -736,7 +952,7 @@ describe('the email kit', () => {
     };
 
     for (const group of ['Turn into', 'Align', 'Space after', 'Tone']) await refusedIn(group, 'Hi');
-    await refusedIn('Width', '', '[data-slot=email-button]');
+    await refusedIn('Width', '', '[data-slot=link-button]');
     await refusedIn('Lanes', 'left');
 
     await openBlockMenu('Hi');
@@ -761,7 +977,7 @@ describe('the email kit', () => {
     await mount([paragraph('Header'), block({ type: 'button', content: { label: 'Go' } })], {
       profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }),
     });
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
 
     const refused = page.getByRole('menuitem', { name: 'Duplicate' });
     await expect.element(refused).toBeDisabled();
@@ -786,19 +1002,19 @@ describe('the email kit', () => {
     const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
     pasteHtml(buttonHtml);
-    expect(typesOf(layout)).not.toContain('emailButton');
+    expect(typesOf(layout)).not.toContain('button');
 
     const full = await mount([paragraph('Body')]);
     await caretAfter('Body');
     pasteHtml(buttonHtml);
-    await vi.waitFor(() => expect(typesOf(full)).toContain('emailButton'));
+    await vi.waitFor(() => expect(typesOf(full)).toContain('button'));
   });
 
   it('brings back a stored block of a left-out kind on undo', async () => {
     const stored = [paragraph('Header', 'p'), block({ id: 'b', key: 'b', type: 'button', content: { label: 'Go' } })];
     const editor = await mount(stored, { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
     await caretAfter('Header');
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() => expect(typesOf(editor)).toEqual(['paragraph']));
     await vi.waitFor(() => expect(document.activeElement?.classList.contains('ProseMirror')).toBe(true));

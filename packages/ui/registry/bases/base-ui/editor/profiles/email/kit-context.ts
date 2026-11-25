@@ -97,8 +97,11 @@ function nodeAt(state: EngineState, matches: (node: ProseMirrorNode) => boolean)
 }
 
 export const blockAt = (state: EngineState) => nodeAt(state, carriesKey);
-export const columnsAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailColumns');
-export const laneAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'emailLane');
+export const columnsAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'columns');
+export const laneAt = (state: EngineState) => nodeAt(state, (node) => node.type.name === 'column');
+/** The table cell around the selection: the export writes a cell as one line, so it holds a line and nothing else. */
+export const cellAt = (state: EngineState) =>
+  nodeAt(state, (node) => node.type.name === 'tableCell' || node.type.name === 'tableHeader');
 
 /**
  * Selects the block whose view holds `element`. A field inside a block's view takes the focus without moving
@@ -157,7 +160,7 @@ export function emailLinkTarget(engine: Editor, reason: (button: Found) => strin
   const { state } = engine;
   const picked = (state.selection as { node?: ProseMirrorNode }).node;
   if (picked) {
-    if (picked.type.name !== 'emailButton') return undefined;
+    if (picked.type.name !== 'button') return undefined;
     const button = { node: picked, pos: state.selection.from };
     return { kind: 'button', pos: button.pos, href: String(picked.attrs.href ?? ''), reason: reason(button) };
   }

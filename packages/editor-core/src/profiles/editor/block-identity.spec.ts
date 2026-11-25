@@ -5,7 +5,7 @@ import type { Editor } from '../../document/advanced.js';
 import { createDocumentEditor } from '../../document/core/create-document-editor.js';
 import type { EditorFeature, IEditor, NodeJSON, NodeSpec } from '../../document/core/types/index.js';
 import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
-import { emailNodeSpecs } from '../core/email-nodes.js';
+import { buttonNodeSpec, columnsNodeSpecs, emailNodeSpecs } from '../core/email-nodes.js';
 
 // Stand-ins for the document's own callout and rule, which live outside editor-core; the callout holds
 // inline text here so a caret in it sits in the block itself.
@@ -22,7 +22,7 @@ const documentNodes: NodeSpec[] = [
 
 const email: EditorFeature = {
   id: 'email',
-  nodes: [...documentNodes, ...emailNodeSpecs.nodes],
+  nodes: [...documentNodes, buttonNodeSpec, ...columnsNodeSpecs(), ...emailNodeSpecs.nodes],
   marks: [{ name: 'bold', htmlTag: 'strong' }, ...emailNodeSpecs.marks],
 };
 const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
@@ -38,7 +38,7 @@ function callout(text: string, attrs: Attrs = {}): NodeJSON {
 }
 
 function button(attrs: Attrs): NodeJSON {
-  return { type: 'emailButton', attrs };
+  return { type: 'button', attrs };
 }
 
 const mounted: IEditor[] = [];
@@ -301,11 +301,11 @@ describe('blockIdentity', () => {
 
   it('refuses deleting a columns block holding a required block', () => {
     const columns: NodeJSON = {
-      type: 'emailColumns',
+      type: 'columns',
       attrs: { id: 'c', key: 'kc', ratio: [1, 1] },
       content: [
-        { type: 'emailLane', content: [paragraph('left', { id: 'l', key: 'kl' })] },
-        { type: 'emailLane', content: [paragraph('right', { id: 'r', key: 'kr' })] },
+        { type: 'column', content: [paragraph('left', { id: 'l', key: 'kl' })] },
+        { type: 'column', content: [paragraph('right', { id: 'r', key: 'kr' })] },
       ],
     };
     const { editor, engine } = mount([columns, paragraph('after', { id: 'p', key: 'kp' })], { required: () => ['l'] });
@@ -417,9 +417,9 @@ describe('blockIdentity', () => {
       });
 
       engine.commands.setNodeSelection(0);
-      expect(editor.run('updateAttributes', { name: 'emailButton', attrs: { label: 'Di' } })).toBe(true);
+      expect(editor.run('updateAttributes', { name: 'button', attrs: { label: 'Di' } })).toBe(true);
       expect(editor.getJSON().content?.[0].attrs).toMatchObject({ label: 'Di', href: '{{u}}' });
-      editor.run('updateAttributes', { name: 'emailButton', attrs: { href: '{{v}}' } });
+      editor.run('updateAttributes', { name: 'button', attrs: { href: '{{v}}' } });
       expect(editor.getJSON().content?.[0].attrs).toMatchObject({ label: 'Di', href: '{{u}}' });
     });
   });

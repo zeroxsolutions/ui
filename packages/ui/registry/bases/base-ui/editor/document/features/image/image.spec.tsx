@@ -1,8 +1,10 @@
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index';
+import { Viewer } from '../../react/viewer';
 import { image } from './image';
 
 const editors: IEditor[] = [];
@@ -48,5 +50,37 @@ describe('image', () => {
     expect(node?.type).toBe('image');
     expect(node?.attrs?.src).toBe('https://x/y.png');
     expect(node?.attrs?.alt).toBe('Cat');
+  });
+
+  it('round-trips a caption and a link through HTML', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'image',
+          attrs: { src: 'https://x/y.png', alt: 'Cat', title: '', width: 300, caption: 'A "cat"', href: 'https://x/c' },
+        },
+      ],
+    };
+    const html = serialize(doc, 'html', registry);
+    expect(html).toContain('data-caption="A &quot;cat&quot;" data-href="https://x/c"');
+    expect(importHTML(html, registry).doc).toEqual(doc);
+  });
+
+  it('draws its caption, and links it in the Viewer only to an address a reader would open', () => {
+    const viewed = (href: string) =>
+      renderToStaticMarkup(
+        <Viewer
+          doc={{
+            type: 'doc',
+            content: [{ type: 'image', attrs: { src: 'https://x/y.png', alt: 'Cat', caption: 'Lunch', href } }],
+          }}
+          features={[standardKit(), image()]}
+        />,
+      );
+    expect(viewed('https://x/c')).toMatch(/<a href="https:\/\/x\/c"[^>]*><img/);
+    expect(viewed('https://x/c')).toContain('<figcaption');
+    expect(viewed('https://x/c')).toContain('Lunch');
+    expect(viewed('javascript:alert(1)')).not.toContain('<a ');
   });
 });

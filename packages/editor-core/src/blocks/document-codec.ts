@@ -114,7 +114,14 @@ type Place =
   | { readonly kind: 'closed'; readonly reason: string }
   | { readonly kind: 'tag'; readonly tag: string }
   | { readonly kind: 'unquoted'; readonly tag: string }
-  | { readonly kind: 'value'; readonly tag: string; readonly attribute: string; readonly quote: string };
+  /** In a quoted attribute value; `empty` while nothing of the value is written yet. */
+  | {
+      readonly kind: 'value';
+      readonly tag: string;
+      readonly attribute: string;
+      readonly quote: string;
+      readonly empty: boolean;
+    };
 
 /** Where a character appended to `html` lands. Escaped values hold no `<`, `>` or quote, so they never move it. */
 function placeAfter(html: string): Place {
@@ -142,7 +149,8 @@ function placeAfter(html: string): Place {
       place = { kind: 'tag', tag };
       at += 1 + opened[0].length;
     } else if (place.kind === 'value') {
-      if (character === place.quote) place = { kind: 'tag', tag: place.tag };
+      const value: Extract<Place, { kind: 'value' }> = place;
+      place = character === value.quote ? { kind: 'tag', tag: value.tag } : { ...value, empty: false };
       at += 1;
     } else if (place.kind === 'unquoted') {
       if (character === '>') place = { kind: 'text' };
@@ -160,7 +168,7 @@ function placeAfter(html: string): Place {
       at += attribute[0].length;
       if (attribute[2] === '') place = { kind: 'unquoted', tag };
       else if (attribute[2] !== undefined) {
-        place = { kind: 'value', tag, attribute: attribute[1].toLowerCase(), quote: attribute[2] };
+        place = { kind: 'value', tag, attribute: attribute[1].toLowerCase(), quote: attribute[2], empty: true };
       }
     } else return place;
   }
@@ -186,10 +194,25 @@ function placementRefusal(place: Place, value: unknown): string | null {
     case 'value':
       if (fragment) return 'a fragment holding a value goes in text, where its values were checked';
       if (LINK_ATTRIBUTES[place.tag]?.includes(place.attribute)) {
-        return url ? null : `a value in ${place.attribute} goes through markup.url`;
+        if (!url) return `a value in ${place.attribute} goes through markup.url`;
+        // Written after a scheme of the template's own, an address would run as that scheme.
+        return place.empty ? null : `markup.url is the whole of ${place.attribute}, not a part of it`;
       }
       return TEXT_ATTRIBUTE.test(place.attribute) ? null : `a value cannot go in ${place.attribute} of <${place.tag}>`;
   }
+}
+
+/**
+ * @throws {BlockDefinitionInvalid} unless `html` ends in text: what follows a block's HTML, its body and the next
+ * block's, would otherwise land in a tag, an attribute or an element that runs or styles it
+ */
+function assertEndsInText(type: string, html: string): void {
+  const place = placeAfter(html);
+  if (place.kind === 'text') return;
+  throw new BlockDefinitionInvalid(
+    type,
+    place.kind === 'closed' ? place.reason : 'the markup ends inside a tag, where what follows it would land',
+  );
 }
 
 /** The `markup` template of block `type`, recording whether `body` was placed. */
@@ -214,12 +237,21 @@ function markupOf(type: string, body: MarkupValue, placed: { body: boolean }): M
     values.forEach((value, index) => {
       if (Array.isArray(value)) {
         for (const part of value) {
-          if (!(part instanceof MarkupValue)) throw new BlockDefinitionInvalid(type, 'a list holds fragments only');
+          if (!(part instanceof MarkupValue) || part instanceof UrlValue) {
+            throw new BlockDefinitionInvalid(type, 'a list holds fragments only');
+          }
           place(part);
         }
-      } else place(value);
+      } else {
+        const before = placeAfter(html);
+        place(value);
+        if (value instanceof UrlValue && before.kind === 'value' && !strings[index + 1].startsWith(before.quote)) {
+          throw new BlockDefinitionInvalid(type, `markup.url is the whole of ${before.attribute}, not a part of it`);
+        }
+      }
       html += strings[index + 1];
     });
+    assertEndsInText(type, html);
     return new MarkupValue(html, holdsValues);
   };
   return Object.assign(template, {
@@ -340,6 +372,7 @@ export function documentCodecOf(editor: BlockEditor, html: DocumentBlockHtml<nev
       viewOf(node, body),
       markupOf(editor.type, body, placed),
     ).html;
+    assertEndsInText(editor.type, inner);
     return `${opening}${escaped(JSON.stringify(json))}">${inner}${placed.body ? '' : body.html}</div>`;
   };
 

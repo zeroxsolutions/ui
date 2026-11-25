@@ -160,24 +160,32 @@
   margin-bottom: 2rem;
 }
 
-/* An email columns block's lanes, and a product block's, are the children of its content element, which its view cannot class. The
- * lanes share the width by the block's ratio, or equally without one. */
-.document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react],
+/* A columns block's columns, and an email product block's lanes, are the children of its content element, which its
+ * view cannot class. The columns share the width by the block's ratio, or equally without one, and stack on a
+ * narrow screen, as an email's lanes do. */
+.document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react],
 .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react] {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  grid-template-columns: var(--email-columns, none);
+  grid-template-columns: var(--columns-ratio, none);
   gap: 0.75rem;
+}
+@media (max-width: 40rem) {
+  .document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react],
+  .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react] {
+    grid-auto-flow: row;
+    grid-template-columns: none;
+  }
 }
 
 /* An email block's marker row, empty and hidden while its block has no problem, sits before the block, so the
- * first block is not the `:first-child` the reset above reaches. A lane's first and last block sit flush with
+ * first block is not the `:first-child` the reset above reaches. A column's first and last block sit flush with
  * its padding, as the document's do with the editor's edge. `:where` keeps a block's own `spaceAfter` above. */
 .document-editor .ProseMirror > [data-slot='email-block-row']:first-child + *,
-.document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :first-child,
+.document-editor [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :first-child,
 .document-editor
-  [data-slot='email-lane']
+  [data-slot='column']
   > [data-node-view-content]
   > [data-node-view-content-react]
   > [data-slot='email-block-row']:first-child
@@ -186,8 +194,8 @@
 }
 .document-editor
   :where(
-    [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child,
-    [data-slot='email-lane']
+    [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child,
+    [data-slot='column']
       > [data-node-view-content]
       > [data-node-view-content-react]
       > :last-child

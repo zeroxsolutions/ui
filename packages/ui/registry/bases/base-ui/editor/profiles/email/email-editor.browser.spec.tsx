@@ -5,6 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   emailProfile,
+  MAIL_LAYOUT_KINDS,
   toEmailBlocks,
   validate,
   type EditorEmailBlock,
@@ -433,8 +434,10 @@ describe('EmailEditor', () => {
     expect(style.borderTopColor).toBe(style.color);
   });
 
-  it('marks a pasted heading, whose structure the email cannot carry, with one problem', async () => {
-    const probe = await mount([paragraph('Body', 'p1')]);
+  it('marks a heading pasted where the profile holds none, whose structure the email cannot carry, with one problem', async () => {
+    const probe = await mount([paragraph('Body', 'p1')], {
+      profile: emailProfile({ variables: declared, allow: MAIL_LAYOUT_KINDS }),
+    });
     await caretAfter('Body');
     const data = new DataTransfer();
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
@@ -445,10 +448,8 @@ describe('EmailEditor', () => {
 
     await vi.waitFor(() => expect(last(probe.validated)?.map(({ kind }) => kind)).toEqual(['block-not-carried']));
     await vi.waitFor(() => expect(document.querySelectorAll('[data-slot=email-problem-marker]')).toHaveLength(1));
-    expect(exportedOf(probe.editor).map(({ type, content }) => [type, content])).toContainEqual([
-      'paragraph',
-      { text: 'Hi' },
-    ]);
+    const exported = toEmailBlocks(probe.editor.getJSON(), [], { kinds: MAIL_LAYOUT_KINDS });
+    expect(exported.map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
   });
 
   it("previews the renderer's HTML for the blocks, keys standing in for ids, with the sample values", async () => {
@@ -615,7 +616,7 @@ describe('EmailEditor', () => {
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[0].content).toEqual({ label: 'Reset now', href: '{{resetUrl}}' }),
     );
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
@@ -669,7 +670,7 @@ describe('EmailEditor', () => {
 
   it("inserts the toolbar's variable into the link popover's href field, which stays open", async () => {
     const probe = await mount([button()]);
-    await openBlockMenu('', '[data-slot=email-button]');
+    await openBlockMenu('', '[data-slot=link-button]');
     await userEvent.click(page.getByRole('menuitem', { name: 'Link' }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     const href = popover.getByRole('textbox', { name: 'Link' });

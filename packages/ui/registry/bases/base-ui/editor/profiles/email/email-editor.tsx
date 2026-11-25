@@ -418,13 +418,20 @@ export function EmailEditor({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const exportBlocks = useCallback((from: IEditor) => toEmailBlocks(from.getJSON(), setup.codecs), [setup]);
+  // The profile's kinds decide what folds into a paragraph; read live, as the checks read the profile.
+  const exportBlocks = useCallback(
+    (from: IEditor) => toEmailBlocks(from.getJSON(), setup.codecs, { kinds: live.current.profile.kinds }),
+    [setup],
+  );
 
   const check = useCallback(
     (from: IEditor) => {
       if (from.status === 'destroyed') return;
       // What the export cannot carry is named on the document's own nodes, before they fold into email blocks.
-      const problems = [...validate(exportBlocks(from), live.current.profile), ...docProblems(from.getJSON())];
+      const problems = [
+        ...validate(exportBlocks(from), live.current.profile),
+        ...docProblems(from.getJSON(), { kinds: live.current.profile.kinds }),
+      ];
       if (validated.current !== null && sameBlockContent(validated.current, problems)) return;
       validated.current = problems;
       const placed = problemMarks(problems, idBase, live.current.text.problem);

@@ -54,18 +54,18 @@ const theme: EmailTheme = {
   font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
 };
 
-/** A quote of your own: its body is written in place, its author in a field under it, its tone in the block menu. */
-const quote = defineEmailBlock({
-  type: 'quote',
-  label: 'Quote',
+/** A testimonial of your own: its body is written in place, its author in a field under it, its tone in the block menu. */
+const testimonial = defineEmailBlock({
+  type: 'testimonial',
+  label: 'Testimonial',
   description: 'A line a customer said',
-  keywords: ['testimonial'],
+  keywords: ['quote', 'review'],
   fields: { text: richText(), author: plainText({ max: 120 }) },
   attributes: { tone: choice(['neutral', 'brand'], 'neutral') },
   render: ({ fields, attributes }, h) =>
-    h.section({ class: ['zx-quote', `zx-quote-${attributes.tone}`] }, [
+    h.section({ class: ['zx-testimonial', `zx-testimonial-${attributes.tone}`] }, [
       h.text({ markup: fields.text }),
-      h.text({ class: ['zx-tone-muted', 'zx-quote-author'], text: fields.author }),
+      h.text({ class: ['zx-tone-muted', 'zx-testimonial-author'], text: fields.author }),
     ]),
   sample: {
     fields: { text: '{{first_name}} set us up in a day.', author: 'Lan' },
@@ -73,19 +73,19 @@ const quote = defineEmailBlock({
   },
 });
 
-// The quote joins the profile, so a server's `validate` reads it as the editor does.
-const profile = emailProfile({ variables, blocks: [quote] });
+// The testimonial joins the profile, so a server's `validate` reads it as the editor does.
+const profile = emailProfile({ variables, blocks: [testimonial] });
 
-// The quote's own rules, and the callout's border in the brand's green; a color for dark mode goes in its own
+// The testimonial's own rules, and the callout's border in the brand's green; a color for dark mode goes in its own
 // query, since the base sheet's dark rules beat an inlined one.
 const css = `
-.zx-quote { border-left: 3px solid #E4E4E7; padding: 0 0 0 16px; }
-.zx-quote-brand { border-left-color: #007A55; }
-.zx-quote-author { font-size: 13px; }
+.zx-testimonial { border-left: 3px solid #E4E4E7; padding: 0 0 0 16px; }
+.zx-testimonial-brand { border-left-color: #007A55; }
+.zx-testimonial-author { font-size: 13px; }
 .zx-callout { border-color: #007A55; }
 @media (prefers-color-scheme: dark) {
-  .zx-quote { border-left-color: #262626; }
-  .zx-quote-brand, .zx-callout { border-color: #00BC7D; }
+  .zx-testimonial { border-left-color: #262626; }
+  .zx-testimonial-brand, .zx-callout { border-color: #00BC7D; }
 }
 `;
 
@@ -134,7 +134,7 @@ const initial: EditorEmailBlock[] = [
   {
     id: 'said',
     key: 'said',
-    type: 'quote',
+    type: 'testimonial',
     attributes: { tone: 'brand' },
     content: { text: 'We moved our whole team over in **one afternoon**.', author: 'Minh, at Example' },
   },
@@ -152,17 +152,17 @@ const initial: EditorEmailBlock[] = [
 ];
 
 /**
- * A welcome email with a button and a text link to url variables, a callout, a quote block of its own, two
+ * A welcome email with a button and a text link to url variables, a callout, a testimonial block of its own, two
  * columns, and its preview, styled by a stylesheet of its own over the theme.
  */
 function EmailEditorDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
-  const renderer = useMemo(() => createEmailRenderer({ theme, css, extraBlocks: [quote] }), []);
+  const renderer = useMemo(() => createEmailRenderer({ theme, css, extraBlocks: [testimonial] }), []);
   return (
     <EmailEditor
       label="Email body"
       profile={profile}
-      blocks={[quote]}
+      blocks={[testimonial]}
       value={blocks}
       onChange={setBlocks}
       renderer={renderer}
