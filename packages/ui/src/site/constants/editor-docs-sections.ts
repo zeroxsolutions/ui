@@ -20,6 +20,7 @@ export const editorDocsSections: readonly { title: string; pages: readonly strin
     title: 'Features',
     pages: [
       'block-library',
+      'block-presets',
       'editor-bookmark',
       'editor-button',
       'editor-callout',

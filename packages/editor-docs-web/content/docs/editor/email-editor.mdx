@@ -35,12 +35,18 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field input popover tabs tooltip utils @zui/block-library @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-table @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
+pnpm dlx shadcn@latest add badge button combobox field input popover tabs tooltip utils @zui/block-library @zui/block-presets @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-table @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
 ```
 
 <Step>Copy the files into your project.</Step>
 
 <ComponentSource name="email-editor" title="components/editor/profiles/email/email-editor.tsx" />
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-presets.ts"
+  title="components/editor/profiles/email/email-presets.ts"
+/>
 
 <ComponentSource
   name="email-editor"
@@ -551,26 +557,27 @@ text or lanes fields, or a default outside its attribute's values. Run `checkEma
 
 ### EmailEditor
 
-| Prop                   | Type                                             | Default  | Description                                                                         |
-| ---------------------- | ------------------------------------------------ | -------- | ----------------------------------------------------------------------------------- |
-| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                   |
-| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value that differs from the last `onChange` loads in its place. |
-| `label`                | `string`                                         | -        | The accessible name of the editable area.                                           |
-| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.         |
-| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.           |
-| `sender`               | `string`                                         | -        | The sender's name the preview shows above the subject.                              |
-| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.          |
-| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                       |
-| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                    |
-| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.       |
-| `blocks`               | `EmailBlockDefinition[]`                         | -        | Your own blocks, from `defineEmailBlock`. Read once, on mount.                      |
-| `features`             | `EditorFeature[]`                                | -        | Your own features, each block in them with an email codec. Read once, on mount.     |
-| `className`            | `string`                                         | -        | Classes for the frame.                                                              |
-| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                             |
-| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                    |
-| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                             |
-| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.        |
-| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                        |
+| Prop                   | Type                                             | Default  | Description                                                                                                   |
+| ---------------------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `profile`              | `EditorProfile`                                  | -        | The blocks and variables the author may use, from `emailProfile`.                                             |
+| `value`                | `EditorEmailBlock[]`                             | -        | The blocks shown. A value that differs from the last `onChange` loads in its place.                           |
+| `label`                | `string`                                         | -        | The accessible name of the editable area.                                                                     |
+| `renderer`             | `EmailPreviewRenderer`                           | -        | A `createEmailRenderer` instance. Without one, the editor draws no preview.                                   |
+| `previewInput`         | `EmailPreviewInput`                              | -        | The subject, preheader, locale and layout props the preview renders with.                                     |
+| `sender`               | `string`                                         | -        | The sender's name the preview shows above the subject.                                                        |
+| `messages`             | `Partial<ProfileEditorMessages>`                 | -        | Your words for the strings the editor draws. A key left out stays English.                                    |
+| `readOnly`             | `boolean`                                        | `false`  | Shows the blocks and their problems with no toolbar or menus.                                                 |
+| `required`             | `readonly string[]`                              | -        | The ids of the blocks the author may not delete.                                                              |
+| `structure`            | `'free' \| 'locked'`                             | `'free'` | `locked` allows edits to text, marks (bold, italic, link) and variables only.                                 |
+| `blocks`               | `EmailBlockDefinition[]`                         | -        | Your own blocks, from `defineEmailBlock`. Read once, on mount.                                                |
+| `features`             | `EditorFeature[]`                                | -        | Your own features, each block in them with an email codec. Read once, on mount.                               |
+| `presets`              | `readonly BlockPreset[]`                         | -        | Groups of blocks offered under Presets. See [Block Presets](/docs/editor/block-presets). Read once, on mount. |
+| `className`            | `string`                                         | -        | Classes for the frame.                                                                                        |
+| `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                                                       |
+| `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                                              |
+| `onValidate`           | `(problems: ProfileProblem[]) => void`           | -        | Called with the problems on mount and when they change.                                                       |
+| `renderBlockAdornment` | `(id: string \| null, key: string) => ReactNode` | -        | Draws your content beside each block. `id` is null until the block is saved.                                  |
+| `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                                                  |
 
 Build `messages` once per locale; a new object rebuilds the toolbar and the menus. Its English defaults are
 `DEFAULT_PROFILE_MESSAGES` in `messages.ts`.

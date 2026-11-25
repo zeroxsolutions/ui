@@ -1,0 +1,316 @@
+---
+title: Block Presets
+description: Ready-made groups of blocks an author drags, clicks or picks from the slash menu into the Document Editor or the email editor.
+---
+
+<ComponentPreview name="block-presets-demo" />
+
+A preset is a group of blocks the author inserts in one move: a header with a logo, a footer with social links
+and the legal lines, two cards side by side. Your product declares its presets in code, once for either editor.
+Once inserted, the blocks are ordinary ones: the author edits, moves and deletes them like any other, and nothing
+ties them back to the preset.
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor @zui/block-presets
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install [Document Editor](/docs/editor/document-editor), which this feature plugs into.</Step>
+
+```bash
+pnpm dlx shadcn@latest add @zui/document-editor
+```
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core zod
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add card empty input-group item utils @zui/lucide-circle-question-mark-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-info-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-search-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="block-presets" title="components/editor/document/features/presets/index.ts" />
+
+<ComponentSource
+  name="block-presets"
+  file="registry/bases/base-ui/editor/document/features/presets/library-presets.ts"
+  title="components/editor/document/features/presets/library-presets.ts"
+/>
+
+<ComponentSource
+  name="block-presets"
+  file="registry/bases/base-ui/editor/document/features/presets/presets-feature.ts"
+  title="components/editor/document/features/presets/presets-feature.ts"
+/>
+
+<ComponentSource
+  name="block-presets"
+  file="registry/bases/base-ui/editor/document/features/presets/presets-panel.tsx"
+  title="components/editor/document/features/presets/presets-panel.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Define a preset
+
+`definePreset` from `@zeroxsolutions/editor-core/blocks/index` takes an `id`, a `label`, and the blocks as the
+editor's own JSON, what `editor.getJSON().content` holds. `icon`, `description` and `keywords` are optional:
+the panel and the slash menu draw the icon and the description, and a search finds a preset by its label or a
+keyword.
+
+```tsx
+import { definePreset } from '@zeroxsolutions/editor-core/blocks/index';
+```
+
+```tsx
+const tip = definePreset({
+  id: 'tip',
+  label: 'Tip',
+  description: 'A heading over a callout',
+  keywords: ['note', 'advice'],
+  content: [
+    { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Good to know' }] },
+    {
+      type: 'callout',
+      attrs: { variant: 'info' },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Most museums close on Mondays.' }] }],
+    },
+  ],
+});
+```
+
+The id is lowercase letters, digits and hyphens. `definePreset` throws `PresetDefinitionInvalid` for another id,
+for empty `content`, and for a text node or a mark at the top level of it. The preset it returns is frozen.
+
+Content copied from a saved document is safe to use as it is: every block of an inserted preset gets a null
+`id` and a fresh `key`, and loses its `stored` copy, as a duplicated block does. Your host assigns the ids on
+save, as it does for any new block.
+
+### From saved email blocks
+
+`emailPreset` from `@zeroxsolutions/editor-core/profiles/index` takes the blocks in the shape your product
+already stores for a mail, `EditorEmailBlock[]`, and reads them through the profile, so a library block and
+each of the profile's own blocks become their nodes. Here `testimonial` is a block of your own, as [Email
+Editor](/docs/editor/email-editor#your-own-blocks) defines it.
+
+```tsx
+import { emailPreset, emailProfile } from '@zeroxsolutions/editor-core/profiles/index';
+```
+
+```tsx
+const profile = emailProfile({ blocks: [testimonial] });
+
+const signOff = emailPreset(profile, {
+  id: 'sign-off',
+  label: 'Sign-off',
+  blocks: [
+    { id: null, key: '', type: 'paragraph', attributes: {}, content: { text: 'See you soon,' } },
+    { id: null, key: '', type: 'testimonial', attributes: { tone: 'brand' }, content: { text: '', author: '' } },
+  ],
+});
+```
+
+It throws `PresetDefinitionInvalid` for a profile that is not an email one, and for a block, at the top level or
+in a lane, that the profile has no codec for.
+
+## Add presets to an editor
+
+### Document Editor
+
+`presetsFeature(presets)` adds the presets to the Document Editor: an `insertPreset` command, a Presets group
+in the slash menu and the "+" beside a block, and a drop target for a preset dragged from the panel. `EditorPresetsPanel` lists them beside
+the document. Give it the editor `onReady` hands you and the same list.
+
+```tsx
+import { useState } from 'react';
+
+import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
+
+import { callout } from '@/components/editor/document/features/callout';
+import { EditorPresetsPanel, presetsFeature } from '@/components/editor/document/features/presets';
+import { standardKit } from '@/components/editor/document/features/standard';
+import { Editor } from '@/components/editor/document/react';
+import { SlashMenu } from '@/components/editor/document/ui/slash-menu';
+```
+
+```tsx
+const presets = [tip];
+const features = [standardKit(), callout(), presetsFeature(presets)];
+const contributions = collectUiContributions(features);
+
+function GuideEditor({ content }: { content: DocJSON }) {
+  const [editor, setEditor] = useState<IEditor | null>(null);
+  return (
+    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_16rem]">
+      <Editor features={features} content={content} onReady={setEditor} />
+      {editor && <SlashMenu editor={editor} items={contributions.slash} />}
+      {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+    </div>
+  );
+}
+```
+
+`insertPreset` takes `{ id, at? }`. Without `at`, it inserts after the block holding the caret, at that block's
+level; `at` is a document position. One insert is one undo step.
+
+```tsx
+function insertTip(editor: IEditor) {
+  editor.run('insertPreset', { id: 'tip' });
+}
+```
+
+### Email editor
+
+The email editor takes the list in its `presets` prop and builds the feature itself, with the email's rules
+below. Its slash menu and "+" list the presets under Presets, which `messages.presetsGroup` words.
+
+<ComponentPreview name="block-presets-email" />
+
+```tsx
+import { useState } from 'react';
+
+import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { emailProfile, type EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
+
+import { emailPresets, EditorPresetsPanel } from '@/components/editor/document/features/presets';
+import { EmailEditor } from '@/components/editor/profiles/email/email-editor';
+```
+
+```tsx
+const profile = emailProfile();
+const presets = [...emailPresets(profile), signOff];
+
+function Newsletter({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
+  const [editor, setEditor] = useState<IEditor | null>(null);
+  return (
+    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_16rem]">
+      <EmailEditor
+        label="Email body"
+        profile={profile}
+        presets={presets}
+        value={blocks}
+        onChange={save}
+        onReady={setEditor}
+      />
+      {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
+    </div>
+  );
+}
+```
+
+`presets`, like `blocks`, is read once, on mount.
+
+## The panel
+
+Each row of `EditorPresetsPanel` shows a preset's icon, label and description. A click inserts the preset after
+the caret's block, and a drag carries it to the spot it drops on. The panel lists only the presets the editor can
+insert where the caret is, and reads them again as the caret moves. With more than six, a search field filters
+them by label and keyword. On a narrow screen the demos stack the panel under the editor; your product can put
+it in a sheet instead.
+
+## Where each preset is offered
+
+An editor offers a preset only where it can hold every block of it. The slash menu, the "+" and the panel all
+ask the same `insertPreset` check, so the three always agree.
+
+| Rule                                                                              | Document Editor | Email editor |
+| --------------------------------------------------------------------------------- | --------------- | ------------ |
+| Every node of the preset is in the editor's schema, so its features are installed | yes             | yes          |
+| Every block kind is in the profile's `allow`                                      | -               | yes          |
+| The export carries every block, with no `block-not-carried` problem               | -               | yes          |
+| In a column, the preset holds no columns block, hero or card                      | -               | yes          |
+| `structure: 'locked'` offers no preset                                            | -               | yes          |
+
+A drop follows the same rules. It snaps to the nearest block boundary at the level under the pointer, and a spot
+that refuses the preset draws no drop indicator and inserts nothing.
+
+`bounds`, such as the most blocks a mail may hold, is checked as for any insert: an insert over a bound shows a
+problem rather than being refused.
+
+## The library's presets
+
+The library ships a few general presets. Their text is placeholder text, with no variables, and their images and
+links are empty, so each shows the same problems an empty block from the slash menu shows until it is filled in.
+
+| Function                | Presets                                                                                                                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `documentPresets()`     | two columns (each a heading and text), an FAQ (three open toggle headings), a callout holding a button, two cards in columns                                                                                    |
+| `emailPresets(profile)` | a header (a logo and a divider), a hero, a call to action (a heading, text and a button), a two-up (two columns, each an image, a heading, text and a button), and a footer (social links and the legal footer) |
+
+`documentPresets` needs [Editor Columns](/docs/editor/editor-columns), [Editor Toggle
+Heading](/docs/editor/editor-toggle-heading), [Editor Callout](/docs/editor/editor-callout), [Editor
+Button](/docs/editor/editor-button) and [Editor Card](/docs/editor/editor-card) beside the standard kit; an
+editor without one of them does not offer the presets that hold it. `emailPresets` throws
+`PresetDefinitionInvalid` for a profile that is not an email one.
+
+Both take an optional `messages`, a `Partial<LibraryPresetMessages>`: each preset's label, description and
+keywords, and the placeholder text inside the blocks. A key you leave out stays
+`DEFAULT_LIBRARY_PRESET_MESSAGES`'s English.
+
+```tsx
+const presets = documentPresets({
+  heading: 'Voeg een kop toe',
+  text: 'Schrijf hier een of twee zinnen.',
+});
+```
+
+## API reference
+
+### definePreset
+
+| Option        | Type                  | Default | Description                                                   |
+| ------------- | --------------------- | ------- | ------------------------------------------------------------- |
+| `id`          | `string`              | -       | Lowercase letters, digits and hyphens. `insertPreset`'s `id`. |
+| `label`       | `string`              | -       | The name the panel and the slash menu show.                   |
+| `content`     | `readonly NodeJSON[]` | -       | The blocks, as `editor.getJSON().content` holds them.         |
+| `icon`        | `unknown`             | -       | A component the panel and the slash menu draw.                |
+| `description` | `string`              | -       | The line under the label.                                     |
+| `keywords`    | `readonly string[]`   | `[]`    | Further words a search finds the preset by.                   |
+
+`emailPreset(profile, options)` takes the same options with `blocks: readonly EditorEmailBlock[]` in place of
+`content`.
+
+### presetsFeature
+
+| Option  | Type                                                            | Default     | Description                                                                   |
+| ------- | --------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------- |
+| `fits`  | `(preset: BlockPreset, editor: IEditor, at: number) => boolean` | -           | Your own rule for whether a preset lands at `at`, checked after the schema's. |
+| `group` | `string`                                                        | `'Presets'` | The slash menu's heading over the presets.                                    |
+
+### EditorPresetsPanel
+
+| Prop        | Type                       | Default | Description                                                                 |
+| ----------- | -------------------------- | ------- | --------------------------------------------------------------------------- |
+| `editor`    | `IEditor`                  | -       | The editor `onReady` handed you.                                            |
+| `presets`   | `readonly BlockPreset[]`   | -       | The list the editor was built with.                                         |
+| `messages`  | `Partial<PresetsMessages>` | -       | Your words for `title`, `search` and `empty`. A key left out stays English. |
+| `className` | `string`                   | -       | Classes for the panel.                                                      |
