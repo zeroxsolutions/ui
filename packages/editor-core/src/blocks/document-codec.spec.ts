@@ -69,10 +69,10 @@ describe("a defined block's document codec", () => {
     expect(importMarkdown(serialize(doc, 'markdown', registry), registry).doc).toEqual(doc);
   });
 
-  it('links nowhere for an address a reader would not open', () => {
+  it('writes no address for one a reader would not open, leaving the attribute out', () => {
     const html = serialize(docOf({ ...attrs, url: 'javascript:alert(1)' }), 'html', registry);
-    expect(html).toContain('<a href=""');
-    expect(html).not.toContain('href="javascript');
+    expect(html).toContain('<a title="Hi">Hi</a>');
+    expect(html).not.toContain('href=');
   });
 
   it('keeps a value holding a blank line and a comment end in one Markdown block', () => {
@@ -208,6 +208,28 @@ describe("a defined block's body", () => {
     expect(importMarkdown(markdown, registry).doc).toEqual(docOf(attrs, [{ type: 'text', text: 'go' }]));
   });
 
+  it.each([
+    ['a phone number', 'tel:+84901234567'],
+    ['a page in the site', '/guides/hoi-an'],
+    ['a page beside this one', 'day-two.html'],
+    ['a place on the page', '#day-1'],
+    ['a mail address', 'mailto:hi@x.test'],
+    ['a web address', 'https://x.test/a?b=1&c=2'],
+  ])('keeps a link to %s through a Markdown body, as the link mark does', (_kind, href) => {
+    const doc = docOf(attrs, [{ type: 'text', text: 'call', marks: [{ type: 'link', attrs: { href } }] }]);
+    expect(importMarkdown(serialize(doc, 'markdown', registry), registry).doc).toEqual(doc);
+  });
+
+  it.each(['javascript:alert(1)', 'JavaScript:alert(1)', ' java\tscript:alert(1)', 'data:text/html,x', 'vbscript:x'])(
+    'drops the link %j from a Markdown body, keeping its text',
+    (href) => {
+      const doc = docOf(attrs, [{ type: 'text', text: 'go', marks: [{ type: 'link', attrs: { href } }] }]);
+      expect(importMarkdown(serialize(doc, 'markdown', registry), registry).doc).toEqual(
+        docOf(attrs, [{ type: 'text', text: 'go' }]),
+      );
+    },
+  );
+
   it('keeps an item that leaves a field out', () => {
     const html = '<div data-block="note" data-block-attrs="{&quot;tags&quot;:[{}]}"></div>';
     expect(importHTML(html, registry).doc).toEqual(docOf({ tags: [{}] }));
@@ -257,6 +279,41 @@ describe('markup.url', () => {
     expect(() =>
       serialize(docOf({ url: 'https://x.test/%0aalert(1)' }, undefined, 'linked'), 'html', registryOf(block)),
     ).toThrow(BlockDefinitionInvalid);
+  });
+
+  const linked = (template: string) => {
+    const [before, after] = template.split('\u0000');
+    return defineBlock({
+      type: 'linked',
+      label: 'Linked',
+      fields: { url: link() },
+      document: {
+        html: (view, markup) =>
+          markup(Object.assign([before, after], { raw: [before, after] }), markup.url(view.fields.url)),
+      },
+    });
+  };
+  const exportedWith = (template: string, url: string) =>
+    serialize(docOf({ url }, undefined, 'linked'), 'html', registryOf(linked(template)));
+
+  it.each([
+    ['an image source', '<img src="\u0000" alt="x">', '<img alt="x">'],
+    ['a video poster', '<video poster="\u0000" controls></video>', '<video controls></video>'],
+    ['a video source', "<video src='\u0000'></video>", '<video></video>'],
+    ['a media source', '<audio><source data-x="1" src="\u0000"></audio>', '<audio><source data-x="1"></audio>'],
+  ])('takes no mail address in %s, leaving the attribute out', (_where, template, written) => {
+    expect(exportedWith(template, 'mailto:a@x.test')).toContain(written);
+    expect(exportedWith(template, 'tel:+84901234567')).toContain(written);
+    expect(exportedWith(template, 'javascript:alert(1)')).toContain(written);
+    expect(exportedWith(template, 'http://x.test/a.png')).toContain('http://x.test/a.png');
+  });
+
+  it('takes a mail address in a link, and leaves out a link it refuses', () => {
+    expect(exportedWith('<a href="\u0000" data-x>x</a>', 'mailto:a@x.test')).toContain(
+      '<a href="mailto:a@x.test" data-x>x</a>',
+    );
+    expect(exportedWith('<a href="\u0000" data-x>x</a>', 'javascript:alert(1)')).toContain('<a data-x>x</a>');
+    expect(exportedWith('<a\n  href="\u0000">x</a>', 'javascript:alert(1)')).toContain('<a>x</a>');
   });
 
   it.each([

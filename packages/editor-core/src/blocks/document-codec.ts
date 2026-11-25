@@ -19,16 +19,24 @@ export class MarkupValue {
   ) {}
 }
 
-/** An address `markup.url` let through: the only value a link or a source attribute takes. */
-class UrlValue extends MarkupValue {}
+/**
+ * An address for a link or a source attribute, the only value one takes. Which addresses it writes depends on
+ * where it lands, so it keeps the address and writes, in text or an attribute that is no link, only one a link
+ * would open.
+ */
+class UrlValue extends MarkupValue {
+  constructor(readonly address: string) {
+    super(LINK_ADDRESS.test(address) ? escaped(address) : '', true);
+  }
+}
 
 /**
  * Builds a block's HTML. Every value is escaped and drawn as text; a `MarkupValue` is written as it is, and a
  * list of them one after another. A value goes in text or in a quoted `class`, `id`, `title`, `alt`, `lang`,
  * `dir`, `role`, `width`, `height`, `colspan`, `rowspan`, `headers`, `scope`, `target`, `rel`, `download`,
- * `datetime`, `name`, `data-*` or `aria-*` value. A link goes through `markup.url`, which takes a web or mail
- * address and turns any other into an empty one, and only in `href` of `a`, `src` of `img`, `video`, `audio` and
- * `source`, and `poster` of `video`.
+ * `datetime`, `name`, `data-*` or `aria-*` value. A link goes through `markup.url`, as the whole of `href` of `a`,
+ * `src` of `img`, `video`, `audio` and `source`, or `poster` of `video`: `href` takes a web or mail address and
+ * `src` and `poster` a web one, and for any other address the attribute is left out.
  *
  * @throws {BlockDefinitionInvalid} for a value anywhere else: naming a tag, loose inside one, in another
  * attribute, or after a comment, a declaration or an element that runs, styles, frames or loads, such as
@@ -62,7 +70,12 @@ function unescaped(value: string): string {
   );
 }
 
-const ADDRESS = /^(?:https?:|mailto:)/i;
+/** What a link attribute opens: a web or mail address. */
+const LINK_ADDRESS = /^(?:https?:|mailto:)/i;
+/** What a source attribute loads: a web address. */
+const SOURCE_ADDRESS = /^https?:/i;
+/** The opening of the quoted attribute value a template ends in, from the space before its name. */
+const ATTRIBUTE_OPENING = /[\t\n\f\r ]+[^\t\n\f\r "'<>/=]+[\t\n\f\r ]*=[\t\n\f\r ]*["']$/;
 /**
  * Elements whose content a browser reads as code, style or a document, or which load or redirect what the page
  * loads; with a comment or a declaration, a template that has opened one takes no value after it.
@@ -244,10 +257,25 @@ function markupOf(type: string, body: MarkupValue, placed: { body: boolean }): M
         }
       } else {
         const before = placeAfter(html);
-        place(value);
-        if (value instanceof UrlValue && before.kind === 'value' && !strings[index + 1].startsWith(before.quote)) {
-          throw new BlockDefinitionInvalid(type, `markup.url is the whole of ${before.attribute}, not a part of it`);
+        if (
+          value instanceof UrlValue &&
+          before.kind === 'value' &&
+          LINK_ATTRIBUTES[before.tag]?.includes(before.attribute)
+        ) {
+          const refusal = placementRefusal(before, value);
+          if (refusal !== null) throw new BlockDefinitionInvalid(type, refusal);
+          if (!strings[index + 1].startsWith(before.quote)) {
+            throw new BlockDefinitionInvalid(type, `markup.url is the whole of ${before.attribute}, not a part of it`);
+          }
+          holdsValues = true;
+          const opens = (before.attribute === 'href' ? LINK_ADDRESS : SOURCE_ADDRESS).test(value.address);
+          // An address it refuses leaves the attribute out: an empty one would load or open the page itself.
+          html = opens
+            ? `${html}${escaped(value.address)}${strings[index + 1]}`
+            : `${html.replace(ATTRIBUTE_OPENING, '')}${strings[index + 1].slice(1)}`;
+          return;
         }
+        place(value);
       }
       html += strings[index + 1];
     });
@@ -255,7 +283,7 @@ function markupOf(type: string, body: MarkupValue, placed: { body: boolean }): M
     return new MarkupValue(html, holdsValues);
   };
   return Object.assign(template, {
-    url: (value: string): MarkupValue => new UrlValue(ADDRESS.test(value.trim()) ? escaped(value.trim()) : '', true),
+    url: (value: string): MarkupValue => new UrlValue(value.trim()),
   });
 }
 

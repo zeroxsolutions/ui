@@ -38,14 +38,27 @@ export function markupOfNodes(nodes: readonly NodeJSON[]): string {
   return printInlineMarkup(runs);
 }
 
-/** A link a reader opens: a web or mail address. Any other keeps its text and loses the link. */
-const ADDRESS = /^(?:https?:|mailto:)/i;
+/** The schemes a body's link may open, as the document's link mark allows them. */
+const LINK_SCHEMES: ReadonlySet<string> = new Set(['http', 'https', 'mailto', 'tel']);
+
+/**
+ * Whether `href` opens a web, mail or phone address or one in the site, as the document's link mark keeps it. The
+ * scheme is read as a browser reads it, after the control characters and spaces around the address and the tabs and
+ * newlines inside it are dropped, so `java&#9;script:` is refused as `javascript:` is. Any other keeps its text and
+ * loses the link.
+ */
+function opensLink(href: string): boolean {
+  // eslint-disable-next-line no-control-regex -- the controls are what a browser drops from an address
+  const read = href.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '').replace(/[\t\n\r]/g, '');
+  const scheme = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(read)?.[1];
+  return scheme === undefined || LINK_SCHEMES.has(scheme.toLowerCase());
+}
 
 function nodesOfText(part: InlineText, href?: string): NodeJSON[] {
   const marks: MarkJSON[] = [
     ...(part.bold ? [{ type: 'bold' }] : []),
     ...(part.italic ? [{ type: 'italic' }] : []),
-    ...(href === undefined || !ADDRESS.test(href.trim()) ? [] : [{ type: 'link', attrs: { href } }]),
+    ...(href === undefined || !opensLink(href) ? [] : [{ type: 'link', attrs: { href } }]),
   ];
   return part.text
     .split('\n')
