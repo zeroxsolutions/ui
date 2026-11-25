@@ -56,10 +56,10 @@ const profile = emailProfile({
 });
 
 describe('the library kinds', () => {
-  it('are email kinds with a document node each, and a mail layout holds none of them', () => {
+  it('are email kinds with a document node each, and a mail layout holds the legal footer alone', () => {
     expect(EMAIL_KINDS).toEqual(expect.arrayContaining([...LIBRARY]));
     expect(EMAIL_BLOCK_NODES).toEqual(expect.arrayContaining([...LIBRARY]));
-    for (const kind of LIBRARY) expect(MAIL_LAYOUT_KINDS).not.toContain(kind);
+    expect(LIBRARY.filter((kind) => MAIL_LAYOUT_KINDS.includes(kind))).toEqual(['legalFooter']);
   });
 });
 

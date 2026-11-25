@@ -383,7 +383,7 @@ describe('the email kit', () => {
   it('offers in the slash menu only the kinds a mail-layout region holds', async () => {
     await mount([paragraph('')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
 
-    expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns']);
+    expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns', 'Legal footer']);
   });
 
   it('folds a heading pasted into a mail-layout region into a paragraph, and marks it', async () => {

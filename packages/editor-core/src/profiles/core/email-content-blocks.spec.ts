@@ -29,7 +29,7 @@ const block = (overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'ty
 describe('the email kinds', () => {
   it('hold heading, quote, image and table, and leave them out of a mail layout', () => {
     expect(EMAIL_KINDS).toEqual(expect.arrayContaining(['heading', 'quote', 'image', 'table']));
-    expect(MAIL_LAYOUT_KINDS).toEqual(['paragraph', 'list', 'callout', 'divider', 'columns']);
+    expect(MAIL_LAYOUT_KINDS).toEqual(['paragraph', 'list', 'callout', 'divider', 'columns', 'legalFooter']);
   });
 });
 

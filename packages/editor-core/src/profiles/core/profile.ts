@@ -29,8 +29,15 @@ export const EMAIL_KINDS: readonly EmailBlockKind[] = [
   'legalFooter',
 ];
 
-/** What a mail-layout region (header, footer) may hold. */
-export const MAIL_LAYOUT_KINDS: readonly EmailBlockKind[] = ['paragraph', 'list', 'callout', 'divider', 'columns'];
+/** What a mail-layout region (header, footer) may hold; a product's footer region may carry the legal footer. */
+export const MAIL_LAYOUT_KINDS: readonly EmailBlockKind[] = [
+  'paragraph',
+  'list',
+  'callout',
+  'divider',
+  'columns',
+  'legalFooter',
+];
 
 const DEFAULT_BOUNDS: EmailBounds = {
   text: BLOCK_TEXT_MAX_LENGTH,

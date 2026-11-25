@@ -44,6 +44,7 @@ describe('emailProfile', () => {
       'callout',
       'divider',
       'columns',
+      'legalFooter',
     ]);
   });
 
