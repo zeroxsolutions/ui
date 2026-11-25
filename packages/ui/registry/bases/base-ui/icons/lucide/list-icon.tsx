@@ -83,24 +83,28 @@ const ListIcon = forwardRef<ListIconHandle, ListIconProps>(
         >
           <motion.path
             animate={controls}
+            initial="normal"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { opacity: 1 }, animate: { opacity: [1, 0, 1] } }}
             d="M3 5h.01"
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={{ ...DEFAULT_TRANSITION, delay: 0.04 }}
             variants={{ normal: { opacity: 1 }, animate: { opacity: [1, 0, 1] } }}
             d="M3 12h.01"
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={{ ...DEFAULT_TRANSITION, delay: 0.08 }}
             variants={{ normal: { opacity: 1 }, animate: { opacity: [1, 0, 1] } }}
             d="M3 19h.01"
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={DEFAULT_TRANSITION}
             variants={{ normal: { scaleX: 1 }, animate: { scaleX: [1, 0.7, 1] } }}
             style={{ originX: 0, originY: 0.5 }}
@@ -108,6 +112,7 @@ const ListIcon = forwardRef<ListIconHandle, ListIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={{ ...DEFAULT_TRANSITION, delay: 0.04 }}
             variants={{ normal: { scaleX: 1 }, animate: { scaleX: [1, 0.7, 1] } }}
             style={{ originX: 0, originY: 0.5 }}
@@ -115,6 +120,7 @@ const ListIcon = forwardRef<ListIconHandle, ListIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             transition={{ ...DEFAULT_TRANSITION, delay: 0.08 }}
             variants={{ normal: { scaleX: 1 }, animate: { scaleX: [1, 0.7, 1] } }}
             style={{ originX: 0, originY: 0.5 }}

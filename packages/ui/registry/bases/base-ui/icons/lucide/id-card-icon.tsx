@@ -91,10 +91,10 @@ const IdCardIcon = forwardRef<IdCardIconHandle, IdCardIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} custom={2} d="M16 10h2" variants={VARIANTS} />
-          <motion.path animate={controls} custom={2} d="M16 14h2" variants={VARIANTS} />
-          <motion.path animate={controls} custom={0} d="M13 19a4 4 0 00-8 0" variants={VARIANTS} />
-          <motion.circle animate={controls} custom={1} cx="9" cy="12" r="3" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="M16 10h2" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="M16 14h2" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0} d="M13 19a4 4 0 00-8 0" variants={VARIANTS} />
+          <motion.circle animate={controls} initial="normal" custom={1} cx="9" cy="12" r="3" variants={VARIANTS} />
           <rect height="14" rx="2" width="20" x="2" y="5" />
         </svg>
       </span>

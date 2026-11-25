@@ -86,6 +86,7 @@ const TextAlignStartIcon = forwardRef<TextAlignStartIconHandle, TextAlignStartIc
           <path d="M21 5H3" />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M15 12H3"
             transition={DEFAULT_TRANSITION}
             variants={{
@@ -95,6 +96,7 @@ const TextAlignStartIcon = forwardRef<TextAlignStartIconHandle, TextAlignStartIc
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M17 19H3"
             transition={DEFAULT_TRANSITION}
             variants={{
