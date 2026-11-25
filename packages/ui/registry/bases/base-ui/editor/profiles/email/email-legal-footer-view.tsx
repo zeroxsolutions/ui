@@ -9,8 +9,8 @@ import { emailBlockText, type EmailBlockViewProps } from './email-block-feature'
 import { EmailInlineField } from './email-inline-field';
 
 /**
- * A legal footer in the email editor, as the email draws it: small muted lines, each written in place, and the
- * unsubscribe link drawn as a link with its label, whose address changes in the link popover.
+ * A legal footer in the email editor, as the email draws it: small muted lines on the left or centred, each written
+ * in place, and the unsubscribe link drawn as a link with its label, whose address changes in the link popover.
  */
 export function EmailLegalFooterView({
   block,
@@ -33,15 +33,20 @@ export function EmailLegalFooterView({
     />
   );
   const unsubscribe = label('unsubscribe');
+  const align = values.align === 'center' ? 'center' : 'left';
   return (
-    <div data-slot="email-legal-footer" className="text-muted-foreground flex flex-col gap-1 text-xs">
+    <div
+      data-slot="email-legal-footer"
+      data-align={align}
+      className="group/legal-footer text-muted-foreground flex flex-col gap-1 text-xs data-[align=center]:text-center"
+    >
       <div data-slot="email-block-body" className="min-h-4">
         {body}
       </div>
       <div contentEditable={false} className="flex flex-col gap-1">
         {line('reason')}
         {line('address')}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 group-data-[align=center]/legal-footer:justify-center">
           <span className="underline underline-offset-2">
             <EmailInlineField
               editor={editor}

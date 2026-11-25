@@ -185,6 +185,26 @@ describe("the email editor's library blocks", () => {
       .toHaveTextContent('Unsubscribe link');
   });
 
+  it("centres a legal footer's lines from the Align choice in its block menu", async () => {
+    const probe = await mount([footer]);
+
+    await userEvent.hover(page.getByRole('group', { name: 'Legal footer' }));
+    const grip = await vi.waitFor(() => {
+      const found = document.querySelector<HTMLElement>('.drag-handle');
+      if (!found || found.classList.contains('hide')) throw new Error('the grip is hidden');
+      return found;
+    });
+    await userEvent.click(grip);
+    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Left', exact: true })).toBeChecked();
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Center', exact: true }));
+
+    await vi.waitFor(() => expect(reportedOf(probe, 'f1')?.attributes).toEqual({ align: 'center' }));
+    await vi.waitFor(() =>
+      expect(document.querySelector<HTMLElement>('[data-slot=email-legal-footer]')?.dataset.align).toBe('center'),
+    );
+  });
+
   it("changes a required block's address, and none of its fields in locked structure", async () => {
     const probe: Probe = { editor: null, reported: [] };
     function Required({ structure }: { structure: 'free' | 'locked' }) {

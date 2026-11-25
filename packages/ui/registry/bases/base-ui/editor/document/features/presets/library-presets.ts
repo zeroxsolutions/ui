@@ -194,13 +194,17 @@ export function emailPresets(profile: EditorProfile, messages?: Partial<LibraryP
           { links: words.socialLinks.map((label) => ({ label, icon: '', href: '' })) },
           { align: 'center', size: 'small' },
         ),
-        stored('legalFooter', {
-          sender: words.sender,
-          reason: words.reason,
-          address: '',
-          unsubscribe: '',
-          unsubscribeLabel: words.unsubscribeLabel,
-        }),
+        stored(
+          'legalFooter',
+          {
+            sender: words.sender,
+            reason: words.reason,
+            address: '',
+            unsubscribe: '',
+            unsubscribeLabel: words.unsubscribeLabel,
+          },
+          { align: 'center' },
+        ),
       ],
     }),
   ];

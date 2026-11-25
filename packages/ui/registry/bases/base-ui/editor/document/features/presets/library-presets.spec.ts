@@ -111,6 +111,15 @@ describe('emailPresets', () => {
     ]);
   });
 
+  it('centres the legal footer under the centred social links in the footer', () => {
+    const footer = presets.find((preset) => preset.id === 'footer')!;
+    const blocks = toEmailBlocks(docOf(footer), [], { kinds: profile.kinds });
+    expect(blocks.map((block) => [block.type, block.attributes.align])).toEqual([
+      ['socialLinks', 'center'],
+      ['legalFooter', 'center'],
+    ]);
+  });
+
   it.each(presets.map((preset) => [preset.id, preset] as const))(
     'fits the default email profile: %s',
     (_id, preset) => {
