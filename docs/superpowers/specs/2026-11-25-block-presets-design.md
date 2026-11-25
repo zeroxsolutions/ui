@@ -103,8 +103,9 @@ The owner asked to proceed; these were settled by the writer and are open to the
 2. **"Fits" is what the editor would accept and the export carry, checked in the editor.** `presetFits` in
    editor-core checks node names against the schema and block kinds against `allow`; the email editor also runs
    `docProblems` over the preset's content and leaves out a preset with a `block-not-carried` problem. Where
-   the caret sits matters: in a column, a preset holding `columns`, `hero` or `card` is not offered (as the
-   slash items do with `inLanes`). Under `structure: 'locked'` no preset is offered. `bounds` stays a
+   the caret sits matters: in a column, a preset holding `columns`, `hero` or `card` is not offered by the slash
+   menu and "+" (as the slash items do with `inLanes`); the panel lists it with its click refused
+   (`aria-disabled`, the reason read to assistive tech), so it can still be dragged to the top level. Under `structure: 'locked'` no preset is offered. `bounds` stays a
    `validate` problem, as for any insert.
 3. **`emailPreset(profile, options)` takes the profile**, so its blocks' codecs convert the wire, and a
    product block's wire never becomes `emailUnknown`. A preset holding `emailUnknown` does not fit.
