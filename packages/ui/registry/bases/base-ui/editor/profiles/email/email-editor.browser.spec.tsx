@@ -1027,8 +1027,8 @@ describe('EmailEditor presets', () => {
       .map((element) => element.textContent);
 
   /**
-   * Whether the editor's drop cursor was drawn as the next drag let go over a lane: read as the browser drops
-   * there, or as it leaves a drag it refused, before the editor's handlers clear the cursor either way.
+   * Whether a drop cursor was drawn as the next drag let go over a lane: read as the browser drops there, or as
+   * it leaves a drag it refused, before the editor's handlers clear the cursor either way.
    */
   function watchLaneCursor(): () => boolean | null {
     let released: boolean | null = null;
@@ -1074,21 +1074,22 @@ describe('EmailEditor presets', () => {
     await vi.waitFor(() => expect(offered()).toEqual(['Call to action', 'Action']));
   });
 
-  it('drops a card in a column nowhere, drawing no drop cursor, and a call to action there with one', async () => {
+  it('drops a card over a column at the top level, before the columns, and a call to action in the column', async () => {
     const probe = await mount([paragraph('Top', 'p1'), columns()], { presets });
     const lane = () => vi.waitFor(() => find('[contenteditable=true] [data-slot=column] p', 'Left'));
-    await caretAfter('Top');
     await expect.element(row('Card')).toBeVisible();
 
-    const refused = watchLaneCursor();
+    const outside = watchLaneCursor();
     await userEvent.dragAndDrop(row('Card'), await lane(), { steps: 10, targetPosition: { x: 2, y: 4 } });
-    expect(refused()).toBe(false);
-    expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns']);
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'card', 'columns']),
+    );
+    expect(outside()).toBe(true);
 
     const taken = watchLaneCursor();
     await userEvent.dragAndDrop(row('Call to action'), await lane(), { steps: 10, targetPosition: { x: 2, y: 4 } });
     await vi.waitFor(() =>
-      expect(exportedOf(probe.editor)[1].lanes?.[0].map(({ type }) => type)).toEqual([
+      expect(exportedOf(probe.editor)[2].lanes?.[0].map(({ type }) => type)).toEqual([
         'heading',
         'paragraph',
         'button',
@@ -1096,6 +1097,53 @@ describe('EmailEditor presets', () => {
       ]),
     );
     expect(taken()).toBe(true);
+  });
+
+  it('drops a preset over a table before or after the table, never in a cell', async () => {
+    const table: EditorEmailBlock = {
+      id: 't1',
+      key: 't1',
+      type: 'table',
+      attributes: {},
+      content: {
+        rows: [
+          ['cellA', 'cellB'],
+          ['cellC', 'cellD'],
+        ],
+      },
+    };
+    const probe = await mount([paragraph('Top', 'p1'), table, paragraph('End', 'p2')], { presets });
+    const cell = (text: string) => vi.waitFor(() => find('[contenteditable=true] td', text));
+    await expect.element(row('Action')).toBeVisible();
+
+    const last = await cell('cellD');
+    await userEvent.dragAndDrop(row('Action'), last, {
+      steps: 10,
+      targetPosition: { x: 2, y: last.getBoundingClientRect().height - 2 },
+    });
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual([
+        'paragraph',
+        'table',
+        'paragraph',
+        'button',
+        'paragraph',
+      ]),
+    );
+
+    await userEvent.dragAndDrop(row('Action'), await cell('cellA'), { steps: 10, targetPosition: { x: 2, y: 2 } });
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual([
+        'paragraph',
+        'paragraph',
+        'button',
+        'table',
+        'paragraph',
+        'button',
+        'paragraph',
+      ]),
+    );
+    expect(exportedOf(probe.editor)[3].content).toEqual(table.content);
   });
 
   it('offers no preset in locked structure', async () => {

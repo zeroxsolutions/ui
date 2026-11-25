@@ -2,14 +2,12 @@ import { z } from 'zod';
 import { LayoutPanelTopIcon } from '@/registry/bases/base-ui/icons/lucide/layout-panel-top-icon';
 import { presetContent, type BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
 import {
-  dropPoint,
   Extension,
   facadeFor,
   Fragment,
   Plugin,
   PluginKey,
   Selection,
-  Slice,
   type Editor,
   type EditorView,
   type EngineHandle,
@@ -105,6 +103,87 @@ function takes(doc: ProseMirrorNode, target: Target, nodes: readonly ProseMirror
   return $from.parent.canReplace(index, index + replaced, Fragment.from([...nodes]));
 }
 
+/**
+ * The boundaries a drop at `pointer` may land on, innermost level first: at each level that is the document or a
+ * lane, the side of the block under the pointer nearer to `top`, read from the block's drawn box.
+ */
+function dropBoundaries(view: EditorView, pointer: { pos: number; inside: number }, top: number): number[] {
+  const { doc } = view.state;
+  const $pos = doc.resolve(pointer.pos);
+  // An atom the pointer is over resolves to a boundary beside it; it is the block under the pointer there.
+  const atom = pointer.inside >= 0 ? doc.resolve(pointer.inside) : null;
+  const found: number[] = [];
+  for (let depth = $pos.depth; depth >= 0; depth -= 1) {
+    if (depth > 0 && !$pos.node(depth).type.spec.container) continue;
+    let start: number;
+    if (depth < $pos.depth) start = $pos.before(depth + 1);
+    else if (atom?.depth === depth && atom.parent === $pos.parent) start = pointer.inside;
+    else {
+      found.push($pos.pos);
+      continue;
+    }
+    const block = doc.nodeAt(start);
+    const drawn = view.nodeDOM(start);
+    if (!block) continue;
+    const box = drawn instanceof HTMLElement ? drawn.getBoundingClientRect() : null;
+    const below = box ? top > box.top + box.height / 2 : pointer.pos > start + block.nodeSize / 2;
+    found.push(below ? start + block.nodeSize : start);
+  }
+  return found;
+}
+
+/**
+ * Whether a drag left the editor with `event`. Safari leaves `relatedTarget` null on a dragleave between two
+ * elements inside the editor, so a leave with none is read from where the pointer is.
+ */
+function leftEditor(view: EditorView, event: DragEvent): boolean {
+  const to = event.relatedTarget;
+  if (to instanceof Node) return !view.dom.contains(to);
+  const box = view.dom.getBoundingClientRect();
+  const { clientX: x, clientY: y } = event;
+  return x < box.left || x > box.right || y < box.top || y > box.bottom;
+}
+
+/** The line a preset's drag draws at the boundary it would drop on, in the place and look of the editor's own. */
+function dropCursorOf(): { show(view: EditorView, at: number): void; hide(): void } {
+  let line: HTMLElement | null = null;
+  const hide = () => {
+    line?.remove();
+    line = null;
+    document.removeEventListener('dragend', hide, true);
+  };
+  const show = (view: EditorView, at: number) => {
+    const $at = view.state.doc.resolve(at);
+    const before = $at.nodeBefore ? view.nodeDOM(at - $at.nodeBefore.nodeSize) : null;
+    const after = $at.nodeAfter ? view.nodeDOM(at) : null;
+    const above = before instanceof HTMLElement ? before.getBoundingClientRect() : null;
+    const below = after instanceof HTMLElement ? after.getBoundingClientRect() : null;
+    const edge = above ?? below;
+    const parent = view.dom.offsetParent;
+    if (!edge || !(parent instanceof HTMLElement)) return hide();
+    const y = above && below ? (above.bottom + below.top) / 2 : above ? above.bottom : edge.top;
+    const origin =
+      parent === document.body && getComputedStyle(parent).position === 'static'
+        ? { left: -window.scrollX, top: -window.scrollY }
+        : (() => {
+            const box = parent.getBoundingClientRect();
+            return { left: box.left - parent.scrollLeft, top: box.top - parent.scrollTop };
+          })();
+    if (!line) {
+      line = parent.appendChild(document.createElement('div'));
+      line.className = 'prosemirror-dropcursor-block';
+      line.style.cssText = 'position: absolute; z-index: 50; pointer-events: none; background-color: currentColor;';
+      // A drag cancelled over the editor ends at its source with no dragleave here.
+      document.addEventListener('dragend', hide, true);
+    }
+    line.style.left = `${edge.left - origin.left}px`;
+    line.style.top = `${y - 0.5 - origin.top}px`;
+    line.style.width = `${edge.right - edge.left}px`;
+    line.style.height = '1px';
+  };
+  return { show, hide };
+}
+
 const insertArgs = z.object({ id: z.string().min(1), at: z.number().int().min(0).optional() });
 type InsertArgs = z.infer<typeof insertArgs>;
 
@@ -163,64 +242,53 @@ export function presetsFeature(presets: readonly BlockPreset[], options: Presets
     return { engine, nodes, target };
   };
 
-  /** Where a preset dropped at the pointer of `event` lands: the boundary the drop cursor snaps to. */
+  /**
+   * Where a preset dropped at the pointer of `event` lands: the boundary nearest the pointer beside the block it
+   * is over, at the innermost level that is the document or a lane and takes the preset, as a click would.
+   */
   const dropTarget = (engine: Editor, view: EditorView, event: DragEvent, id: string): number | null => {
-    const preset = byId.get(id);
-    const nodes = preset && nodesOf(engine, preset);
+    const facade = facadeFor(engine as unknown as EngineHandle);
     const pointer = view.posAtCoords({ left: event.clientX, top: event.clientY });
-    if (!nodes || !pointer) return null;
-    return dropPoint(view.state.doc, pointer.pos, new Slice(Fragment.from(nodes), 0, 0)) ?? null;
+    if (!facade || !pointer) return null;
+    return dropBoundaries(view, pointer, event.clientY).find((at) => facade.can('insertPreset', { id, at })) ?? null;
   };
 
   const dropPlugin = (engine: Editor) => {
-    // The drag the editor's drop cursor reads while a preset is over a spot that takes it.
-    let shown: EditorView['dragging'] = null;
-    const hide = (view: EditorView) => {
-      if (shown === null) return;
-      if (view.dragging === shown) view.dragging = null;
-      shown = null;
-      // The drop cursor clears itself on a drag leaving the editor and offers no other way to.
-      view.dom.dispatchEvent(new DragEvent('dragleave', { relatedTarget: null }));
-    };
+    const cursor = dropCursorOf();
     return new Plugin({
       key: new PluginKey('presetDrop'),
+      view: () => ({ destroy: cursor.hide }),
       props: {
         handleDOMEvents: {
           dragover(view, event) {
             const id = draggedPreset(event.dataTransfer);
             if (id === null) return false;
-            const facade = facadeFor(engine as unknown as EngineHandle);
+            // The editor's own drop cursor snaps to the innermost level the schema takes, a table cell or a
+            // list item, so a preset's drag draws this one instead.
+            event.stopImmediatePropagation();
             const at = dropTarget(engine, view, event, id);
-            if (at === null || !facade?.can('insertPreset', { id, at })) {
-              // Not prevented, so the browser refuses the drop; and the drop cursor draws nothing.
-              event.stopImmediatePropagation();
-              hide(view);
+            if (at === null) {
+              // Not prevented, so the browser refuses the drop.
+              cursor.hide();
               return true;
             }
             event.preventDefault();
             if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
-            const preset = byId.get(id)!;
-            shown = { slice: new Slice(Fragment.from(nodesOf(engine, preset)!), 0, 0), move: false };
-            view.dragging = shown;
+            cursor.show(view, at);
             return true;
           },
           dragleave(view, event) {
-            const to = event.relatedTarget;
-            if (shown !== null && !(to instanceof Node && view.dom.contains(to))) {
-              if (view.dragging === shown) view.dragging = null;
-              shown = null;
-            }
+            if (leftEditor(view, event)) cursor.hide();
             return false;
           },
           drop(view, event) {
             const id = draggedPreset(event.dataTransfer);
             if (id === null) return false;
-            if (view.dragging === shown) view.dragging = null;
-            shown = null;
+            cursor.hide();
             event.preventDefault();
             const facade = facadeFor(engine as unknown as EngineHandle);
             const at = dropTarget(engine, view, event, id);
-            if (facade && at !== null && facade.can('insertPreset', { id, at })) {
+            if (facade && at !== null) {
               facade.run('insertPreset', { id, at });
               view.focus();
             }
