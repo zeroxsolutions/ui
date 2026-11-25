@@ -73,7 +73,7 @@ function ButtonShell({ attrs, children }: { attrs: ButtonAttrs; children: ReactN
     <div
       data-slot="link-button"
       data-width={attrs.width ?? 'inline'}
-      className={cn('flex items-center gap-2', justifyClass(attrs.align), blockClasses(attrs))}
+      className={cn('flex flex-wrap items-center gap-2', justifyClass(attrs.align), blockClasses(attrs))}
     >
       {children}
     </div>

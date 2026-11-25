@@ -8,22 +8,31 @@ import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { Editor } from '../../react/editor';
 import { SlashMenu } from '../../ui/slash-menu';
+import { callout } from '../callout/index';
 import { columns } from '../columns/index';
 import { standardKit } from '../standard/index';
 import { button } from './button';
 
-const features: EditorFeature[] = [standardKit(), button(), columns()];
+const features: EditorFeature[] = [standardKit(), button(), columns(), callout()];
 const contributions = collectUiContributions(features);
 
 const empty: DocJSON = { type: 'doc', content: [{ type: 'paragraph' }] };
 
-function Host({ onReady }: { onReady(editor: IEditor): void }) {
+function Host({
+  onReady,
+  content = empty,
+  className = 'p-12',
+}: {
+  onReady(editor: IEditor): void;
+  content?: DocJSON;
+  className?: string;
+}) {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    <div className="style-nova p-12">
+    <div className={`style-nova ${className}`}>
       <Editor
         features={features}
-        content={empty}
+        content={content}
         onReady={(ready) => {
           setEditor(ready);
           onReady(ready);
@@ -34,9 +43,9 @@ function Host({ onReady }: { onReady(editor: IEditor): void }) {
   );
 }
 
-async function mount(): Promise<IEditor> {
+async function mount(content?: DocJSON, className?: string): Promise<IEditor> {
   let mounted: IEditor | null = null;
-  await render(<Host onReady={(editor) => (mounted = editor)} />);
+  await render(<Host content={content} className={className} onReady={(editor) => (mounted = editor)} />);
   return vi.waitFor(() => {
     if (!mounted) throw new Error('the editor is not ready');
     return mounted;
@@ -73,5 +82,30 @@ describe('the button in the Document Editor', () => {
         href: 'https://x.test/book',
       }),
     );
+  });
+
+  it('keeps its Link control inside a callout as narrow as a phone column', async () => {
+    await mount(
+      {
+        type: 'doc',
+        content: [
+          {
+            type: 'callout',
+            content: [
+              { type: 'paragraph', content: [{ type: 'text', text: 'Write a sentence or two here.' }] },
+              { type: 'button', attrs: { label: 'Learn more', href: '' } },
+            ],
+          },
+        ],
+      },
+      'w-64 p-4',
+    );
+
+    const link = page.getByRole('button', { name: 'Link' });
+    await expect.element(link).toBeVisible();
+    const box = document.querySelector('[data-type=callout]')!.getBoundingClientRect();
+    const control = link.element().getBoundingClientRect();
+    expect(control.right).toBeLessThanOrEqual(box.right);
+    expect(control.left).toBeGreaterThanOrEqual(box.left);
   });
 });
