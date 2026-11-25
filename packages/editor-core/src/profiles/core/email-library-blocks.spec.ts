@@ -45,7 +45,7 @@ const STORED: readonly EditorEmailBlock[] = [
   block('socialLinks', { links: links(2) }, { align: 'center', size: 'small' }),
   block('hero', feature, { align: 'center' }),
   block('card', { ...feature, buttonLabel: '', buttonHref: '' }),
-  block('legalFooter', footer),
+  block('legalFooter', footer, { align: 'center' }),
 ];
 
 const profile = emailProfile({
@@ -106,6 +106,7 @@ describe('validate a library block', () => {
     ],
     ['no social links', block('socialLinks', { links: [] }), 'text-empty', 'links'],
     ['nine social links', block('socialLinks', { links: links(9) }), 'list-too-long', 'links'],
+    ['a footer aligned right', block('legalFooter', footer, { align: 'right' }), 'attributes-invalid', 'align'],
     ['a spacer height it does not take', block('spacer', {}, { height: 'huge' }), 'attributes-invalid', 'height'],
     ['a key the type does not have', block('spacer', { extra: 1 }), 'content-invalid', 'extra'],
   ])('flags %s', (_case, stored, kind, field) => {
@@ -124,6 +125,7 @@ describe('validate a library block', () => {
       block('legalFooter', { ...footer, sender: '**x' }),
       block('socialLinks', { links: links(9) }),
       block('socialLinks', { links: [{ ...links(1)[0], href: 'data:x' }] }),
+      block('legalFooter', footer, { align: 'right' }),
       block('spacer', {}, { height: 'huge' }),
     ];
     for (const stored of cases) {

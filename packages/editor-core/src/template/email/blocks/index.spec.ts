@@ -542,6 +542,16 @@ describe('a legal footer', () => {
     expect(text).toContain('Unsubscribe (https://x.test/u?a=1)');
   });
 
+  it('draws its lines on the left unless it is set to the centre, as under centred social links', () => {
+    const vars = { b: 'Acme', u: 'https://x.test/u' };
+    expect(render('legalFooter', {}, footer, vars, { u: 'url' }).html).toContain(
+      'class="zx-block zx-block-legalFooter zx-align-left',
+    );
+    expect(render('legalFooter', { align: 'center' }, footer, vars, { u: 'url' }).html).toContain(
+      'class="zx-block zx-block-legalFooter zx-align-center',
+    );
+  });
+
   it("draws a label it is given, kept plain even where it holds markup or a link's brackets", () => {
     const { html } = render(
       'legalFooter',

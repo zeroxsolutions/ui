@@ -1,6 +1,6 @@
 import { printInlineMarkup } from '../../markup/inline-markup.js';
 import { builtInEmailBlockOf } from '../define-email-block.js';
-import { link, plainText, richText } from '../fields.js';
+import { choice, link, plainText, richText } from '../fields.js';
 
 /** The label the unsubscribe link takes where the block names none. */
 export const UNSUBSCRIBE_LABEL = 'Unsubscribe';
@@ -8,7 +8,8 @@ export const UNSUBSCRIBE_LABEL = 'Unsubscribe';
 /**
  * The text a mail sent to a list must carry: who sends it, why the reader gets it, the sender's postal address and
  * a link that unsubscribes them. The address and the link are required, so a mail built from it is never missing
- * either. `unsubscribeLabel` words the link in the mail's language.
+ * either. `unsubscribeLabel` words the link in the mail's language; `align` centres the lines, as under a centred
+ * row of social links.
  */
 export const legalFooter = builtInEmailBlockOf(
   {
@@ -23,6 +24,7 @@ export const legalFooter = builtInEmailBlockOf(
       unsubscribe: link({ required: true, label: 'Unsubscribe link' }),
       unsubscribeLabel: plainText({ max: 100, label: 'Unsubscribe label' }),
     },
+    attributes: { align: choice(['left', 'center'], 'left', { label: 'Align' }) },
     render: ({ fields }, h) => {
       const label = fields.unsubscribeLabel.trim() === '' ? UNSUBSCRIBE_LABEL : fields.unsubscribeLabel;
       const line = (text: string) => h.text({ class: ['zx-legal-text', 'zx-tone-muted'], text });
