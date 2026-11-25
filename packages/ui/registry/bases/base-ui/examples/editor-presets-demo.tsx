@@ -9,7 +9,7 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 import { button } from '@/registry/bases/base-ui/editor/document/features/button';
 import { callout } from '@/registry/bases/base-ui/editor/document/features/callout';
 import { columns } from '@/registry/bases/base-ui/editor/document/features/columns';
-import { presetsFeature } from '@/registry/bases/base-ui/editor/document/features/presets';
+import { EditorPresetsPanel, presetsFeature } from '@/registry/bases/base-ui/editor/document/features/presets';
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
@@ -56,16 +56,17 @@ const contributions = collectUiContributions(features);
 
 const content: DocJSON = {
   type: 'doc',
-  content: [paragraph('Type / and pick a preset under Presets to add a ready-made group of blocks.')],
+  content: [paragraph('Drag a preset from the panel, click one, or type / and pick one under Presets.')],
 };
 
-/** A document whose slash menu offers two presets: two columns, and a tip in a callout. */
+/** A document beside a panel of two presets, two columns and a tip in a callout, which its slash menu offers too. */
 function EditorPresetsDemo(): ReactNode {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-3">
+    <div className="grid w-full max-w-4xl items-start gap-6 md:grid-cols-[minmax(0,1fr)_18rem]">
       <Editor features={features} content={content} onReady={setEditor} />
       {editor && <SlashMenu editor={editor} items={contributions.slash} />}
+      {editor && <EditorPresetsPanel editor={editor} presets={presets} />}
     </div>
   );
 }

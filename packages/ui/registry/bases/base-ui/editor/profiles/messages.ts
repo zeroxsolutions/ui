@@ -73,6 +73,8 @@ export interface ProfileEditorMessages {
   blockGroup: string;
   /** The SMS slash menu's heading over the variables it inserts. */
   variableGroup: string;
+  /** The slash menu's heading over the presets the email editor offers. */
+  presetsGroup: string;
   /** Each email block's name and line in the slash menu. */
   blocks: Readonly<Record<EmailBlockKind, { title: string; description: string }>>;
   bold: string;
@@ -207,6 +209,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   slashEmpty: 'No matching blocks',
   blockGroup: 'Email',
   variableGroup: 'Variables',
+  presetsGroup: 'Presets',
   blocks: {
     paragraph: { title: 'Text', description: 'A paragraph of text' },
     button: { title: 'Button', description: 'A button that opens a link' },

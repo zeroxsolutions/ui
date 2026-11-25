@@ -2,8 +2,11 @@ import { useState, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
+import type { BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
+  docProblems,
+  emailPreset,
   emailProfile,
   MAIL_LAYOUT_KINDS,
   toEmailBlocks,
@@ -20,6 +23,7 @@ import {
 } from '@zeroxsolutions/editor-core/template/email/index';
 import '../../../../../../test/nova-style.css';
 import '../../styles.css';
+import { EditorPresetsPanel } from '../../document/features/presets/presets-panel';
 import {
   EmailEditor,
   type EmailEditorProps,
@@ -104,6 +108,8 @@ interface HarnessProps {
   renderBlockAdornment?: EmailEditorProps['renderBlockAdornment'];
   initial: EditorEmailBlock[];
   probe: Probe;
+  /** The presets the editor offers, listed in a panel beside it too. */
+  presets?: readonly BlockPreset[];
 }
 
 /** A host that stores what the editor reports and hands it back as the value, as travel's rows do. */
@@ -125,8 +131,10 @@ function Host({
   probe.load = setValue;
   probe.adorn = (next) => setAdornment(() => next);
   const previewProps: EmailPreviewProps = preview ? { renderer: preview.renderer, previewInput: preview.input } : {};
+  const [ready, setReady] = useState<IEditor | null>(null);
   return (
     <div className="style-nova p-12">
+      {props.presets && ready && <EditorPresetsPanel editor={ready} presets={props.presets} />}
       <EmailEditor
         {...props}
         {...previewProps}
@@ -141,7 +149,10 @@ function Host({
         }}
         onValidate={(problems) => probe.validated.push(problems)}
         onBlur={() => (probe.blurs += 1)}
-        onReady={(editor) => (probe.editor = editor)}
+        onReady={(editor) => {
+          probe.editor = editor;
+          setReady(editor);
+        }}
       />
       <button type="button">Elsewhere</button>
     </div>
@@ -957,5 +968,160 @@ describe('EmailEditor variables in code and html', () => {
     await pickVariable('Name');
 
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ html: '<b>{{name}}' }));
+  });
+});
+
+describe('EmailEditor presets', () => {
+  const callToAction = emailPreset(profile, {
+    id: 'call-to-action',
+    label: 'Call to action',
+    blocks: [
+      { id: 'srv-h', key: 'kh', type: 'heading', attributes: { level: 2 }, content: { text: 'Ready?' } },
+      paragraph('Reset it now.', 'srv-p'),
+      { id: 'srv-b', key: 'kb', type: 'button', attributes: {}, content: { label: 'Reset', href: '{{resetUrl}}' } },
+    ],
+  });
+  const action = emailPreset(profile, {
+    id: 'action',
+    label: 'Action',
+    blocks: [
+      paragraph('Reset it now.'),
+      { id: null, key: '', type: 'button', attributes: {}, content: { label: 'Reset', href: '{{resetUrl}}' } },
+    ],
+  });
+  const card = emailPreset(profile, {
+    id: 'card',
+    label: 'Card',
+    blocks: [
+      {
+        id: null,
+        key: '',
+        type: 'card',
+        attributes: {},
+        content: {
+          image: 'https://x.test/c.png',
+          alt: 'A bay',
+          heading: 'Stay',
+          text: 'By the sea',
+          buttonLabel: '',
+          buttonHref: '',
+        },
+      },
+    ],
+  });
+  const presets = [callToAction, action, card];
+  const columns = (): EditorEmailBlock => ({
+    id: 'c1',
+    key: 'c1',
+    type: 'columns',
+    attributes: { ratio: [1, 1] },
+    content: {},
+    lanes: [[paragraph('Left', 'l1')], [paragraph('Right', 'l2')]],
+  });
+  const row = (label: string) => page.getByRole('button', { name: label, exact: true });
+  const offered = () =>
+    page
+      .getByRole('list', { name: 'Presets' })
+      .getByRole('button')
+      .elements()
+      .map((element) => element.textContent);
+
+  /**
+   * Whether the editor's drop cursor was drawn as the next drag let go over a lane: read as the browser drops
+   * there, or as it leaves a drag it refused, before the editor's handlers clear the cursor either way.
+   */
+  function watchLaneCursor(): () => boolean | null {
+    let released: boolean | null = null;
+    const read = (event: DragEvent) => {
+      if (!event.isTrusted || !(event.target instanceof Element) || !event.target.closest('[data-slot=column]')) return;
+      released = document.querySelector('.prosemirror-dropcursor-block') !== null;
+    };
+    for (const type of ['dragleave', 'drop'] as const) document.addEventListener(type, read, { capture: true });
+    document.addEventListener(
+      'dragend',
+      () => {
+        for (const type of ['dragleave', 'drop'] as const) document.removeEventListener(type, read, { capture: true });
+      },
+      { capture: true, once: true },
+    );
+    return () => released;
+  }
+
+  it("offers a preset holding a heading nowhere when the profile allows none, the group in the host's words", async () => {
+    await mount([paragraph('Hi', 'p1')], {
+      presets,
+      profile: emailProfile({ variables: declared, allow: ['paragraph', 'button', 'divider'] }),
+      messages: { presetsGroup: 'Ready-made' },
+    });
+    await vi.waitFor(() => expect(offered()).toEqual(['Action']));
+
+    await caretAfter('Hi');
+    await userEvent.keyboard('{Enter}/');
+
+    await expect.element(page.getByText('Ready-made', { exact: true })).toBeVisible();
+    const slash = () =>
+      [...document.querySelectorAll('[data-slot=slash-menu] [data-slot=item-title]')].map((title) => title.textContent);
+    expect(slash()).toContain('Action');
+    expect(slash()).not.toContain('Call to action');
+  });
+
+  it('leaves out a preset holding a card while the caret is in a column', async () => {
+    await mount([paragraph('Top', 'p1'), columns()], { presets });
+
+    await caretAfter('Top');
+    await vi.waitFor(() => expect(offered()).toEqual(['Call to action', 'Action', 'Card']));
+    await caretAfter('Left');
+    await vi.waitFor(() => expect(offered()).toEqual(['Call to action', 'Action']));
+  });
+
+  it('drops a card in a column nowhere, drawing no drop cursor, and a call to action there with one', async () => {
+    const probe = await mount([paragraph('Top', 'p1'), columns()], { presets });
+    const lane = () => vi.waitFor(() => find('[contenteditable=true] [data-slot=column] p', 'Left'));
+    await caretAfter('Top');
+    await expect.element(row('Card')).toBeVisible();
+
+    const refused = watchLaneCursor();
+    await userEvent.dragAndDrop(row('Card'), await lane(), { steps: 10, targetPosition: { x: 2, y: 4 } });
+    expect(refused()).toBe(false);
+    expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns']);
+
+    const taken = watchLaneCursor();
+    await userEvent.dragAndDrop(row('Call to action'), await lane(), { steps: 10, targetPosition: { x: 2, y: 4 } });
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor)[1].lanes?.[0].map(({ type }) => type)).toEqual([
+        'heading',
+        'paragraph',
+        'button',
+        'paragraph',
+      ]),
+    );
+    expect(taken()).toBe(true);
+  });
+
+  it('offers no preset in locked structure', async () => {
+    await mount([paragraph('Hi', 'p1')], { presets, structure: 'locked' });
+    await caretAfter('Hi');
+
+    await expect.element(page.getByText('No presets fit here')).toBeVisible();
+    expect(offered()).toEqual([]);
+  });
+
+  it('inserts a preset as new blocks the export carries, with no problem and no id from where it came', async () => {
+    const probe = await mount([paragraph('Hi', 'p1')], { presets });
+    await caretAfter('Hi');
+
+    await userEvent.click(row('Call to action'));
+
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ id, type }) => [id, type])).toEqual([
+        ['p1', 'paragraph'],
+        [null, 'heading'],
+        [null, 'paragraph'],
+        [null, 'button'],
+      ]),
+    );
+    expect(validate(exportedOf(probe.editor), profile)).toEqual([]);
+    expect(docProblems(probe.editor.getJSON())).toEqual([]);
+    expect(new Set(exportedOf(probe.editor).map(({ key }) => key)).size).toBe(4);
   });
 });
