@@ -95,6 +95,7 @@ const BluetoothOffIcon = forwardRef<BluetoothOffIconHandle, BluetoothOffIconProp
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="m17 17-5 5V12l-5 5"
             transition={{
               duration: 0.3,
@@ -103,6 +104,7 @@ const BluetoothOffIcon = forwardRef<BluetoothOffIconHandle, BluetoothOffIconProp
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="m2 2 20 20"
             transition={{
               duration: 0.2,
@@ -112,6 +114,7 @@ const BluetoothOffIcon = forwardRef<BluetoothOffIconHandle, BluetoothOffIconProp
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M14.5 9.5 17 7l-5-5v4.5"
             transition={{
               duration: 0.3,

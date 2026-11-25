@@ -84,6 +84,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="5"
             cy="6"
             r="3"
@@ -103,6 +104,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M12 6h5a2 2 0 0 1 2 2v7"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="m15 9-3-3 3-3"
             transition={{
               duration: DURATION,
@@ -140,6 +143,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="19"
             cy="18"
             r="3"
@@ -159,6 +163,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M12 18H7a2 2 0 0 1-2-2V9"
             transition={{
               duration: DURATION,
@@ -182,6 +187,7 @@ const GitCompareArrowsIcon = forwardRef<GitCompareArrowsIconHandle, GitCompareAr
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="m9 15 3 3-3 3"
             transition={{
               duration: DURATION,

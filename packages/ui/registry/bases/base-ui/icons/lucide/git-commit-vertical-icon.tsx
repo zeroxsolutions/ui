@@ -91,9 +91,9 @@ const GitCommitVerticalIcon = forwardRef<GitCommitVerticalIconHandle, GitCommitV
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} custom={0} d="M12 3v6" variants={VARIANTS} />
-          <motion.circle animate={controls} custom={1} cx="12" cy="12" r="3" variants={VARIANTS} />
-          <motion.path animate={controls} custom={2} d="M12 15v6" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0} d="M12 3v6" variants={VARIANTS} />
+          <motion.circle animate={controls} initial="normal" custom={1} cx="12" cy="12" r="3" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="M12 15v6" variants={VARIANTS} />
         </svg>
       </span>
     );

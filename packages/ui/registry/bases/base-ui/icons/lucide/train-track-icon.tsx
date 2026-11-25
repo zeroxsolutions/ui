@@ -97,11 +97,11 @@ const TrainTrackIcon = forwardRef<TrainTrackIconHandle, TrainTrackIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M2 17 17 2" />
-          <motion.path animate={controls} custom={4} d="m2 14 8 8" variants={VARIANTS} />
-          <motion.path animate={controls} custom={3} d="m5 11 8 8" variants={VARIANTS} />
-          <motion.path animate={controls} custom={2} d="m8 8 8 8" variants={VARIANTS} />
-          <motion.path animate={controls} custom={1} d="m11 5 8 8" variants={VARIANTS} />
-          <motion.path animate={controls} custom={0} d="m14 2 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={4} d="m2 14 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={3} d="m5 11 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="m8 8 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={1} d="m11 5 8 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0} d="m14 2 8 8" variants={VARIANTS} />
           <path d="M7 22 22 7" />
         </svg>
       </span>

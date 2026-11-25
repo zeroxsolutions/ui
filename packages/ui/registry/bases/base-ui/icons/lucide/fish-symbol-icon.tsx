@@ -91,7 +91,7 @@ const FishSymbolIcon = forwardRef<FishSymbolIconHandle, FishSymbolIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <motion.path animate={controls} d="M2 16s9-15 20-4C11 23 2 8 2 8" variants={VARIANTS} />
+          <motion.path animate={controls} initial="normal" d="M2 16s9-15 20-4C11 23 2 8 2 8" variants={VARIANTS} />
         </svg>
       </span>
     );

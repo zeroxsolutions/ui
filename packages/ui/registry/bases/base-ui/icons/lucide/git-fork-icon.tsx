@@ -84,6 +84,7 @@ const GitForkIcon = forwardRef<GitForkIconHandle, GitForkIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="12"
             cy="18"
             r="3"
@@ -103,6 +104,7 @@ const GitForkIcon = forwardRef<GitForkIconHandle, GitForkIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitForkIcon = forwardRef<GitForkIconHandle, GitForkIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="6"
             r="3"
@@ -145,6 +148,7 @@ const GitForkIcon = forwardRef<GitForkIconHandle, GitForkIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="6"
             r="3"
@@ -164,6 +168,7 @@ const GitForkIcon = forwardRef<GitForkIconHandle, GitForkIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M12 12v3"
             transition={{
               duration: DURATION,

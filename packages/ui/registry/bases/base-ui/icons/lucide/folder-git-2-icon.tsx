@@ -85,6 +85,7 @@ const FolderGit2Icon = forwardRef<FolderGit2IconHandle, FolderGit2IconProps>(
           <path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v5" />
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="13"
             cy="12"
             r="2"
@@ -103,6 +104,7 @@ const FolderGit2Icon = forwardRef<FolderGit2IconHandle, FolderGit2IconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M18 19a5 5 0 0 1-5-5v8"
             transition={{
               duration: DURATION,
@@ -125,6 +127,7 @@ const FolderGit2Icon = forwardRef<FolderGit2IconHandle, FolderGit2IconProps>(
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="20"
             cy="19"
             r="2"

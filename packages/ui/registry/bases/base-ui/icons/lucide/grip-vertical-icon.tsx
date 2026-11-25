@@ -77,6 +77,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4, delay: 0.05 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="9"
@@ -85,6 +86,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="9"
@@ -93,6 +95,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4, delay: 0.1 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="9"
@@ -101,6 +104,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4, delay: 0.09 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="15"
@@ -109,6 +113,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4, delay: 0.04 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="15"
@@ -117,6 +122,7 @@ const GripVerticalIcon = forwardRef<GripVerticalIconHandle, GripVerticalIconProp
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             transition={{ duration: 0.4, delay: 0.14 }}
             variants={{ normal: { opacity: 1, scale: 1 }, animate: { opacity: [1, 0.4, 1], scale: [1, 0.85, 1] } }}
             cx="15"

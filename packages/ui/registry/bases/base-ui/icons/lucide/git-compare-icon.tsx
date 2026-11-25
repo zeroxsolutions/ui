@@ -84,6 +84,7 @@ const GitCompareIcon = forwardRef<GitCompareIconHandle, GitCompareIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="18"
             r="3"
@@ -103,6 +104,7 @@ const GitCompareIcon = forwardRef<GitCompareIconHandle, GitCompareIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M13 6h3a2 2 0 0 1 2 2v7"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitCompareIcon = forwardRef<GitCompareIconHandle, GitCompareIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M11 18H8a2 2 0 0 1-2-2V9"
             transition={{
               duration: DURATION,
@@ -149,6 +152,7 @@ const GitCompareIcon = forwardRef<GitCompareIconHandle, GitCompareIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="6"
             r="3"

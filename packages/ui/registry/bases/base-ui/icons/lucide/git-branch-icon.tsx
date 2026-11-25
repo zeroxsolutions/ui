@@ -85,6 +85,7 @@ const GitBranchIcon = forwardRef<GitBranchIconHandle, GitBranchIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="6"
             r="3"
@@ -104,6 +105,7 @@ const GitBranchIcon = forwardRef<GitBranchIconHandle, GitBranchIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="18"
             r="3"
@@ -123,6 +125,7 @@ const GitBranchIcon = forwardRef<GitBranchIconHandle, GitBranchIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M15 6a9 9 0 0 0-9 9V3"
             transition={{
               duration: DURATION,

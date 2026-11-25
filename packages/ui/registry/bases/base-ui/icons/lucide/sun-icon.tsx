@@ -94,7 +94,14 @@ const SunIcon = forwardRef<SunIconHandle, SunIconProps>(
             'M2 12h2',
             'm4.93 4.93 1.41 1.41',
           ].map((d, index) => (
-            <motion.path animate={controls} custom={index + 1} d={d} key={d} variants={PATH_VARIANTS} />
+            <motion.path
+              animate={controls}
+              initial="normal"
+              custom={index + 1}
+              d={d}
+              key={d}
+              variants={PATH_VARIANTS}
+            />
           ))}
         </svg>
       </span>

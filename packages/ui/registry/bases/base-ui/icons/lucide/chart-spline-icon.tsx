@@ -93,7 +93,12 @@ const ChartSplineIcon = forwardRef<ChartSplineIconHandle, ChartSplineIconProps>(
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M3 3v16a2 2 0 0 0 2 2h16" />
-          <motion.path animate={controls} d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7" variants={VARIANTS} />
+          <motion.path
+            animate={controls}
+            initial="normal"
+            d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7"
+            variants={VARIANTS}
+          />
         </svg>
       </span>
     );

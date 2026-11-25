@@ -86,6 +86,7 @@ const TextAlignEndIcon = forwardRef<TextAlignEndIconHandle, TextAlignEndIconProp
           <path d="M21 5H3" />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 12H9"
             transition={DEFAULT_TRANSITION}
             variants={{
@@ -95,6 +96,7 @@ const TextAlignEndIcon = forwardRef<TextAlignEndIconHandle, TextAlignEndIconProp
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 19H7"
             transition={DEFAULT_TRANSITION}
             variants={{

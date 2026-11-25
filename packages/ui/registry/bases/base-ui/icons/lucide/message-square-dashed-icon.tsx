@@ -96,7 +96,14 @@ const MessageSquareDashedIcon = forwardRef<MessageSquareDashedIconHandle, Messag
             'M20 19a2 2 0 0 0 2-2v-1',
             'M4 3a2 2 0 0 0-2 2v1',
           ].map((d, index) => (
-            <motion.path animate={controls} custom={index + 1} d={d} key={d} variants={PATH_VARIANTS} />
+            <motion.path
+              animate={controls}
+              initial="normal"
+              custom={index + 1}
+              d={d}
+              key={d}
+              variants={PATH_VARIANTS}
+            />
           ))}
         </svg>
       </span>

@@ -81,6 +81,7 @@ const StethoscopeIcon = forwardRef<StethoscopeIconHandle, StethoscopeIconProps>(
         >
           <motion.path
             animate={controls}
+            initial="normal"
             d="M11 2v2"
             transition={{
               duration: DURATION,
@@ -103,6 +104,7 @@ const StethoscopeIcon = forwardRef<StethoscopeIconHandle, StethoscopeIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M5 2v2"
             transition={{
               duration: DURATION,
@@ -125,6 +127,7 @@ const StethoscopeIcon = forwardRef<StethoscopeIconHandle, StethoscopeIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"
             transition={{
               duration: DURATION,
@@ -147,6 +150,7 @@ const StethoscopeIcon = forwardRef<StethoscopeIconHandle, StethoscopeIconProps>(
           />
           <motion.path
             animate={controls}
+            initial="normal"
             d="M8 15a6 6 0 0 0 12 0v-3"
             transition={{
               duration: DURATION,
@@ -169,6 +173,7 @@ const StethoscopeIcon = forwardRef<StethoscopeIconHandle, StethoscopeIconProps>(
           />
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="20"
             cy="10"
             r="2"

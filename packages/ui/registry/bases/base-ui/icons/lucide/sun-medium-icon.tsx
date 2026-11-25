@@ -95,7 +95,14 @@ const SunMediumIcon = forwardRef<SunMediumIconHandle, SunMediumIconProps>(
             'm5.636 5.636.707.707',
             'm17.657 17.657.707.707',
           ].map((d, index) => (
-            <motion.path animate={controls} custom={index + 1} d={d} key={d} variants={PATH_VARIANTS} />
+            <motion.path
+              animate={controls}
+              initial="normal"
+              custom={index + 1}
+              d={d}
+              key={d}
+              variants={PATH_VARIANTS}
+            />
           ))}
         </svg>
       </span>

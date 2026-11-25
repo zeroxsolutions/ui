@@ -89,6 +89,7 @@ const WifiIcon = forwardRef<WifiIconHandle, WifiIconProps>(
           {WIFI_LEVELS.map((level) => (
             <motion.path
               animate={controls}
+              initial="fadeIn"
               d={level.d}
               key={level.d}
               variants={{

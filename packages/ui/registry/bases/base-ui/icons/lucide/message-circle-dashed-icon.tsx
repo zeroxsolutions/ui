@@ -94,7 +94,14 @@ const MessageCircleDashedIcon = forwardRef<MessageCircleDashedIconHandle, Messag
             'M2.182 13.9a10 10 0 0 1 0-3.8',
             'M3.721 6.391a10 10 0 0 1 2.7-2.69',
           ].map((d, index) => (
-            <motion.path animate={controls} custom={index + 1} d={d} key={d} variants={PATH_VARIANTS} />
+            <motion.path
+              animate={controls}
+              initial="normal"
+              custom={index + 1}
+              d={d}
+              key={d}
+              variants={PATH_VARIANTS}
+            />
           ))}
         </svg>
       </span>

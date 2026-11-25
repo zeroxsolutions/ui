@@ -85,6 +85,7 @@ const GitMergeIcon = forwardRef<GitMergeIconHandle, GitMergeIconProps>(
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="18"
             cy="18"
             r="3"
@@ -104,6 +105,7 @@ const GitMergeIcon = forwardRef<GitMergeIconHandle, GitMergeIconProps>(
 
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="6"
             r="3"
@@ -123,6 +125,7 @@ const GitMergeIcon = forwardRef<GitMergeIconHandle, GitMergeIconProps>(
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M6 21V9a9 9 0 0 0 9 9"
             transition={{
               duration: DURATION,

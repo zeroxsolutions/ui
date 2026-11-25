@@ -101,9 +101,9 @@ const MessageSquareMoreIcon = forwardRef<MessageSquareMoreIconHandle, MessageSqu
           xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
-          <motion.path animate={controls} custom={0} d="M8 11h.01" variants={DOT_VARIANTS} />
-          <motion.path animate={controls} custom={1} d="M12 11h.01" variants={DOT_VARIANTS} />
-          <motion.path animate={controls} custom={2} d="M16 11h.01" variants={DOT_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={0} d="M8 11h.01" variants={DOT_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={1} d="M12 11h.01" variants={DOT_VARIANTS} />
+          <motion.path animate={controls} initial="normal" custom={2} d="M16 11h.01" variants={DOT_VARIANTS} />
         </svg>
       </span>
     );

@@ -84,6 +84,7 @@ const GitPullRequestCreateIcon = forwardRef<GitPullRequestCreateIconHandle, GitP
         >
           <motion.circle
             animate={controls}
+            initial="normal"
             cx="6"
             cy="6"
             r="3"
@@ -103,6 +104,7 @@ const GitPullRequestCreateIcon = forwardRef<GitPullRequestCreateIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M6 9v12"
             transition={{
               duration: DURATION,
@@ -126,6 +128,7 @@ const GitPullRequestCreateIcon = forwardRef<GitPullRequestCreateIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M13 6h3a2 2 0 0 1 2 2v3"
             transition={{
               duration: DURATION,
@@ -149,6 +152,7 @@ const GitPullRequestCreateIcon = forwardRef<GitPullRequestCreateIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M18 15v6"
             transition={{
               duration: DURATION,
@@ -172,6 +176,7 @@ const GitPullRequestCreateIcon = forwardRef<GitPullRequestCreateIconHandle, GitP
 
           <motion.path
             animate={controls}
+            initial="normal"
             d="M21 18h-6"
             transition={{
               duration: DURATION,
