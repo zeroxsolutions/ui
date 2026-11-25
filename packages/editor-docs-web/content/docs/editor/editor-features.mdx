@@ -1,6 +1,6 @@
 ---
 title: Editor Features
-description: Every document feature behind one import, from the standard kit to callout, toggle, link, image, table, code block, Mermaid, math, mention and embed.
+description: "Every document feature behind one import: the standard kit, callout, toggle, link, image, table, code block, Mermaid, math, mention, embed, and the block library's toggle heading, button, columns, card, bookmark, file, media and table of contents."
 ---
 
 <ComponentPreview name="editor-features-demo" />
@@ -29,7 +29,7 @@ pnpm dlx shadcn@latest add @zui/editor-features
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-callout @zui/editor-code-block @zui/editor-embed @zui/editor-image @zui/editor-link @zui/editor-math @zui/editor-mention @zui/editor-mermaid @zui/editor-table @zui/editor-toggle
+pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-bookmark @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-embed @zui/editor-file @zui/editor-image @zui/editor-link @zui/editor-math @zui/editor-media @zui/editor-mention @zui/editor-mermaid @zui/editor-table @zui/editor-table-of-contents @zui/editor-toggle @zui/editor-toggle-heading
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -61,4 +61,4 @@ function NotesEditor({ content }: { content: DocJSON }) {
 }
 ```
 
-The barrel exports `standardKit`, `callout`, `toggle`, `link`, `image`, `table`, `codeBlock`, `mermaid`, `math`, `mention` and `embed`, each the one function its own page shows. Installing it installs every feature, with KaTeX and Mermaid behind two of them; to keep a project to the blocks it draws, install the feature items one by one and import each from its own folder.
+The barrel exports `standardKit`, `callout`, `toggle`, `link`, `image`, `table`, `codeBlock`, `mermaid`, `math`, `mention`, `embed`, `toggleHeading`, `button`, `columns`, `card`, `bookmark`, `file`, `media` and `tableOfContents`, each the one function its own page shows. `card` takes the card's shared definition, `card` from `@zeroxsolutions/editor-core/blocks/index`, as [Editor Card](/docs/editor/editor-card) shows. Installing it installs every feature, with KaTeX and Mermaid behind two of them; to keep a project to the blocks it draws, install the feature items one by one and import each from its own folder.

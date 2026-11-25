@@ -2818,23 +2818,441 @@
       ]
     },
     {
+      "name": "block-library",
+      "type": "registry:component",
+      "title": "Block Library",
+      "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with.",
+      "categories": ["editor"],
+      "registryDependencies": ["@shadcn/input", "@shadcn/utils", "@zui/document-editor", "@zui/lucide-blocks-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-feature.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-feature.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-address.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-address.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-address-field.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-address-field.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+    },
+    {
+      "name": "block-library-demo",
+      "type": "registry:example",
+      "title": "Block Library Demo",
+      "description": "A document holding every block of the library, as the Document Editor draws it.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-bookmark",
+        "@zui/editor-button",
+        "@zui/editor-card",
+        "@zui/editor-columns",
+        "@zui/editor-file",
+        "@zui/editor-media",
+        "@zui/editor-table-of-contents",
+        "@zui/editor-toggle-heading"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/block-library-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/block-library-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-bookmark",
+      "type": "registry:component",
+      "title": "Editor Bookmark",
+      "description": "A link drawn as a card with the page's title, description and image, which the host reads when the author pastes the address.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/block-library", "@zui/document-editor", "@zui/lucide-bookmark-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/bookmark/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/bookmark/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/bookmark/bookmark.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/bookmark/bookmark.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-bookmark-demo",
+      "type": "registry:example",
+      "title": "Editor Bookmark Demo",
+      "description": "A document with a bookmark to a travel guide.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-bookmark"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-bookmark-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-bookmark-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-button",
+      "type": "registry:component",
+      "title": "Editor Button",
+      "description": "A link drawn as a button, its label edited in place and its address in a popover, aligned left, center or right.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/input",
+        "@shadcn/popover",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/lucide-mouse-pointer-click-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/button/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/button/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/button/button.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/button/button.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/button/block-style.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/button/block-style.ts"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+    },
+    {
+      "name": "editor-button-demo",
+      "type": "registry:example",
+      "title": "Editor Button Demo",
+      "description": "A document with a button that links to a booking page.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-button"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-button-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-button-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-card",
+      "type": "registry:component",
+      "title": "Editor Card",
+      "description": "An image over a title, a text and a link button: the same card the email editor draws, from one shared definition.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/utils",
+        "@zui/block-library",
+        "@zui/document-editor",
+        "@zui/lucide-id-card-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/card/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/card/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/card/card.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/card/card.tsx"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "name": "editor-card-demo",
+      "type": "registry:example",
+      "title": "Editor Card Demo",
+      "description": "A document with a card for a place to visit.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-card"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-card-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-card-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-columns",
+      "type": "registry:component",
+      "title": "Editor Columns",
+      "description": "Columns of blocks side by side, weighed by a ratio, which stack on a narrow screen.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-button", "@zui/lucide-layout-grid-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/columns.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/columns.tsx"
+        }
+      ],
+      "css": {
+        ".document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react], .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react]": {
+          "display": "grid",
+          "grid-auto-flow": "column",
+          "grid-auto-columns": "minmax(0, 1fr)",
+          "grid-template-columns": "var(--columns-ratio, none)",
+          "gap": "0.75rem"
+        },
+        "@media (max-width: 40rem)": {
+          ".document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react], .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react]": {
+            "grid-auto-flow": "row",
+            "grid-template-columns": "none"
+          }
+        },
+        ".document-editor .ProseMirror > [data-slot='email-block-row']:first-child + *, .document-editor [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :first-child, .document-editor [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='email-block-row']:first-child + *": {
+          "margin-top": "0"
+        },
+        ".document-editor :where( [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
+          "margin-bottom": "0"
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+    },
+    {
+      "name": "editor-columns-demo",
+      "type": "registry:example",
+      "title": "Editor Columns Demo",
+      "description": "A document with two columns of blocks.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-columns"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-columns-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-columns-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-file",
+      "type": "registry:component",
+      "title": "Editor File",
+      "description": "A file to download, drawn as a row with its icon, its name and its size.",
+      "categories": ["editor"],
+      "registryDependencies": ["@zui/block-library", "@zui/document-editor", "@zui/lucide-file-text-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/file/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/file/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/file/file.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/file/file.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/hooks/use-animated-icon.ts",
+          "type": "registry:hook",
+          "target": "@hooks/use-animated-icon.ts"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-file-demo",
+      "type": "registry:example",
+      "title": "Editor File Demo",
+      "description": "A document with a file attachment.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-file"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-file-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-file-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-media",
+      "type": "registry:component",
+      "title": "Editor Media",
+      "description": "A video or audio player with its controls, and a caption under it.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@zui/block-library",
+        "@zui/document-editor",
+        "@zui/lucide-audio-lines-icon",
+        "@zui/lucide-clapperboard-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/media/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/media/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/media/media.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/media/media.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-media-demo",
+      "type": "registry:example",
+      "title": "Editor Media Demo",
+      "description": "A document with a video and an audio file.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-media"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-media-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-media-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-table-of-contents",
+      "type": "registry:component",
+      "title": "Editor Table of Contents",
+      "description": "The document's headings of level 1 to 3, each a link that scrolls to it.",
+      "categories": ["editor"],
+      "registryDependencies": ["@shadcn/utils", "@zui/block-library", "@zui/document-editor", "@zui/lucide-list-icon"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table-of-contents/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table-of-contents/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table-of-contents/table-of-contents.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table-of-contents/table-of-contents.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-table-of-contents-demo",
+      "type": "registry:example",
+      "title": "Editor Table of Contents Demo",
+      "description": "A document with a table of contents above its headings.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-table-of-contents"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-table-of-contents-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-table-of-contents-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-toggle-heading",
+      "type": "registry:component",
+      "title": "Editor Toggle Heading",
+      "description": "A heading of level 1 to 3 that folds away the blocks under it.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/lucide-chevron-right-icon",
+        "@zui/lucide-heading-1-icon",
+        "@zui/lucide-heading-2-icon",
+        "@zui/lucide-heading-3-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/toggle-heading/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/toggle-heading/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/toggle-heading/toggle-heading.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/toggle-heading/toggle-heading.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+    },
+    {
+      "name": "editor-toggle-heading-demo",
+      "type": "registry:example",
+      "title": "Editor Toggle Heading Demo",
+      "description": "A document with an open toggle heading and a folded one.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-toggle-heading"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-toggle-heading-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-toggle-heading-demo.tsx"
+        }
+      ]
+    },
+    {
       "name": "editor-features",
       "type": "registry:component",
       "title": "Editor Features",
-      "description": "Every document feature behind one import, from the standard kit to callout, toggle, link, image, table, code block, Mermaid, math, mention and embed.",
+      "description": "Every document feature behind one import: the standard kit, callout, toggle, link, image, table, code block, Mermaid, math, mention, embed, and the block library's toggle heading, button, columns, card, bookmark, file, media and table of contents.",
       "categories": ["editor"],
       "registryDependencies": [
         "@zui/document-editor",
+        "@zui/editor-bookmark",
+        "@zui/editor-button",
         "@zui/editor-callout",
+        "@zui/editor-card",
         "@zui/editor-code-block",
+        "@zui/editor-columns",
         "@zui/editor-embed",
+        "@zui/editor-file",
         "@zui/editor-image",
         "@zui/editor-link",
         "@zui/editor-math",
+        "@zui/editor-media",
         "@zui/editor-mention",
         "@zui/editor-mermaid",
         "@zui/editor-table",
-        "@zui/editor-toggle"
+        "@zui/editor-table-of-contents",
+        "@zui/editor-toggle",
+        "@zui/editor-toggle-heading"
       ],
       "files": [
         {
@@ -3226,17 +3644,29 @@
         "@shadcn/utils",
         "@zui/chat-input",
         "@zui/document-editor",
+        "@zui/editor-button",
         "@zui/editor-callout",
         "@zui/editor-code-block",
+        "@zui/editor-columns",
+        "@zui/editor-image",
+        "@zui/editor-table",
+        "@zui/lucide-at-sign-icon",
         "@zui/lucide-blocks-icon",
         "@zui/lucide-braces-icon",
+        "@zui/lucide-chevrons-up-down-icon",
         "@zui/lucide-eye-icon",
+        "@zui/lucide-heading-2-icon",
+        "@zui/lucide-id-card-icon",
+        "@zui/lucide-image-icon",
         "@zui/lucide-layout-grid-icon",
         "@zui/lucide-layout-panel-top-icon",
         "@zui/lucide-link-icon",
+        "@zui/lucide-mailbox-icon",
         "@zui/lucide-mouse-pointer-click-icon",
         "@zui/lucide-pencil-line-icon",
-        "@zui/lucide-text-align-start-icon"
+        "@zui/lucide-table-icon",
+        "@zui/lucide-text-align-start-icon",
+        "@zui/lucide-text-quote-icon"
       ],
       "files": [
         {
@@ -3376,19 +3806,6 @@
         },
         ".document-editor .ProseMirror [data-space-after='large']": {
           "margin-bottom": "2rem"
-        },
-        ".document-editor [data-slot='email-columns'] > [data-node-view-content] > [data-node-view-content-react], .document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react]": {
-          "display": "grid",
-          "grid-auto-flow": "column",
-          "grid-auto-columns": "minmax(0, 1fr)",
-          "grid-template-columns": "var(--email-columns, none)",
-          "gap": "0.75rem"
-        },
-        ".document-editor .ProseMirror > [data-slot='email-block-row']:first-child + *, .document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :first-child, .document-editor [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='email-block-row']:first-child + *": {
-          "margin-top": "0"
-        },
-        ".document-editor :where( [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='email-lane'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
-          "margin-bottom": "0"
         },
         ".variable-text-field .ProseMirror, .variable-text-field .ProseMirror[contenteditable='true']": {
           "outline": "none",
