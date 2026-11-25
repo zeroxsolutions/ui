@@ -3,7 +3,7 @@ import { builtInEmailBlockOf } from '../define-email-block.js';
 import { link, plainText, richText } from '../fields.js';
 
 /** The label the unsubscribe link takes where the block names none. */
-const UNSUBSCRIBE_LABEL = 'Unsubscribe';
+export const UNSUBSCRIBE_LABEL = 'Unsubscribe';
 
 /**
  * The text a mail sent to a list must carry: who sends it, why the reader gets it, the sender's postal address and

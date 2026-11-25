@@ -4,7 +4,7 @@ import { choice, imageUrl, items, link, plainText } from '../fields.js';
 /** The most links one row holds, so it stays on one line on a phone. */
 export const SOCIAL_LINKS_MAX = 8;
 /** Each icon's side in px; the product supplies a hosted PNG at twice the size. */
-const SIZES = { small: 24, medium: 32 } as const;
+export const SOCIAL_ICON_SIZES = { small: 24, medium: 32 } as const;
 
 /**
  * A row of icon links to the product's pages elsewhere. The product supplies each icon, a hosted image; its
@@ -35,7 +35,7 @@ export const socialLinks = builtInEmailBlockOf(
     render: ({ fields, attributes }, h) =>
       h.icons({
         align: attributes.align,
-        size: SIZES[attributes.size],
+        size: SOCIAL_ICON_SIZES[attributes.size],
         items: fields.links.map((entry) => ({ src: entry.icon, alt: entry.label, href: entry.href })),
       }),
     sample: {

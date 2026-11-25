@@ -19,6 +19,9 @@ export {
   LIST_MAX_ITEMS,
 } from './blocks/shared.js';
 export { MAX_LANES } from './blocks/columns.js';
+export { SOCIAL_ICON_SIZES, SOCIAL_LINKS_MAX } from './blocks/social-links.js';
+export { SPACER_HEIGHTS } from './blocks/spacer.js';
+export { UNSUBSCRIBE_LABEL } from './blocks/legal-footer.js';
 export {
   defaultBlocks,
   LIBRARY_BLOCK_PAIRS,

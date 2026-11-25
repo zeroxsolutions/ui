@@ -2,7 +2,7 @@ import { builtInEmailBlockOf } from '../define-email-block.js';
 import { choice } from '../fields.js';
 
 /** The heights a spacer takes, in px: a breath, a gap, a break between parts. */
-const HEIGHTS = { small: 8, medium: 16, large: 32 } as const;
+export const SPACER_HEIGHTS = { small: 8, medium: 16, large: 32 } as const;
 
 /** Vertical space of a fixed height, besides the gap below every block. */
 export const spacer = builtInEmailBlockOf(
@@ -13,7 +13,7 @@ export const spacer = builtInEmailBlockOf(
     keywords: ['space', 'gap', 'padding'],
     fields: {},
     attributes: { height: choice(['small', 'medium', 'large'], 'medium', { label: 'Height' }) },
-    render: ({ attributes }, h) => h.spacer({ height: HEIGHTS[attributes.height] }),
+    render: ({ attributes }, h) => h.spacer({ height: SPACER_HEIGHTS[attributes.height] }),
     sample: { fields: {}, attributes: { height: 'large' }, variableTypes: {} },
   },
   'spacer',
