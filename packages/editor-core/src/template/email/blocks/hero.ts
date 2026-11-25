@@ -67,5 +67,5 @@ export const hero = builtInEmailBlockOf(
     },
   },
   'hero',
-  BUTTON_PAIR,
+  { pairs: BUTTON_PAIR, secureImages: true },
 );

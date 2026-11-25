@@ -222,22 +222,24 @@ to see both.
 
 ## Library blocks
 
-| Block         | Holds                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| `heading`     | a title at level 1, 2 or 3, level 2 when it names none                                                  |
-| `quote`       | words set off by a rule at their left, in the muted colour                                              |
-| `image`       | a hosted `https:` image, its required alt text, a caption and a link, at most 566px wide                |
-| `table`       | rows of short text, the first one headers where `header` is set, at most 20 rows of 6 columns           |
-| `hero`        | a wide image and its alt text, a heading, text, and a button, left or centred                           |
-| `card`        | the hero's fields in a frame                                                                            |
-| `socialLinks` | 1 to 8 icon links, each a label, a hosted icon your product supplies and a link, left, centred or right |
-| `spacer`      | empty space, small, medium or large                                                                     |
-| `legalFooter` | why the reader gets the mail, the required postal address, and the required unsubscribe link            |
+| Block         | Holds                                                                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `heading`     | a title at level 1, 2 or 3, level 2 when it names none                                                                                   |
+| `quote`       | words set off by a rule at their left, in the muted colour                                                                               |
+| `image`       | a hosted `https:` image, its required alt text, a caption and a link, at most 566px wide                                                 |
+| `table`       | rows of short text, the first one headers where `header` is set, at most 20 rows of 6 columns                                            |
+| `hero`        | a wide image and its alt text, a heading, text, and a button, left or centred                                                            |
+| `card`        | the hero's fields in a frame                                                                                                             |
+| `socialLinks` | 1 to 8 icon links, each a label, a hosted icon your product supplies and a link, left, centred or right                                  |
+| `spacer`      | empty space, small, medium or large                                                                                                      |
+| `legalFooter` | who sends the mail, why the reader gets it, the required postal address, and the required unsubscribe link, worded by `unsubscribeLabel` |
 
 A hero's and a card's button is drawn only with both its label and its link, and the write check refuses one
 without the other. An image is drawn at its width, at most 566px, the card's width less its border and
-padding, since Outlook on Windows reads no `max-width` and would push the card wider. The card is also a block for the Document Editor: `card` from
-`@zeroxsolutions/editor-core/blocks/index` is one definition for both editors. In a table cell the editor keeps
+padding, since Outlook on Windows reads no `max-width` and would push the card wider. A hero, a card and the social links take `https:` images only. A lane holds no hero or
+card, which are drawn at the card's whole width. The card is also a block for the Document Editor: `card` from
+`@zeroxsolutions/editor-core/blocks/index` is one definition for both editors. The email editor holds it already,
+so it goes in neither `emailProfile`'s `blocks` nor the editor's, which throw for it. In a table cell the editor keeps
 to a line of text, since the email writes each cell as one.
 
 ## Theme

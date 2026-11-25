@@ -17,4 +17,5 @@ export const spacer = builtInEmailBlockOf(
     sample: { fields: {}, attributes: { height: 'large' }, variableTypes: {} },
   },
   'spacer',
+  { secureImages: true },
 );

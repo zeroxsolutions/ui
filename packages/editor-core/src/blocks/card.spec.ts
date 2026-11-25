@@ -37,9 +37,10 @@ describe('the card', () => {
   it('writes no button where its label or link is empty, and no link a reader would not open', () => {
     expect(serialize(docOf({ ...attrs, buttonHref: '' }), 'html', registry)).not.toContain('<a');
     expect(serialize(docOf({ ...attrs, buttonLabel: '' }), 'html', registry)).not.toContain('<a');
-    expect(serialize(docOf({ ...attrs, buttonHref: 'javascript:alert(1)' }), 'html', registry)).not.toContain(
-      'href="javascript',
-    );
+    for (const buttonHref of ['javascript:alert(1)', '{{u}}', '   ']) {
+      expect(serialize(docOf({ ...attrs, buttonHref }), 'html', registry)).not.toContain('<a');
+    }
+    expect(serialize(docOf({ ...attrs, buttonLabel: '   ' }), 'html', registry)).not.toContain('<a');
   });
 
   it('checks a stored card on write as the library card does, its button label and link together', () => {

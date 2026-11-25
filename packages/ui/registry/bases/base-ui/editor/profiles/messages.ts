@@ -212,7 +212,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     card: { title: 'Card', description: 'An image, a heading, text and a button in a frame' },
     legalFooter: {
       title: 'Legal footer',
-      description: 'Why the reader gets this, the address and an unsubscribe link',
+      description: 'Who sends this and why, the address and an unsubscribe link',
     },
   },
   bold: 'Bold',

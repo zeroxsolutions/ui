@@ -516,15 +516,17 @@ describe('a card', () => {
 
 describe('a legal footer', () => {
   const footer = {
-    text: 'You joined {{b}}.',
+    sender: 'You joined {{b}}.',
+    reason: 'You asked for our news.',
     address: '1 Road, Town',
     unsubscribe: '{{u}}',
     unsubscribeLabel: '',
   };
 
-  it('draws why, the address and an unsubscribe link, muted and small', () => {
+  it('draws who sends it and why, the address and an unsubscribe link, muted and small', () => {
     const { html, text } = render('legalFooter', {}, footer, { b: 'Acme', u: 'https://x.test/u?a=1' }, { u: 'url' });
     expect(html).toContain('You joined Acme.');
+    expect(html).toContain('You asked for our news.');
     expect(html).toContain('1 Road, Town');
     expect(html).toMatch(/<a href="https:\/\/x.test\/u\?a=1"[^>]*>Unsubscribe<\/a>/);
     expect(html).toContain('zx-legal-text zx-tone-muted');

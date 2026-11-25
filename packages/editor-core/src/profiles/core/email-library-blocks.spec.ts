@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
+import { card } from '../../blocks/card.js';
 import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
 import { docProblems } from './doc-problems.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
@@ -24,7 +25,13 @@ const feature = {
   buttonLabel: 'Go',
   buttonHref: '{{u}}',
 };
-const footer = { text: 'You joined.', address: '1 Road', unsubscribe: '{{u}}', unsubscribeLabel: '' };
+const footer = {
+  sender: 'You joined.',
+  reason: 'You asked for news.',
+  address: '1 Road',
+  unsubscribe: '{{u}}',
+  unsubscribeLabel: '',
+};
 const links = (count: number) =>
   Array.from({ length: count }, (_, index) => ({
     label: `Site ${index}`,
@@ -114,7 +121,7 @@ describe('validate a library block', () => {
       block('hero', { ...feature, image: 'mailto:a@b.c' }),
       block('legalFooter', { ...footer, address: '' }),
       block('legalFooter', { ...footer, unsubscribe: 'javascript:x' }),
-      block('legalFooter', { ...footer, text: '**x' }),
+      block('legalFooter', { ...footer, sender: '**x' }),
       block('socialLinks', { links: links(9) }),
       block('socialLinks', { links: [{ ...links(1)[0], href: 'data:x' }] }),
       block('spacer', {}, { height: 'huge' }),
@@ -126,5 +133,55 @@ describe('validate a library block', () => {
         definition.attributes.safeParse(stored.attributes).success;
       expect([stored, validate([stored], profile).length === 0]).toEqual([stored, writes]);
     }
+  });
+});
+
+describe('a library block opened and saved unedited', () => {
+  it.each([
+    ['a hero with no button', block('hero', { image: feature.image, alt: 'a', heading: 'h', text: 't' })],
+    [
+      'a card whose keys are in another order',
+      block('card', { text: 't', heading: 'h', alt: 'a', image: feature.image, buttonHref: '', buttonLabel: '' }),
+    ],
+    [
+      'a footer with no reason',
+      block('legalFooter', { sender: 'You joined.', address: '1 Road', unsubscribe: '{{u}}' }),
+    ],
+  ])('saves %s byte for byte as stored', (_case, stored) => {
+    const doc = fromEmailBlocks([stored]);
+    expect(JSON.stringify(toEmailBlocks(doc))).toBe(JSON.stringify([stored]));
+  });
+
+  it('saves an edited one as the editor holds it', () => {
+    const doc = fromEmailBlocks([block('hero', feature, { align: 'center' })]);
+    doc.content![0].attrs = { ...doc.content![0].attrs, heading: 'Changed' };
+    expect(toEmailBlocks(doc)[0].content).toMatchObject({ heading: 'Changed' });
+  });
+});
+
+describe('a library block in a lane', () => {
+  it.each(['hero', 'card'])('flags a %s, drawn too wide for a lane', (type) => {
+    const columns: EditorEmailBlock = {
+      ...block('columns', {}, { ratio: [1, 1] }),
+      lanes: [[{ ...block(type, feature), key: 'k2' }], []],
+    };
+    expect(validate([columns], profile)).toContainEqual({ kind: 'block-nested-too-deep', block: 'k2' });
+  });
+});
+
+describe('a library block image', () => {
+  it.each([
+    ['hero', block('hero', { ...feature, image: 'http://x.test/h.png' }), 'image'],
+    ['social links', block('socialLinks', { links: [{ ...links(1)[0], icon: 'http://x.test/i.png' }] }), 'links'],
+  ])('refuses a plain http address in a %s on write and in validate', (_case, stored, field) => {
+    const definition = defaultBlocks[stored.type as DefaultBlockType];
+    expect(definition.content.safeParse(stored.content).success).toBe(false);
+    expect(validate([stored], profile)).toContainEqual(expect.objectContaining({ kind: 'href-invalid', field }));
+  });
+});
+
+describe('a profile naming a library block as its own', () => {
+  it('refuses it, since the email already holds it', () => {
+    expect(() => emailProfile({ blocks: [card] })).toThrow(/already an email kind/);
   });
 });

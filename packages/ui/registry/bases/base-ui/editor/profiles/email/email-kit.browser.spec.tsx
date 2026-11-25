@@ -20,6 +20,8 @@ import { Editor } from '../../document/react/editor';
 import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { EditorToolbar } from '../../document/ui/editor-toolbar';
 import { SlashMenu } from '../../document/ui/slash-menu';
+import { libraryBlocks } from '@zeroxsolutions/editor-core/template/email/index';
+import { emailBlockFeature } from './email-block-feature';
 import { emailKit, emailUi, type EmailKitOptions } from './email-kit';
 import { EmailLinkPopover } from './email-link-popover';
 
@@ -247,6 +249,21 @@ describe('the email kit', () => {
     await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain(type));
   });
 
+  it('keeps a hero and a card out of a lane, as wide as the card', async () => {
+    const editor = await mount([block({ type: 'columns', lanes: [[paragraph('left')], [paragraph('right')]] })]);
+    await caretAfter('left');
+    for (const kind of ['hero', 'card'] as const) {
+      expect(editor.can('insertEmailBlock', { kind })).toBe(false);
+      expect(editor.can(`insertEmailBlock:${kind}`)).toBe(false);
+    }
+    expect(editor.can('insertEmailBlock', { kind: 'spacer' })).toBe(true);
+  });
+
+  it("refuses a host's own feature holding a library block's node", () => {
+    const own = emailBlockFeature(libraryBlocks.card);
+    expect(() => emailKit(fullProfile, [own])).toThrow(/already holds/);
+  });
+
   it("inserts a library block through the kit's own command where the profile allows it", async () => {
     const editor = await mount([paragraph('Hi')]);
     await caretAfter('Hi');
@@ -282,7 +299,7 @@ describe('the email kit', () => {
         id: 'f',
         key: 'f',
         type: 'legalFooter',
-        content: { text: 'You joined.', address: '1 Road', unsubscribe: '{{resetUrl}}', unsubscribeLabel: '' },
+        content: { sender: 'You joined.', address: '1 Road', unsubscribe: '{{resetUrl}}' },
       }),
     ];
     const editor = await mount(stored);

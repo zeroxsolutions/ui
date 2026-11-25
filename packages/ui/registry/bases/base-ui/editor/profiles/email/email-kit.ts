@@ -400,11 +400,18 @@ function outsiders(doc: ProseMirrorNode, admitted: ReadonlySet<string>): Map<str
 /**
  * Refuses a feature whose node or mark the email export cannot carry: every block it declares or encodes needs
  * a codec with `toEmailBlock` and `fromEmailBlock`, and an inline node or a mark has no place in the stored text.
- * Refuses two features that hold one node, as a block given both in `blocks` and in `features`.
+ * Refuses two features that hold one node, as a block given both in `blocks` and in `features`, and a feature
+ * holding a library block's node, which the kit holds itself.
  */
 function assertEmailCodecs(extra: readonly EditorFeature[]): void {
   const named = new Set<string>();
   for (const node of extra.flatMap((feature) => feature.nodes ?? [])) {
+    if (Object.hasOwn(libraryBlocks, node.name)) {
+      throw new EditorError(
+        'editor.profile.library_node',
+        `The email kit already holds the library block "${node.name}"; leave it out of the features.`,
+      );
+    }
     if (named.has(node.name)) {
       throw new EditorError('editor.profile.duplicate_node', `Two of the features hold the node "${node.name}".`);
     }
@@ -599,7 +606,11 @@ export function emailKit(
 
   // In the schema whatever the profile allows, so a stored one opens; its slash item is offered where it is allowed.
   const library = (Object.keys(libraryBlocks) as LibraryBlockType[]).map((type) =>
-    emailBlockFeature(libraryBlocks[type], { icon: LIBRARY_ICONS[type], messages }),
+    emailBlockFeature(libraryBlocks[type], {
+      icon: LIBRARY_ICONS[type],
+      messages,
+      inLanes: type !== 'hero' && type !== 'card',
+    }),
   );
   const ownMenus = [...extra, ...library].flatMap((feature) => ownBlockMenus.get(feature) ?? []);
   const extraNodes = extra.flatMap((feature) => (feature.nodes ?? []).filter((node) => inGroup(node, 'block')));
@@ -652,6 +663,8 @@ export function emailKit(
     const found = contextOf(editor);
     if (!found || locked() || !kinds.includes(kind)) return false;
     if (kind !== 'paragraph' && cellAt(found.engine.state) !== undefined) return false;
+    // A library block's own feature knows where it goes, as a lane holds no hero.
+    if (Object.hasOwn(libraryBlocks, kind)) return editor.can(`insertEmailBlock:${kind}`);
     return kind !== 'columns' || laneAt(found.engine.state) === undefined;
   };
   const attributable = (editor: IEditor, attrs: Record<string, string>) => {

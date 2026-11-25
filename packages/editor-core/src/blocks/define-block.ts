@@ -13,7 +13,7 @@ import {
   type EmailBlockDefinition,
   type EmailBlockOptions,
   type FieldMap,
-  type FieldPairs,
+  type LibraryRules,
 } from '../template/email/define-email-block.js';
 import { documentAttributes, documentCodecOf, type DocumentBlockHtml } from './document-codec.js';
 
@@ -134,7 +134,7 @@ export function defineBlock<
 
 /**
  * A block of the library itself, whose type is one the renderer knows by default, so its email side is built
- * without the check `defineBlock` makes against those types. `pairs` names its fields filled together.
+ * without the check `defineBlock` makes against those types, under the library's `rules`.
  *
  * @throws {BlockDefinitionInvalid} as `defineBlock` does, but for a default type
  */
@@ -142,8 +142,8 @@ export function defineLibraryBlock<
   const Type extends string,
   const F extends FieldMap,
   const A extends AttributeMap = Record<never, never>,
->(options: BlockOptions<Type, F, A>, pairs: FieldPairs = []): Block<Type, F, A> {
-  return blockOf(options, (email, node) => builtInEmailBlockOf(email, node, pairs));
+>(options: BlockOptions<Type, F, A>, rules: LibraryRules = {}): Block<Type, F, A> {
+  return blockOf(options, (email, node) => builtInEmailBlockOf(email, node, rules));
 }
 
 function blockOf<const Type extends string, const F extends FieldMap, const A extends AttributeMap>(

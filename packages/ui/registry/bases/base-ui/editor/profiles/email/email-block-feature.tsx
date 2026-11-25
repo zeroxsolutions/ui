@@ -35,6 +35,8 @@ export interface EmailBlockFeatureOptions {
   nodeView?(props: NodeViewProps<Record<string, unknown>>): ReactNode;
   /** The words of the slash item, read once, when the feature is built; the kit's own in the editor's views. */
   messages?: () => ProfileEditorMessages;
+  /** Whether a lane takes the block. Default true; a block drawn at the card's whole width sets false. */
+  inLanes?: boolean;
 }
 
 type AttributeValue = string | boolean | number;
@@ -263,8 +265,9 @@ export function emailBlockFeature(
     const found = contextOf(editor);
     if (!found || found.context.locked() || !found.context.admitted.has(block.node)) return false;
     if (cellAt(found.engine.state) !== undefined) return false;
-    // A lane holds no block of lanes, as it holds no columns block.
-    return block.lanes === null || laneAt(found.engine.state) === undefined;
+    // A lane holds no block of lanes, as it holds no columns block, and no block drawn at the card's width.
+    const lanes = block.lanes !== null || options.inLanes === false;
+    return !lanes || laneAt(found.engine.state) === undefined;
   };
   const settable = (editor: IEditor, name: string, value: AttributeValue) => {
     const found = contextOf(editor);

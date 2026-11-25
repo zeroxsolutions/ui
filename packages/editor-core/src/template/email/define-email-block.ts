@@ -232,12 +232,14 @@ export function assertBlockShape(options: BlockShape<string, FieldMap, Attribute
 const LINK_START = /^(?:https?:\/\/|mailto:)/i;
 /** A literal address an image field may open with, beside a whole variable token. */
 const IMAGE_START = /^(?:https?:\/\/)/i;
+/** A literal address a library block's image field may open with: over a secure connection only, as the image block's. */
+const SECURE_IMAGE_START = /^https:\/\//i;
 
 /**
  * The body holds text, as a paragraph does; another field may be empty, as the editor exports it while the author
  * has not filled it, or left out, which reads as empty.
  */
-function textSchema(field: Exclude<EmailBlockField, LanesField | ItemsField>): z.ZodType<string> {
+function textSchema(field: Exclude<EmailBlockField, LanesField | ItemsField>, secure = false): z.ZodType<string> {
   if (field.kind === 'richText') {
     // Refused where it is saved rather than drawn as a literal `**`.
     return z
@@ -252,7 +254,7 @@ function textSchema(field: Exclude<EmailBlockField, LanesField | ItemsField>): z
     .refine((value) => !field.required || value.trim() !== '', { message: 'required' });
   // A plain field may hold a stored newline, which draws as a space; an address may not.
   if (field.kind === 'plainText') return (field.required ? text : text.optional()) as z.ZodType<string>;
-  const start = field.kind === 'link' ? LINK_START : IMAGE_START;
+  const start = field.kind === 'link' ? LINK_START : secure ? SECURE_IMAGE_START : IMAGE_START;
   const address = text.refine(
     (value) =>
       value === '' || (!/[\r\n]/.test(value) && (start.test(value.trim()) || leadingToken(value) !== undefined)),
@@ -262,9 +264,9 @@ function textSchema(field: Exclude<EmailBlockField, LanesField | ItemsField>): z
 }
 
 /** Each item an object of exactly its fields, between the field's bounds. */
-function itemsSchema(field: ItemsField): z.ZodType<readonly Record<string, string>[]> {
+function itemsSchema(field: ItemsField, secure = false): z.ZodType<readonly Record<string, string>[]> {
   const item = z.object(
-    Object.fromEntries(Object.entries(field.fields).map(([name, part]) => [name, textSchema(part)])),
+    Object.fromEntries(Object.entries(field.fields).map(([name, part]) => [name, textSchema(part, secure)])),
   );
   const list = z.array(item.strict()).min(field.min).max(field.max);
   // Left out, the field reads as no items, which a field of no minimum takes.
@@ -380,18 +382,26 @@ export function emailBlockOf<const Type extends string, const F extends FieldMap
 /** Fields of a built-in block that are drawn together or not at all, such as a button's label and link. */
 export type FieldPairs = readonly (readonly [string, string])[];
 
+/** What a library block's write check refuses beyond a product block's. */
+export interface LibraryRules {
+  /** Fields filled together or both left empty. */
+  readonly pairs?: FieldPairs;
+  /** Whether an image field's literal address must be `https:`, as the image block's is. */
+  readonly secureImages?: boolean;
+}
+
 /**
  * The email side of a block as `emailBlockOf` builds it, without refusing a default type: the renderer's own
- * library blocks are built with it. `pairs` names fields that are filled together or left empty together, which
- * the write check refuses one of.
+ * library blocks are built with it, under `rules`: fields filled together, and images over a secure connection.
  *
  * @throws {BlockDefinitionInvalid} for a shape `assertBlockShape` refuses
  */
 export function builtInEmailBlockOf<const Type extends string, const F extends FieldMap, const A extends AttributeMap>(
   options: EmailBlockOptions<Type, F, A>,
   node: string,
-  pairs: FieldPairs = [],
+  rules: LibraryRules = {},
 ): EmailBlockDefinition<Type, F, A> {
+  const { pairs = [], secureImages = false } = rules;
   const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
   assertBlockShape(shape);
   const fields = Object.entries(options.fields);
@@ -411,8 +421,8 @@ export function builtInEmailBlockOf<const Type extends string, const F extends F
   const filled = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
   const content = z
     .object({
-      ...Object.fromEntries(textFields.map(([name, field]) => [name, textSchema(field)])),
-      ...Object.fromEntries(itemsFields.map(([name, field]) => [name, itemsSchema(field)])),
+      ...Object.fromEntries(textFields.map(([name, field]) => [name, textSchema(field, secureImages)])),
+      ...Object.fromEntries(itemsFields.map(([name, field]) => [name, itemsSchema(field, secureImages)])),
     })
     .strict()
     .refine(

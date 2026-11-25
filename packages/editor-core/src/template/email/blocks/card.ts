@@ -20,4 +20,4 @@ export const CARD_OPTIONS = {
 } satisfies Parameters<typeof builtInEmailBlockOf<'card', typeof FEATURE_FIELDS, Record<never, never>>>[0];
 
 /** A framed feature: an image across its top, then a heading, text and a button. */
-export const card = builtInEmailBlockOf(CARD_OPTIONS, 'card', BUTTON_PAIR);
+export const card = builtInEmailBlockOf(CARD_OPTIONS, 'card', { pairs: BUTTON_PAIR, secureImages: true });

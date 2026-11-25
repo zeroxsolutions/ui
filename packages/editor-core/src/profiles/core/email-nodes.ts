@@ -43,6 +43,11 @@ export const EMAIL_GLOBAL_ATTRIBUTES: Record<string, string[]> = {
   blockquote: ['align', 'spaceAfter', 'source'],
   image: ['align', 'spaceAfter', 'stored'],
   table: ['spaceAfter', 'stored'],
+  spacer: ['stored'],
+  socialLinks: ['stored'],
+  hero: ['stored'],
+  card: ['stored'],
+  legalFooter: ['stored'],
 };
 
 const ALIGNS = ['left', 'center', 'right'] as const;

@@ -222,6 +222,24 @@ const STORED_DEFAULTS: Readonly<
   table: { attributes: { header: false }, content: {} },
 };
 
+/**
+ * A library block's defaults: each attribute's default, and an empty text field, which the codec writes for a
+ * field a stored block leaves out.
+ */
+function libraryDefaultsOf(type: string): (typeof STORED_DEFAULTS)[string] | undefined {
+  if (!Object.hasOwn(libraryBlocks, type)) return undefined;
+  const { editor } = libraryBlocks[type as LibraryBlockType];
+  return {
+    attributes: Object.fromEntries(editor.attributes.map((attribute) => [attribute.name, attribute.default])),
+    content: Object.fromEntries(
+      [...(editor.body === null ? [] : [editor.body.name]), ...editor.fields.map(({ name }) => name)].map((name) => [
+        name,
+        '',
+      ]),
+    ),
+  };
+}
+
 /** `values` without the entries that hold their default, keys in order, as text to compare. */
 function withoutDefaults(values: unknown, defaults: Record<string, unknown>): string {
   const entries = Object.entries(typeof values === 'object' && values !== null ? values : {})
@@ -236,7 +254,7 @@ function withoutDefaults(values: unknown, defaults: Record<string, unknown>): st
  */
 function asStored(node: NodeJSON, exported: EditorEmailBlock): EditorEmailBlock {
   const stored = node.attrs?.stored as { attributes?: unknown; content?: unknown } | null | undefined;
-  const defaults = STORED_DEFAULTS[exported.type];
+  const defaults = STORED_DEFAULTS[exported.type] ?? libraryDefaultsOf(exported.type);
   if (!stored || !defaults) return exported;
   const same =
     withoutDefaults(stored.attributes, defaults.attributes) ===
@@ -377,7 +395,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       };
     default: {
       const library = libraryCodecOf(node.type);
-      if (library?.toEmailBlock) return library.toEmailBlock(node) as EditorEmailBlock;
+      if (library?.toEmailBlock) return asStored(node, library.toEmailBlock(node) as EditorEmailBlock);
       if (!custom?.toEmailBlock) return { ...base, type: node.type, attributes, content: {} };
       const exported = custom.toEmailBlock(node);
       // A codec's node that holds lanes, as a product's lanes block does, exports them as a columns block does.
@@ -478,7 +496,7 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
     }
     default: {
       const library = libraryCodecOf(block.type)?.fromEmailBlock?.(block);
-      if (library) return library;
+      if (library) return { ...library, attrs: { ...library.attrs, stored: storedOf(block) } };
       for (const codec of codecs) {
         const node = codec.fromEmailBlock?.(block);
         const lanes = node?.content ?? [];
