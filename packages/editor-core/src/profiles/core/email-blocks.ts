@@ -240,12 +240,23 @@ function libraryDefaultsOf(type: string): (typeof STORED_DEFAULTS)[string] | und
   };
 }
 
-/** `values` without the entries that hold their default, keys in order, as text to compare. */
+/** `value` with every object's keys in order at any depth, so two that differ only in key order are equal. */
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (typeof value !== 'object' || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([a], [b]) => (a < b ? -1 : 1))
+      .map(([name, entry]) => [name, canonical(entry)]),
+  );
+}
+
+/** `values` without the entries that hold their default, keys in order at any depth, as text to compare. */
 function withoutDefaults(values: unknown, defaults: Record<string, unknown>): string {
-  const entries = Object.entries(typeof values === 'object' && values !== null ? values : {})
-    .filter(([name, value]) => value !== undefined && defaults[name] !== value)
-    .sort(([a], [b]) => (a < b ? -1 : 1));
-  return JSON.stringify(entries);
+  const entries = Object.entries(typeof values === 'object' && values !== null ? values : {}).filter(
+    ([name, value]) => value !== undefined && defaults[name] !== value,
+  );
+  return JSON.stringify(canonical(Object.fromEntries(entries)));
 }
 
 /**

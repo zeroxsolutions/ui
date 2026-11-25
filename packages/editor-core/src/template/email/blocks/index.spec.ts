@@ -503,6 +503,15 @@ describe.each([
   });
 });
 
+describe('a hero or a card in a lane', () => {
+  it.each(['hero', 'card'] as const)('draws no %s there, drawn at the card width, and reports it', (type) => {
+    const lane = [{ id: 'w', type, attributes: {}, content: feature }];
+    const { html, problems } = render('columns', { ratio: [1, 1] }, {}, {}, {}, [lane, []]);
+    expect(html).not.toContain('<img');
+    expect(problems).toContainEqual(expect.objectContaining({ blockId: 'w', kind: 'block-nested-too-deep' }));
+  });
+});
+
 describe('a card', () => {
   it('frames its content in a bordered box', () => {
     const { html } = render('card', {}, feature);

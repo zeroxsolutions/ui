@@ -20,8 +20,6 @@ import type {
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
-/** The blocks drawn at the card's whole width, which a lane holds none of. */
-const WIDE_BLOCKS: ReadonlySet<string> = new Set(['hero', 'card']);
 
 interface Walk {
   readonly profile: EditorProfile;
@@ -375,7 +373,8 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
 
   // A lane holds no block of lanes: the renderer draws a columns block, or a product's lanes block, at the top only.
   // A hero's and a card's image is drawn at the card's width, which Outlook would push a lane past.
-  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined || WIDE_BLOCKS.has(block.type))) {
+  const wide = Object.hasOwn(defaultBlocks, block.type) && defaultBlocks[block.type as DefaultBlockType].wide === true;
+  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined || wide)) {
     walk.problems.push({ kind: 'block-nested-too-deep', block: id });
     return;
   }

@@ -29,7 +29,12 @@ import {
   type ToolbarItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
-import { libraryBlocks, type LibraryBlockType } from '@zeroxsolutions/editor-core/template/email/index';
+import {
+  defaultBlocks,
+  libraryBlocks,
+  type DefaultBlockType,
+  type LibraryBlockType,
+} from '@zeroxsolutions/editor-core/template/email/index';
 import {
   EMAIL_GLOBAL_ATTRIBUTES,
   EMAIL_KINDS,
@@ -556,6 +561,40 @@ function cellLines(): Plugin {
   });
 }
 
+/** How many blocks drawn at the card's whole width sit in `doc`'s lanes. */
+function wideInLanes(doc: ProseMirrorNode): number {
+  let count = 0;
+  doc.descendants((node) => {
+    if (node.type.name !== 'column') return true;
+    node.forEach((child) => {
+      if (defaultBlocks[child.type.name as DefaultBlockType]?.wide === true) count += 1;
+    });
+    return false;
+  });
+  return count;
+}
+
+/**
+ * Refuses a change that puts a hero or a card in a lane, by an insert, a paste or a drop: each is drawn at the
+ * card's width, which Outlook would push the lane past. A host's load and an undo pass, and a stored one shows
+ * its problem.
+ */
+function laneWidths(): Plugin {
+  const counted = new WeakMap<ProseMirrorNode, number>();
+  const countOf = (doc: ProseMirrorNode) => {
+    let count = counted.get(doc);
+    if (count === undefined) counted.set(doc, (count = wideInLanes(doc)));
+    return count;
+  };
+  return new Plugin({
+    key: new PluginKey('emailLaneWidths'),
+    filterTransaction(tr, state: EngineState) {
+      if (!tr.docChanged || tr.getMeta(CONTENT_LOAD_META) || isHistoryTransaction(tr)) return true;
+      return countOf(tr.doc) <= countOf(state.doc);
+    },
+  });
+}
+
 /**
  * The engine half: the email attributes on the document's nodes, the blocks and marks an author may add, the
  * input and paste rules of only what the email stores, and the context the commands read.
@@ -575,7 +614,12 @@ function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: r
       contexts.delete(this.editor);
     },
     addGlobalAttributes: () => emailGlobalAttributes(),
-    addProseMirrorPlugins: () => [admittedBlocks(context.admitted, carried), cellLines(), heldMarks(EMAIL_MARKS)],
+    addProseMirrorPlugins: () => [
+      admittedBlocks(context.admitted, carried),
+      cellLines(),
+      laneWidths(),
+      heldMarks(EMAIL_MARKS),
+    ],
   });
 }
 

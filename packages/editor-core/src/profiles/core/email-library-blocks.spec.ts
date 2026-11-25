@@ -144,6 +144,10 @@ describe('a library block opened and saved unedited', () => {
       block('card', { text: 't', heading: 'h', alt: 'a', image: feature.image, buttonHref: '', buttonLabel: '' }),
     ],
     [
+      'social links whose items keep their keys in another order',
+      block('socialLinks', { links: [{ href: 'https://x.test', icon: 'https://x.test/i.png', label: 'Blog' }] }),
+    ],
+    [
       'a footer with no reason',
       block('legalFooter', { sender: 'You joined.', address: '1 Road', unsubscribe: '{{u}}' }),
     ],

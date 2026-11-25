@@ -388,6 +388,8 @@ export interface LibraryRules {
   readonly pairs?: FieldPairs;
   /** Whether an image field's literal address must be `https:`, as the image block's is. */
   readonly secureImages?: boolean;
+  /** Whether the block is drawn at the card's whole width, so a lane takes none. */
+  readonly wide?: boolean;
 }
 
 /**
@@ -401,7 +403,7 @@ export function builtInEmailBlockOf<const Type extends string, const F extends F
   node: string,
   rules: LibraryRules = {},
 ): EmailBlockDefinition<Type, F, A> {
-  const { pairs = [], secureImages = false } = rules;
+  const { pairs = [], secureImages = false, wide = false } = rules;
   const shape = options as unknown as BlockShape<string, FieldMap, AttributeMap>;
   assertBlockShape(shape);
   const fields = Object.entries(options.fields);
@@ -465,6 +467,7 @@ export function builtInEmailBlockOf<const Type extends string, const F extends F
       textFields.some(([, field]) => field.kind === 'richText' || field.kind === 'plainText') ||
       itemsFields.some(([, field]) => Object.values(field.fields).some((part) => part.kind === 'plainText')),
     holdsLanes: lanesName !== undefined,
+    ...(wide ? { wide: true } : {}),
     ...(lanesEntry === undefined ? {} : { laneBounds: { min: lanesEntry[1].min, max: lanesEntry[1].max } }),
     async translate(source, translateOne) {
       const stored = source as Record<string, unknown>;

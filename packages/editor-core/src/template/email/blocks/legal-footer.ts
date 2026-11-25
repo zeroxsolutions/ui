@@ -54,5 +54,4 @@ export const legalFooter = builtInEmailBlockOf(
     },
   },
   'legalFooter',
-  { secureImages: true },
 );

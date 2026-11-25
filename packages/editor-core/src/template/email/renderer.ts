@@ -186,7 +186,7 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
           problems.push({ blockId: block.id, kind: 'unknown-block-type', name: block.type, ...where });
           return [];
         }
-        if (inLane && definition.holdsLanes) {
+        if (inLane && (definition.holdsLanes || definition.wide === true)) {
           problems.push({ blockId: block.id, kind: 'block-nested-too-deep', ...where });
           return [];
         }

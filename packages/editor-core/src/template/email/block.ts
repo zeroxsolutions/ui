@@ -112,6 +112,11 @@ export interface BlockDefinition<Type extends string = string, Attributes = unkn
   /** Whether the block holds lanes of other blocks, one level deep. */
   readonly holdsLanes: boolean;
   /**
+   * Whether the block is drawn at the card's whole width, which Outlook would push a lane past: the renderer
+   * reports `block-nested-too-deep` for one in a lane and draws nothing of it.
+   */
+  readonly wide?: boolean;
+  /**
    * How many lanes a lanes block takes. The renderer reports `lanes-count` for a stored block outside it and
    * draws no lane past `max`; without it, every stored lane is drawn.
    */

@@ -257,6 +257,10 @@ describe('the email kit', () => {
       expect(editor.can(`insertEmailBlock:${kind}`)).toBe(false);
     }
     expect(editor.can('insertEmailBlock', { kind: 'spacer' })).toBe(true);
+
+    editor.run('insertContent', { content: { type: 'hero' } });
+    const lanes = editor.getJSON().content?.[0].content ?? [];
+    expect(lanes.flatMap((lane) => (lane.content ?? []).map((child) => child.type))).not.toContain('hero');
   });
 
   it("refuses a host's own feature holding a library block's node", () => {

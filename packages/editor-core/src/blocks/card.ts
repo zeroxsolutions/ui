@@ -27,5 +27,5 @@ export const card = defineLibraryBlock(
         }</figcaption></figure>`,
     },
   },
-  { pairs: BUTTON_PAIR, secureImages: true },
+  { pairs: BUTTON_PAIR, secureImages: true, wide: true },
 );
