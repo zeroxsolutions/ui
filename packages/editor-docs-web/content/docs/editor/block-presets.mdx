@@ -147,7 +147,8 @@ in a lane, that the profile has no codec for.
 
 `presetsFeature(presets)` adds the presets to the Document Editor: an `insertPreset` command, a Presets group
 in the slash menu and the "+" beside a block, and a drop target for a preset dragged from the panel. `EditorPresetsPanel` lists them beside
-the document. Give it the editor `onReady` hands you and the same list.
+the document. Give it the editor `onReady` hands you and the same list. Each preset's id is unique in the list:
+`presetsFeature` throws an `EditorError` with the code `editor.presets.duplicate_id` for two presets with one id.
 
 ```tsx
 import { useState } from 'react';
@@ -191,7 +192,9 @@ function insertTip(editor: IEditor) {
 ### Email editor
 
 The email editor takes the list in its `presets` prop and builds the feature itself, with the email's rules
-below. Its slash menu and "+" list the presets under Presets, which `messages.presetsGroup` words.
+below. Its slash menu and "+" list the presets under Presets, which `messages.presetsGroup` words. Here `profile`
+and `signOff` are the ones from [From saved email blocks](#from-saved-email-blocks): the profile names
+`testimonial`, and the editor takes the block itself in `blocks`, so the sign-off is offered.
 
 <ComponentPreview name="block-presets-email" />
 
@@ -199,14 +202,13 @@ below. Its slash menu and "+" list the presets under Presets, which `messages.pr
 import { useState } from 'react';
 
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { emailProfile, type EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
+import type { EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
 
 import { emailPresets, EditorPresetsPanel } from '@/components/editor/document/features/presets';
 import { EmailEditor } from '@/components/editor/profiles/email/email-editor';
 ```
 
 ```tsx
-const profile = emailProfile();
 const presets = [...emailPresets(profile), signOff];
 
 function Newsletter({ blocks, save }: { blocks: EditorEmailBlock[]; save: (blocks: EditorEmailBlock[]) => void }) {
@@ -216,6 +218,7 @@ function Newsletter({ blocks, save }: { blocks: EditorEmailBlock[]; save: (block
       <EmailEditor
         label="Email body"
         profile={profile}
+        blocks={[testimonial]}
         presets={presets}
         value={blocks}
         onChange={save}
@@ -231,10 +234,14 @@ function Newsletter({ blocks, save }: { blocks: EditorEmailBlock[]; save: (block
 
 ## The panel
 
-Each row of `EditorPresetsPanel` shows a preset's icon, label and description. A click inserts the preset after
-the caret's block, and a drag carries it to the spot it drops on. The panel lists only the presets the editor can
-insert where the caret is, and reads them again as the caret moves. With more than six, a search field filters
-them by label and keyword. On a narrow screen the demos stack the panel under the editor; your product can put
+Each row of `EditorPresetsPanel` is a button showing a preset's icon, label and description. A click, or Enter or
+Space on the focused row, inserts the preset after the caret's block, and a drag carries it to the spot it drops
+on. The panel lists every preset the editor can hold somewhere. A preset that does not fit where the caret is,
+such as a card while the caret is in an email column, stays in the list and can still be dragged, but its row is
+marked `aria-disabled` and a click inserts nothing; a screen reader reads `messages.notAtCaret` as the reason.
+The panel reads the presets again as the caret moves, as the document changes, as it is drawn again, and as the
+pointer or the focus comes into it, so a change to read-only or to locked structure takes the presets away. With
+more than six, a search field filters them by label and keyword. On a narrow screen the demos stack the panel under the editor; your product can put
 it in a sheet instead.
 
 ## Where each preset is offered
@@ -250,8 +257,11 @@ ask the same `insertPreset` check, so the three always agree.
 | In a column, the preset holds no columns block, hero or card                      | -               | yes          |
 | `structure: 'locked'` offers no preset                                            | -               | yes          |
 
-A drop follows the same rules. It snaps to the nearest block boundary at the level under the pointer, and a spot
-that refuses the preset draws no drop indicator and inserts nothing.
+A drop follows the same rules, at the level a click inserts at: it lands before or after the block under the
+pointer, whichever side is nearer, at the innermost level that is the document or a column and takes the preset.
+Dropped over a table, a list or a callout, a preset goes beside it, never into a cell or an item; a card dropped
+over an email column goes beside the columns block. A spot where no level takes the preset draws no drop
+indicator and inserts nothing.
 
 `bounds`, such as the most blocks a mail may hold, is checked as for any insert: an insert over a bound shows a
 problem rather than being refused.
@@ -308,9 +318,9 @@ const presets = documentPresets({
 
 ### EditorPresetsPanel
 
-| Prop        | Type                       | Default | Description                                                                 |
-| ----------- | -------------------------- | ------- | --------------------------------------------------------------------------- |
-| `editor`    | `IEditor`                  | -       | The editor `onReady` handed you.                                            |
-| `presets`   | `readonly BlockPreset[]`   | -       | The list the editor was built with.                                         |
-| `messages`  | `Partial<PresetsMessages>` | -       | Your words for `title`, `search` and `empty`. A key left out stays English. |
-| `className` | `string`                   | -       | Classes for the panel.                                                      |
+| Prop        | Type                       | Default | Description                                                                               |
+| ----------- | -------------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| `editor`    | `IEditor`                  | -       | The editor `onReady` handed you.                                                          |
+| `presets`   | `readonly BlockPreset[]`   | -       | The list the editor was built with.                                                       |
+| `messages`  | `Partial<PresetsMessages>` | -       | Your words for `title`, `search`, `empty` and `notAtCaret`. A key left out stays English. |
+| `className` | `string`                   | -       | Classes for the panel.                                                                    |
