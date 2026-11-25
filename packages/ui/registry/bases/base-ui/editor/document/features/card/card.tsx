@@ -87,6 +87,18 @@ export interface CardViewProps {
   readonly align?: 'left' | 'center';
   /** The button's look; outline as the Viewer draws it, default as an email draws it. */
   readonly buttonVariant?: 'outline' | 'default';
+  /** The title's element outside the editor; h4 by default, the email's level where it draws one. */
+  readonly headingAs?: 'h1' | 'h2' | 'h4';
+  /**
+   * What an image address that is not a web address draws in place of the image, such as the name of the
+   * variable the email fills it from; nothing, so the card offers an image, when absent.
+   */
+  readonly imageStandIn?: (address: string) => ReactNode;
+  /**
+   * Whether a button with `address` is drawn, linked where the address is a web or mail one and plain otherwise;
+   * a web or mail address alone when absent.
+   */
+  readonly drawsButton?: (address: string) => boolean;
 }
 
 export const DEFAULT_CARD_WORDS: CardWords = {
@@ -98,7 +110,7 @@ export const DEFAULT_CARD_WORDS: CardWords = {
   buttonHref: 'Button link',
   apply: 'Apply',
   linkProblem: 'Use an address that starts with https://, http:// or mailto:',
-  imageProblem: 'Use an image address that starts with https://',
+  imageProblem: 'Use an image address that starts with https:// or http://',
 };
 
 function CardTextField({ label, value, placeholder, className, onValueChange }: CardTextProps): ReactNode {
@@ -167,18 +179,23 @@ export function CardView({
   variant = 'card',
   align = 'left',
   buttonVariant = 'outline',
+  headingAs: Heading = 'h4',
+  imageStandIn,
+  drawsButton = (address) => linkAddress(address) !== undefined,
 }: CardViewProps): ReactNode {
   const { Text, Address } = parts;
   const image = sourceAddress(fields.image);
   const href = linkAddress(fields.buttonHref);
+  const unsent = fields.buttonLabel === '' || fields.buttonHref.trim() === '' || !drawsButton(fields.buttonHref);
   const hero = variant === 'hero';
+  const standIn = image === undefined && fields.image.trim() !== '' ? imageStandIn?.(fields.image) : undefined;
   const imageElement = image !== undefined && (
     <img
       data-slot="card-image"
       src={image}
       alt={editable ? '' : fields.alt}
       contentEditable={false}
-      className={cn('w-full object-cover', hero ? 'max-h-80' : 'aspect-video')}
+      className={cn('w-full', !hero && 'aspect-video object-cover')}
     />
   );
   return (
@@ -222,14 +239,20 @@ export function CardView({
                   )}
                 >
                   <ImageIcon size={16} aria-hidden />
-                  {words.imagePlaceholder}
+                  {standIn ?? words.imagePlaceholder}
                 </button>
               )
             }
           />
         </div>
       ) : (
-        imageElement
+        (imageElement || standIn) &&
+        (imageElement || (
+          <div className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm">
+            <ImageIcon size={16} aria-hidden />
+            {standIn}
+          </div>
+        ))
       )}
       <div className={cn('flex w-full flex-col gap-2', hero ? 'pt-4' : 'p-4', align === 'center' && 'items-center')}>
         {editable ? (
@@ -247,9 +270,9 @@ export function CardView({
           </div>
         ) : (
           fields.heading !== '' && (
-            <h4 data-slot="card-title" className={hero ? 'text-2xl font-bold' : 'text-base font-semibold'}>
+            <Heading data-slot="card-title" className={hero ? 'text-2xl font-bold' : 'text-base font-semibold'}>
               {fields.heading}
-            </h4>
+            </Heading>
           )
         )}
         {body !== null && (
@@ -260,11 +283,11 @@ export function CardView({
         {editable ? (
           <div contentEditable={false} data-slot="card-button" className="flex items-center gap-1">
             <span
-              data-state={fields.buttonLabel === '' ? 'empty' : 'set'}
-              // A button with no label is not sent; it is drawn as an outline to fill in.
+              data-state={unsent ? 'empty' : 'set'}
+              // A button with no label or no link is not drawn outside the editor; it is an outline to fill in.
               className={cn(
-                buttonVariants({ variant: fields.buttonLabel === '' ? 'outline' : buttonVariant, size: 'sm' }),
-                fields.buttonLabel === '' && 'text-muted-foreground border-dashed',
+                buttonVariants({ variant: unsent ? 'outline' : buttonVariant, size: 'sm' }),
+                unsent && 'text-muted-foreground border-dashed',
               )}
             >
               <Text
@@ -296,8 +319,7 @@ export function CardView({
             />
           </div>
         ) : (
-          fields.buttonLabel !== '' &&
-          href !== undefined && (
+          !unsent && (
             <a
               data-slot="card-button"
               href={href}

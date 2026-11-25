@@ -110,16 +110,18 @@ export interface ProfileEditorMessages {
   buttonLabel: string;
   /** The faint hint in a block's button that has no label, such as a hero's. */
   buttonPlaceholder: string;
+  /** Adds an item to a block's items field; the editor names its control with `addItemTo` now. */
+  addItem: string;
   /** Names the control that adds an item to a block's items field, such as one more social link. */
-  addItem(field: string): string;
+  addItemTo(field: string): string;
   /** Names the control in an item's popover that removes the item. */
   removeItem: string;
   /** What an image-less block, or item, shows where its image goes. */
   imagePlaceholder: string;
   /** The hint an image's address field shows while it is empty. */
   imageAddressPlaceholder: string;
-  /** What an image address the email cannot load is told. */
-  imageInvalid: string;
+  /** What an image address the email cannot load is told; `secure` where the block loads `https:` images only. */
+  imageInvalid(secure: boolean): string;
   /** Names the control that opens a block's settings, such as a number it takes. */
   blockSettings: string;
   /** A spacer's size, shown as the pointer rests on it: the size's name and its height in px. */
@@ -263,11 +265,15 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   kindNotAllowed: 'This kind of block is not allowed here',
   buttonLabel: 'Button label',
   buttonPlaceholder: 'Add a button',
-  addItem: (field) => `Add to ${field}`,
+  addItem: 'Add',
+  addItemTo: (field) => `Add to ${field}`,
   removeItem: 'Remove',
   imagePlaceholder: 'Add an image',
   imageAddressPlaceholder: 'Paste an image link or pick a variable',
-  imageInvalid: 'The image must load from https:// or a link variable',
+  imageInvalid: (secure) =>
+    secure
+      ? 'The image must load from https:// or a link variable'
+      : 'The image must load from https://, http:// or a link variable',
   blockSettings: 'Block settings',
   spacerSize: (size, px) => `${size}, ${px}px`,
   itemRow: (field, position) => `${field} ${position}`,

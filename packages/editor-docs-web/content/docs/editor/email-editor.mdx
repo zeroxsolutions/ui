@@ -509,8 +509,12 @@ renderer will: an empty body, a field over its `max`, and a link or image addres
 `blocks` offers the block in the slash menu and exports it, and throws `EditorError` for a block the profile does
 not hold through its `blocks`. A lanes block holding fewer or more lanes than it takes is a `lanes-count`, and the renderer draws
 no lane past its `max`. The rich text
-field is edited in place, the other fields in a text field under it, a `choice` in a submenu of the block menu,
-a `toggle` as a checkbox there, and a `number` in a field under the block. `customBlocks` in `messages` words a
+field and each plain field are edited in place, with no caption. A link opens from a link icon on the block, and an
+image from the image itself, in a popover that offers the `url` variables and refuses an address the renderer would
+refuse. An items field is a row of its items, each opening its fields in a popover, with a plus that adds one. A
+`choice` is a submenu of the block menu, a `toggle` a checkbox there, and a `number` a field in the block's settings
+popover. Locked structure refuses a change to any of these fields, so the editor draws them read-only there; the
+body still edits. `customBlocks` in `messages` words a
 block's title and its fields, attributes and values by their names; the definition's labels stand in.
 
 | Field                  | Holds                                                             |

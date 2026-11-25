@@ -52,7 +52,7 @@ export interface BlockAddressPopoverProps {
   field?(props: BlockAddressPopoverFieldProps): ReactNode;
   /** Ready-made addresses under the field, each applied with `apply`. */
   choices?(apply: (address: string) => void): ReactNode;
-  /** More fields above the address, such as an image's alt text. */
+  /** More fields under the address, such as an image's alt text. */
   children?: ReactNode;
   /** Where a press outside the popover keeps it open, as a menu the field opens in a layer of its own. */
   keepOpenWithin?: string;
@@ -119,7 +119,6 @@ export function BlockAddressPopover({
         <PopoverHeader>
           <PopoverTitle id={titleId}>{label}</PopoverTitle>
         </PopoverHeader>
-        {children}
         <Field data-invalid={shown.length > 0 || undefined} data-disabled={disabled || undefined}>
           {field ? (
             field({
@@ -158,6 +157,7 @@ export function BlockAddressPopover({
           {shown.length > 0 && <FieldError id={problemId} errors={shown.map((message) => ({ message }))} />}
         </Field>
         {!disabled && choices?.(apply)}
+        {children}
         <div className="flex items-center justify-end gap-2">
           {onRemove && removeLabel && (
             <Tooltip>

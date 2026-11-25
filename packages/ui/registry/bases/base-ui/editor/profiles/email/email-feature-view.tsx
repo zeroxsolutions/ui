@@ -13,13 +13,13 @@ import {
 } from '../../document/features/card/card';
 import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 import { VariableTextField } from '../variables/variable-text-field';
-import { EmailAddressPopover } from './email-address-popover';
+import { EmailAddressPopover, emailImageVariable } from './email-address-popover';
 import { emailBlockText, type EmailBlockViewProps } from './email-block-feature';
 import { EmailInlineField } from './email-inline-field';
 import { contextOf } from './kit-context';
 
 /** The card's controls in an email editor: fields that hold variables, and the email's address popover. */
-function emailCardParts(editor: IEditor | null, readOnly: boolean, refusal: string | null): CardParts {
+function emailCardParts(editor: IEditor | null, readOnly: boolean): CardParts {
   return {
     Text: function EmailCardText({ label, value, placeholder, className, onValueChange }: CardTextProps) {
       return (
@@ -48,8 +48,7 @@ function emailCardParts(editor: IEditor | null, readOnly: boolean, refusal: stri
           trigger={trigger}
           tooltip={tooltip}
           onApply={onApply}
-          onRemove={kind === 'link' && value !== '' && refusal === null ? () => onApply('') : undefined}
-          disabledReason={refusal}
+          onRemove={kind === 'link' && value !== '' ? () => onApply('') : undefined}
         >
           {alt && (
             <Field>
@@ -82,14 +81,13 @@ export function EmailFeatureView({
   values,
   body,
   editable,
-  refusal,
   editor,
   words,
   messages,
   update,
 }: EmailBlockViewProps & { variant: 'hero' | 'card' }): ReactNode {
   const label = (name: string) => words.field(name, block.fields.find((field) => field.name === name)?.label ?? name);
-  const parts = useMemo(() => emailCardParts(editor, !editable, refusal), [editor, editable, refusal]);
+  const parts = useMemo(() => emailCardParts(editor, !editable), [editor, editable]);
   const fields: CardFields = {
     image: emailBlockText(values, 'image'),
     alt: emailBlockText(values, 'alt'),
@@ -107,6 +105,10 @@ export function EmailFeatureView({
       variant={variant}
       align={values.align === 'center' ? 'center' : 'left'}
       buttonVariant="default"
+      headingAs={variant === 'hero' ? 'h1' : 'h2'}
+      imageStandIn={(address) => emailImageVariable(editor, address)}
+      // The popover writes only an address the email can send, and the email draws the button whenever both are set.
+      drawsButton={() => true}
       words={{
         ...DEFAULT_CARD_WORDS,
         image: label('image'),

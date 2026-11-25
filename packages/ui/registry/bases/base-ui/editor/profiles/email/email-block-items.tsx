@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
 import { PlusIcon } from '@/registry/bases/base-ui/icons/lucide/plus-icon';
 import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
@@ -143,6 +143,11 @@ export function EmailBlockItems({
   const add = useRef<HTMLButtonElement>(null);
   // Whether the open item was removed, so the focus goes to the plus rather than to a trigger that is gone.
   const removed = useRef(false);
+  // Once the removed item's popover and its trigger are gone, the focus goes to the plus, which stays.
+  // The popover that held it either unmounts with its trigger or closes onto it, so both move the focus there.
+  useEffect(() => {
+    if (removed.current) add.current?.focus();
+  }, [entries.length]);
   const messages = (editor && contextOf(editor)?.context.messages()) ?? DEFAULT_PROFILE_MESSAGES;
   const image = items.fields.find((field) => field.kind === 'imageUrl');
   const text = items.fields.find((field) => field.kind === 'plainText');
@@ -184,7 +189,7 @@ export function EmailBlockItems({
       data-slot="email-block-items"
       data-name={items.name}
       className={cn(
-        'flex flex-wrap items-center gap-2',
+        'not-prose flex flex-wrap items-center gap-2',
         align === 'center' && 'justify-center',
         align === 'right' && 'justify-end',
       )}
@@ -209,6 +214,7 @@ export function EmailBlockItems({
               ) {
                 return;
               }
+              if (next) removed.current = false;
               setOpenAt(next ? index : null);
             }}
           >
@@ -236,11 +242,7 @@ export function EmailBlockItems({
               className="w-80 gap-3"
               data-slot="email-block-item-popover"
               aria-label={messages.itemRow(label, index + 1)}
-              finalFocus={() => {
-                if (!removed.current) return true;
-                removed.current = false;
-                return add.current ?? true;
-              }}
+              finalFocus={() => (removed.current ? (add.current ?? false) : true)}
             >
               <PopoverHeader>
                 <PopoverTitle>{messages.itemRow(label, index + 1)}</PopoverTitle>
@@ -297,10 +299,11 @@ export function EmailBlockItems({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                aria-label={messages.addItem(label)}
+                aria-label={messages.addItemTo(label)}
                 disabled={!restructure || entries.length >= items.max}
                 className="text-muted-foreground"
                 onClick={() => {
+                  removed.current = false;
                   onValueChange([...entries, empty()]);
                   setOpenAt(entries.length);
                 }}
@@ -309,7 +312,7 @@ export function EmailBlockItems({
           >
             <PlusIcon size={16} aria-hidden />
           </TooltipTrigger>
-          <TooltipContent>{messages.addItem(label)}</TooltipContent>
+          <TooltipContent>{messages.addItemTo(label)}</TooltipContent>
         </Tooltip>
       )}
     </div>

@@ -32,7 +32,7 @@ import type {
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
-import { EmailAddressPopover } from './email-address-popover';
+import { EmailAddressPopover, emailImageVariable } from './email-address-popover';
 import { EmailBlockItems, emailBlockItemsOf } from './email-block-items';
 import { EmailInlineField } from './email-inline-field';
 import { blockAt, cellAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
@@ -158,11 +158,10 @@ export interface EmailBlockViewProps {
   readonly values: Readonly<Record<string, unknown>>;
   /** The body: the editable inline content in the editor, its text outside it; null for a block with none. */
   readonly body: ReactNode;
+  /** Whether the block's fields change: false in a read-only editor, in locked structure and outside an editor. */
   readonly editable: boolean;
-  /** False in locked structure and on a required block: no item is added or removed, no setting changes. */
+  /** False on a required block, and wherever `editable` is: no item is added or removed, no setting changes. */
   readonly restructure: boolean;
-  /** Why an address, an item or a setting cannot change, as in locked structure; null where it can. */
-  readonly refusal: string | null;
   /** The email editor the block is in; null where it is drawn outside one. */
   readonly editor: IEditor | null;
   readonly words: EmailBlockWords;
@@ -190,7 +189,6 @@ function EmailBlockDefaultView({
   body,
   editable,
   restructure,
-  refusal,
   editor,
   words,
   messages,
@@ -205,11 +203,26 @@ function EmailBlockDefaultView({
     <>
       {images.map((field) => {
         const src = emailBlockText(values, field.name).trim();
-        const drawn = DRAWN_IMAGE.test(src) && <img src={src} alt="" className="block max-w-full" />;
-        if (!live) return drawn && <div key={field.name}>{drawn}</div>;
+        const variable = emailImageVariable(editor, src);
+        const drawn =
+          (DRAWN_IMAGE.test(src) && <img src={src} alt="" className="block max-w-full" />) ||
+          (variable !== undefined && (
+            <span className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
+              <ImageIcon size={16} aria-hidden />
+              {variable}
+            </span>
+          ));
+        if (!live)
+          return (
+            drawn && (
+              <div key={field.name} className="not-prose">
+                {drawn}
+              </div>
+            )
+          );
         const label = words.field(field.name, field.label);
         return (
-          <div key={field.name} contentEditable={false}>
+          <div key={field.name} contentEditable={false} className="not-prose">
             <EmailAddressPopover
               editor={editor}
               kind="image"
@@ -218,7 +231,6 @@ function EmailBlockDefaultView({
               tooltip={label}
               onApply={(address) => update({ [field.name]: address })}
               onRemove={field.required ? undefined : () => update({ [field.name]: '' })}
-              disabledReason={refusal}
               trigger={
                 <button
                   type="button"
@@ -296,7 +308,6 @@ function EmailBlockDefaultView({
                 tooltip={label}
                 onApply={(address) => update({ [field.name]: address })}
                 onRemove={field.required || value === '' ? undefined : () => update({ [field.name]: '' })}
-                disabledReason={refusal}
                 trigger={
                   <Button
                     type="button"
@@ -413,16 +424,17 @@ export function emailBlockFeature(
     const messages = context?.messages() ?? DEFAULT_PROFILE_MESSAGES;
     const shown = wordsOf(block, messages);
     const required = typeof values.id === 'string' && (context?.required().includes(values.id) ?? false);
-    const refusal = context?.locked() ? messages.deleteLocked : required ? messages.deleteRequired : null;
+    // Locked structure refuses every change to a block's own fields, which are its node's attributes; its body,
+    // the node's text, still edits.
+    const fields = editable && !(context?.locked() ?? false);
     return (
       <EmailBlock type={block.type} title={shown.title}>
         <View
           block={block}
           values={values}
           body={children as ReactNode}
-          editable={editable}
-          restructure={editable && refusal === null}
-          refusal={refusal}
+          editable={fields}
+          restructure={fields && !required}
           editor={editor}
           words={shown}
           messages={messages}
@@ -452,7 +464,6 @@ export function emailBlockFeature(
             body={block.body === null && block.lanes === null ? null : body}
             editable={false}
             restructure={false}
-            refusal={null}
             editor={null}
             words={words}
             messages={DEFAULT_PROFILE_MESSAGES}

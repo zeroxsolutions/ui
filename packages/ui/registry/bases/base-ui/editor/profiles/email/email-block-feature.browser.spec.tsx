@@ -273,14 +273,12 @@ describe("an items field in the block's view", () => {
       .toBeDisabled();
   });
 
-  it('adds and removes nothing in locked structure, while its text stays editable', async () => {
+  it("draws its items as they are in locked structure, which refuses a change to a block's fields", async () => {
     await mount([links([site, { label: 'Shop', href: '' }])], 'locked');
 
-    await expect.element(page.getByRole('button', { name: 'Add to Links' })).toBeDisabled();
-    await userEvent.click(page.getByRole('button', { name: 'Shop' }));
-    const popover = page.getByRole('dialog', { name: 'Links 2' });
-    await expect.element(popover.getByRole('button', { name: 'Remove' })).toBeDisabled();
-    await expect.element(popover.getByRole('textbox', { name: 'Label' })).not.toHaveAttribute('aria-readonly', 'true');
+    await expect.element(page.getByRole('img', { name: 'Shop' })).toBeVisible();
+    expect(page.getByRole('button', { name: 'Shop' }).query()).toBeNull();
+    expect(page.getByRole('button', { name: 'Add to Links' }).query()).toBeNull();
   });
 });
 

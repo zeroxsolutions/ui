@@ -5,6 +5,7 @@ import { Button } from '@/registry/bases/base-ui/ui/button';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { hrefProblems, leadingToken, type VariableType } from '@zeroxsolutions/editor-core/template/index';
+import { BUTTON_HREF_MAX_LENGTH } from '@zeroxsolutions/editor-core/template/email/index';
 import { BlockAddressPopover } from '../../document/blocks/block-address-popover';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { variableIcon, variableLabel } from '../variables/variable';
@@ -29,11 +30,15 @@ export function emailAddressProblems(
   const typeOf = (name: string): VariableType | undefined =>
     declarations.find((declaration) => declaration.name === name)?.type;
   const problems = hrefProblems(address, typeOf);
-  const undeclared = problems.flatMap((problem) =>
-    problem.kind === 'variable-undeclared'
-      ? [messages.problem({ kind: 'variable-undeclared', block: null, name: problem.name })]
-      : [],
-  );
+  const undeclared = [
+    ...problems.flatMap((problem) =>
+      problem.kind === 'variable-undeclared'
+        ? [messages.problem({ kind: 'variable-undeclared', block: null, name: problem.name })]
+        : [],
+    ),
+    // The write check refuses an address longer than a button's, which is every link's and image's bound.
+    ...(address.length > BUTTON_HREF_MAX_LENGTH ? [messages.problem({ kind: 'text-too-long', block: null })] : []),
+  ];
   if (kind === 'link') {
     return problems.some((problem) => problem.kind === 'href-invalid')
       ? [...undeclared, messages.problem({ kind: 'link-invalid', block: null })]
@@ -43,7 +48,20 @@ export function emailAddressProblems(
   const loads = token === undefined ? (secure ? SECURE_IMAGE : IMAGE).test(address.trim()) : typeOf(token) === 'url';
   return loads || (token !== undefined && typeOf(token) === undefined)
     ? undeclared
-    : [...undeclared, messages.imageInvalid];
+    : [...undeclared, messages.imageInvalid(secure)];
+}
+
+/**
+ * The name of the variable an image address opens with, which the editor draws in place of an image it cannot
+ * load before the email is sent; undefined for any other address.
+ */
+export function emailImageVariable(editor: IEditor | null, address: string): string | undefined {
+  const name = leadingToken(address);
+  if (name === undefined) return undefined;
+  const declaration = (editor && contextOf(editor)?.context.declarations())?.find(
+    (candidate) => candidate.name === name,
+  );
+  return declaration ? variableLabel(declaration) : name;
 }
 
 export interface EmailAddressPopoverProps {
@@ -62,7 +80,7 @@ export interface EmailAddressPopoverProps {
   onRemove?(): void;
   /** Why the address cannot change, or null. */
   disabledReason?: string | null;
-  /** More fields above the address, such as an image's alt text. */
+  /** More fields under the address, such as an image's alt text. */
   children?: ReactNode;
 }
 
@@ -102,7 +120,7 @@ export function EmailAddressPopover({
       onRemove={onRemove}
       removeLabel={messages.removeItem}
       disabledReason={disabledReason}
-      // The `{{` menu opens in a layer of its own; picking from it keeps the popover open.
+      // The toolbar's variable menu inserts into the field from a layer of its own; reaching it keeps the popover open.
       keepOpenWithin="[data-slot=variable-menu], [data-slot=combobox-content]"
       field={(field) => (
         <VariableTextField

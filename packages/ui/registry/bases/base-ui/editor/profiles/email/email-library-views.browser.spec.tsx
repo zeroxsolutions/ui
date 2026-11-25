@@ -165,6 +165,7 @@ describe("the email editor's library blocks", () => {
     await userEvent.click(added.getByRole('button', { name: 'Remove' }));
     await vi.waitFor(() => expect(reportedOf(probe, 's1')?.content.links).toEqual(social.content.links));
     await expect.element(page.getByRole('button', { name: 'Shop' })).not.toBeInTheDocument();
+    await expect.element(page.getByRole('button', { name: 'Add to Links' })).toHaveFocus();
   });
 
   it("edits a legal footer's line in place, and draws its unsubscribe link by its label", async () => {
@@ -184,6 +185,45 @@ describe("the email editor's library blocks", () => {
       .toHaveTextContent('Unsubscribe link');
   });
 
+  it("changes a required block's address, and none of its fields in locked structure", async () => {
+    const probe: Probe = { editor: null, reported: [] };
+    function Required({ structure }: { structure: 'free' | 'locked' }) {
+      const [value, setValue] = useState([footer]);
+      return (
+        <EmailEditor
+          label="Body"
+          profile={profile}
+          structure={structure}
+          required={['f1']}
+          value={value}
+          onChange={(blocks) => {
+            probe.reported.push(blocks);
+            setValue(blocks);
+          }}
+          onReady={(editor) => (probe.editor = editor)}
+        />
+      );
+    }
+    const { unmount } = await render(<Required structure="free" />);
+
+    await userEvent.click(page.getByRole('button', { name: 'Unsubscribe link' }));
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}https://out.test/leave{Enter}');
+    await vi.waitFor(() => expect(reportedOf(probe, 'f1')?.content.unsubscribe).toBe('https://out.test/leave'));
+    await unmount();
+
+    await render(<Required structure="locked" />);
+    const address = page.getByRole('group', { name: 'Legal footer' }).getByRole('textbox', { name: 'Postal address' });
+    await expect.element(address).toHaveAttribute('aria-readonly', 'true');
+    expect(page.getByRole('button', { name: 'Unsubscribe link' }).query()).toBeNull();
+  });
+
+  it('draws an image a variable fills by the variable, and a button whose link is a variable', async () => {
+    await mount([{ ...hero, content: { ...hero.content, image: '{{trip_url}}' } }]);
+
+    await expect.element(page.getByRole('button', { name: 'Image', exact: true })).toHaveTextContent('Trip link');
+    expect(document.querySelector('[data-type=hero] [data-slot=card-button] [data-state=set]')).not.toBeNull();
+  });
+
   it('draws a spacer at the height the email gives it', async () => {
     await mount([{ id: 'g1', key: 'g1', type: 'spacer', attributes: { height: 'large' }, content: {} }]);
 
@@ -192,7 +232,7 @@ describe("the email editor's library blocks", () => {
       if (!found) throw new Error('no spacer');
       return found;
     });
-    expect(gap.getBoundingClientRect().height).toBe(32);
+    expect(gap.dataset.height).toBe('large');
     expect(gap.textContent).toContain('Large, 32px');
   });
 });

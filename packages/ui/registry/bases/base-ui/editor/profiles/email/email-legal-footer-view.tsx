@@ -17,7 +17,6 @@ export function EmailLegalFooterView({
   values,
   body,
   editable,
-  refusal,
   editor,
   words,
   update,
@@ -62,7 +61,6 @@ export function EmailLegalFooterView({
               value={emailBlockText(values, 'unsubscribe')}
               tooltip={unsubscribe}
               onApply={(address) => update({ unsubscribe: address })}
-              disabledReason={refusal}
               trigger={
                 <Button type="button" variant="ghost" size="icon-xs" aria-label={unsubscribe}>
                   <LinkIcon size={12} aria-hidden />
