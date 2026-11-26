@@ -2,8 +2,11 @@ import type { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { Palette, Smile, Upload } from 'lucide-react';
 import { createRef, type MouseEvent, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { page, userEvent } from 'vitest/browser';
+import { cdp, page, server, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
+
+import { drawingIn, expectPlaying, expectStill, playMotion, settled } from '../../../../../test/motion';
+import { centreOf, type Point } from '../../../../../test/pointer';
 
 import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 
@@ -118,17 +121,43 @@ const pane = page.getByRole('tabpanel');
 // The input is hidden, so no role or label reaches it.
 const fileInput = (): HTMLInputElement => document.querySelector<HTMLInputElement>('input[type="file"]')!;
 
+/** A file in `src/test/files`, which a drag carries from the disk. */
+type DiskFile = 'drop.png' | 'plan.pdf';
+
+/** `point` in the page around the spec's frame, where the browser's input lands. */
+function onPage({ x, y }: Point): Point {
+  const frame = window.frameElement?.getBoundingClientRect();
+  const scale = frame && window.innerWidth > 0 ? frame.width / window.innerWidth : 1;
+  return { x: (frame?.left ?? 0) + x * scale, y: (frame?.top ?? 0) + y * scale };
+}
+
 /**
- * Sends `type` to `target` as a drag carrying `files`. Neither Playwright nor Vitest can drag a file in
- * from outside the page, so this dispatches the browser's own DragEvent around a real DataTransfer;
- * returns the event, whose `defaultPrevented` says whether the page took the drag.
+ * Moves a drag of `files` from the disk to `point` as `type`, through the browser's own drag input: `dragEnter`
+ * starts it, `dragOver` moves it, firing the enters and leaves between elements, and `drop` lets go.
  */
-function dragFiles(target: Element, type: 'dragenter' | 'dragover' | 'dragleave' | 'drop', files: File[] = []) {
-  const dataTransfer = new DataTransfer();
-  for (const file of files) dataTransfer.items.add(file);
-  const event = new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer });
-  target.dispatchEvent(event);
-  return event;
+async function drag(
+  type: 'dragEnter' | 'dragOver' | 'drop' | 'dragCancel',
+  point: Point,
+  files: DiskFile[] = ['drop.png'],
+) {
+  const data = {
+    items: [],
+    files: files.map((name) => `${server.config.root}/src/test/files/${name}`),
+    dragOperationsMask: 1,
+  };
+  await cdp().send('Input.dispatchDragEvent', { type, ...onPage(point), data });
+}
+
+/** Drags `files` from the disk onto the middle of `target` and drops them. */
+async function dropOn(target: Element, files: DiskFile[] = ['drop.png']): Promise<void> {
+  const at = centreOf(target);
+  for (const type of ['dragEnter', 'dragOver', 'drop'] as const) await drag(type, at, files);
+}
+
+/** A point just past the pane's top-left corner, outside it. */
+function outside(target: Element): Point {
+  const { left, top } = target.getBoundingClientRect();
+  return { x: Math.max(0, left - 8), y: Math.max(0, top - 8) };
 }
 
 /** WCAG 2 contrast ratio between two computed `rgb()` colours; 1 when either is not one. */
@@ -332,7 +361,7 @@ describe('AvatarPicker', () => {
     await openEditor();
     await expect.element(pane).toBeVisible();
 
-    dragFiles(pane.element(), 'drop', [pngFile()]);
+    await dropOn(pane.element());
 
     await expect
       .poll(() => onChange.mock.calls.at(-1)?.[0])
@@ -349,10 +378,10 @@ describe('AvatarPicker', () => {
     await openEditor();
     await expect.element(pane).toBeVisible();
 
-    const file = pngFile();
-    dragFiles(pane.element(), 'drop', [file]);
+    await dropOn(pane.element());
 
-    expect(onUpload).toHaveBeenCalledWith(file);
+    await expect.poll(() => onUpload.mock.calls.length).toBe(1);
+    expect(onUpload.mock.calls[0]).toEqual([expect.objectContaining({ name: 'drop.png', type: 'image/png' })]);
   });
 
   it('ignores a dropped file that is not an image', async () => {
@@ -365,8 +394,9 @@ describe('AvatarPicker', () => {
     await openEditor();
     await expect.element(pane).toBeVisible();
 
-    dragFiles(pane.element(), 'drop', [new File(['x'], 'a.pdf', { type: 'application/pdf' })]);
+    await dropOn(pane.element(), ['plan.pdf']);
 
+    await expect.element(pane).toBeVisible();
     expect(onUpload).not.toHaveBeenCalled();
   });
 
@@ -379,14 +409,16 @@ describe('AvatarPicker', () => {
     await openEditor();
     await expect.element(pane).toBeVisible();
 
-    dragFiles(pane.element(), 'dragenter', [pngFile()]);
+    const at = centreOf(pane.element());
+    await drag('dragEnter', at);
+    await drag('dragOver', at);
     await expect.element(pane).toHaveAttribute('data-dragging');
-    dragFiles(pane.element(), 'dragleave');
+    await drag('dragOver', outside(pane.element()));
     await expect.element(pane).not.toHaveAttribute('data-dragging');
 
-    dragFiles(pane.element(), 'dragenter', [pngFile()]);
+    await drag('dragOver', at);
     await expect.element(pane).toHaveAttribute('data-dragging');
-    dragFiles(pane.element(), 'drop', [pngFile()]);
+    await drag('drop', at);
     await expect.element(pane).not.toHaveAttribute('data-dragging');
   });
 
@@ -400,12 +432,13 @@ describe('AvatarPicker', () => {
     await expect.element(pane).toBeVisible();
     const title = page.getByText('Upload an image').element();
 
-    dragFiles(pane.element(), 'dragenter', [pngFile()]);
-    dragFiles(title, 'dragenter', [pngFile()]);
-    dragFiles(pane.element(), 'dragleave');
+    await drag('dragEnter', outside(pane.element()));
+    await drag('dragOver', centreOf(pane.element()));
+    await drag('dragOver', centreOf(title));
     await expect.element(pane).toHaveAttribute('data-dragging');
-    dragFiles(title, 'dragleave');
+    await drag('dragOver', outside(pane.element()));
     await expect.element(pane).not.toHaveAttribute('data-dragging');
+    await drag('dragCancel', outside(pane.element()));
   });
 
   it('shows the current image in the preview, and marks the pane, only while the avatar is an image', async () => {
@@ -434,7 +467,7 @@ describe('AvatarPicker', () => {
     URL.revokeObjectURL(imageUrl);
   });
 
-  it('takes a drop while an upload is pending, so the browser does not open the file, and ignores it', async () => {
+  it('ignores a drag and a drop while an upload is pending', async () => {
     const onUpload = vi.fn(() => new Promise<string | null>(() => {}));
     await render(
       <Picker defaultTab="upload">
@@ -443,13 +476,15 @@ describe('AvatarPicker', () => {
     );
     await openEditor();
     await expect.element(pane).toBeVisible();
-    dragFiles(pane.element(), 'drop', [pngFile()]);
+    await dropOn(pane.element());
     await expect.element(pane).toHaveAttribute('data-uploading');
 
-    dragFiles(pane.element(), 'dragenter', [pngFile()]);
+    const at = centreOf(pane.element());
+    await drag('dragEnter', at);
+    await drag('dragOver', at);
     await expect.element(pane).not.toHaveAttribute('data-dragging');
-    expect(dragFiles(pane.element(), 'dragover', [pngFile()]).defaultPrevented).toBe(true);
-    expect(dragFiles(pane.element(), 'drop', [pngFile()]).defaultPrevented).toBe(true);
+    await drag('drop', at);
+    await expect.element(pane).toHaveAttribute('data-uploading');
     expect(onUpload).toHaveBeenCalledTimes(1);
   });
 
@@ -549,5 +584,63 @@ describe('AvatarPicker', () => {
     actionsRef.current?.close();
 
     await expect.element(page.getByRole('button', { name: '#6366f1' })).not.toBeInTheDocument();
+  });
+});
+
+describe('AvatarPicker icons, for a reader who allows motion', () => {
+  playMotion();
+
+  const group = (color: string) => (
+    <AvatarPicker value={{ color }} onValueChange={() => {}}>
+      <AvatarPickerColorGroup aria-label="Colors" colors={['#6366f1', '#ec4899']} />
+    </AvatarPicker>
+  );
+
+  it('draws the check on the pressed swatch only, still on its first draw', async () => {
+    await render(group('#6366f1'));
+    const pressed = page.getByRole('button', { name: '#6366f1' });
+
+    await expect.element(pressed).toBeVisible();
+    expect(pressed.element().querySelector('svg')).not.toBeNull();
+    expect(page.getByRole('button', { name: '#ec4899' }).element().querySelector('svg')).toBeNull();
+    await expectStill(pressed.element());
+  });
+
+  it('plays the check on the swatch that becomes pressed, not on a rerender that keeps it', async () => {
+    const screen = await render(group('#6366f1'));
+    await screen.rerender(group('#6366f1'));
+    const first = page.getByRole('button', { name: '#6366f1' }).element();
+    await expectStill(first);
+    const rest = drawingIn(first);
+
+    await screen.rerender(group('#ec4899'));
+    const pressed = page.getByRole('button', { name: '#ec4899' }).element();
+    await expectPlaying(pressed, rest);
+    expect(await settled(pressed)).toBe(rest);
+
+    await screen.rerender(group('#ec4899'));
+    await expectStill(pressed);
+    expect(drawingIn(pressed)).toBe(rest);
+  });
+
+  it('plays the trash while the pointer or the focus holds the remove button', async () => {
+    const onPointerEnter = vi.fn();
+    await render(
+      <AvatarPicker value={{}} onValueChange={() => {}}>
+        <AvatarPickerRemoveButton onPointerEnter={onPointerEnter} />
+      </AvatarPicker>,
+    );
+    const button = page.getByRole('button', { name: 'Remove avatar' });
+    await expect.element(button).toBeVisible();
+
+    await userEvent.hover(button);
+    await expectPlaying(button.element(), drawingIn(button.element()));
+    expect(onPointerEnter).toHaveBeenCalled();
+    await userEvent.unhover(button);
+    const rest = await settled(button.element());
+
+    await userEvent.tab();
+    await expect.element(button).toHaveFocus();
+    await expectPlaying(button.element(), rest);
   });
 });
