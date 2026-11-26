@@ -172,7 +172,7 @@ function TabBarItem({ active = false, className, render, ...props }: TabBarItemP
       {
         'aria-current': active ? 'page' : undefined,
         className: cn(
-          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground cn-tab-bar-item cn-tab-bar-item-focus-ring outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
+          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground cn-tab-bar-item cn-tab-bar-item-focus-ring outline-none select-none has-data-[slot=tab-bar-indicator]:focus-visible:ring-0 group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
           className,
         ),
       },

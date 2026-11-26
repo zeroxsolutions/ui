@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 
 import { ResizeHandle } from '@/registry/bases/base-ui/components/data-entry/resize-handle';
+import { Card } from '@/registry/bases/base-ui/ui/card';
 
 const MIN_WIDTH = 120;
 const MAX_WIDTH = 320;
@@ -12,7 +13,7 @@ function ResizeHandleDemo(): ReactNode {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="bg-muted/50 relative h-48 w-full overflow-hidden rounded-lg border">
+    <Card className="bg-muted/50 relative h-48 w-full py-0">
       <p className="text-muted-foreground absolute right-3 bottom-3 text-sm">Canvas</p>
       <div className="absolute inset-y-3 left-3 flex">
         <div
@@ -32,7 +33,7 @@ function ResizeHandleDemo(): ReactNode {
           onToggle={() => setCollapsed((current) => !current)}
         />
       </div>
-    </div>
+    </Card>
   );
 }
 

@@ -1721,7 +1721,7 @@
       "title": "Resize Handle Demo",
       "description": "A panel floating over a canvas, resized by dragging its ResizeHandle or collapsed by a double-click.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/resize-handle"],
+      "registryDependencies": ["@zui/resize-handle", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/resize-handle-demo.tsx",
@@ -1766,7 +1766,7 @@
       "title": "Copy Button Demo",
       "description": "An install command with its own copy button, announcing the copy inline.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/copy-button"],
+      "registryDependencies": ["@zui/copy-button", "@shadcn/item"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/copy-button-demo.tsx",
@@ -1884,7 +1884,7 @@
       "title": "Meteors Demo",
       "description": "Meteors falling behind a heading in a bordered panel.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/meteors"],
+      "registryDependencies": ["@zui/meteors", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/meteors-demo.tsx",
@@ -1899,7 +1899,7 @@
       "title": "Animated Grid Pattern Demo",
       "description": "A grid whose cells light and fade behind a heading, masked to fade toward the panel's edges.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/animated-grid-pattern"],
+      "registryDependencies": ["@zui/animated-grid-pattern", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/animated-grid-pattern-demo.tsx",
@@ -2074,7 +2074,7 @@
       "description": "A model list of three providers, one dimmed as unavailable, each toggleable and removable.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "@zui/model-list"],
+      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "@zui/model-list", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/model-list-demo.tsx",

@@ -140,9 +140,9 @@
     @apply rounded-lg;
   }
 
-  /* cn-button's focus ring, a destination with no indicator to carry it */
+  /* cn-button's focus ring, a destination, which its indicator carries instead where it has one */
   .cn-tab-bar-item-focus-ring {
-    @apply not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-ring/50 not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-3;
+    @apply focus-visible:ring-ring/50 focus-visible:ring-3;
   }
 
   /* cn-button's focus ring, the indicator of a destination holding keyboard focus */
