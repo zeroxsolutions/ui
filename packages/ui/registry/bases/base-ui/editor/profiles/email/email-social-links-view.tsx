@@ -15,6 +15,7 @@ export function EmailSocialLinksView({
   editable,
   restructure,
   editor,
+  place,
   words,
   update,
 }: EmailBlockViewProps): ReactNode {
@@ -25,6 +26,7 @@ export function EmailSocialLinksView({
     <div contentEditable={false}>
       <EmailBlockItems
         editor={editor}
+        place={place}
         items={items}
         entries={emailBlockItemsOf(items, values[items.name])}
         label={words.field(items.name, items.label)}

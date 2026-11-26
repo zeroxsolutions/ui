@@ -40,6 +40,17 @@ function positionOf(place: BlockPlace): number | undefined {
   }
 }
 
+/** The upload in flight or failed into `slot` of the block at `place`, for a view that only draws it; null for none. */
+export function useUploadEntry(place: BlockPlace | null, slot: string): UploadEntry | null {
+  const store = place ? uploadStoreOf(place.editor) : null;
+  const subscribe = useCallback((listener: () => void) => store?.subscribe(listener) ?? NO_STORE(), [store]);
+  return useSyncExternalStore(
+    subscribe,
+    () => (store && place ? store.find(positionOf(place), slot) : null),
+    () => null,
+  );
+}
+
 /**
  * The upload into `slot` of the block at `place`, drawn again as it moves; null where the block does not upload:
  * no `request`, as for a feature given no `upload`, or no place, as in the Viewer.

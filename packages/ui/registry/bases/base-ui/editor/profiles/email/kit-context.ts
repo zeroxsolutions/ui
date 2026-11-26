@@ -8,6 +8,13 @@ import type { BlockMenuItem, IEditor } from '@zeroxsolutions/editor-core/documen
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import type { VariableFeature } from '../variables/variable';
+import type { EditorUpload, UploadLimits } from '../../document/uploads/upload';
+
+/** The host's upload and what it narrows it to, which every image field of the email uploads with. */
+export interface KitUploads {
+  readonly upload: EditorUpload;
+  readonly limits: UploadLimits;
+}
 
 export type EngineState = Editor['state'];
 
@@ -26,6 +33,8 @@ export interface KitContext {
   messages(): ProfileEditorMessages;
   /** The link popovers listening to this editor, which `editEmailLink` opens. */
   linkListeners: Set<(target: EmailLinkTarget) => void>;
+  /** The host's upload; null where it gave none, and the image fields take an address only. */
+  uploads: KitUploads | null;
 }
 
 /** What the link popover edits: a button's href, or the link on a range of text. */

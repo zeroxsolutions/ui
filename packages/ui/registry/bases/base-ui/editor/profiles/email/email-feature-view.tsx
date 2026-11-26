@@ -17,6 +17,7 @@ import { EmailAddressPopover, emailImageVariable } from './email-address-popover
 import { emailBlockText, type EmailBlockViewProps } from './email-block-feature';
 import { EmailInlineField } from './email-inline-field';
 import { contextOf } from './kit-context';
+import { useEmailImageUpload } from './email-uploads';
 
 /** The card's controls in an email editor: fields that hold variables, and the email's address popover. */
 function emailCardParts(editor: IEditor | null, readOnly: boolean): CardParts {
@@ -34,7 +35,16 @@ function emailCardParts(editor: IEditor | null, readOnly: boolean): CardParts {
         />
       );
     },
-    Address: function EmailCardAddress({ kind, label, value, trigger, tooltip, onApply, alt }: CardAddressProps) {
+    Address: function EmailCardAddress({
+      kind,
+      label,
+      value,
+      trigger,
+      tooltip,
+      onApply,
+      alt,
+      upload,
+    }: CardAddressProps) {
       const altId = useId();
       if (!editor) return null;
       const context = contextOf(editor)?.context;
@@ -49,6 +59,7 @@ function emailCardParts(editor: IEditor | null, readOnly: boolean): CardParts {
           tooltip={tooltip}
           onApply={onApply}
           onRemove={kind === 'link' && value !== '' ? () => onApply('') : undefined}
+          upload={upload}
         >
           {alt && (
             <Field>
@@ -82,10 +93,16 @@ export function EmailFeatureView({
   body,
   editable,
   editor,
+  place,
   words,
   messages,
   update,
 }: EmailBlockViewProps & { variant: 'hero' | 'card' }): ReactNode {
+  const live = editor !== null && editable;
+  // A hero's and a card's image loads over https only, as the image block's does.
+  const imageUpload = useEmailImageUpload(live ? editor : null, live ? place : null, 'image', true, (_attrs, url) => ({
+    image: url,
+  }));
   const label = (name: string) => words.field(name, block.fields.find((field) => field.name === name)?.label ?? name);
   const parts = useMemo(() => emailCardParts(editor, !editable), [editor, editable]);
   const fields: CardFields = {
@@ -99,8 +116,9 @@ export function EmailFeatureView({
     <CardView
       fields={fields}
       body={body}
-      editable={editor !== null && editable}
+      editable={live}
       update={update}
+      imageUpload={imageUpload}
       parts={parts}
       variant={variant}
       align={values.align === 'center' ? 'center' : 'left'}

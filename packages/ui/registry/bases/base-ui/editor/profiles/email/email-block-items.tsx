@@ -19,7 +19,12 @@ import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { BlockEditorField, BlockEditorItems } from '@zeroxsolutions/editor-core/template/email/index';
 import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 import { VariableTextField } from '../variables/variable-text-field';
+import { UploadStatus } from '../../document/uploads/upload-status';
+import { uploadStoreOf } from '../../document/uploads/upload-store';
+import { UploadTabs } from '../../document/uploads/upload-tabs';
+import { useUploadEntry, type BlockPlace } from '../../document/uploads/use-block-upload';
 import { emailAddressProblems } from './email-address-popover';
+import { useEmailImageUpload } from './email-uploads';
 import { contextOf, selectBlockOf } from './kit-context';
 
 /** One item of an items field: each of its fields' text, `''` where it holds none. */
@@ -42,6 +47,8 @@ const DRAWN_IMAGE = /^https?:\/\//i;
 export interface EmailBlockItemsProps {
   /** The email editor the block is in; null where the block is drawn outside one. */
   editor: IEditor | null;
+  /** Where the block is in the editor, which an upload into an item's image is kept at; null outside one. */
+  place?: BlockPlace | null;
   items: BlockEditorItems;
   entries: readonly EmailBlockItem[];
   /** The items field's name, as the block's words give it. */
@@ -61,6 +68,9 @@ export interface EmailBlockItemsProps {
 /** One field of an item in its popover; an address is written once the email can send it, or once it is empty. */
 function EmailBlockItemField({
   editor,
+  place,
+  items,
+  index,
   field,
   label,
   value,
@@ -69,6 +79,10 @@ function EmailBlockItemField({
   onValueChange,
 }: {
   editor: IEditor;
+  place: BlockPlace | null;
+  items: BlockEditorItems;
+  /** The item's place in the field, which an upload into its image lands at. */
+  index: number;
   field: BlockEditorField;
   label: string;
   value: string;
@@ -76,6 +90,18 @@ function EmailBlockItemField({
   autoFocus: boolean;
   onValueChange(value: string): void;
 }): ReactNode {
+  const upload = useEmailImageUpload(
+    field.kind === 'imageUrl' ? editor : null,
+    place,
+    itemSlot(items, index, field.name),
+    secure,
+    (attrs, url) => ({
+      [items.name]: emailBlockItemsOf(items, attrs[items.name]).map((item, place) =>
+        place === index ? { ...item, [field.name]: url } : item,
+      ),
+    }),
+  );
+  const entry = upload?.upload.entry ?? null;
   const id = useId();
   const problemId = useId();
   const context = contextOf(editor)?.context;
@@ -90,35 +116,98 @@ function EmailBlockItemField({
   return (
     <Field data-invalid={problems.length > 0 || undefined}>
       <FieldLabel id={id}>{label}</FieldLabel>
-      <VariableTextField
-        value={address ? draft : value}
-        onValueChange={(next) => {
-          if (!address) return onValueChange(next);
-          setDraft(next);
-          const kind = field.kind === 'link' ? 'link' : 'image';
-          if (next.trim() === '' || emailAddressProblems(next, kind, secure, declarations(), messages).length === 0) {
-            onValueChange(next.trim());
+      <UploadTabs
+        upload={upload?.upload ?? null}
+        messages={upload?.messages ?? messages.uploads}
+        defaultTab={value === '' ? 'upload' : 'link'}
+      >
+        <VariableTextField
+          value={address ? draft : value}
+          onValueChange={(next) => {
+            if (!address) return onValueChange(next);
+            setDraft(next);
+            const kind = field.kind === 'link' ? 'link' : 'image';
+            if (next.trim() === '' || emailAddressProblems(next, kind, secure, declarations(), messages).length === 0) {
+              onValueChange(next.trim());
+            }
+          }}
+          declarations={declarations}
+          variables={context?.variables}
+          label={label}
+          placeholder={
+            field.kind === 'imageUrl'
+              ? messages.imageAddressPlaceholder
+              : field.kind === 'link'
+                ? messages.linkPlaceholder
+                : ''
           }
-        }}
-        declarations={declarations}
-        variables={context?.variables}
-        label={label}
-        placeholder={
-          field.kind === 'imageUrl'
-            ? messages.imageAddressPlaceholder
-            : field.kind === 'link'
-              ? messages.linkPlaceholder
-              : ''
-        }
-        invalid={problems.length > 0}
-        describedBy={problems.length > 0 ? problemId : undefined}
-        autoFocus={autoFocus}
-        messages={messages}
-        className="cn-input h-auto min-h-8"
-      />
-      {problems.length > 0 && <FieldError id={problemId} errors={problems.map((message) => ({ message }))} />}
+          invalid={problems.length > 0}
+          describedBy={problems.length > 0 ? problemId : undefined}
+          autoFocus={autoFocus}
+          messages={messages}
+          className="cn-input h-auto min-h-8"
+        />
+        {problems.length > 0 && <FieldError id={problemId} errors={problems.map((message) => ({ message }))} />}
+      </UploadTabs>
+      {upload && entry && (
+        <UploadStatus
+          entry={entry}
+          messages={upload.messages}
+          onCancel={upload.upload.cancel}
+          onRetry={upload.upload.retry}
+        />
+      )}
     </Field>
   );
+}
+
+/** The upload slot of `field` of the item at `index` of `items`. */
+function itemSlot(items: BlockEditorItems, index: number, field: string): string {
+  return `${items.name}.${index}.${field}`;
+}
+
+/** An item's face: its image, the file uploading into it drawn faint, or its text. */
+function EmailBlockItemFace({
+  place,
+  items,
+  index,
+  entry,
+  size,
+}: {
+  place: BlockPlace | null;
+  items: BlockEditorItems;
+  index: number;
+  entry: EmailBlockItem;
+  size: number;
+}): ReactNode {
+  const image = items.fields.find((field) => field.kind === 'imageUrl');
+  const text = items.fields.find((field) => field.kind === 'plainText');
+  const uploading = useUploadEntry(image ? place : null, image ? itemSlot(items, index, image.name) : '');
+  const src = uploading?.preview ?? (image ? entry[image.name]?.trim() : '');
+  if (image && src && (uploading?.preview || DRAWN_IMAGE.test(src))) {
+    return (
+      <img
+        src={src}
+        alt=""
+        width={size}
+        height={size}
+        data-dimmed={uploading !== null || undefined}
+        className="block object-contain data-dimmed:opacity-50"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+  if (image) {
+    return (
+      <span
+        className="text-muted-foreground flex items-center justify-center border border-dashed"
+        style={{ width: size, height: size }}
+      >
+        <ImageIcon size={Math.round(size / 2)} aria-hidden />
+      </span>
+    );
+  }
+  return <span className="text-sm underline underline-offset-4">{(text && entry[text.name]) || ''}</span>;
 }
 
 /**
@@ -134,6 +223,7 @@ export function EmailBlockItems({
   fieldLabel,
   readOnly,
   restructure,
+  place = null,
   secure = false,
   size = 24,
   align = 'left',
@@ -149,38 +239,19 @@ export function EmailBlockItems({
     if (removed.current) add.current?.focus();
   }, [entries.length]);
   const messages = (editor && contextOf(editor)?.context.messages()) ?? DEFAULT_PROFILE_MESSAGES;
-  const image = items.fields.find((field) => field.kind === 'imageUrl');
   const text = items.fields.find((field) => field.kind === 'plainText');
   const empty = (): EmailBlockItem => Object.fromEntries(items.fields.map(({ name }) => [name, '']));
+  // An upload lands at its item's place; a removal shifts the places after it, so their uploads stop.
+  const cancelUploadsFrom = (index: number): void => {
+    const store = place && uploadStoreOf(place.editor);
+    const pos = place?.getPos();
+    for (const upload of store?.entries() ?? []) {
+      const [name, at] = upload.slot.split('.');
+      if (upload.pos === pos && name === items.name && Number(at) >= index) store?.cancel(upload.id);
+    }
+  };
   const nameOf = (entry: EmailBlockItem, index: number) =>
     (text && entry[text.name]) || messages.itemRow(label, index + 1);
-
-  const face = (entry: EmailBlockItem) => {
-    const src = image ? entry[image.name]?.trim() : '';
-    if (image && src && DRAWN_IMAGE.test(src)) {
-      return (
-        <img
-          src={src}
-          alt=""
-          width={size}
-          height={size}
-          className="block object-contain"
-          style={{ width: size, height: size }}
-        />
-      );
-    }
-    if (image) {
-      return (
-        <span
-          className="text-muted-foreground flex items-center justify-center border border-dashed"
-          style={{ width: size, height: size }}
-        >
-          <ImageIcon size={Math.round(size / 2)} aria-hidden />
-        </span>
-      );
-    }
-    return <span className="text-sm underline underline-offset-4">{(text && entry[text.name]) || ''}</span>;
-  };
 
   return (
     <div
@@ -198,7 +269,7 @@ export function EmailBlockItems({
       {entries.map((entry, index) =>
         editor === null || readOnly ? (
           <span key={index} data-slot="email-block-item" aria-label={nameOf(entry, index)} role="img">
-            {face(entry)}
+            <EmailBlockItemFace place={place} items={items} index={index} entry={entry} size={size} />
           </span>
         ) : (
           <Popover
@@ -233,7 +304,7 @@ export function EmailBlockItems({
                   />
                 }
               >
-                {face(entry)}
+                <EmailBlockItemFace place={place} items={items} index={index} entry={entry} size={size} />
               </TooltipTrigger>
               <TooltipContent>{nameOf(entry, index)}</TooltipContent>
             </Tooltip>
@@ -251,6 +322,9 @@ export function EmailBlockItems({
                 <EmailBlockItemField
                   key={field.name}
                   editor={editor}
+                  place={place}
+                  items={items}
+                  index={index}
                   field={field}
                   label={fieldLabel(field.name, field.label)}
                   value={entry[field.name] ?? ''}
@@ -276,6 +350,7 @@ export function EmailBlockItems({
                         onClick={() => {
                           removed.current = true;
                           setOpenAt(null);
+                          cancelUploadsFrom(index);
                           onValueChange(entries.filter((_item, place) => place !== index));
                         }}
                       />

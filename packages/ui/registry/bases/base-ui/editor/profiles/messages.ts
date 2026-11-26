@@ -1,5 +1,6 @@
 import type { EmailBlockKind, ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
 import type { RenderProblem, RenderProblemKind } from '@zeroxsolutions/editor-core/template/email/index';
+import { DEFAULT_UPLOAD_MESSAGES, type UploadMessages } from '../document/uploads/upload';
 
 /** The attributes the email block menu sets. */
 export type EmailBlockAttribute = 'align' | 'spaceAfter' | 'tone' | 'width' | 'level';
@@ -124,6 +125,8 @@ export interface ProfileEditorMessages {
   imageAddressPlaceholder: string;
   /** What an image address the email cannot load is told; `secure` where the block loads `https:` images only. */
   imageInvalid(secure: boolean): string;
+  /** The words of the Upload and Link tabs and of an image uploading, drawn where the host gives `upload`. */
+  uploads: UploadMessages;
   /** Names the control that opens a block's settings, such as a number it takes. */
   blockSettings: string;
   /** A spacer's size, shown as the pointer rests on it: the size's name and its height in px. */
@@ -277,6 +280,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
     secure
       ? 'The image must load from https:// or a link variable'
       : 'The image must load from https://, http:// or a link variable',
+  uploads: DEFAULT_UPLOAD_MESSAGES,
   blockSettings: 'Block settings',
   spacerSize: (size, px) => `${size}, ${px}px`,
   itemRow: (field, position) => `${field} ${position}`,

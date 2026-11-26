@@ -91,6 +91,8 @@ import { EmailButtonLabelField, emailButtonSlashItem } from './nodes/button';
 import { emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
 import { emailUnknownNode } from './nodes/unknown';
+import { emailAddressProblems } from './email-address-popover';
+import type { KitUploads } from './kit-context';
 
 /** The node each email kind is: the document's own block, or the email profile's where the document has none. */
 export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
@@ -353,6 +355,12 @@ export interface EmailKitOptions extends BlockIdentityOptions {
    * reasons an item is disabled are read each time the menu opens. The English when absent.
    */
   messages?: () => ProfileEditorMessages;
+  /**
+   * The host's upload and its limits: every image field, the image block's, a hero's, a card's, a product
+   * block's and each social icon's, uploads a file beside taking an address, and a pasted or dropped image file
+   * becomes an image block. Address only when absent.
+   */
+  uploads?: KitUploads;
 }
 
 function holdsRequired(node: ProseMirrorNode, required: readonly string[]): boolean {
@@ -706,6 +714,7 @@ export function emailKit(
     variables,
     messages,
     linkListeners: new Set(),
+    uploads: options.uploads ?? null,
   };
   const rules = [
     'zeroxEditorBehavior',
@@ -848,7 +857,21 @@ export function emailKit(
     { ...button({ labelField: EmailButtonLabelField, linkField: false }), slash: [], commands: {} },
     { ...columns({ columnContent: laneContent }), slash: [], commands: {} },
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
-    { ...image(), slash: [], commands: {} },
+    {
+      ...image(
+        options.uploads
+          ? {
+              upload: options.uploads.upload,
+              ...options.uploads.limits,
+              messages: () => messages().uploads,
+              // The image block loads over https only; an answer is checked as a typed address is.
+              problems: (url) => emailAddressProblems(url, 'image', true, declarations(), messages()),
+            }
+          : {},
+      ),
+      slash: [],
+      commands: {},
+    },
     { ...table(), slash: [], commands: {} },
     ...library,
     blocks,

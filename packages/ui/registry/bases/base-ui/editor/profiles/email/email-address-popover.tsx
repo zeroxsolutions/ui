@@ -7,6 +7,7 @@ import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/i
 import { hrefProblems, leadingToken, type VariableType } from '@zeroxsolutions/editor-core/template/index';
 import { BUTTON_HREF_MAX_LENGTH } from '@zeroxsolutions/editor-core/template/email/index';
 import { BlockAddressPopover } from '../../document/blocks/block-address-popover';
+import type { BlockUploadControl } from '../../document/uploads/use-block-upload';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { variableIcon, variableLabel } from '../variables/variable';
 import { VariableTextField } from '../variables/variable-text-field';
@@ -82,6 +83,8 @@ export interface EmailAddressPopoverProps {
   disabledReason?: string | null;
   /** More fields under the address, such as an image's alt text. */
   children?: ReactNode;
+  /** Uploads a file into the address from an Upload tab; the address field alone when absent. */
+  upload?: BlockUploadControl | null;
 }
 
 /**
@@ -101,6 +104,7 @@ export function EmailAddressPopover({
   onRemove,
   disabledReason = null,
   children,
+  upload = null,
 }: EmailAddressPopoverProps): ReactNode {
   const variablesId = useId();
   const context = contextOf(editor)?.context;
@@ -122,6 +126,7 @@ export function EmailAddressPopover({
       disabledReason={disabledReason}
       // The toolbar's variable menu inserts into the field from a layer of its own; reaching it keeps the popover open.
       keepOpenWithin="[data-slot=variable-menu], [data-slot=combobox-content]"
+      upload={upload}
       field={(field) => (
         <VariableTextField
           value={field.value}

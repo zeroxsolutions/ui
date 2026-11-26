@@ -18,6 +18,12 @@ export {
   type UploadStore,
   type UploadTaker,
 } from './upload-store';
-export { useBlockUpload, type BlockPlace, type BlockUpload, type BlockUploadControl } from './use-block-upload';
+export {
+  useBlockUpload,
+  useUploadEntry,
+  type BlockPlace,
+  type BlockUpload,
+  type BlockUploadControl,
+} from './use-block-upload';
 export { UploadTabs, type UploadTabsProps } from './upload-tabs';
 export { UploadStatus, type UploadStatusProps } from './upload-status';

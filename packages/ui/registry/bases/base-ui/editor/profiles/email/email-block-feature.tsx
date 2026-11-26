@@ -29,6 +29,7 @@ import type {
   EmailBlockDefinition,
   BlockEditor,
   BlockEditorAttribute,
+  BlockEditorField,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec } from '../../react-types';
 import { DEFAULT_PROFILE_MESSAGES, type CustomBlockMessages, type ProfileEditorMessages } from '../messages';
@@ -37,6 +38,9 @@ import { EmailBlockItems, emailBlockItemsOf } from './email-block-items';
 import { EmailInlineField } from './email-inline-field';
 import { blockAt, cellAt, contextOf, laneAt, ownBlockMenus, selectBlockOf, type Found } from './kit-context';
 import { blockClasses } from './nodes/block-style';
+import { UploadStatus } from '../../document/uploads/upload-status';
+import type { BlockPlace } from '../../document/uploads/use-block-upload';
+import { useEmailImageUpload } from './email-uploads';
 
 export interface EmailBlockFeatureOptions {
   /** The slash menu's icon for the block; a blocks icon when absent. */
@@ -164,6 +168,8 @@ export interface EmailBlockViewProps {
   readonly restructure: boolean;
   /** The email editor the block is in; null where it is drawn outside one. */
   readonly editor: IEditor | null;
+  /** Where the block is in the editor, which an upload into it is kept at; null outside one. */
+  readonly place: BlockPlace | null;
   readonly words: EmailBlockWords;
   readonly messages: ProfileEditorMessages;
   /** Writes fields and attributes onto the block; does nothing outside an editor. */
@@ -180,6 +186,94 @@ export function emailBlockText(values: Readonly<Record<string, unknown>>, name: 
 const DRAWN_IMAGE = /^https?:\/\//i;
 
 /**
+ * One image field of a product block, as the email draws it; in the editor, the control that opens its address
+ * popover, and while a file uploads into it, the file drawn faint with its progress.
+ */
+function EmailBlockImage({
+  field,
+  value,
+  editor,
+  place,
+  live,
+  label,
+  messages,
+  update,
+}: {
+  field: BlockEditorField;
+  value: string;
+  editor: IEditor | null;
+  place: BlockPlace | null;
+  live: boolean;
+  label: string;
+  messages: ProfileEditorMessages;
+  update: EmailBlockViewProps['update'];
+}): ReactNode {
+  const upload = useEmailImageUpload(live ? editor : null, live ? place : null, field.name, false, (_attrs, url) => ({
+    [field.name]: url,
+  }));
+  const entry = upload?.upload.entry ?? null;
+  const src = (entry?.preview ?? value).trim();
+  const variable = emailImageVariable(editor, src);
+  const drawn =
+    DRAWN_IMAGE.test(src) || entry?.preview ? (
+      <img
+        src={src}
+        alt=""
+        data-dimmed={entry !== null || undefined}
+        className="block max-w-full data-dimmed:opacity-50"
+      />
+    ) : (
+      variable !== undefined && (
+        <span className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
+          <ImageIcon size={16} aria-hidden />
+          {variable}
+        </span>
+      )
+    );
+  if (!live || editor === null) return drawn && <div className="not-prose">{drawn}</div>;
+  return (
+    <div contentEditable={false} className="not-prose flex flex-col gap-2">
+      <EmailAddressPopover
+        editor={editor}
+        kind="image"
+        label={label}
+        value={value}
+        tooltip={label}
+        onApply={(address) => update({ [field.name]: address })}
+        onRemove={field.required ? undefined : () => update({ [field.name]: '' })}
+        upload={upload}
+        trigger={
+          <button
+            type="button"
+            aria-label={label}
+            className={cn(
+              'focus-visible:ring-ring/50 block w-full outline-none focus-visible:ring-3',
+              !drawn &&
+                'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
+            )}
+          >
+            {drawn || (
+              <>
+                <ImageIcon size={16} aria-hidden />
+                {messages.imagePlaceholder}
+              </>
+            )}
+          </button>
+        }
+      />
+      {upload && entry && (
+        <UploadStatus
+          entry={entry}
+          messages={upload.messages}
+          onCancel={upload.upload.cancel}
+          onRetry={upload.upload.retry}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
  * A product block as the email draws it: its images, its body and its plain fields written in place, its items in
  * a row, and its links and number settings behind small icons that open a popover.
  */
@@ -190,6 +284,7 @@ function EmailBlockDefaultView({
   editable,
   restructure,
   editor,
+  place,
   words,
   messages,
   update,
@@ -201,58 +296,19 @@ function EmailBlockDefaultView({
   const live = editor !== null && editable;
   return (
     <>
-      {images.map((field) => {
-        const src = emailBlockText(values, field.name).trim();
-        const variable = emailImageVariable(editor, src);
-        const drawn =
-          (DRAWN_IMAGE.test(src) && <img src={src} alt="" className="block max-w-full" />) ||
-          (variable !== undefined && (
-            <span className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
-              <ImageIcon size={16} aria-hidden />
-              {variable}
-            </span>
-          ));
-        if (!live)
-          return (
-            drawn && (
-              <div key={field.name} className="not-prose">
-                {drawn}
-              </div>
-            )
-          );
-        const label = words.field(field.name, field.label);
-        return (
-          <div key={field.name} contentEditable={false} className="not-prose">
-            <EmailAddressPopover
-              editor={editor}
-              kind="image"
-              label={label}
-              value={emailBlockText(values, field.name)}
-              tooltip={label}
-              onApply={(address) => update({ [field.name]: address })}
-              onRemove={field.required ? undefined : () => update({ [field.name]: '' })}
-              trigger={
-                <button
-                  type="button"
-                  aria-label={label}
-                  className={cn(
-                    'focus-visible:ring-ring/50 block w-full outline-none focus-visible:ring-3',
-                    !drawn &&
-                      'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
-                  )}
-                >
-                  {drawn || (
-                    <>
-                      <ImageIcon size={16} aria-hidden />
-                      {messages.imagePlaceholder}
-                    </>
-                  )}
-                </button>
-              }
-            />
-          </div>
-        );
-      })}
+      {images.map((field) => (
+        <EmailBlockImage
+          key={field.name}
+          field={field}
+          value={emailBlockText(values, field.name)}
+          editor={editor}
+          place={place}
+          live={live}
+          label={words.field(field.name, field.label)}
+          messages={messages}
+          update={update}
+        />
+      ))}
       {block.body !== null && (
         <div data-slot="email-block-body" className="min-h-6">
           {body}
@@ -278,6 +334,7 @@ function EmailBlockDefaultView({
         <div key={items.name} contentEditable={false}>
           <EmailBlockItems
             editor={editor}
+            place={place}
             items={items}
             entries={emailBlockItemsOf(items, values[items.name])}
             label={words.field(items.name, items.label)}
@@ -436,6 +493,7 @@ export function emailBlockFeature(
           editable={fields}
           restructure={fields && !required}
           editor={editor}
+          place={{ editor, getPos: props.getPos }}
           words={shown}
           messages={messages}
           update={updateAttrs}
@@ -465,6 +523,7 @@ export function emailBlockFeature(
             editable={false}
             restructure={false}
             editor={null}
+            place={null}
             words={words}
             messages={DEFAULT_PROFILE_MESSAGES}
             update={() => {}}

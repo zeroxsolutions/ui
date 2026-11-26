@@ -70,6 +70,7 @@ import { UNLINK_ITEM_ID } from './marks';
 import { carriesKey, contextOf } from './kit-context';
 import { EmailLinkPopover } from './email-link-popover';
 import { EmailPreview } from './email-preview';
+import type { EditorUpload, UploadLimits } from '../../document/uploads/upload';
 import { problemDecorations, problemMarks, type ProblemMark } from './problem-decorations';
 
 /** How long after an edit the problems are read again, at most, and how long after the last edit the preview is. */
@@ -139,6 +140,16 @@ interface EmailEditorBaseProps {
   required?: readonly string[];
   /** `locked` lets the author edit text and variables only; nothing is inserted, removed or restyled. */
   structure?: 'free' | 'locked';
+  /**
+   * Stores a file the author uploads and answers its web address. Given, every image field (the image block's, a
+   * hero's, a card's, a product block's and each social icon's) has an Upload tab beside its Link tab, and an
+   * image file pasted or dropped into the editor becomes an image block. The answered address is checked as a
+   * typed one is, so an image block or a library block refuses an `http:` one. Whether it is given, and
+   * `uploadLimits`, are read once: a change needs a remount; the latest callback is the one called.
+   */
+  upload?: EditorUpload;
+  /** The image types an upload takes, within `image/*`, and the largest file, in bytes. */
+  uploadLimits?: UploadLimits;
   className?: string;
   onChange?(blocks: EditorEmailBlock[]): void;
   /** The focus left the editor and the popups it opened; when to save is the host's. */
@@ -336,6 +347,8 @@ export function EmailEditor({
   presets,
   required = [],
   structure = 'free',
+  upload,
+  uploadLimits,
   renderer,
   previewInput,
   sender,
@@ -358,8 +371,19 @@ export function EmailEditor({
       `Block "${missing}" is in \`blocks\` but not in the profile; pass it to emailProfile({ blocks }) too.`,
     );
   }
-  const live = useRef({ profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur });
-  live.current = { profile, required, structure, renderer, previewInput, text, onChange, onValidate, onBlur };
+  const live = useRef({
+    profile,
+    required,
+    structure,
+    renderer,
+    previewInput,
+    text,
+    upload,
+    onChange,
+    onValidate,
+    onBlur,
+  });
+  live.current = { profile, required, structure, renderer, previewInput, text, upload, onChange, onValidate, onBlur };
 
   const hosts = useRef(new Map<string, HTMLElement>());
   const host = useCallback((key: string) => {
@@ -390,6 +414,12 @@ export function EmailEditor({
       required: () => live.current.required,
       structure: () => live.current.structure,
       messages: () => live.current.text,
+      uploads: upload
+        ? {
+            upload: (file, options) => (live.current.upload ?? upload)(file, options),
+            limits: uploadLimits ?? {},
+          }
+        : undefined,
     });
     const offered = presets?.length
       ? [

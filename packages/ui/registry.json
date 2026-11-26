@@ -3817,6 +3817,7 @@
         "@zui/editor-columns",
         "@zui/editor-image",
         "@zui/editor-table",
+        "@zui/editor-uploads",
         "@zui/lucide-at-sign-icon",
         "@zui/lucide-blocks-icon",
         "@zui/lucide-braces-icon",
@@ -3983,6 +3984,11 @@
           "path": "registry/bases/base-ui/editor/profiles/email/email-spacer-view.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/email-spacer-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/email-uploads.ts",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/email-uploads.ts"
         }
       ],
       "dependencies": [
