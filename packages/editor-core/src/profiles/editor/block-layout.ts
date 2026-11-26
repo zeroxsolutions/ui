@@ -284,7 +284,8 @@ const sectionArgs = z.object({ pos: position, layout: sectionPatch });
  * their own specs. Adds the marks `textColor` and `textBackground` (attribute `token`, `<span data-color>` and
  * `<span data-bg>`), and the commands below, each one undo step, refused (`can` false) where the block does not take
  * the value or, with `email`, where the email cannot draw it. A document opened or loaded with an image's pixel
- * width, or a table's pixel `colwidth`s, holds fractions instead, with no undo step.
+ * width, or a table's pixel `colwidth`s, holds fractions instead, with no undo step; a paste or a drop holding them
+ * holds fractions too, in the paste's own undo step.
  */
 export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
   const layoutTypes: Readonly<Record<string, readonly string[]>> = { ...LAYOUT_NODES, ...options.types };
@@ -327,9 +328,15 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       }
     },
     appendTransaction(trs, _oldState, newState) {
-      if (!trs.some((tr) => tr.docChanged && tr.getMeta(CONTENT_LOAD_META) && !tr.getMeta(layoutKey))) return null;
+      const fresh = trs.filter((tr) => tr.docChanged && !tr.getMeta(layoutKey));
+      const loaded = fresh.some((tr) => tr.getMeta(CONTENT_LOAD_META));
+      // A paste or a drop brings in what another editor or page wrote, pixel widths among it; the fix joins its
+      // undo step.
+      const brought = fresh.some((tr) => ['paste', 'drop'].includes(tr.getMeta('uiEvent') as string));
+      if (!loaded && !brought) return null;
       const tr = pixelFixes(newState);
-      return tr && tr.setMeta(layoutKey, true).setMeta(CONTENT_LOAD_META, true).setMeta('addToHistory', false);
+      if (!tr || !loaded) return tr && tr.setMeta(layoutKey, true);
+      return tr.setMeta(layoutKey, true).setMeta(CONTENT_LOAD_META, true).setMeta('addToHistory', false);
     },
   });
 

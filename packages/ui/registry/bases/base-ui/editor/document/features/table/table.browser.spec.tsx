@@ -52,7 +52,9 @@ async function mount(content: DocJSON): Promise<{ editor: IEditor; changes: () =
     if (!ready) throw new Error('the editor is not ready');
     return ready;
   });
-  await vi.waitFor(() => expect(document.querySelector('.ProseMirror [data-slot=table] table')).not.toBeNull());
+  if (content.content?.some((node) => node.type === 'table')) {
+    await vi.waitFor(() => expect(document.querySelector('.ProseMirror [data-slot=table] table')).not.toBeNull());
+  }
   return { editor, changes: () => changes };
 }
 
@@ -159,6 +161,29 @@ describe('the table in the Document Editor', () => {
     expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.25, 0.75]);
     expect(drawnShares()[0]).toBeCloseTo(0.25, 1);
     expect(changes()).toBe(0);
+  });
+
+  it('a table pasted with pixel colwidths takes the same proportions as fractions, in one undo step', async () => {
+    await page.viewport(1000, 700);
+    const { editor } = await mount({ type: 'doc', content: [{ type: 'paragraph' }] });
+    const source = document.createElement('div');
+    source.contentEditable = 'true';
+    source.innerHTML =
+      '<table><tbody><tr><td colwidth="100"><p>a</p></td><td colwidth="300"><p>b</p></td></tr></tbody></table>';
+    document.body.append(source);
+    await userEvent.click(source);
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+    await userEvent.copy();
+    source.remove();
+
+    await userEvent.click(document.querySelector<HTMLElement>('.ProseMirror p')!);
+    await userEvent.paste();
+
+    await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.25, 0.75]));
+    expect(JSON.stringify(editor.getJSON())).not.toContain('colwidth":[');
+    expect(drawnShares()[0]).toBeCloseTo(0.25, 1);
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(tableOf(editor)).toBeUndefined());
   });
 
   it("Full width bleeds to the editor's edges, and the Viewer draws the same", async () => {
