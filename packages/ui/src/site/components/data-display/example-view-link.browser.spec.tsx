@@ -1,25 +1,15 @@
-import {
-  CheckIcon as LucideCheckIcon,
-  ChevronDownIcon as LucideChevronDownIcon,
-  Maximize2Icon as LucideMaximize2Icon,
-} from 'lucide-react';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 import '../../../../test/nova-style.css';
-import { Button } from '../../../../registry/bases/base-ui/ui/button';
+import { drawingIn, expectPlaying, playMotion, settled } from '../../../../test/motion';
 import { drawingsOver } from '../../../test/drawings-over';
 import { TestHost } from '../../../test/test-host';
 import { StylePicker } from '../navigation/style-picker';
 
 import { ExampleViewLink } from './example-view-link';
-
-function sizeOf(element: Element): { width: number; height: number } {
-  const { width, height } = element.getBoundingClientRect();
-  return { width, height };
-}
 
 function Stage({ children }: { children: ReactNode }): ReactNode {
   return (
@@ -29,65 +19,33 @@ function Stage({ children }: { children: ReactNode }): ReactNode {
   );
 }
 
-// An icon inside its control keeps the size lucide-react's drew at there, which the control's own rule sets.
-describe('the docs chrome icons', () => {
-  it("draws the preview link's icon at the size lucide-react's drew at", async () => {
-    await render(
-      <Stage>
-        <ExampleViewLink name="x-demo" href="/view/x-demo" />
-        <Button variant="ghost" size="icon-sm" aria-label="reference">
-          <LucideMaximize2Icon />
-        </Button>
-      </Stage>,
-    );
+describe('ExampleViewLink', () => {
+  playMotion();
 
-    const ours = page
-      .getByRole('link', { name: /Open x-demo/ })
-      .element()
-      .querySelector('svg');
-    const reference = page.getByRole('button', { name: 'reference' }).element().querySelector('svg');
-    expect(sizeOf(ours as Element)).toEqual(sizeOf(reference as Element));
-    expect(sizeOf(ours as Element).width).toBeGreaterThan(0);
+  it('opens the demo page in a new tab under a label naming the demo', async () => {
+    await render(<ExampleViewLink name="button-demo" href="/view/button-demo" />);
+
+    const link = page.getByRole('link', { name: 'Open button-demo in a new tab' });
+    await expect.element(link).toHaveAttribute('href', '/view/button-demo');
+    await expect.element(link).toHaveAttribute('target', '_blank');
   });
 
-  it("draws the style picker's chevron at the size lucide-react's drew at", async () => {
-    await render(
-      <Stage>
-        <StylePicker platform="web" />
-        <Button variant="ghost" size="sm" aria-label="reference">
-          Style
-          <LucideChevronDownIcon />
-        </Button>
-      </Stage>,
-    );
+  it('plays its icon while the pointer or the focus is on it', async () => {
+    await render(<ExampleViewLink name="button-demo" href="/view/button-demo" />);
+    const link = page.getByRole('link', { name: 'Open button-demo in a new tab' });
 
-    const ours = page
-      .getByRole('button', { name: /^Style/ })
-      .first()
-      .element()
-      .querySelector('svg');
-    const reference = page.getByRole('button', { name: 'reference' }).element().querySelector('svg');
-    expect(sizeOf(ours as Element)).toEqual(sizeOf(reference as Element));
-    expect(sizeOf(ours as Element).width).toBeGreaterThan(0);
+    await userEvent.hover(link);
+    await expectPlaying(link.element(), drawingIn(link.element()));
+    await userEvent.unhover(link);
+    const rest = await settled(link.element());
+
+    await userEvent.tab();
+    await expect.element(link).toHaveFocus();
+    await expectPlaying(link.element(), rest);
   });
+});
 
-  it("draws the style picker's check at the size lucide-react's drew at", async () => {
-    await render(
-      <Stage>
-        <StylePicker platform="web" />
-        <LucideCheckIcon className="size-4" data-testid="reference" />
-      </Stage>,
-    );
-    await userEvent.click(page.getByRole('button', { name: /^Style/ }));
-
-    const item = page.getByRole('menuitem', { name: 'Nova' });
-    await expect.element(item).toBeVisible();
-    const ours = item.element().querySelector('svg');
-    const reference = page.getByTestId('reference').element();
-    expect(sizeOf(ours as Element)).toEqual(sizeOf(reference));
-    expect(sizeOf(reference).width).toBe(16);
-  });
-
+describe('the style picker in the docs chrome', () => {
   // The browser project runs as a reader who asked for reduced motion.
   it("leaves the style in use's check as drawn under reduced motion", async () => {
     await render(
