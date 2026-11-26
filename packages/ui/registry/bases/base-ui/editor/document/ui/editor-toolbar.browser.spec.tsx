@@ -126,13 +126,24 @@ async function askForMotion(): Promise<() => Promise<void>> {
 }
 
 /**
- * Counts every attribute `icon` draws differently from now on, and reads what it draws. Motion leaves
- * `transform: none` on a drawing it has animated back to rest, which draws as no transform at all.
+ * Reads what `icon` draws. Motion leaves `transform: none` on a drawing it has animated back to rest,
+ * which draws as no transform at all. `atRest` reads the drawing once it stays the same for a few
+ * frames, since motion plays out frame by frame.
  */
-function watchIcon(icon: Element): { changes: () => number; drawn: () => string } {
-  let changes = 0;
-  new MutationObserver((records) => (changes += records.length)).observe(icon, { subtree: true, attributes: true });
-  return { changes: () => changes, drawn: () => icon.innerHTML.replaceAll(' style="transform: none;"', '') };
+function readIcon(icon: Element): { drawn: () => string; atRest: () => Promise<string> } {
+  const drawn = () => icon.innerHTML.replaceAll(' style="transform: none;"', '');
+  const frame = () => new Promise((done) => requestAnimationFrame(done));
+  const atRest = () =>
+    vi.waitFor(
+      async () => {
+        const seen = drawn();
+        for (let i = 0; i < 5; i++) await frame();
+        expect(drawn()).toBe(seen);
+        return seen;
+      },
+      { timeout: 10_000 },
+    );
+  return { drawn, atRest };
 }
 
 describe('EditorToolbar over the Document Editor', () => {
@@ -161,19 +172,20 @@ describe('EditorToolbar over the Document Editor', () => {
     await render(<ToolbarHarness />);
     const bold = page.getByRole('button', { name: 'Bold' });
     await expect.element(bold).toBeVisible();
-    const icon = watchIcon(bold.element().querySelector('svg')!.parentElement!);
-    const still = icon.drawn();
+    const icon = readIcon(bold.element().querySelector('svg')!.parentElement!);
+    // An earlier case leaves the pointer where Bold now draws, so the icon starts out hovered.
+    await userEvent.unhover(bold);
+    const still = await icon.atRest();
 
     await userEvent.hover(bold);
-    await vi.waitFor(() => expect(icon.changes()).toBeGreaterThan(0));
+    await vi.waitFor(() => expect(icon.drawn()).not.toBe(still));
     await userEvent.unhover(bold);
     // The icon plays its motion out before it is still, frame by frame, which a loaded runner stretches.
     await vi.waitFor(() => expect(icon.drawn()).toBe(still), { timeout: 10_000 });
 
-    const before = icon.changes();
     await userEvent.click(page.getByText('Notes'));
     await userEvent.tab({ shift: true });
     await expect.element(bold).toHaveFocus();
-    await vi.waitFor(() => expect(icon.changes()).toBeGreaterThan(before));
+    await vi.waitFor(() => expect(icon.drawn()).not.toBe(still));
   });
 });
