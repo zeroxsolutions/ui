@@ -20,6 +20,12 @@ const slotTexts = () =>
     .map((slot) => slot.textContent);
 const input = () => page.getByRole('textbox', { name: 'Verification code' });
 
+/** Copies the whole text of the field named `label`, as a reader copies a code out of a message. */
+async function copyFrom(label: string): Promise<void> {
+  await userEvent.tripleClick(page.getByLabelText(label));
+  await userEvent.copy();
+}
+
 describe('CodeInput', () => {
   it('renders one group of six slots and one input for the pattern "6"', async () => {
     await inStyle(<CodeInput aria-label="Verification code" />);
@@ -63,6 +69,39 @@ describe('CodeInput', () => {
     await userEvent.fill(input(), '482913');
 
     await expect.poll(slotTexts).toEqual(['4', '8', '2', '9', '1', '3']);
+  });
+
+  it('fills every slot from one paste of the whole code', async () => {
+    const onChange = vi.fn();
+    await inStyle(
+      <>
+        <input aria-label="Message" defaultValue="482913" />
+        <CodeInput aria-label="Verification code" pattern="3-3" onChange={onChange} />
+      </>,
+    );
+    await copyFrom('Message');
+
+    await userEvent.click(input());
+    await userEvent.paste();
+
+    await expect.poll(slotTexts).toEqual(['4', '8', '2', '9', '1', '3']);
+    expect(onChange).toHaveBeenLastCalledWith('482913');
+  });
+
+  it('refuses a pasted code holding a character outside the code', async () => {
+    await inStyle(
+      <>
+        <input aria-label="Message" defaultValue="48a913" />
+        <CodeInput aria-label="Verification code" />
+      </>,
+    );
+    await copyFrom('Message');
+
+    await userEvent.click(input());
+    await userEvent.paste();
+
+    await expect.element(input()).toHaveValue('');
+    expect(slotTexts()).toEqual(['', '', '', '', '', '']);
   });
 
   it('refuses a character outside the code', async () => {

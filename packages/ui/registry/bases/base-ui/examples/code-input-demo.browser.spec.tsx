@@ -20,21 +20,4 @@ describe('CodeInputDemo', () => {
     await expect.element(code).toHaveValue('482913');
     await expect.element(verify).toBeEnabled();
   });
-
-  it('takes the whole code from one paste', async () => {
-    await render(
-      <>
-        <input aria-label="Message" defaultValue="482913" />
-        <CodeInputDemo />
-      </>,
-    );
-    await userEvent.tripleClick(page.getByLabelText('Message'));
-    await userEvent.copy();
-
-    await userEvent.click(page.getByLabelText('Verification code'));
-    await userEvent.paste();
-
-    await expect.element(page.getByLabelText('Verification code')).toHaveValue('482913');
-    await expect.element(page.getByRole('button', { name: 'Verify' })).toBeEnabled();
-  });
 });
