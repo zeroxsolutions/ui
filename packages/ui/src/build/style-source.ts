@@ -29,7 +29,29 @@ export function styleSheets(root: string, style: Style): { upstream: string; zui
 /** Each `cn-` slot `style` draws, upstream's and zui's, with the classes it draws it with. */
 export function styleMapOf(root: string, style: Style): Record<string, string> {
   const { upstream, zui } = styleSheets(root, style);
-  return createStyleMap(`${upstream}\n${zui}`);
+  return slotMapOf(`${upstream}\n${zui}`);
+}
+
+/** A rule with no rule inside it: its selector list and its body. */
+const FLAT_RULE = /([^{}]+)\{([^{}]*)\}/g;
+
+/**
+ * Each `cn-` slot `sheet` draws on the bare slot, with the classes it draws it with. A rule whose selector
+ * scopes the slot, by a state, a `:has()` or a descendant, is left out: `createStyleMap` would fold its
+ * classes into the slot's own, and `shadcn add` would then write them on every element the slot names,
+ * as vega's `.cn-card-content:has(> [data-slot=questionnaire-choices])` would lay out every card's body.
+ */
+export function slotMapOf(sheet: string): Record<string, string> {
+  const uncommented = sheet.replace(/\/\*[\s\S]*?\*\//g, '');
+  const bare = uncommented.replace(FLAT_RULE, (rule, selectors: string) =>
+    selectors
+      .split(',')
+      .map((selector) => selector.trim())
+      .some((selector) => selector.includes('.cn-') && !/^\.cn-[\w-]+$/.test(selector))
+      ? ''
+      : rule,
+  );
+  return createStyleMap(bare);
 }
 
 /**
