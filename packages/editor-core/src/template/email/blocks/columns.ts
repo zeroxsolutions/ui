@@ -38,7 +38,7 @@ export const columns = defineBlockType({
   render({ attributes: a }, { h, lane }) {
     if (a.ratio.reduce((sum, weight) => sum + weight, 0) === 0) return [];
     return h.columns(
-      {},
+      a.valign === undefined ? {} : { valign: a.valign },
       a.ratio.map((weight, index) => h.column({ weight }, lane(index))),
     );
   },

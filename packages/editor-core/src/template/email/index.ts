@@ -7,6 +7,7 @@ export {
   type BlockSample,
   type BlockView,
   type EmailBlock,
+  type Nesting,
   type RenderContext,
   type RenderedBlock,
   type RenderProblem,
@@ -19,6 +20,8 @@ export {
   LIST_MAX_ITEMS,
 } from './blocks/shared.js';
 export { MAX_LANES } from './blocks/columns.js';
+export { EMAIL_SECTION_WIDTHS } from './blocks/section.js';
+export { CONTENT_WIDTH, emailAlignOf, layoutAlignOf, type Align } from './blocks/shared.js';
 export { SOCIAL_ICON_SIZES } from './blocks/social-links.js';
 export { SPACER_HEIGHTS } from './blocks/spacer.js';
 export { UNSUBSCRIBE_LABEL } from './blocks/legal-footer.js';
@@ -100,6 +103,10 @@ export {
   assertEmailTheme,
   DEFAULT_EMAIL_THEME,
   EmailThemeInvalid,
+  resolveEmailTheme,
+  tint,
   type EmailColors,
   type EmailTheme,
+  type ResolvedEmailColors,
+  type ResolvedEmailTheme,
 } from './theme.js';

@@ -7,22 +7,25 @@ import type {
   BlockRendering,
   BlockSample,
   EmailBlock,
+  Nesting,
   RenderedBlock,
   RenderProblem,
 } from './block.js';
 import { defaultBlocks, type DefaultBlocks, type DefaultBlockType } from './blocks/index.js';
+import { DEFAULT_SECTION_PADDING, SECTION_PADDING_PX } from './blocks/section.js';
+import { CARD_INNER_WIDTH, CONTENT_WIDTH, LANE_GUTTER } from './blocks/shared.js';
 import { createRenderContext, type RenderState } from './context.js';
-import { baseStylesheet } from './css/base-stylesheet.js';
-import { composeStylesheets } from './css/stylesheet.js';
+import { baseStylesheet, TOKEN_CLASSES } from './css/base-stylesheet.js';
+import { composeStylesheets, type ComposedStylesheet } from './css/stylesheet.js';
 import type { StylesheetWarning } from './css/unsupported.js';
 import { defaultLayout, type DefaultLayoutProps, type EmailLayout } from './layout.js';
-import { expandNodes } from './primitives/elements.js';
+import { expandNodes, type ElementChild } from './primitives/elements.js';
 import { createQueryWriter } from './css/query-styles.js';
 import { createPrimitives, layoutReader, type EmailNode } from './primitives/nodes.js';
 import { plainTextOf } from './primitives/plain-text.js';
 import { serialiseElements } from './primitives/serialise.js';
 import type { Region, RegionInput } from './region.js';
-import { assertEmailTheme, DEFAULT_EMAIL_THEME, type EmailTheme } from './theme.js';
+import { assertEmailTheme, DEFAULT_EMAIL_THEME, resolveEmailTheme, type EmailTheme } from './theme.js';
 
 /** Two definitions of one block type handed to one renderer. */
 export class BlockTypeCollision extends Error {
@@ -110,6 +113,46 @@ function classPart(attributes: unknown, name: string, fallback: string): string 
   return typeof value === 'string' && CLASS_PART.test(value) ? value : fallback;
 }
 
+/** The px a lane of a lanes block is drawn in: its weight's share of `available`, less the gutter after it. */
+function laneWidth(attributes: unknown, laneCount: number, index: number, available: number): number {
+  const ratio =
+    typeof attributes === 'object' && attributes !== null ? (attributes as { ratio?: unknown }).ratio : null;
+  const weights =
+    Array.isArray(ratio) &&
+    ratio.length >= laneCount &&
+    ratio.every((weight) => typeof weight === 'number' && weight > 0)
+      ? (ratio as number[]).slice(0, laneCount)
+      : Array<number>(laneCount).fill(1);
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  const share = Math.round((available * (weights[index] ?? 0)) / total);
+  return index === laneCount - 1 ? share : share - LANE_GUTTER;
+}
+
+/** The px a section's lane is drawn in: the card's inner width for a `wide` one, else `available`, inside its padding. */
+function sectionWidth(
+  attributes: { width?: string; padding?: keyof typeof SECTION_PADDING_PX },
+  available: number,
+): number {
+  const outer = attributes.width === 'wide' ? CARD_INNER_WIDTH : available;
+  return outer - 2 * SECTION_PADDING_PX[attributes.padding ?? DEFAULT_SECTION_PADDING];
+}
+
+/** The layout model's classes `children` are drawn with, raw markup's included, which the sheet writes rules for. */
+function tokenClassesIn(children: readonly ElementChild[], found: Set<string> = new Set()): Set<string> {
+  for (const child of children) {
+    if ('text' in child) continue;
+    if ('raw' in child) {
+      for (const match of child.raw.matchAll(/class="([^"]*)"/g)) {
+        for (const name of match[1].split(/\s+/)) if (TOKEN_CLASSES.has(name)) found.add(name);
+      }
+      continue;
+    }
+    for (const name of child.classes) if (TOKEN_CLASSES.has(name)) found.add(name);
+    tokenClassesIn(child.children, found);
+  }
+  return found;
+}
+
 const DARK_SCHEME_META =
   '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">';
 
@@ -147,10 +190,22 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
   options: EmailRendererOptions<Props, Extra> = {},
 ): EmailRenderer<DefaultBlockType | Extra[number]['type'], Props> {
   type Type = DefaultBlockType | Extra[number]['type'];
-  const theme = options.theme ?? DEFAULT_EMAIL_THEME;
-  assertEmailTheme(theme);
+  const given = options.theme ?? DEFAULT_EMAIL_THEME;
+  assertEmailTheme(given);
+  const theme = resolveEmailTheme(given);
   const sheets = options.css === undefined ? [] : typeof options.css === 'string' ? [options.css] : options.css;
   const stylesheet = composeStylesheets(baseStylesheet(theme), sheets);
+  // One sheet per set of layout classes a render uses, composed the first time a render uses that set.
+  const sheetsByClasses = new Map<string, ComposedStylesheet>([['', stylesheet]]);
+  const stylesheetFor = (used: ReadonlySet<string>): ComposedStylesheet => {
+    const key = [...used].sort().join(' ');
+    let composed = sheetsByClasses.get(key);
+    if (composed === undefined) {
+      composed = composeStylesheets(baseStylesheet(theme, used), sheets);
+      sheetsByClasses.set(key, composed);
+    }
+    return composed;
+  };
 
   const definitions = new Map<string, BlockDefinition>();
   for (const definition of Object.values(defaultBlocks) as BlockDefinition[]) {
@@ -175,18 +230,22 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
     render(input): RenderedEmail {
       const problems: RenderProblem[] = [];
       // Stored JSON is read, not trusted: a list or lane of another shape renders as empty.
-      const renderList = (state: RenderState, blocks: unknown, inLane: boolean): EmailNode[] => {
+      const renderList = (state: RenderState, blocks: unknown, nesting: Nesting, available: number): EmailNode[] => {
         const readable = Array.isArray(blocks) ? (blocks as unknown[]).filter(isBlock) : [];
-        return readable.flatMap((block) => renderOne(state, block, inLane));
+        return readable.flatMap((block) => renderOne(state, block, nesting, available));
       };
-      const renderOne = (state: RenderState, block: EmailBlock, inLane: boolean): EmailNode[] => {
+      const renderOne = (state: RenderState, block: EmailBlock, nesting: Nesting, available: number): EmailNode[] => {
         const definition = definitionOf(block.type);
         const where = state.region === 'body' ? {} : { region: state.region };
         if (definition === undefined) {
           problems.push({ blockId: block.id, kind: 'unknown-block-type', name: block.type, ...where });
           return [];
         }
-        if (inLane && (definition.holdsLanes || definition.wide === true)) {
+        // A lane holds no lanes block and no wide block; a section is a row of the body's own table, at the top only.
+        const section = definition.section === true;
+        const tooDeep =
+          (nesting === 'lane' && (definition.holdsLanes || definition.wide === true)) || (nesting !== 'top' && section);
+        if (tooDeep) {
           problems.push({ blockId: block.id, kind: 'block-nested-too-deep', ...where });
           return [];
         }
@@ -196,13 +255,18 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
           problems.push({ blockId: block.id, kind: 'lanes-count', ...where });
         }
         const lanes = bounds ? stored.slice(0, bounds.max) : stored;
+        const attributes = definition.readAttributes(block.attributes);
+        const laneAvailable = (index: number): number =>
+          section
+            ? sectionWidth(attributes as Parameters<typeof sectionWidth>[0], available)
+            : laneWidth(attributes, lanes.length, index, available);
         const ctx = createRenderContext(
           state,
           block.id,
-          (index) => renderList(state, lanes[index], true),
+          (index) => renderList(state, lanes[index], section ? 'section' : 'lane', laneAvailable(index)),
           lanes.length,
+          available,
         );
-        const attributes = definition.readAttributes(block.attributes);
         const drawn = definition.render(
           { id: block.id, attributes, content: definition.readContent(block.content) },
           ctx,
@@ -210,7 +274,9 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         if (isRendered(drawn)) return [{ kind: 'raw', html: drawn.html, text: drawn.text, rows: true }];
         const nodes: readonly EmailNode[] = Array.isArray(drawn) ? drawn : [drawn as EmailNode];
         if (nodes.length === 0) return [];
-        // The block's own row: its gap below and its alignment, by the attributes every default block reads.
+        // The block's own row: its gaps and its alignment, by the attributes every default block reads. A wide
+        // section's row is marked for the card, which draws it outside its padding.
+        const spaceBefore = classPart(attributes, 'spaceBefore', '');
         return [
           ctx.h.section(
             {
@@ -219,6 +285,8 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
                 `zx-block-${classPart({ type: block.type }, 'type', 'custom')}`,
                 `zx-align-${classPart(attributes, 'align', 'left')}`,
                 `zx-space-${classPart(attributes, 'spaceAfter', 'medium')}`,
+                spaceBefore !== '' && `zx-space-before-${spaceBefore}`,
+                section && classPart(attributes, 'width', 'content') === 'wide' && 'zx-section-wide',
               ],
             },
             nodes,
@@ -249,12 +317,13 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
             region,
           },
           blocks,
-          false,
+          'top',
+          CONTENT_WIDTH,
         );
       };
 
       const header = renderRegion('header');
-      const body = renderList(bodyState, input.blocks, false);
+      const body = renderList(bodyState, input.blocks, 'top', CONTENT_WIDTH);
       const footer = renderRegion('footer');
       const inbox = createRenderContext(bodyState, null, () => []);
       const subject = inbox.text(input.subject);
@@ -272,19 +341,21 @@ export function createEmailRenderer<Props = DefaultLayoutProps, const Extra exte
         throw new TypeError("An email layout returns primitives, drawn with its input's `h`, not HTML and text");
       }
       const nodes: readonly EmailNode[] = Array.isArray(framed) ? framed : [framed as EmailNode];
-      const queries = createQueryWriter(stylesheet.queries, stylesheet.queryWeight);
+      const elements = expandNodes(nodes);
+      const sheet = stylesheetFor(tokenClassesIn(elements));
+      const queries = createQueryWriter(sheet.queries, sheet.queryWeight);
       const document = serialiseElements(
-        [{ tag: 'body', attributes: [], classes: ['zx-body'], children: expandNodes(nodes) }],
-        stylesheet.rules,
+        [{ tag: 'body', attributes: [], classes: ['zx-body'], children: elements }],
+        sheet.rules,
         null,
         queries,
       );
-      const style = stylesheet.head + queries.head();
+      const style = sheet.head + queries.head();
       const html =
         '<!doctype html>' +
         `<html lang="${escapeHtml(input.locale)}">` +
         '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-        (stylesheet.darkScheme ? DARK_SCHEME_META : '') +
+        (sheet.darkScheme ? DARK_SCHEME_META : '') +
         `<title>${escapeHtml(subject)}</title>` +
         (style === '' ? '' : `<style>${style}</style>`) +
         `</head>${document}</html>`;

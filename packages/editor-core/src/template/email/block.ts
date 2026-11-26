@@ -18,6 +18,9 @@ export interface EmailBlock<Type extends string = string> {
   readonly lanes?: readonly (readonly EmailBlock<Type>[])[];
 }
 
+/** Where a block sits: at the top of a list of blocks, in a section's one lane, or in a lane of a lanes block. */
+export type Nesting = 'top' | 'section' | 'lane';
+
 /** One render's two arms. Neither is optional: a mail with no plain-text twin is filed as spam by many receivers. */
 export interface RenderedBlock {
   readonly html: string;
@@ -47,6 +50,12 @@ export interface RenderContext {
   readonly locale: string;
   /** Where the block renders, which decides the text size and colour a default block draws. */
   readonly region: Region | 'body';
+  /**
+   * The width in px the block is drawn in: the card's content width at the top and in a `content` section, a lane's
+   * share of its row less the gutter, and a `wide` section's width inside its padding. An image's width fraction
+   * is read against it.
+   */
+  readonly available: number;
   /** The template's text and every value, escaped: authored text in a block is text, never markup. */
   html(template: string): string;
   /** The template's own markup as written, every value escaped: the `html` block's arm, and no other's. */

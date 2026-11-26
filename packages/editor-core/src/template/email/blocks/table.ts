@@ -71,7 +71,10 @@ export const table = defineBlockType({
   },
   render({ attributes: a, content: c }, { h }) {
     const rows = drawnRows(c.rows);
-    return rows.length === 0 ? [] : h.table({ header: a.header ?? false, rows });
+    if (rows.length === 0) return [];
+    const widths =
+      a.columnWidths !== undefined && a.columnWidths.length === rows[0].length ? a.columnWidths : undefined;
+    return h.table({ header: a.header ?? false, rows, ...(widths === undefined ? {} : { columnWidths: widths }) });
   },
   sample: {
     attributes: { header: true },

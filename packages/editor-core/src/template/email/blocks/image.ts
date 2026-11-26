@@ -43,6 +43,15 @@ const lenientContent = z.object({
 });
 
 /**
+ * The px an image is drawn at: a fraction of the width it sits in, a legacy pixel width as stored, or the card's
+ * content width when it names none; never wider than the content width, which Outlook would push the card past.
+ */
+function drawnWidth(width: number | undefined, available: number): number {
+  if (width === undefined) return CONTENT_WIDTH;
+  return Math.min(width <= 1 ? Math.round(width * available) : width, CONTENT_WIDTH);
+}
+
+/**
  * A hosted image, its alt text read where images are off, optionally linked and captioned. It is drawn at its
  * width, at most the card's content width and that by default, and shrinks to a narrow screen. The write check
  * takes an `https:` address or a url variable; drawn, any address but an `http:` or `https:` one draws nothing,
@@ -63,14 +72,14 @@ export const image = defineBlockType({
       ...(source.caption === undefined || source.caption === '' ? {} : { caption: await translateOne(source.caption) }),
     };
   },
-  render({ attributes: a, content: c }, { h }) {
+  render({ attributes: a, content: c }, { h, available }) {
     const caption = c.caption ?? '';
     return [
       h.image({
         class: 'zx-image-fluid',
         src: c.src,
         alt: c.alt,
-        width: Math.min(a.width ?? CONTENT_WIDTH, CONTENT_WIDTH),
+        width: drawnWidth(a.width, available),
         ...(c.href ? { href: c.href } : {}),
       }),
       caption !== '' && h.text({ class: ['zx-caption', 'zx-tone-muted'], text: caption }),

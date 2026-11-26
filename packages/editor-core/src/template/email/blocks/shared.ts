@@ -74,6 +74,15 @@ export const IMAGE_START = /^https:\/\//i;
  */
 export const CONTENT_WIDTH = 566;
 
+/** The card's width inside its 1px border, which a `wide` section reaches. */
+export const CARD_INNER_WIDTH = 598;
+
+/** The gap at the end of every lane but the last, which `.zx-lane` pads. */
+export const LANE_GUTTER = 8;
+
+/** Each space token's length in px, before or after a block. */
+export const SPACE_PX = { none: 0, small: 6, medium: 10, large: 20 } as const satisfies Record<Space, number>;
+
 /**
  * An image's stored width: a fraction of the width it is drawn in, `WIDTH_MIN` to 1, or a legacy whole pixel width
  * from 1 to `CONTENT_WIDTH`. A stored 1 reads as the whole width, never as one pixel.

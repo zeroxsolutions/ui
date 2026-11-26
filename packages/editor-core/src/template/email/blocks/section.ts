@@ -1,10 +1,19 @@
 import { z } from 'zod';
-import { SECTION_BACKGROUNDS, SPACES, type SectionWidth } from '../../layout/index.js';
+import { SECTION_BACKGROUNDS, SPACES, type LayoutSpace, type SectionWidth } from '../../layout/index.js';
 import { defineBlockType } from '../block.js';
 import { readOr, spaceAfter, spaceBefore } from './shared.js';
 
 /** The section widths an email draws: within the card's content, or to the card's inner edges; never past the card. */
 export const EMAIL_SECTION_WIDTHS = ['content', 'wide'] as const satisfies readonly SectionWidth[];
+
+/** Each padding token's length in px, on every side of a section's lane. */
+export const SECTION_PADDING_PX = { none: 0, small: 8, medium: 16, large: 24 } as const satisfies Record<
+  LayoutSpace,
+  number
+>;
+
+/** The padding a section takes when it names none. */
+export const DEFAULT_SECTION_PADDING: LayoutSpace = 'medium';
 
 const background = z.enum(SECTION_BACKGROUNDS).optional();
 const padding = z.enum(SPACES).optional();
@@ -36,8 +45,12 @@ export const section = defineBlockType({
   async translate(source) {
     return { ...source };
   },
-  render() {
-    return [];
+  render({ attributes: a }, { h, lane }) {
+    const background = a.background === undefined || a.background === 'none' ? null : `zx-section-bg-${a.background}`;
+    return h.section(
+      { class: ['zx-section', background, `zx-section-pad-${a.padding ?? DEFAULT_SECTION_PADDING}`] },
+      lane(0),
+    );
   },
   sample: {
     attributes: { background: 'muted', padding: 'medium' },

@@ -9,6 +9,7 @@ import {
 } from '../../template/email/blocks/index.js';
 import { IMAGE_TEXT_MAX_LENGTH } from '../../template/email/blocks/image.js';
 import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '../../template/email/blocks/table.js';
+import type { Nesting } from '../../template/email/block.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
 import type {
@@ -20,9 +21,6 @@ import type {
 import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js';
 
 const RATIO_WEIGHT_MAX = 12;
-
-/** Where a block sits: at the top of the body, in a section's one lane, or in a lane of a columns or lanes block. */
-type Nesting = 'top' | 'section' | 'lane';
 
 interface Walk {
   readonly profile: EditorProfile;

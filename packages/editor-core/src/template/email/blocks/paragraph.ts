@@ -24,7 +24,7 @@ export const paragraph = defineBlockType({
     return { text: await translateOne(source.text) };
   },
   render({ attributes: a, content: c }, { h }) {
-    return h.text({ class: `zx-tone-${a.tone ?? 'default'}`, markup: c.text });
+    return h.text({ class: [`zx-tone-${a.tone ?? 'default'}`, a.size && `zx-text-${a.size}`], markup: c.text });
   },
   sample: { attributes: {}, content: { text: 'Hi {{name}},' }, variableTypes: { name: 'string' } },
 });

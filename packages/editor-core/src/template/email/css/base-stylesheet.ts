@@ -1,4 +1,23 @@
-import { fontStack, type EmailColors, type EmailTheme } from '../theme.js';
+import {
+  COLOR_TOKENS,
+  SECTION_BACKGROUNDS,
+  SPACES,
+  VALIGNS,
+  type ColorToken,
+  type SectionBackground,
+} from '../../layout/index.js';
+import { SECTION_PADDING_PX } from '../blocks/section.js';
+import { LANE_GUTTER, SPACE_PX } from '../blocks/shared.js';
+import {
+  DEFAULT_EMAIL_THEME,
+  fontStack,
+  resolveEmailTheme,
+  tint,
+  type EmailColors,
+  type EmailTheme,
+  type ResolvedEmailColors,
+  type ResolvedEmailTheme,
+} from '../theme.js';
 
 /** The monospace list a code block sets its digits in, so each digit takes the same width. */
 const MONOSPACE = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace";
@@ -7,8 +26,8 @@ const MONOSPACE = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New',
  * Under 600px the card loses its frame and gutter and fills the screen, body text and the button grow to
  * 16px, the button spans the card, and lanes stack. Footer text stays small.
  */
-const NARROW_SCREEN =
-  '@media only screen and (max-width:600px){' +
+const NARROW_SCREEN_OPEN = '@media only screen and (max-width:600px){';
+const NARROW_SCREEN_RULES =
   '.zx-outer{padding:0 !important;}' +
   '.zx-card{border:0 !important;border-radius:0 !important;}' +
   '.zx-inner{padding:24px 20px !important;}' +
@@ -18,11 +37,10 @@ const NARROW_SCREEN =
   '.zx-button{display:block !important;text-align:center !important;font-size:16px !important;line-height:22px !important;padding:12px 16px !important;}' +
   '.zx-lane{display:block !important;width:100% !important;padding:0 !important;}' +
   '.zx-caption{font-size:12px !important;line-height:17px !important;}' +
-  '.zx-legal-text{font-size:12px !important;line-height:17px !important;}' +
-  '}';
+  '.zx-legal-text{font-size:12px !important;line-height:17px !important;}';
 
 /** The rules that repaint the email with `dark` where a client reads `prefers-color-scheme` (Apple Mail, Outlook for Mac). */
-function darkScheme(dark: EmailColors): string {
+function darkScheme(dark: EmailColors, extra: string): string {
   return (
     '@media (prefers-color-scheme:dark){' +
     `.zx-body{background:${dark.background} !important;}` +
@@ -43,19 +61,118 @@ function darkScheme(dark: EmailColors): string {
     `.zx-table-head{background:${dark.muted} !important;}` +
     `.zx-card-block{border-color:${dark.border} !important;}` +
     `.zx-footer{border-color:${dark.border} !important;}` +
+    extra +
     '}'
   );
 }
+
+/** How much of a colour a background token's surface takes, over the page's background. */
+const SURFACE_TINT = 0.15;
+
+/** A colour token as text in `colors`; `default` draws no colour of its own. */
+export function textColorOf(token: Paint, colors: ResolvedEmailColors): string {
+  switch (token) {
+    case 'muted':
+      return colors.mutedForeground;
+    case 'primary':
+      return colors.primary;
+    case 'accent':
+      return colors.accent;
+    default:
+      return colors.hues[token];
+  }
+}
+
+/** A colour token as a surface behind text or a section in `colors`: the muted surface, or a tint of the colour. */
+export function surfaceColorOf(token: Paint, colors: ResolvedEmailColors): string {
+  return token === 'muted' ? colors.muted : tint(textColorOf(token, colors), colors.background, SURFACE_TINT);
+}
+
+/** One class the layout model draws with: its light declarations, and its narrow-screen and dark ones where it has them. */
+interface TokenRule {
+  readonly light: string;
+  readonly narrow?: string;
+  readonly dark?: string;
+}
+
+type Paint = Exclude<ColorToken, 'default'>;
+
+const PAINTS = COLOR_TOKENS.filter((token): token is Paint => token !== 'default');
+const SECTION_SURFACES = SECTION_BACKGROUNDS.filter((token): token is Paint & SectionBackground => token !== 'none');
+const VERTICAL_ALIGN = { top: 'top', center: 'middle', bottom: 'bottom' } as const;
+
+/**
+ * The layout model's classes, in the order the sheet writes them: each written only where a render uses it, so an
+ * email with no layout attribute draws with the sheet it had before there were any.
+ */
+function tokenRules(theme: ResolvedEmailTheme): ReadonlyMap<string, TokenRule> {
+  const { colors, dark } = theme;
+  const rules: [string, TokenRule][] = [
+    ['zx-space-none', { light: 'padding:0;' }],
+    ...SPACES.map((space): [string, TokenRule] => [
+      `zx-space-before-${space}`,
+      { light: `padding-top:${SPACE_PX[space] === 0 ? '0' : `${SPACE_PX[space]}px`};` },
+    ]),
+    [
+      'zx-text-lead',
+      { light: 'font-size:18px;line-height:28px;', narrow: 'font-size:18px !important;line-height:28px !important;' },
+    ],
+    [
+      'zx-text-small',
+      { light: 'font-size:12px;line-height:17px;', narrow: 'font-size:12px !important;line-height:17px !important;' },
+    ],
+    ...VALIGNS.map((valign): [string, TokenRule] => [
+      `zx-valign-${valign}`,
+      { light: `vertical-align:${VERTICAL_ALIGN[valign]};` },
+    ]),
+    ...PAINTS.map((token): [string, TokenRule] => [
+      `zx-color-${token}`,
+      {
+        light: `color:${textColorOf(token, colors)};`,
+        ...(dark === undefined ? {} : { dark: `color:${textColorOf(token, dark)} !important;` }),
+      },
+    ]),
+    ...PAINTS.map((token): [string, TokenRule] => [
+      `zx-bg-${token}`,
+      {
+        light: `background:${surfaceColorOf(token, colors)};`,
+        ...(dark === undefined ? {} : { dark: `background:${surfaceColorOf(token, dark)} !important;` }),
+      },
+    ]),
+    ['zx-section', { light: `border-radius:${theme.radius}px;` }],
+    ...SECTION_SURFACES.map((token): [string, TokenRule] => [
+      `zx-section-bg-${token}`,
+      {
+        light: `background:${surfaceColorOf(token, colors)};`,
+        ...(dark === undefined ? {} : { dark: `background:${surfaceColorOf(token, dark)} !important;` }),
+      },
+    ]),
+    ...SPACES.map((space): [string, TokenRule] => [
+      `zx-section-pad-${space}`,
+      { light: `padding:${SECTION_PADDING_PX[space] === 0 ? '0' : `${SECTION_PADDING_PX[space]}px`};` },
+    ]),
+    ['zx-inner-flush-bottom', { light: 'padding-bottom:0;', narrow: 'padding-bottom:0 !important;' }],
+    ['zx-inner-flush-top', { light: 'padding-top:0;', narrow: 'padding-top:0 !important;' }],
+    ['zx-inner-wide', { light: 'padding:0;' }],
+  ];
+  return new Map(rules);
+}
+
+/** Every class of the layout model a sheet writes only where a render uses it. */
+export const TOKEN_CLASSES: ReadonlySet<string> = new Set(tokenRules(DEFAULT_EMAIL_THEME).keys());
 
 /**
  * The stylesheet every default block and the default layout are drawn by, its values taken from `theme`. A
  * product's sheet comes after it, so a product rule of equal specificity wins. The narrow-screen rules and
  * the dark palette's are head rules, class-keyed, as Gmail keeps only those; without `theme.dark` the email
- * has no dark rules and declares no dark scheme.
+ * has no dark rules and declares no dark scheme. Of `TOKEN_CLASSES`, only the classes in `used` are written.
  */
-export function baseStylesheet(theme: EmailTheme): string {
+export function baseStylesheet(theme: EmailTheme, used: ReadonlySet<string> = new Set()): string {
   const { colors: c, radius } = theme;
   const font = fontStack(theme);
+  const rules = [...tokenRules(resolveEmailTheme(theme))].filter(([name]) => used.has(name));
+  const written = (part: keyof TokenRule): string =>
+    rules.map(([name, rule]) => (rule[part] === undefined ? '' : `.${name}{${rule[part]}}`)).join('');
   return (
     `.zx-body{margin:0;padding:0;background:${c.background};}` +
     `.zx-canvas{background:${c.background};}` +
@@ -104,12 +221,16 @@ export function baseStylesheet(theme: EmailTheme): string {
     `.zx-card-block-image{border-radius:${radius}px ${radius}px 0 0;}` +
     '.zx-card-block-body{padding:0 16px 16px;}' +
     '.zx-legal-text{padding:0 0 4px;font-size:12px;line-height:17px;}' +
-    '.zx-lane{padding:0 8px 0 0;}' +
+    `.zx-lane{padding:0 ${LANE_GUTTER}px 0 0;}` +
     '.zx-lane-last{padding:0;}' +
     `.zx-footer{padding:10px 0 0;border-top:1px solid ${c.border};}` +
     `.zx-footer-line{margin:0 0 4px;font-size:12px;line-height:17px;color:${c.mutedForeground};}` +
     `.zx-region-footer .zx-text{font-size:12px;line-height:17px;color:${c.mutedForeground};}` +
-    NARROW_SCREEN +
-    (theme.dark === undefined ? '' : darkScheme(theme.dark))
+    written('light') +
+    NARROW_SCREEN_OPEN +
+    NARROW_SCREEN_RULES +
+    written('narrow') +
+    '}' +
+    (theme.dark === undefined ? '' : darkScheme(theme.dark, written('dark')))
   );
 }
