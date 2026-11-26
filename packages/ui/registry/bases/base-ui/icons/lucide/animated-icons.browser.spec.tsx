@@ -1,5 +1,5 @@
 import { icons as lucideIcons } from 'lucide-react';
-import { frameData } from 'motion/react';
+import { frameData, visualElementStore } from 'motion/react';
 import { createRef, type ComponentType, type ReactNode, type Ref, type RefObject } from 'react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
@@ -266,23 +266,43 @@ async function pointAt(element: Element): Promise<void> {
   await mouse('move', centreOf(element));
 }
 
+/** The elements of `svg`, itself included, that a motion component draws. */
+function motionElementsIn(svg: Element): Element[] {
+  return [svg, ...svg.querySelectorAll('*')].filter((element) => visualElementStore.get(element) !== undefined);
+}
+
+/**
+ * Whether Motion has animated a value of `element`. A group that only times its children's motion holds none,
+ * and a value is held from the first time Motion animates it.
+ */
+function holdsValues(element: Element): boolean {
+  return (visualElementStore.get(element)?.values.size ?? 0) > 0;
+}
+
+/** The attributes `element` is drawn with, its inline style among them, without its children's. */
+function ownDrawing(element: Element): string {
+  return [...element.attributes].map(({ name, value }) => `${name}=${value}`).join(' ');
+}
+
 /** The button holding the icon `name`. */
 const buttonOf = (name: string): Element => document.querySelector(`[data-icon="${name}"]`) as Element;
 
 /**
- * Every icon is drawn and started at once, then read on every frame for 1.5 s: an icon whose motion starts only after
- * a delay is still caught. An icon counts as played when its drawing on some frame differs from its rest drawing. At
- * rest, read after the icons are stopped, each element of the icon's Lucide glyph must be drawn whole by some element
- * of the icon: at full opacity, fully drawn, and neither moved, turned nor scaled, itself or through a group around
- * it. A glyph element no element draws fails the icon unless the icon is in DRAWN_OTHERWISE. A decoration outside the
- * glyph is not checked.
+ * Every icon is drawn and started at once, then read on every frame for the play window: an icon whose motion starts
+ * only after a delay is still caught. An icon counts as played when its drawing on some frame differs from its rest
+ * drawing, and each element Motion animates in it must itself be drawn otherwise on some frame, so a part left out
+ * of the motion fails. At rest, read after the icons are stopped, each element of the icon's Lucide glyph must be
+ * drawn whole by some element of the icon: at full opacity, fully drawn, and neither moved, turned nor scaled,
+ * itself or through a group around it. A glyph element no element draws fails the icon unless the icon is in
+ * DRAWN_OTHERWISE. A decoration outside the glyph is not checked.
  */
 describe('the walk', () => {
   playMotion();
 
-  const WINDOW_MS = 1500;
   const played = new Set<string>();
   const unwhole = new Map<string, string[]>();
+  const animated = new Map<string, Element[]>();
+  const still = new Map<string, string[]>();
 
   beforeAll(async () => {
     const handles = cases.map(() => createRef<AnimatedIconHandle>());
@@ -330,13 +350,30 @@ describe('the walk', () => {
     }
     const buttons = cases.map(({ name }) => buttonOf(name));
     const rest = buttons.map(drawingIn);
+    for (const [index, { name }] of cases.entries()) {
+      animated.set(name, motionElementsIn(buttons[index].querySelector('svg') as Element));
+    }
+    const restOf = new Map([...animated.values()].flat().map((element) => [element, ownDrawing(element)]));
+    const moved = new Set<Element>();
     for (const handle of handles) handle.current?.startAnimation();
     await drawingsOver(() => {
       buttons.forEach((button, index) => {
         if (drawingIn(button) !== rest[index]) played.add(cases[index].name);
       });
+      for (const [element, drawing] of restOf)
+        if (!moved.has(element) && ownDrawing(element) !== drawing) moved.add(element);
       return '';
-    }, WINDOW_MS);
+    }, PLAY_WINDOW_MS);
+    for (const [name, elements] of animated) {
+      const valued = elements.filter(holdsValues);
+      animated.set(name, valued);
+      still.set(
+        name,
+        valued
+          .filter((element) => !moved.has(element))
+          .map((element) => `<${element.tagName.toLowerCase()}> ${restOf.get(element)}`),
+      );
+    }
     for (const handle of handles) handle.current?.stopAnimation();
     await until(isMotionIdle, 'the icons returning to rest');
     await unmount();
@@ -344,6 +381,14 @@ describe('the walk', () => {
 
   it.each(cases)('$name plays from its handle', ({ name }) => {
     expect(played.has(name)).toBe(true);
+  });
+
+  it.each(cases)('$name animates an element with Motion', ({ name }) => {
+    expect(animated.get(name)?.length).toBeGreaterThan(0);
+  });
+
+  it.each(cases)('$name moves every element Motion animates', ({ name }) => {
+    expect(still.get(name)).toEqual([]);
   });
 
   it.each(cases)('$name draws its whole Lucide glyph at rest', ({ name }) => {
