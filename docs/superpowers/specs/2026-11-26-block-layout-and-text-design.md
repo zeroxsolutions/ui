@@ -102,6 +102,10 @@ The owner asked to proceed; these were settled by the writer and are open to the
 4. **Inline colour in email text** is a new inline-markup form, `{color=<token>}text{/color}` (and
    `{bg=<token>}...{/bg}`), escaped like the rest; older-format checks and translation checks learn it.
 5. **The email button keeps its own `width: inline | full`** (fill the card); it is not a media block. Only
-   image, video, embed and card take the layout `width`.
+   image, video, embed and card take the layout `width`, and in the email editor only the image, the email's one
+   media block: the email's card block carries no layout on the wire, so the email editor draws a card at the
+   card's width with no align, width or full width control.
+   Revised 2026-11-26: the first version listed card among the email's width blocks; the wire stores no card
+   layout, and the smallest change is to offer none rather than grow the wire.
 6. **Document table widths** are stored as fractions; pixel widths the current resizable table stored read as
    fractions of the table's width on load.
