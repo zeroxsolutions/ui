@@ -151,4 +151,20 @@ describe('the image block with uploads', () => {
     await vi.waitFor(() => expect(editor.getJSON().content?.filter((node) => node.type === 'image')).toHaveLength(1));
     expect(calls[0].signal.aborted).toBe(true);
   });
+
+  it('ends its upload when the author types an address instead, which stays', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], withImage);
+    await openUpload();
+    await userEvent.upload(fileInput(), pngFile());
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+
+    await openEdit();
+    await userEvent.fill(page.getByRole('textbox', { name: 'Image address' }), 'https://cdn.test/typed.png');
+    await userEvent.click(page.getByRole('textbox', { name: 'Alt text' }));
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
+    expect(srcOf(editor)).toBe('https://cdn.test/typed.png');
+  });
 });

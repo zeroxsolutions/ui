@@ -97,6 +97,8 @@ export function BlockAddressPopover({
   const apply = (address: string): void => {
     const next = address.trim();
     if (next === '' || disabled || problems(next).length > 0) return;
+    // The author's address wins over a file still uploading into it.
+    upload?.upload.cancel();
     onApply(next);
     setOpen(false);
   };
@@ -184,6 +186,7 @@ export function BlockAddressPopover({
                     disabled={disabled}
                     className="mr-auto"
                     onClick={() => {
+                      upload?.upload.cancel();
                       onRemove();
                       setOpen(false);
                     }}

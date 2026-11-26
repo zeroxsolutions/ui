@@ -128,6 +128,8 @@ function EmailBlockItemField({
             setDraft(next);
             const kind = field.kind === 'link' ? 'link' : 'image';
             if (next.trim() === '' || emailAddressProblems(next, kind, secure, declarations(), messages).length === 0) {
+              // The author's address wins over a file still uploading into it.
+              upload?.upload.cancel();
               onValueChange(next.trim());
             }
           }}

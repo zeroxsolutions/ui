@@ -64,4 +64,24 @@ describe('the card with uploads', () => {
       ),
     );
   });
+
+  it('ends its image upload when the author applies an address instead, which stays', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), card(cardDefinition, { upload })]);
+    await insertFromSlashMenu('Card');
+    await userEvent.click(page.getByRole('button', { name: 'Image', exact: true }));
+    await userEvent.upload(fileInput(), pngFile());
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+
+    await userEvent.click(page.getByRole('button', { name: 'Image', exact: true }));
+    await userEvent.click(page.getByRole('tab', { name: 'Link' }));
+    await userEvent.fill(page.getByRole('textbox', { name: 'Image', exact: true }), 'https://i.test/typed.jpg');
+    await userEvent.keyboard('{Enter}');
+    calls[0].answer('https://i.test/uploaded.jpg');
+
+    await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
+    expect(editor.getJSON().content?.find((node) => node.type === 'card')?.attrs?.image).toBe(
+      'https://i.test/typed.jpg',
+    );
+  });
 });

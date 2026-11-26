@@ -290,4 +290,20 @@ describe('uploads in the email editor', () => {
     await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
     expect((contentOf(probe, 'socialLinks') as { links: unknown[] }).links).toHaveLength(1);
   });
+
+  it("ends a product image's upload when the author removes the image", async () => {
+    const { upload, calls } = heldUpload();
+    const probe = await mount([block('banner', { picture: 'https://i.test/b.png', note: 'Sale' })], upload);
+    await userEvent.click(page.getByRole('button', { name: 'Picture' }));
+    await userEvent.click(page.getByRole('tab', { name: 'Upload' }));
+    await userEvent.upload(fileInput(), pngFile());
+    await waitForCalls(calls, 1);
+
+    await userEvent.click(page.getByRole('button', { name: 'Picture' }));
+    await userEvent.click(page.getByRole('button', { name: 'Remove' }));
+    calls[0].answer('https://i.test/uploaded.png');
+
+    await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
+    await vi.waitFor(() => expect(contentOf(probe, 'banner')).toMatchObject({ picture: '' }));
+  });
 });

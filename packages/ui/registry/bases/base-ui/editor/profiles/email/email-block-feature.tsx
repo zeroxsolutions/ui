@@ -247,7 +247,8 @@ function EmailBlockImage({
             type="button"
             aria-label={label}
             className={cn(
-              'focus-visible:ring-ring/50 block w-full outline-none focus-visible:ring-3',
+              // An image that has not loaded still leaves a control to open its popover from.
+              'focus-visible:ring-ring/50 bg-muted/40 block min-h-12 w-full outline-none focus-visible:ring-3',
               !drawn &&
                 'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
             )}

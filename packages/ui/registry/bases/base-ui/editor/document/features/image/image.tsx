@@ -193,7 +193,13 @@ function ImageEditView({
                     id={srcId}
                     placeholder="https://"
                     defaultValue={attrs.src}
-                    onBlur={(event) => updateAttrs({ src: event.target.value.trim() })}
+                    onBlur={(event) => {
+                      const src = event.target.value.trim();
+                      if (src === attrs.src) return;
+                      // The author's address wins over a file still uploading into it.
+                      upload?.cancel();
+                      updateAttrs({ src });
+                    }}
                   />
                 </Field>
               </UploadTabs>
