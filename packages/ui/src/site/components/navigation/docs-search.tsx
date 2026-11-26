@@ -107,14 +107,22 @@ function DocsSearch({ tree, navItems = [], platform = 'web', api, resultHref }: 
 
   return (
     <>
-      <div className="hidden md:block">
-        <Button variant="outline" className="w-48 justify-start xl:w-64" onClick={() => setOpen(true)}>
+      {/*
+        It gives up its width before the header overflows, as a style's wider type leaves less of it: the field
+        shows where the width holds it, and the icon where it does not.
+      */}
+      <div className="@container flex w-10 min-w-10 justify-end md:w-48 xl:w-64">
+        <Button
+          variant="outline"
+          className="hidden w-full justify-start @min-[10rem]:flex"
+          onClick={() => setOpen(true)}
+        >
           {/* The button is named once; the width-dependent labels and the shortcut hint are what is drawn. */}
           <span className="sr-only">Search documentation</span>
-          <span aria-hidden className="hidden xl:inline">
+          <span aria-hidden className="hidden min-w-0 truncate xl:inline">
             Search documentation...
           </span>
-          <span aria-hidden className="xl:hidden">
+          <span aria-hidden className="min-w-0 truncate xl:hidden">
             Search...
           </span>
           <KbdGroup aria-hidden className="ml-auto">
@@ -122,9 +130,13 @@ function DocsSearch({ tree, navItems = [], platform = 'web', api, resultHref }: 
             <Kbd>K</Kbd>
           </KbdGroup>
         </Button>
-      </div>
-      <div className="md:hidden">
-        <Button variant="ghost" size="icon" onClick={() => setOpen(true)} {...searchIcon.handlers}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="@min-[10rem]:hidden"
+          onClick={() => setOpen(true)}
+          {...searchIcon.handlers}
+        >
           <SearchIcon ref={searchIcon.ref} />
           <span className="sr-only">Search documentation</span>
         </Button>
