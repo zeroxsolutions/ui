@@ -13,6 +13,7 @@ import {
   type NodeJSON,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import { Extension, Plugin } from '@zeroxsolutions/editor-core/document/advanced';
 import { sectionNodeSpecs } from '@zeroxsolutions/editor-core/profiles/index';
 import {
   SECTION_BACKGROUNDS,
@@ -257,6 +258,32 @@ function sectionAttrsOf(element: HTMLElement): Record<string, string> {
   return Object.fromEntries(Object.entries(attrs).filter(([, value]) => value !== undefined));
 }
 
+/** The HTML of the blocks that hold blocks, as their codecs read it: a section, a lane, a callout, a list, a cell. */
+const BLOCK_HOLDERS = '[data-section], [data-column], [data-callout], li, td, th, blockquote, details';
+
+/**
+ * Pasted HTML with each `<section data-section>` an export wrote spelled as the node's own HTML, which is all the
+ * editor's paste reads, so a copied export pastes back as the section it was, its tokens kept.
+ */
+function pastedSections(html: string): string {
+  if (!html.includes('data-section')) return html;
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  for (const exported of template.content.querySelectorAll<HTMLElement>('section[data-section]')) {
+    const node = document.createElement('div');
+    node.setAttribute('data-type', 'section');
+    for (const [name, value] of Object.entries(sectionAttrsOf(exported))) node.setAttribute(name, value);
+    node.append(...exported.childNodes);
+    exported.replaceWith(node);
+  }
+  return template.innerHTML;
+}
+
+const SectionPaste = Extension.create({
+  name: 'sectionPaste',
+  addProseMirrorPlugins: () => [new Plugin({ props: { transformPastedHTML: pastedSections } })],
+});
+
 /** The inline nodes HTML may hold loose in a section, which only a paragraph holds in a document. */
 const INLINE = new Set(['text', 'hardBreak']);
 
@@ -297,8 +324,10 @@ const sectionCodec: ReactNodeCodec = {
     </SectionShell>
   ),
   fromHTML: (element, ctx) => {
-    // A section in a section reads as the blocks it holds, as a section never holds one.
-    if (!element.hasAttribute('data-section') || element.parentElement?.closest('[data-section]')) return null;
+    // A section sits only at the top: one inside a block that holds blocks reads as the blocks it holds, as does one a
+    // codec copied out of the page to read it, as the table does a cell's blocks.
+    const nested = !element.isConnected || element.parentElement?.closest(BLOCK_HOLDERS);
+    if (!element.hasAttribute('data-section') || nested) return null;
     const content = linesOf(ctx.fromHTMLChildren(element));
     return {
       type: 'section',
@@ -323,6 +352,7 @@ export function section(options: SectionOptions = {}): EditorFeature {
     id: 'section',
     nodes: [{ ...sectionNode, render: sectionView(words, widths, options.changeable) }],
     codecs: [sectionCodec as NodeCodec],
+    advanced: { engineExtensions: [SectionPaste] },
     slash: [
       {
         id: 'section',

@@ -4,11 +4,13 @@ import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/cor
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { fromEmailBlocks, toEmailBlocks } from '@zeroxsolutions/editor-core/profiles/index';
 import { Viewer } from '../../react/viewer';
+import { callout } from '../callout/index';
 import { columns } from '../columns/index';
 import { standardKit } from '../standard/index';
+import { table } from '../table/index';
 import { section } from './section';
 
-const features = [section(), columns(), standardKit()];
+const features = [section(), columns(), callout(), table(), standardKit()];
 const registry = createCodecRegistry(features);
 
 const line = (text: string): NodeJSON => ({ type: 'paragraph', content: [{ type: 'text', text }] });
@@ -26,6 +28,11 @@ const twoLanes: NodeJSON = {
     { type: 'column', content: [line('right')] },
   ],
 };
+
+/** Whether a section of `nodes` sits below the top of the document. */
+function sectionBelowTop(nodes: readonly NodeJSON[], inside = false): boolean {
+  return nodes.some((node) => (node.type === 'section' && inside) || sectionBelowTop(node.content ?? [], true));
+}
 
 describe('section', () => {
   it('round-trips through HTML with its background, padding, width and space', () => {
@@ -61,6 +68,31 @@ describe('section', () => {
       '<section data-section data-background="muted"><p>a</p>' +
       '<section data-section data-background="red"><p>b</p></section></section>';
     expect(importHTML(html, registry).doc).toEqual(docOf(sectionOf({ background: 'muted' }, line('a'), line('b'))));
+  });
+
+  it.each([
+    [
+      'a lane',
+      (inner: string) => `<div data-columns><div data-column>${inner}</div><div data-column><p>r</p></div></div>`,
+    ],
+    ['a callout', (inner: string) => `<div data-callout="info">${inner}</div>`],
+    ['a list item', (inner: string) => `<ul><li>${inner}</li></ul>`],
+    ['a table cell', (inner: string) => `<table><tbody><tr><td>${inner}</td></tr></tbody></table>`],
+  ])('reads a section in %s from HTML as the blocks it holds', (_, holder) => {
+    const doc = importHTML(holder('<section data-section data-background="red"><p>deep</p></section>'), registry).doc;
+    expect(sectionBelowTop(doc.content ?? [])).toBe(false);
+    expect(JSON.stringify(doc)).toContain('"deep"');
+  });
+
+  it('draws a section below the top in the Viewer as the blocks it holds', () => {
+    const nested = docOf({
+      type: 'callout',
+      attrs: { variant: 'info' },
+      content: [sectionOf({ background: 'red' }, line('deep'))],
+    });
+    const markup = renderToStaticMarkup(<Viewer doc={nested} features={features} />);
+    expect(markup).not.toContain('data-slot="section"');
+    expect(markup).toContain('<p>deep</p>');
   });
 
   it('reads a plain section element of a pasted page as its blocks', () => {

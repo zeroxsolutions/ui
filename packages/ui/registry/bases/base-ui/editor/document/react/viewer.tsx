@@ -2,6 +2,7 @@
 
 import { useMemo, type ReactNode } from 'react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
+import { withSectionsAtTop } from '@zeroxsolutions/editor-core/document/layout/index';
 import { createCodecRegistry } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { renderToReact } from '../serialize/render-to-react';
 import { defaultEditorTheme } from '../../shared/theme/default-theme';
@@ -29,7 +30,8 @@ export interface ViewerProps {
 
 export function Viewer({ doc, features = [], theme, forcedMode, className }: ViewerProps): ReactNode {
   const registry = useMemo(() => createCodecRegistry(features), [features]);
-  const tree = renderToReact(doc, registry);
+  // A section below the top draws as its blocks, as the editor opens it.
+  const tree = renderToReact(withSectionsAtTop(doc), registry);
   const inner = (
     // Sized by its container, as the editor is, so an unwrapped block scrolls rather than widening it.
     <div

@@ -346,6 +346,20 @@ describe('the section in the Document Editor', () => {
     expect(nestedSection(editor.getJSON().content ?? [])).toBe(false);
   });
 
+  it('takes its own HTML export back on a paste, its tokens kept', async () => {
+    const editor = await mount({ type: 'doc', content: [line('top')] });
+    // A line before it, so the copy takes the whole section rather than the text inside it.
+    await copyHtml(
+      '<p>before</p><section data-section data-background="teal" data-padding="large"><p>copied</p></section>',
+    );
+    await userEvent.click(holding('.ProseMirror p', 'top'));
+    await userEvent.keyboard('{End}');
+    await userEvent.paste();
+
+    await vi.waitFor(() => expect(sectionAttrs(editor)).toMatchObject({ background: 'teal', padding: 'large' }));
+    expect(sectionTexts(editor)).toEqual(['copied']);
+  });
+
   it('keeps a section out of a section and a lane when one is pasted there', async () => {
     const editor = await mount({
       type: 'doc',
