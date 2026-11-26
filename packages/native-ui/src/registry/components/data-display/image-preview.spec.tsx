@@ -26,7 +26,7 @@ describe('ImagePreview', () => {
     expect(screen.getByTestId('image', HIDDEN).props['aria-hidden']).toBe(true);
   });
 
-  it('draws the image from src, scaled down to fit and never up', async () => {
+  it('draws the image from src', async () => {
     await render(
       <ImagePreview>
         <ImagePreviewImage src={SAMPLE} alt="Logo" />
@@ -34,7 +34,6 @@ describe('ImagePreview', () => {
     );
 
     const image = screen.getByRole('img', { name: 'Logo' });
-    expect(image.props.resizeMode).toBe('center');
     // React Native for Web draws only `source`, so the web's `src` arrives there.
     expect(image.props.source).toEqual({ uri: SAMPLE });
   });

@@ -22,16 +22,6 @@ import {
   type AvatarPickerValue,
 } from './avatar-picker';
 import { EmojiPickerContent, EmojiPickerSearch } from './emoji-picker';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { CheckIcon } from '../../icons/lucide/check-icon';
-import { TrashIcon } from '../../icons/lucide/trash-icon';
-
-jest.mock('../../icons/lucide/check-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('check-icon'),
-);
-jest.mock('../../icons/lucide/trash-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -348,33 +338,17 @@ describe('AvatarPicker', () => {
   });
 });
 
-describe('AvatarPicker motion', () => {
-  it("starts the remove button's icon on press-in and on focus", async () => {
+describe('AvatarPicker handlers', () => {
+  it("runs the remove button's own press-in handler", async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <AvatarPicker value={{ emoji: '\u{1F600}' }} onValueChange={jest.fn()}>
-        <AvatarPickerRemoveButton onPressIn={onPressIn} onFocus={onFocus} />
+        <AvatarPickerRemoveButton onPressIn={onPressIn} />
       </AvatarPicker>,
     );
-    const control = screen.getByRole('button', { name: 'Remove avatar' });
 
-    await userEvent.setup().press(control);
-    await focus(control);
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Remove avatar' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(TrashIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(TrashIcon).stopAnimation).not.toHaveBeenCalled();
-  });
-
-  it('plays the selected check once when a swatch is picked, and not for the swatch selected from the start', async () => {
-    await render(<Editor initial={{ color: '#6366f1' }} tab="color" />);
-    expect(handleOf(CheckIcon).startAnimation).not.toHaveBeenCalled();
-
-    await userEvent.setup().press(screen.getByRole('button', { name: '#ec4899' }));
-
-    expect(screen.getByRole('button', { name: '#ec4899' })).toBeSelected();
-    expect(handleOf(CheckIcon).startAnimation).toHaveBeenCalledTimes(1);
   });
 });

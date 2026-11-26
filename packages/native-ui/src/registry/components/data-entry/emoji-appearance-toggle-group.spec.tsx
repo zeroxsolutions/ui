@@ -1,5 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import type { FluentEmojiStyle } from '../../lib/fluent-emoji';
+import { fluentEmojiUrl, type FluentEmojiStyle } from '../../lib/fluent-emoji';
 import { Text } from '../../ui/text';
 import { EmojiAppearanceToggleGroup, EmojiAppearanceToggleGroupItem } from './emoji-appearance-toggle-group';
 
@@ -33,6 +33,9 @@ function Example({
 
 type Node = ReturnType<typeof screen.getByRole>;
 
+/** The face every swatch previews. */
+const GRINNING = '\u{1F600}';
+
 /** The image sources drawn inside a node, outermost first. */
 function sourcesIn(node: Node): string[] {
   const own = Array.isArray(node.props.source) ? (node.props.source as { uri: string }[]).map(({ uri }) => uri) : [];
@@ -56,11 +59,15 @@ describe('EmojiAppearanceToggleGroup', () => {
   it('previews the grinning face in each swatch in its own style, whichever is chosen', async () => {
     await render(<Example value="3d" />);
 
-    expect(artworkOf('3D')).toEqual(['https://fluent-emoji.zeroxsolutions.com/3d/1f600.webp']);
-    expect(artworkOf('Flat')).toEqual(['https://fluent-emoji.zeroxsolutions.com/flat/1f600.svg']);
-    expect(artworkOf('Modern')).toEqual(['https://fluent-emoji.zeroxsolutions.com/modern/1f600.svg']);
-    expect(artworkOf('Mono')).toEqual(['https://fluent-emoji.zeroxsolutions.com/mono/1f600.svg']);
-    expect(artworkOf('Animated')).toEqual(['https://fluent-emoji.zeroxsolutions.com/anim/1f600.webp']);
+    for (const [label, style] of [
+      ['3D', '3d'],
+      ['Flat', 'flat'],
+      ['Modern', 'modern'],
+      ['Mono', 'mono'],
+      ['Animated', 'anim'],
+    ] as const) {
+      expect(artworkOf(label)).toEqual([fluentEmojiUrl(GRINNING, { style })]);
+    }
   });
 
   it('checks the chosen style', async () => {

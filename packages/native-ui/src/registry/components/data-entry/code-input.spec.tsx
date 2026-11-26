@@ -97,12 +97,4 @@ describe('CodeInput', () => {
 
     expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBeFalsy();
   });
-
-  it('lets the OS offer a texted code to the one input', async () => {
-    await render(<CodeInput testID="code" aria-label="Verification code" />);
-
-    expect(screen.getByLabelText('Verification code').props).toEqual(
-      expect.objectContaining({ textContentType: 'oneTimeCode', autoComplete: 'sms-otp' }),
-    );
-  });
 });

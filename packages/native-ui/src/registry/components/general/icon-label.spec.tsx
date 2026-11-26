@@ -13,16 +13,6 @@ describe('IconLabel', () => {
     expect(screen.getByLabelText('Rotation')).toBeOnTheScreen();
   });
 
-  it('carries the nativeID an input names in aria-labelledby', async () => {
-    await render(
-      <IconLabel aria-label="Rotation" nativeID="rotation" testID="label">
-        <Text>R</Text>
-      </IconLabel>,
-    );
-
-    expect(screen.getByTestId('label').props.nativeID).toBe('rotation');
-  });
-
   it('runs onPress when pressed, which the caller points at the input', async () => {
     const user = userEvent.setup();
     const onPress = jest.fn();

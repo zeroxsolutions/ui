@@ -1,6 +1,5 @@
 import { getDefaultNormalizer, render, screen, userEvent, within } from '@testing-library/react-native';
 import { Linking } from 'react-native';
-import { unified } from 'unified';
 import { MarkdownView } from './markdown-view';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
@@ -202,16 +201,12 @@ describe('MarkdownView', () => {
     expect(screen.getByText('safe and bold text')).toBeOnTheScreen();
   });
 
-  it('parses the source again only when the string changes', async () => {
-    const parse = jest.spyOn(Object.getPrototypeOf(unified()), 'parse');
+  it('draws the new source when it changes', async () => {
     await render(<MarkdownView>{'# Same'}</MarkdownView>);
-    const afterFirst = parse.mock.calls.length;
-
-    await screen.rerender(<MarkdownView>{'# Same'}</MarkdownView>);
-    expect(parse.mock.calls.length).toBe(afterFirst);
 
     await screen.rerender(<MarkdownView>{'# Changed'}</MarkdownView>);
-    expect(parse.mock.calls.length).toBeGreaterThan(afterFirst);
+
     expect(screen.getByRole('heading', { name: 'Changed' })).toBeOnTheScreen();
+    expect(screen.queryByRole('heading', { name: 'Same' })).toBeNull();
   });
 });

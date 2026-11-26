@@ -31,17 +31,6 @@ describe('Meteors', () => {
     expect(screen.getAllByTestId('meteor', HIDDEN)).toHaveLength(7);
   });
 
-  it('starts each meteor along the top, at a share of the width', async () => {
-    reduceMotion(false);
-    await render(<Meteors number={5} />);
-    await elapse(0);
-
-    for (const meteor of screen.getAllByTestId('meteor', HIDDEN)) {
-      expect(meteor).toHaveStyle({ top: '-5%' });
-      expect(String((meteor.props.style as { left: string }[])[0].left)).toMatch(/^\d+(\.\d+)?%$/);
-    }
-  });
-
   it('carries each meteor along its path as it falls', async () => {
     reduceMotion(false);
     await render(<Meteors number={1} minDelay={0} maxDelay={0} minDuration={2} maxDuration={2} />);

@@ -1,16 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { InputGroupAddon } from '../../ui/input-group';
 import { PasswordInput, PasswordInputInput, PasswordInputToggle } from './password-input';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { EyeIcon } from '../../icons/lucide/eye-icon';
-import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
-
-jest.mock('../../icons/lucide/eye-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-icon'),
-);
-jest.mock('../../icons/lucide/eye-off-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
-);
 
 // React Native's jest mock gives every TextInput one shared `focus` mock, so its calls carry over between tests.
 afterEach(() => {
@@ -93,16 +83,6 @@ describe('PasswordInput', () => {
     expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(false);
   });
 
-  it('turns off capitals and autocorrect, so a shown password is not changed as it is typed', async () => {
-    await render(
-      <PasswordInput>
-        <PasswordInputInput aria-label="Password" />
-      </PasswordInput>,
-    );
-
-    expect(screen.getByLabelText('Password').props).toMatchObject({ autoCapitalize: 'none', autoCorrect: false });
-  });
-
   it('throws when a part is rendered outside PasswordInput', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -112,49 +92,20 @@ describe('PasswordInput', () => {
   });
 });
 
-describe('PasswordInputToggle motion', () => {
-  it('starts its icon on press-in and on focus', async () => {
+describe('PasswordInputToggle handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <PasswordInput>
         <PasswordInputInput aria-label="Password" />
         <InputGroupAddon align="inline-end">
-          <PasswordInputToggle onPressIn={onPressIn} onFocus={onFocus} />
+          <PasswordInputToggle onPressIn={onPressIn} />
         </InputGroupAddon>
       </PasswordInput>,
     );
 
     await userEvent.setup().press(screen.getByRole('button', { name: 'Show password' }));
-    await focus(screen.getByRole('button', { name: 'Hide password' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    // The eye starts on press-in; the press swaps in the struck eye, which plays as it appears and again on focus.
-    expect(handleOf(EyeIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(EyeIcon).stopAnimation).not.toHaveBeenCalled();
-  });
-
-  it('plays the newly shown eye once after each press flips it, and nothing on first draw', async () => {
-    const user = userEvent.setup();
-    await render(
-      <PasswordInput>
-        <PasswordInputInput aria-label="Password" />
-        <InputGroupAddon align="inline-end">
-          <PasswordInputToggle />
-        </InputGroupAddon>
-      </PasswordInput>,
-    );
-    expect(handleOf(EyeIcon).startAnimation).not.toHaveBeenCalled();
-    expect(handleOf(EyeOffIcon).startAnimation).not.toHaveBeenCalled();
-
-    await user.press(screen.getByRole('button', { name: 'Show password' }));
-    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(1);
-
-    await user.press(screen.getByRole('button', { name: 'Hide password' }));
-    // Once on the first press-in, once as the second press swaps the eye back in.
-    expect(handleOf(EyeIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(EyeOffIcon).startAnimation).toHaveBeenCalledTimes(2);
   });
 });

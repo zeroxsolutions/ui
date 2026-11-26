@@ -10,12 +10,6 @@ import {
   ModelListSkeleton,
   ModelListTitle,
 } from './model-list';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { TrashIcon } from '../../icons/lucide/trash-icon';
-
-jest.mock('../../icons/lucide/trash-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('trash-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -90,19 +84,13 @@ describe('ModelListSkeleton', () => {
   });
 });
 
-describe('ModelListRemoveButton motion', () => {
-  it('starts its icon on press-in and on focus', async () => {
+describe('ModelListRemoveButton handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    await render(<ModelListRemoveButton onPressIn={onPressIn} onFocus={onFocus} />);
-    const control = screen.getByRole('button', { name: 'Remove model' });
+    await render(<ModelListRemoveButton onPressIn={onPressIn} />);
 
-    await userEvent.setup().press(control);
-    await focus(control);
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Remove model' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(TrashIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(TrashIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

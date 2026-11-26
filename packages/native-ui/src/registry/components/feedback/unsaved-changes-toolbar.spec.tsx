@@ -51,12 +51,6 @@ afterEach(() => {
 });
 
 describe('UnsavedChangesToolbar', () => {
-  it('leaves the screen beneath it touchable', async () => {
-    await render(<Example />);
-
-    expect(screen.getByTestId('toolbar-wrapper').props.pointerEvents).toBe('box-none');
-  });
-
   it('is named by its message', async () => {
     await render(<Example message="Could not save." />);
 

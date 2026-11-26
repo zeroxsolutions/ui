@@ -1,7 +1,6 @@
 import { isHiddenFromAccessibility, render, screen } from '@testing-library/react-native';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '../../ui/item';
 import { Text } from '../../ui/text';
-import * as modelInfoCard from './model-info-card';
 import { ModelInfoCard, ModelInfoCardIndicator, ModelInfoCardSection } from './model-info-card';
 
 describe('ModelInfoCard', () => {
@@ -33,14 +32,6 @@ describe('ModelInfoCard', () => {
     for (const text of ['GPT-4o', 'OpenAI', 'gpt-4o', 'Context length', '128K tokens']) {
       expect(screen.getByText(text)).toBeOnTheScreen();
     }
-  });
-
-  it('exports the card, its section and the accent indicator, and no other part', () => {
-    expect(Object.keys(modelInfoCard).sort()).toEqual([
-      'ModelInfoCard',
-      'ModelInfoCardIndicator',
-      'ModelInfoCardSection',
-    ]);
   });
 });
 

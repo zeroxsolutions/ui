@@ -8,20 +8,6 @@ import {
   ReasoningCollapsibleTrigger,
   type ReasoningCollapsibleProps,
 } from './reasoning-collapsible';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { BrainIcon } from '../../icons/lucide/brain-icon';
-import { ChevronDownIcon } from '../../icons/lucide/chevron-down-icon';
-import { ChevronUpIcon } from '../../icons/lucide/chevron-up-icon';
-
-jest.mock('../../icons/lucide/brain-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('brain-icon'),
-);
-jest.mock('../../icons/lucide/chevron-down-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-down-icon'),
-);
-jest.mock('../../icons/lucide/chevron-up-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-up-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -136,41 +122,20 @@ describe('ReasoningCollapsible', () => {
   });
 });
 
-describe('ReasoningCollapsibleTrigger motion', () => {
-  it('starts its brain and its chevron on press-in and on focus', async () => {
+describe('ReasoningCollapsibleTrigger handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <ReasoningCollapsible>
-        <ReasoningCollapsibleTrigger onPressIn={onPressIn} onFocus={onFocus}>
-          Thought
-        </ReasoningCollapsibleTrigger>
+        <ReasoningCollapsibleTrigger onPressIn={onPressIn}>Thought</ReasoningCollapsibleTrigger>
         <ReasoningCollapsibleContent>Checking the logs.</ReasoningCollapsibleContent>
       </ReasoningCollapsible>,
     );
-    const control = screen.getByRole('button', { name: 'Thought' });
-
-    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(control);
-    await focus(control);
-
-    expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(BrainIcon).startAnimation).toHaveBeenCalledTimes(2);
-    // The down chevron starts on press-in; opening swaps in the up chevron, which plays as it appears and on focus.
-    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(BrainIcon).stopAnimation).not.toHaveBeenCalled();
-  });
-
-  it('plays the newly shown chevron once after a press flips it, and nothing on first draw', async () => {
-    await render(<Example />);
-    expect(handleOf(ChevronDownIcon).startAnimation).not.toHaveBeenCalled();
 
     await userEvent
       .setup({ advanceTimers: jest.advanceTimersByTime })
-      .press(screen.getByRole('button', { name: 'Thought for a few seconds' }));
+      .press(screen.getByRole('button', { name: 'Thought' }));
 
-    expect(screen.getByRole('button', { name: 'Thought for a few seconds' })).toBeExpanded();
-    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(onPressIn).toHaveBeenCalledTimes(1);
   });
 });

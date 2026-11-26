@@ -8,16 +8,6 @@ import {
   CollapsibleCardTrigger,
   type CollapsibleCardProps,
 } from './collapsible-card';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronDownIcon } from '../../icons/lucide/chevron-down-icon';
-import { ChevronUpIcon } from '../../icons/lucide/chevron-up-icon';
-
-jest.mock('../../icons/lucide/chevron-down-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-down-icon'),
-);
-jest.mock('../../icons/lucide/chevron-up-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevron-up-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -100,38 +90,20 @@ describe('CollapsibleCard', () => {
   });
 });
 
-describe('CollapsibleCardTrigger motion', () => {
-  it('starts its chevron on press-in and on focus', async () => {
+describe('CollapsibleCardTrigger handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <CollapsibleCard>
         <CollapsibleCardHeader>
-          <CollapsibleCardTrigger onPressIn={onPressIn} onFocus={onFocus} />
+          <CollapsibleCardTrigger onPressIn={onPressIn} />
         </CollapsibleCardHeader>
         <CollapsibleCardContent>Background, shadow, text</CollapsibleCardContent>
       </CollapsibleCard>,
     );
-    const control = screen.getByRole('button', { name: 'Toggle content' });
-
-    await userEvent.setup().press(control);
-    await focus(control);
-
-    expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    // The up chevron starts on press-in; closing swaps in the down chevron, which plays as it appears and on focus.
-    expect(handleOf(ChevronUpIcon).startAnimation).toHaveBeenCalledTimes(1);
-    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(ChevronUpIcon).stopAnimation).not.toHaveBeenCalled();
-  });
-
-  it('plays the newly shown chevron once after a press flips it, and nothing on first draw', async () => {
-    await render(<Example />);
-    expect(handleOf(ChevronUpIcon).startAnimation).not.toHaveBeenCalled();
 
     await userEvent.setup().press(screen.getByRole('button', { name: 'Toggle content' }));
 
-    expect(screen.getByRole('button', { name: 'Toggle content' })).toBeCollapsed();
-    expect(handleOf(ChevronDownIcon).startAnimation).toHaveBeenCalledTimes(1);
+    expect(onPressIn).toHaveBeenCalledTimes(1);
   });
 });

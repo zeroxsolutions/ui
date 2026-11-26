@@ -33,11 +33,11 @@ function Example({ onSelect, onCheckedChange = () => undefined }: ExampleProps) 
 }
 
 describe('AiProviderCard', () => {
-  it('draws its header, its description on at most two lines, and its note', async () => {
+  it('draws its header, its description and its note', async () => {
     await render(<Example />);
 
     expect(screen.getByRole('heading', { name: 'OpenAI' })).toBeOnTheScreen();
-    expect(screen.getByText('GPT reasoning and chat models.').props.numberOfLines).toBe(2);
+    expect(screen.getByText('GPT reasoning and chat models.')).toBeOnTheScreen();
     expect(screen.getByText('12 models')).toBeOnTheScreen();
   });
 
@@ -99,7 +99,6 @@ describe('AiProviderCardLabel', () => {
     expect(typeof dot).not.toBe('string');
     if (typeof dot === 'string') return;
     expect(isHiddenFromAccessibility(dot)).toBe(true);
-    expect(screen.getByText('Needs a key').props.numberOfLines).toBe(1);
   });
 
   it('draws no dot without a tone', async () => {

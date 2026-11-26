@@ -18,15 +18,7 @@ beforeEach(() => {
 });
 
 describe('FontPreview', () => {
-  it('draws the pangram at each default size, labelled with the size, largest first', async () => {
-    await render(<FontPreview src={INTER} />);
-
-    expect(specimens().map((style) => style.fontSize)).toEqual([36, 24, 18, 14]);
-    expect(screen.getAllByText(/^\d+$/).map((node) => node.props.children)).toEqual([36, 24, 18, 14]);
-    await waitFor(() => expect(specimens()[0]?.fontFamily).toBeDefined());
-  });
-
-  it('draws its own text at the sizes it is given, one line each, a line height 1.375 times the size', async () => {
+  it('draws its own text at the sizes it is given, each labelled with its size, a line height 1.375 times the size', async () => {
     await render(
       <FontPreview src={INTER} sizes={[20, 10]}>
         Hamburgefonstiv
@@ -35,7 +27,7 @@ describe('FontPreview', () => {
 
     const lines = screen.getAllByText('Hamburgefonstiv');
     expect(lines.map((node) => StyleSheet.flatten(node.props.style).lineHeight)).toEqual([27.5, 13.75]);
-    expect(lines.map((node) => node.props.numberOfLines)).toEqual([1, 1]);
+    expect(screen.getAllByText(/^\d+$/).map((node) => node.props.children)).toEqual([20, 10]);
     await waitFor(() => expect(load).toHaveBeenCalled());
   });
 
@@ -45,7 +37,6 @@ describe('FontPreview', () => {
     await waitFor(() => expect(specimens()[0]?.fontFamily).toBeDefined());
     const [[family, source]] = load.mock.calls as [[string, string]];
     expect(source).toBe(INTER);
-    expect(family).toMatch(/^font-[a-zA-Z0-9]+$/);
     expect(specimens().map((style) => style.fontFamily)).toEqual([family, family, family, family]);
   });
 

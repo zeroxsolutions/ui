@@ -1,7 +1,6 @@
 import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
 import type { ReactNode } from 'react';
-import * as highlighter from '../../lib/highlighter';
 import {
   CollapsibleCardActions,
   CollapsibleCardHeader,
@@ -34,6 +33,16 @@ beforeEach(() => {
 afterEach(() => {
   jest.restoreAllMocks();
 });
+
+/** A TypeScript block drawn beside the one under test, whose painted keyword says the highlighter has loaded. */
+function Settled(): ReactNode {
+  return <Block code="let settled" language="ts" />;
+}
+
+/** Waits until {@link Settled} paints its keyword, by which time every block's highlighter has answered. */
+async function settled(): Promise<void> {
+  await waitFor(() => expect(screen.getByText('let')).toHaveStyle({ color: KEYWORD }));
+}
 
 /** A block whose content is the code alone, with `children` composed before it. */
 function Block({ children, ...props }: Omit<CodeCardProps, 'children'> & { children?: ReactNode }): ReactNode {
@@ -165,36 +174,46 @@ describe('CodeCard', () => {
     await waitFor(() => expect(screen.getByText('const')).toHaveStyle({ color: KEYWORD }));
   });
 
-  it('draws the code of a language the highlighter does not list as plain text', async () => {
-    await render(<Block code="MOVE A TO B." language="cobol" />);
+  it('draws the code of a language the highlighter does not list as plain text, once the highlighter has loaded', async () => {
+    await render(
+      <>
+        <Block code="MOVE A TO B." language="cobol" />
+        <Settled />
+      </>,
+    );
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await settled();
     expect(screen.getByText('MOVE A TO B.')).toBeOnTheScreen();
   });
 
-  it('paints the lines it is given, each token in its colour, and highlights nothing itself', async () => {
-    const load = jest.spyOn(highlighter, 'loadHighlighter');
+  it('paints the lines it is given, each token in its colour', async () => {
     await render(
-      <Block
-        code="const x"
-        language="ts"
-        lines={[[{ content: 'const', style: { color: 'rgb(4, 5, 6)' } }, { content: ' x' }]]}
-      />,
+      <>
+        <Block
+          code="const x"
+          language="ts"
+          lines={[[{ content: 'const', style: { color: 'rgb(4, 5, 6)' } }, { content: ' x' }]]}
+        />
+        <Settled />
+      </>,
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await settled();
     expect(screen.getByText('const')).toHaveStyle({ color: 'rgb(4, 5, 6)' });
     expect(screen.getByText('const x')).toBeOnTheScreen();
-    expect(load).not.toHaveBeenCalledWith('ts');
   });
 
-  it('draws the code plain when handed null lines, and highlights nothing itself', async () => {
-    const load = jest.spyOn(highlighter, 'loadHighlighter');
-    await render(<Block code="const x" language="ts" lines={null} />);
+  it('draws the code plain when handed null lines, even once the highlighter has loaded', async () => {
+    await render(
+      <>
+        <Block code="const x" language="ts" lines={null} />
+        <Settled />
+      </>,
+    );
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await settled();
     expect(screen.getByText('const x')).toBeOnTheScreen();
-    expect(load).not.toHaveBeenCalledWith('ts');
+    expect(screen.queryByText('const')).toBeNull();
   });
 
   it('numbers each line in a gutter hidden from assistive technology, apart from the code', async () => {

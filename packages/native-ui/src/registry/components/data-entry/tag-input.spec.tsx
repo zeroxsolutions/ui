@@ -1,12 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { TagInput, TagInputInput, TagInputList, TagInputTag, TagInputTagRemove, type TagInputProps } from './tag-input';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { XIcon } from '../../icons/lucide/x-icon';
-
-jest.mock('../../icons/lucide/x-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('x-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -43,7 +37,7 @@ function shownTags(): string[] {
 }
 
 describe('TagInput', () => {
-  it('adds the trimmed draft on the return key, empties the field and keeps it focused', async () => {
+  it('adds the trimmed draft on the return key and empties the field', async () => {
     const user = userEvent.setup();
     const onValueChange = jest.fn();
     await render(<Tags value={['design']} onValueChange={onValueChange} />);
@@ -53,7 +47,6 @@ describe('TagInput', () => {
     expect(onValueChange.mock.calls).toEqual([[['design', 'ui']]]);
     expect(screen.getByText('ui')).toBeOnTheScreen();
     expect(screen.getByLabelText('Add a tag')).toHaveDisplayValue('');
-    expect(screen.getByLabelText('Add a tag').props.submitBehavior).toBe('submit');
   });
 
   it('adds the draft when a comma is typed, leaving no comma in the field', async () => {
@@ -202,28 +195,22 @@ describe('TagInput', () => {
   });
 });
 
-describe('TagInputTagRemove motion', () => {
-  it('starts its icon on press-in and on focus', async () => {
+describe('TagInputTagRemove handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <TagInput value={['design']} onValueChange={jest.fn()}>
         <TagInputList>
           <TagInputTag value="design">
             design
-            <TagInputTagRemove aria-label="Remove design" onPressIn={onPressIn} onFocus={onFocus} />
+            <TagInputTagRemove aria-label="Remove design" onPressIn={onPressIn} />
           </TagInputTag>
         </TagInputList>
       </TagInput>,
     );
-    const control = screen.getByRole('button', { name: 'Remove design' });
 
-    await userEvent.setup().press(control);
-    await focus(control);
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Remove design' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(XIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(XIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

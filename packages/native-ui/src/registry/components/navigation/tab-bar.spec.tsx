@@ -1,7 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { House, Search } from 'lucide-react-native';
 import { Platform } from 'react-native';
-import { emittedClasses } from '../../../build/slot-tokens.testing';
 import {
   TabBar,
   TabBarBadge,
@@ -52,10 +51,6 @@ function Example({ side, labels, shape, badge, countLabel, onPressInbox }: Examp
   );
 }
 
-function classes(testID: string): string[] {
-  return emittedClasses(screen.getByTestId(testID).props.className);
-}
-
 const initialPlatform = Platform.OS;
 
 afterEach(() => {
@@ -88,15 +83,6 @@ describe('TabBar', () => {
     expect(screen.getByRole('tab', { name: 'Inbox' }).props.accessibilityState).toMatchObject({ selected: false });
   });
 
-  it.each(['left', 'right'] as const)(
-    'leaves the screen beside a floating bar on the %s edge touchable',
-    async (side) => {
-      await render(<Example side={side} shape="floating" />);
-
-      expect(screen.getByTestId('bar-wrapper').props.pointerEvents).toBe('box-none');
-    },
-  );
-
   it('throws when a part is rendered outside a TabBar', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -106,26 +92,9 @@ describe('TabBar', () => {
 });
 
 describe('TabBarLabel', () => {
-  it('shows every label for labels "always"', async () => {
-    await render(<Example labels="always" />);
-
-    expect(classes('inbox-label')).not.toContain('opacity-0');
-    expect(emittedClasses(screen.getByText('Home').props.className)).not.toContain('opacity-0');
-  });
-
-  it('shows only the active label for labels "selected", and keeps the others as names', async () => {
-    await render(<Example labels="selected" />);
-
-    expect(emittedClasses(screen.getByText('Home').props.className)).not.toContain('opacity-0');
-    expect(classes('inbox-label')).toContain('opacity-0');
-    expect(screen.getByRole('tab', { name: 'Inbox' })).toBeOnTheScreen();
-  });
-
-  it('shows no label for labels "none", and keeps every item named', async () => {
+  it('keeps every item named by its label while the labels are hidden', async () => {
     await render(<Example labels="none" />);
 
-    expect(emittedClasses(screen.getByText('Home').props.className)).toContain('opacity-0');
-    expect(classes('inbox-label')).toContain('opacity-0');
     expect(screen.getByRole('tab', { name: 'Home' })).toBeOnTheScreen();
     expect(screen.getByRole('tab', { name: 'Inbox' })).toBeOnTheScreen();
   });

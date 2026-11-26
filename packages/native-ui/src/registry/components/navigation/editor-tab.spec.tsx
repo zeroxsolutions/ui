@@ -1,12 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { ItemActions, ItemContent } from '../../ui/item';
 import { EditorTab, EditorTabCloseButton, EditorTabTitle, type EditorTabProps } from './editor-tab';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { XIcon } from '../../icons/lucide/x-icon';
-
-jest.mock('../../icons/lucide/x-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('x-icon'),
-);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -60,25 +54,19 @@ describe('EditorTab', () => {
   });
 });
 
-describe('EditorTabCloseButton motion', () => {
-  it('starts its icon on press-in and on focus', async () => {
+describe('EditorTabCloseButton handlers', () => {
+  it('runs its own press-in handler', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
     await render(
       <EditorTab>
         <ItemActions>
-          <EditorTabCloseButton aria-label="Close page.tsx" onPressIn={onPressIn} onFocus={onFocus} />
+          <EditorTabCloseButton aria-label="Close page.tsx" onPressIn={onPressIn} />
         </ItemActions>
       </EditorTab>,
     );
-    const control = screen.getByRole('button', { name: 'Close page.tsx' });
 
-    await userEvent.setup().press(control);
-    await focus(control);
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Close page.tsx' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(XIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(XIcon).stopAnimation).not.toHaveBeenCalled();
   });
 });

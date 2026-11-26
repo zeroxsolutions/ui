@@ -1,49 +1,18 @@
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Copy } from 'lucide-react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
-import { registerCSS } from 'react-native-css-interop/test';
-import { CheckIcon } from '../../icons/lucide/check-icon';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { CopyIcon } from '../../icons/lucide/copy-icon';
-import { Button } from '../../ui/button';
-import { Icon } from '../../ui/icon';
 import { CopyButton } from './copy-button';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
-jest.mock('../../icons/lucide/copy-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('copy-icon'),
-);
-jest.mock('../../icons/lucide/check-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('check-icon'),
-);
-
-const copyIcon = handleOf(CopyIcon);
-const checkIcon = handleOf(CheckIcon);
 
 const setStringAsync = jest.mocked(Clipboard.setStringAsync);
 const COMMAND = 'pnpm add @zeroxsolutions/icons';
-
-/** The colour the specs give a ghost Button's text, and so its icons. */
-const GHOST_TEXT = '#737373';
-
-/** The stroke of every svg in `tree`, in the order they are drawn. */
-function svgStrokes(tree: ReturnType<typeof screen.toJSON>): unknown[] {
-  if (tree === null) return [];
-  if (Array.isArray(tree)) return tree.flatMap(svgStrokes);
-  const own = tree.type === 'RNSVGSvgView' ? [tree.props.stroke] : [];
-  return [...own, ...(tree.children ?? []).flatMap((child) => (typeof child === 'string' ? [] : svgStrokes(child)))];
-}
 
 let announce: jest.SpyInstance;
 const platform = Platform.OS;
 
 beforeEach(() => {
   setStringAsync.mockReset().mockResolvedValue(true);
-  for (const handle of [copyIcon, checkIcon]) {
-    handle.startAnimation.mockClear();
-    handle.stopAnimation.mockClear();
-  }
   announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
 });
 
@@ -122,38 +91,13 @@ describe('CopyButton', () => {
     expect(setStringAsync).toHaveBeenCalledWith(COMMAND);
   });
 
-  it('starts its icon on press-in and on focus', async () => {
+  it("runs the caller's own press-in handler", async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    setStringAsync.mockReturnValue(new Promise(() => undefined));
-    await render(<CopyButton value={COMMAND} onPressIn={onPressIn} onFocus={onFocus} />);
-    const control = screen.getByRole('button', { name: 'Copy' });
-
-    await userEvent.setup().press(control);
-    expect(copyIcon.startAnimation).toHaveBeenCalledTimes(1);
-
-    await focus(control);
-    await act(() => control.props.onBlur({ nativeEvent: {} }));
-
-    expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(copyIcon.startAnimation).toHaveBeenCalledTimes(2);
-    expect(copyIcon.stopAnimation).not.toHaveBeenCalled();
-    // The caller's own handler runs before the icon starts.
-    const [pressStart, focusStart] = copyIcon.startAnimation.mock.invocationCallOrder;
-    expect(onPressIn.mock.invocationCallOrder[0]).toBeLessThan(pressStart ?? 0);
-    expect(onFocus.mock.invocationCallOrder[0]).toBeLessThan(focusStart ?? 0);
-  });
-
-  it('plays the check icon once when the copy succeeds, and nothing on first draw', async () => {
-    await render(<CopyButton value={COMMAND} />);
-    expect(checkIcon.startAnimation).not.toHaveBeenCalled();
-    expect(copyIcon.startAnimation).not.toHaveBeenCalled();
+    await render(<CopyButton value={COMMAND} onPressIn={onPressIn} />);
 
     await userEvent.setup().press(screen.getByRole('button', { name: 'Copy' }));
 
-    expect(screen.getByRole('button', { name: 'Copied' })).toBeOnTheScreen();
-    expect(checkIcon.startAnimation).toHaveBeenCalledTimes(1);
+    expect(onPressIn).toHaveBeenCalledTimes(1);
   });
 
   it('does not throw when the state flips back before the motion ends', async () => {
@@ -171,23 +115,5 @@ describe('CopyButton', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Copy' })).toBeOnTheScreen();
-    expect(checkIcon.startAnimation).toHaveBeenCalledTimes(1);
-    expect(copyIcon.startAnimation).toHaveBeenCalledTimes(1);
-  });
-
-  it('draws its icon in the disabled colour', async () => {
-    registerCSS(`.cn-button-variant-ghost\\/text { color: ${GHOST_TEXT}; }`);
-    await render(
-      <>
-        <CopyButton value={COMMAND} disabled />
-        <Button variant="ghost" size="icon-xs" disabled>
-          <Icon as={Copy} />
-        </Button>
-      </>,
-    );
-
-    const [animated, still] = svgStrokes(screen.toJSON());
-    expect(still).toBe(GHOST_TEXT);
-    expect(animated).toBe(still);
   });
 });

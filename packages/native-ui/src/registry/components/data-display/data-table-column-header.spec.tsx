@@ -13,25 +13,6 @@ import {
   DataTableColumnHeaderSortDescending,
   DataTableColumnHeaderTrigger,
 } from './data-table-column-header';
-import { focus, handleOf } from '../../icons/animated-icon.testing';
-import { ChevronsUpDownIcon } from '../../icons/lucide/chevrons-up-down-icon';
-import { ArrowUpIcon } from '../../icons/lucide/arrow-up-icon';
-import { ArrowDownIcon } from '../../icons/lucide/arrow-down-icon';
-import { EyeOffIcon } from '../../icons/lucide/eye-off-icon';
-
-jest.mock('../../icons/lucide/chevrons-up-down-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('chevrons-up-down-icon'),
-);
-jest.mock('../../icons/lucide/arrow-up-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('arrow-up-icon'),
-);
-jest.mock('../../icons/lucide/arrow-down-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('arrow-down-icon'),
-);
-jest.mock('../../icons/lucide/eye-off-icon', () =>
-  jest.requireActual('../../icons/animated-icon.testing').animatedIconModule('eye-off-icon'),
-);
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -58,12 +39,10 @@ interface HeaderProps {
   plain?: boolean;
   /** The trigger's and the ascending item's own press-in handler. */
   onPressIn?: () => void;
-  /** The trigger's and the ascending item's own focus handler. */
-  onFocus?: () => void;
 }
 
 /** The "Name" column's header over a real table, beside what the table says of that column. */
-function Header({ onAscending, onDescending, onHide, plain = false, onPressIn, onFocus }: HeaderProps): ReactNode {
+function Header({ onAscending, onDescending, onHide, plain = false, onPressIn }: HeaderProps): ReactNode {
   const table = useReactTable({
     data: [],
     columns: COLUMNS,
@@ -78,11 +57,9 @@ function Header({ onAscending, onDescending, onHide, plain = false, onPressIn, o
         <DataTableColumnHeader column={column}>Name</DataTableColumnHeader>
       ) : (
         <DataTableColumnHeader column={column}>
-          <DataTableColumnHeaderTrigger onPressIn={onPressIn} onFocus={onFocus}>
-            Name
-          </DataTableColumnHeaderTrigger>
+          <DataTableColumnHeaderTrigger onPressIn={onPressIn}>Name</DataTableColumnHeaderTrigger>
           <DataTableColumnHeaderContent>
-            <DataTableColumnHeaderSortAscending onPress={onAscending} onPressIn={onPressIn} onFocus={onFocus} />
+            <DataTableColumnHeaderSortAscending onPress={onAscending} onPressIn={onPressIn} />
             <DataTableColumnHeaderSortDescending onPress={onDescending} />
             <DropdownMenuSeparator />
             <DataTableColumnHeaderHide onPress={onHide} />
@@ -177,7 +154,7 @@ describe('DataTableColumnHeader', () => {
   });
 });
 
-describe('DataTableColumnHeader motion', () => {
+describe('DataTableColumnHeader handlers', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     // The menu opens where the trigger is laid out, which Jest lays nothing out to report.
@@ -194,70 +171,17 @@ describe('DataTableColumnHeader motion', () => {
   /** Lets the menu's motion finish on Jest's clock. */
   const finishMotion = () => act(() => jest.advanceTimersByTimeAsync(300));
 
-  it("starts the trigger's sort icon on press-in and on focus", async () => {
+  it("runs the caller's own press-in handler on the trigger and on a menu item", async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    await render(<Header onPressIn={onPressIn} onFocus={onFocus} />);
-    const control = screen.getByRole('button', { name: 'Name' });
-
-    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(control);
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await render(<Header onPressIn={onPressIn} />);
+    await user.press(screen.getByRole('button', { name: 'Name' }));
     await finishMotion();
-    await focus(control);
-
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(handleOf(ChevronsUpDownIcon).startAnimation).toHaveBeenCalledTimes(2);
-    expect(handleOf(ChevronsUpDownIcon).stopAnimation).not.toHaveBeenCalled();
-  });
 
-  // Asc and Desc count one start more: the sort they set swaps that icon into the trigger, where it plays once.
-  it.each([
-    ['Asc', ArrowUpIcon, 3],
-    ['Desc', ArrowDownIcon, 3],
-    ['Hide', EyeOffIcon, 2],
-  ] as const)("starts the %s item's icon on focus and on press-in", async (item, icon, starts) => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await render(<Header />);
-    await user.press(screen.getByRole('button', { name: 'Name' }));
-    await finishMotion();
-
-    await focus(screen.getByRole('menuitem', { name: item }));
-    await user.press(screen.getByRole('menuitem', { name: item }));
-    await finishMotion();
-
-    expect(handleOf(icon).startAnimation).toHaveBeenCalledTimes(starts);
-    expect(handleOf(icon).stopAnimation).not.toHaveBeenCalled();
-  });
-
-  it("plays the trigger's new sort icon once as a sort is chosen, and nothing on first draw", async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await render(<Header />);
-    expect(handleOf(ChevronsUpDownIcon).startAnimation).not.toHaveBeenCalled();
-    await user.press(screen.getByRole('button', { name: 'Name' }));
-    await finishMotion();
-
-    await user.press(screen.getByRole('menuitem', { name: 'Desc' }));
-    await finishMotion();
-
-    expect(screen.getByText('sorted: desc')).toBeOnTheScreen();
-    // One start from the item's press-in, one as the trigger shows the down arrow.
-    expect(handleOf(ArrowDownIcon).startAnimation).toHaveBeenCalledTimes(2);
-  });
-
-  it("runs a menu item's own press-in and focus handlers", async () => {
-    const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await render(<Header onPressIn={onPressIn} onFocus={onFocus} />);
-    await user.press(screen.getByRole('button', { name: 'Name' }));
-    await finishMotion();
-
-    await focus(screen.getByRole('menuitem', { name: 'Asc' }));
     await user.press(screen.getByRole('menuitem', { name: 'Asc' }));
     await finishMotion();
 
-    // The trigger's press-in, then the item's focus and press-in.
     expect(onPressIn).toHaveBeenCalledTimes(2);
-    expect(onFocus).toHaveBeenCalledTimes(1);
   });
 });

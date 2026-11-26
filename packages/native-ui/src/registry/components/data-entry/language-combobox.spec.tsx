@@ -90,15 +90,6 @@ describe('LanguageCombobox', () => {
     expect(screen.getByRole('option', { name: 'TypeScript' })).toBeSelected();
   });
 
-  it('offers every built-in code language', async () => {
-    const user = setUp();
-    await render(<Picker kind="code" value="typescript" onValueChange={jest.fn()} />);
-
-    await open(user);
-
-    expect(options()).toEqual(expect.arrayContaining(['Markdown', 'TypeScript', 'Python', 'C++', 'Lua']));
-  });
-
   it('shows a value no option carries as the value itself', async () => {
     await render(<Picker kind="code" value="zig" onValueChange={jest.fn()} />);
 

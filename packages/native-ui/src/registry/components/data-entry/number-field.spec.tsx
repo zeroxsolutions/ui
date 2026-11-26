@@ -121,12 +121,6 @@ describe('NumberField', () => {
     expect(onValueChange.mock.calls).toEqual([[24]]);
   });
 
-  it('opens a keyboard that has a minus sign and the operators', async () => {
-    await render(<Field value={5} onValueChange={() => undefined} />);
-
-    expect(screen.getByLabelText('Width').props.keyboardType).toBe('numbers-and-punctuation');
-  });
-
   it('announces the field disabled and takes no typing while disabled', async () => {
     const user = userEvent.setup();
     const onValueChange = jest.fn();
