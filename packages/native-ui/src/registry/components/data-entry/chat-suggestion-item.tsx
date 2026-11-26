@@ -47,7 +47,7 @@ function ChatSuggestionItem({
 }: ChatSuggestionItemProps): ReactNode {
   const off = disabled ?? !onSelectPrompt;
   return (
-    <Item size="sm" asChild className={cn(!off && 'active:bg-muted', className)}>
+    <Item size="sm" asChild className={cn(!off && 'cn-chat-suggestion-item', className)}>
       <Pressable
         role="button"
         disabled={off}

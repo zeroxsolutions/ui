@@ -48,6 +48,10 @@ const PENDING: ReadonlySet<string> = new Set([]);
 /** Per ported item, the zui slots its web twin writes that a phone does not draw, each with its reason. */
 const UNDRAWN_SLOTS: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
+    'avatar-picker',
+    new Map([['cn-avatar-picker-drop', 'lights a drop target while a file is dragged over it; a phone drags no file']]),
+  ],
+  [
     'password-input',
     new Map([
       [

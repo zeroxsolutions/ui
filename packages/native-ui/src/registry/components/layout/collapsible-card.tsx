@@ -113,7 +113,7 @@ function CollapsibleCardHeader({ className, children, ...props }: ComponentProps
     <View
       className={cn(
         'cn-collapsible-card-header flex-row items-center gap-1.5',
-        variant === 'plain' && 'px-2.5',
+        variant === 'plain' && 'cn-collapsible-card-header@variant=plain',
         holdsActions && 'justify-between',
         className,
       )}
@@ -197,8 +197,9 @@ function CollapsibleCardContent({ className, children, ...props }: CollapsibleCo
   return (
     <CollapsibleContent
       className={cn(
-        'overflow-hidden',
-        (variant === 'default' || variant === 'muted') && 'border-border border-t',
+        'cn-collapsible-card-content overflow-hidden',
+        variant === 'default' && 'cn-collapsible-card-content@variant=default',
+        variant === 'muted' && 'cn-collapsible-card-content@variant=muted',
         className,
       )}
       {...props}
