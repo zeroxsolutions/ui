@@ -237,6 +237,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
       title: 'Legal footer',
       description: 'Who sends this and why, the address and an unsubscribe link',
     },
+    section: { title: 'Section', description: 'Blocks set together on a background' },
   },
   bold: 'Bold',
   italic: 'Italic',

@@ -37,7 +37,7 @@ import {
   type LibraryBlockType,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import {
-  EMAIL_GLOBAL_ATTRIBUTES,
+  EMAIL_LAYOUT_ATTRIBUTES,
   EMAIL_KINDS,
   type EditorProfile,
   type EmailBlockKind,
@@ -113,6 +113,7 @@ export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
   hero: 'hero',
   card: 'card',
   legalFooter: 'legalFooter',
+  section: 'section',
 };
 
 /**
@@ -213,6 +214,7 @@ const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
   hero: 'email-block-hero',
   card: 'email-block-card',
   legalFooter: 'email-block-legalFooter',
+  section: 'email-section',
 };
 
 /** The library's blocks the kit offers, each as a product's block is offered, and the icon its slash item shows. */
@@ -338,6 +340,7 @@ const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph' | LibraryB
       { type: 'tableRow', content: [tableCell('tableCell'), tableCell('tableCell')] },
     ],
   }),
+  section: () => ({ type: 'section', content: [{ type: 'paragraph' }] }),
 };
 
 export interface EmailKitOptions extends BlockIdentityOptions {
@@ -500,11 +503,17 @@ function validAttributes(type: string, attrs: Record<string, string>): boolean {
 
 const DATA_NAMES: Readonly<Record<string, string>> = { align: 'align', spaceAfter: 'space-after', tone: 'tone' };
 
+/** The nodes whose own specs declare their attributes, so no global attribute repeats one. */
+const OWN_SPEC_NODES: ReadonlySet<string> = new Set(['button', 'columns', 'emailHtml', 'section']);
+
+const dataName = (attribute: string): string =>
+  DATA_NAMES[attribute] ?? attribute.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
 const dataAttribute = (attribute: string) => ({
   default: null,
-  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${DATA_NAMES[attribute]}`),
+  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${dataName(attribute)}`),
   renderHTML: (attrs: Record<string, unknown>) =>
-    attrs[attribute] ? { [`data-${DATA_NAMES[attribute]}`]: attrs[attribute] } : {},
+    attrs[attribute] ? { [`data-${dataName(attribute)}`]: attrs[attribute] } : {},
 });
 
 // The stored text, or the stored block, an import keeps beside the nodes; a copy must not carry it to another block.
@@ -512,10 +521,23 @@ const sourceAttribute = { default: null, rendered: false, keepOnSplit: false, pa
 
 /** The attributes each document node carries for the email, as global attributes on the document's own nodes. */
 function emailGlobalAttributes() {
-  return Object.entries(EMAIL_GLOBAL_ATTRIBUTES).map(([type, names]) => ({
+  // The block menu still sets `align` on the blocks it lists it for, beside the layout's own attributes.
+  const types = [...new Set([...Object.keys(EMAIL_LAYOUT_ATTRIBUTES), ...Object.keys(BLOCK_ATTRIBUTES)])].filter(
+    (type) => !OWN_SPEC_NODES.has(type),
+  );
+  const namesOf = (type: string): string[] => [
+    ...new Set([
+      ...(EMAIL_LAYOUT_ATTRIBUTES[type] ?? []),
+      ...(BLOCK_ATTRIBUTES[type]?.includes('align') ? ['align'] : []),
+    ]),
+  ];
+  return types.map((type) => ({
     types: [type],
     attributes: Object.fromEntries(
-      names.map((name) => [name, name === 'source' || name === 'stored' ? sourceAttribute : dataAttribute(name)]),
+      namesOf(type).map((name) => [
+        name,
+        name === 'source' || name === 'stored' ? sourceAttribute : dataAttribute(name),
+      ]),
     ),
   }));
 }
@@ -684,10 +706,10 @@ export function emailKit(
   const extraBlocks = extraNodes.map((node) => node.name);
   // A lane holds no block of lanes, as it holds no columns block.
   const laneBlocks = extraNodes.filter((node) => !/\bcolumn\b/.test(node.content ?? '')).map((node) => node.name);
-  // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
+  // Every kind but columns and the section, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
     ...new Set([
-      ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
+      ...EMAIL_KINDS.filter((kind) => kind !== 'columns' && kind !== 'section').map((kind) => EMAIL_KIND_NODES[kind]),
       ...Object.keys(FOLDED_BLOCKS),
       'emailUnknown',
       ...laneBlocks,
