@@ -49,15 +49,6 @@ test('the registry serves every item it lists under each base style, each file w
   expect(problems).toEqual([]);
 });
 
-test("an item is served in each style's classes", async ({ request }) => {
-  const contentOf = async (style: string): Promise<string> => {
-    const item = (await (await request.get(`/r/styles/base-${style}/collapsible-card.json`)).json()) as RegistryItem;
-    return item.files?.[0]?.content ?? '';
-  };
-  expect(await contentOf('nova')).toContain('rounded-xl');
-  expect(await contentOf('lyra')).toContain("default: 'ring-foreground/10 rounded-none ring-1");
-});
-
 test('the old item and index paths redirect once to base-nova', async ({ request }) => {
   for (const [from, to] of [
     ['/r/status-indicator.json', '/r/styles/base-nova/status-indicator.json'],

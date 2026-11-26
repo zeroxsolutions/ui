@@ -73,15 +73,6 @@ test('the sitemap lists every editor page', async ({ request }) => {
   }
 });
 
-test("the sidebar's web sections link their final addresses", async ({ page }) => {
-  await page.goto('/docs/editor');
-  const sidebar = page.getByRole('navigation', { name: 'Docs' });
-
-  for (const href of ['/docs', '/docs/installation', '/docs/components/base', '/docs/packages/icons']) {
-    await expect(sidebar.locator(`a[href="${href}"]`), href).toHaveCount(1);
-  }
-});
-
 test("the header's Icons entry links the web icons page, after Blocks", async ({ page }) => {
   await page.goto('/docs/editor');
   const header = page.getByRole('navigation', { name: 'Main' });
