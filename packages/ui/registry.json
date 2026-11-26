@@ -2689,7 +2689,13 @@
       "title": "Editor Embed",
       "description": "A block that shows an external page in a responsive frame, after a URL input while it is empty.",
       "categories": ["editor"],
-      "registryDependencies": ["@shadcn/input", "@zui/document-editor", "@zui/lucide-frame-icon"],
+      "registryDependencies": [
+        "@shadcn/input",
+        "@zui/block-library",
+        "@zui/document-editor",
+        "@zui/editor-layout",
+        "@zui/lucide-frame-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/embed/index.ts",
@@ -2731,6 +2737,7 @@
         "@shadcn/field",
         "@shadcn/input",
         "@shadcn/popover",
+        "@zui/block-library",
         "@zui/document-editor",
         "@zui/editor-layout",
         "@zui/editor-uploads",
@@ -3154,7 +3161,7 @@
       "name": "block-library",
       "type": "registry:component",
       "title": "Block Library",
-      "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with.",
+      "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with, and the frame a block's place and width are drawn in.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/button",
@@ -3164,6 +3171,7 @@
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-blocks-icon",
         "@zui/lucide-trash-icon"
@@ -3178,6 +3186,16 @@
           "path": "registry/bases/base-ui/editor/document/blocks/block-feature.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/blocks/block-feature.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-layout-frame.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-layout-frame.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/blocks/block-layout-attrs.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/blocks/block-layout-attrs.ts"
         },
         {
           "path": "registry/bases/base-ui/editor/document/blocks/block-address.ts",
