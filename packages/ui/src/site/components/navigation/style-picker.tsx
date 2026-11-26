@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu as MenuPrimitive } from '@base-ui/react/menu';
+import { cva } from 'class-variance-authority';
 import { Suspense, useRef, type ReactNode } from 'react';
 
 import { useHost } from '../../../host/host-provider';
@@ -67,7 +68,7 @@ function StylePickerMenu({ platform, style, search }: StylePickerMenuProps): Rea
   return (
     <DropdownMenu>
       <DropdownMenuTrigger data-slot="style-picker" render={<Button variant="ghost" size="sm" {...chevron.handlers} />}>
-        <span className="text-muted-foreground">Style</span> {PLATFORM_STYLE_LABELS[style]}
+        <span className="text-muted-foreground">Style</span> <StylePickerLabel platform={platform} style={style} />
         <ChevronDownIcon ref={chevron.ref} aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
@@ -86,6 +87,37 @@ function StylePickerMenu({ platform, style, search }: StylePickerMenuProps): Rea
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+/** Shows a style's name only under the class `<html>` carries for that style. */
+const styleLabelVariants = cva('hidden', {
+  variants: {
+    style: {
+      nova: 'in-[.style-nova]:inline',
+      luma: 'in-[.style-luma]:inline',
+      lyra: 'in-[.style-lyra]:inline',
+      maia: 'in-[.style-maia]:inline',
+      mira: 'in-[.style-mira]:inline',
+      rhea: 'in-[.style-rhea]:inline',
+      sera: 'in-[.style-sera]:inline',
+      vega: 'in-[.style-vega]:inline',
+    } satisfies Record<PlatformStyle, string>,
+  },
+});
+
+/**
+ * The name of the style the page is drawn in. Until the picker hydrates, `style` is the default the server
+ * rendered, while the page's inline script has already put the URL's or the remembered style's class on
+ * `<html>`; so every name is drawn and that class shows the one in use.
+ */
+function StylePickerLabel({ platform, style }: { platform: Platform; style: PlatformStyle }): ReactNode {
+  const hydrated = useHydrated();
+  if (hydrated) return PLATFORM_STYLE_LABELS[style];
+  return PLATFORM_STYLES[platform].map((option) => (
+    <span key={option} className={styleLabelVariants({ style: option })}>
+      {PLATFORM_STYLE_LABELS[option]}
+    </span>
+  ));
 }
 
 interface StyleRowProps {
