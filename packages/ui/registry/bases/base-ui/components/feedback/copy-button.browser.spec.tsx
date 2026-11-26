@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { cdp, page, userEvent } from 'vitest/browser';
+import { describe, expect, it, vi } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 import { CopyButton } from './copy-button';
@@ -17,15 +17,6 @@ async function pasted(): Promise<string> {
 }
 
 describe('CopyButton', () => {
-  // Chromium refuses a page the clipboard until its browser context is granted it.
-  beforeAll(async () => {
-    const { targetInfo } = (await cdp().send('Target.getTargetInfo')) as { targetInfo: { browserContextId: string } };
-    await cdp().send('Browser.grantPermissions', {
-      browserContextId: targetInfo.browserContextId,
-      permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-    });
-  });
-
   it('renders with the default accessible name', async () => {
     await render(<CopyButton value="hello" />);
     await expect.element(page.getByRole('button', { name: 'Copy' })).toBeVisible();

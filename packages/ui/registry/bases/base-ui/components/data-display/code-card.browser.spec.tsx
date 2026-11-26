@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cdp, page, userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
 import {
@@ -41,15 +41,6 @@ function codeOf(text: string): HTMLElement {
 
 /** Whether the `<code>` reading `text` is painted in coloured tokens. */
 const painted = (text: string) => (): boolean => codeOf(text).querySelector('span[style*="color"]') !== null;
-
-/** Grants the run's own browser context the clipboard, which a grant naming no context does not reach. */
-async function allowClipboard(): Promise<void> {
-  const { targetInfo } = (await cdp().send('Target.getTargetInfo')) as { targetInfo: { browserContextId: string } };
-  await cdp().send('Browser.grantPermissions', {
-    permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-    browserContextId: targetInfo.browserContextId,
-  });
-}
 
 describe('CodeCard', () => {
   it('renders the code string', async () => {
@@ -96,7 +87,6 @@ describe('CodeCard', () => {
   });
 
   it('copies the root code from CodeCardCopy', async () => {
-    await allowClipboard();
     await render(
       <Block code="payload" language="json">
         <CodeCardCopy label="Copy payload" />
@@ -109,7 +99,6 @@ describe('CodeCard', () => {
   });
 
   it('copies the code from a floating action and flips the label to Copied', async () => {
-    await allowClipboard();
     await render(
       <Block code="floating payload">
         <CodeCardActions>
