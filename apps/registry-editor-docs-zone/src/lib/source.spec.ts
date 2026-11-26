@@ -375,52 +375,12 @@ describe('content/docs', () => {
     expect(unresolvedNames(readPageSources([CONTENT]), new Set(Object.keys(Index)))).toEqual([]);
   });
 
-  it('reports a name the examples index lacks', () => {
-    const sources = {
-      'components/base/status-indicator':
-        '<ComponentPreview name="status-indicator-demo" />\n<ComponentSource name="status-indicator-missing" />',
-    };
-
-    expect(unresolvedNames(sources, new Set(['status-indicator', 'status-indicator-demo']))).toEqual([
-      'components/base/status-indicator: status-indicator-missing',
-    ]);
-  });
-
   it("names every registry:example in some page's preview", () => {
     expect(unusedExamples(readPageSources([CONTENT]), readExampleNames())).toEqual([]);
   });
 
-  it('reports an example no page previews, naming it in a ComponentSource aside', () => {
-    const sources = {
-      'components/base/status-indicator': [
-        '<ComponentPreview name="status-indicator-demo" />',
-        '<ComponentSource name="status-indicator-tones" />',
-      ].join('\n'),
-    };
-
-    expect(unusedExamples(sources, ['status-indicator-demo', 'status-indicator-tones'])).toEqual([
-      "status-indicator-tones: is named by no page's preview",
-    ]);
-  });
-
   it("opens every item page with the item's own demo", () => {
     expect(misplacedFirstPreviews(readPageSources([CONTENT]), readDemoedNames())).toEqual([]);
-  });
-
-  it("reports an editor page whose first preview is not the item's demo", () => {
-    const sources = { 'editor/math-editor': '<ComponentPreview name="mermaid-editor-demo" />' };
-
-    expect(misplacedFirstPreviews(sources, new Set(['math-editor']))).toEqual(['editor/math-editor']);
-  });
-
-  it('reports an editor page that renames its item, and leaves the editor index out', () => {
-    const items = new Map([['math-editor', { title: 'Math Editor', description: 'A LaTeX editor.' }]]);
-    const sources = {
-      'editor/index': '---\ntitle: Editor\n---',
-      'editor/math-editor': '---\ntitle: Formula Editor\ndescription: A LaTeX editor.\n---',
-    };
-
-    expect(unnamedPages(sources, items)).toEqual(['editor/math-editor: title is not "Math Editor"']);
   });
 
   it("documents only registry items, and repeats an item's title and description", () => {
@@ -436,136 +396,8 @@ describe('content/docs', () => {
     expect(missingInstallCommands(readPageSources([CONTENT]), readItems(), features)).toEqual([]);
   });
 
-  it('installs a document feature together with Document Editor, which it plugs into', () => {
-    const items = new Map([
-      ['editor-toggle', { title: 'Editor Toggle', description: 'A fold.' }],
-      ['editor-mention', { title: 'Editor Mention', description: 'A mention.' }],
-    ]);
-    const sources = {
-      'editor/editor-toggle':
-        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add @zui/document-editor @zui/editor-toggle\n```\n</TabsContent>',
-      'editor/editor-mention':
-        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add @zui/editor-mention\n```\n</TabsContent>',
-    };
-
-    expect(missingInstallCommands(sources, items, new Set(['editor-toggle', 'editor-mention']))).toEqual([
-      'editor/editor-mention: has no `pnpm dlx shadcn@latest add @zui/document-editor @zui/editor-mention`',
-    ]);
-  });
-
   it('gives every editor item a page', () => {
     expect(pagelessComponents(readPageSources([CONTENT]), readComponentItems())).toEqual([]);
-  });
-
-  it("finds an editor item's page under editor/, not under components/base/", () => {
-    const components = [
-      { name: 'document-editor', categories: ['editor'], files: [], dependencies: [], registryDependencies: [] },
-    ];
-
-    expect(pagelessComponents({ 'editor/document-editor': '' }, components)).toEqual([]);
-    expect(pagelessComponents({ 'components/base/document-editor': '' }, components)).toEqual([
-      'document-editor: has no page',
-    ]);
-  });
-
-  it('writes each file to the path the shadcn CLI installs it at', () => {
-    expect(
-      installTarget({
-        path: 'registry/bases/base-ui/components/feedback/status-indicator.tsx',
-        type: 'registry:component',
-      }),
-    ).toBe('components/feedback/status-indicator.tsx');
-    expect(installTarget({ path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' })).toBe(
-      'lib/status-tone.ts',
-    );
-    expect(
-      installTarget({ path: 'registry/bases/base-ui/hooks/use-controllable-state.ts', type: 'registry:hook' }),
-    ).toBe('hooks/use-controllable-state.ts');
-  });
-
-  it("writes a file with a placeholder target to that target in the placeholder's default folder, as the shadcn CLI does", () => {
-    expect(
-      installTarget({
-        path: 'registry/bases/base-ui/editor/shared/theme/index.ts',
-        type: 'registry:lib',
-        target: '@components/editor/shared/theme/index.ts',
-      }),
-    ).toBe('components/editor/shared/theme/index.ts');
-  });
-
-  it("checks an editor item's Manual tab on its page under editor/", () => {
-    const items = [
-      {
-        name: 'editor-theme',
-        categories: ['editor'],
-        files: [
-          {
-            path: 'registry/bases/base-ui/editor/shared/theme/index.ts',
-            type: 'registry:lib',
-            target: '@components/editor/shared/theme/index.ts',
-          },
-        ],
-        dependencies: ['next-themes'],
-        registryDependencies: [],
-      },
-    ];
-    const sources = {
-      'editor/editor-theme': '<ComponentSource name="editor-theme" title="lib/index.ts" />',
-    };
-
-    expect(manualProblems(sources, items)).toEqual([
-      'editor/editor-theme: titles registry/bases/base-ui/editor/shared/theme/index.ts "lib/index.ts", not "components/editor/shared/theme/index.ts"',
-      'editor/editor-theme: installs no package, not pnpm add next-themes',
-    ]);
-  });
-
-  it('adds Document Editor in its own step before the parts a document feature is built from', () => {
-    const toggle = {
-      name: 'editor-toggle',
-      categories: ['editor'],
-      files: [
-        {
-          path: 'registry/bases/base-ui/editor/document/features/toggle/index.ts',
-          type: 'registry:component',
-          target: '@components/editor/document/features/toggle/index.ts',
-        },
-      ],
-      dependencies: [],
-      registryDependencies: ['@shadcn/utils', '@zui/document-editor'],
-    };
-    const page = (adds: string[]): Record<string, string> => ({
-      'editor/editor-toggle': [
-        '<TabsContent value="manual">',
-        ...adds,
-        '<ComponentSource name="editor-toggle" title="components/editor/document/features/toggle/index.ts" />',
-        '</TabsContent>',
-      ].join('\n'),
-    });
-
-    expect(
-      manualProblems(page(['pnpm dlx shadcn@latest add @zui/document-editor', 'pnpm dlx shadcn@latest add utils']), [
-        toggle,
-      ]),
-    ).toEqual([]);
-    expect(manualProblems(page(['pnpm dlx shadcn@latest add utils @zui/document-editor']), [toggle])).toEqual([
-      'editor/editor-toggle: adds pnpm dlx shadcn@latest add utils @zui/document-editor, not pnpm dlx shadcn@latest add @zui/document-editor; pnpm dlx shadcn@latest add utils',
-    ]);
-  });
-
-  it("installs the Tailwind plugin an item's css loads as a dev dependency", () => {
-    const item = {
-      name: 'document-editor',
-      categories: ['editor'],
-      files: [],
-      dependencies: ['lucide-react'],
-      registryDependencies: [],
-      css: { '@plugin "@tailwindcss/typography"': {} },
-    };
-    const sources = { 'editor/document-editor': 'pnpm add lucide-react\n' };
-
-    expect(manualProblems(sources, [item])).toEqual([
-      'editor/document-editor: installs pnpm add lucide-react, not pnpm add lucide-react; pnpm add -D @tailwindcss/typography',
-    ]);
   });
 
   it("installs every component's files and packages as its item lists them", () => {

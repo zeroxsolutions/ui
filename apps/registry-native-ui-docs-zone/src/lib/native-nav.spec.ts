@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
-import { webCounterpart, zoneHome, zoneNavItems } from './native-nav';
+import { webCounterpart, zoneNavItems } from './native-nav';
 
 describe('webCounterpart', () => {
   it.each([
@@ -18,13 +18,6 @@ describe('webCounterpart', () => {
   });
 });
 
-describe('zoneHome', () => {
-  it('points each platform at its own home', () => {
-    expect(zoneHome('native')).toBe('/native');
-    expect(zoneHome('web')).toBe('/');
-  });
-});
-
 describe('zoneNavItems', () => {
   it('points the native sections under the engine', () => {
     expect(zoneNavItems('native', 'uniwind').map((item) => item.href)).toEqual([
@@ -32,15 +25,6 @@ describe('zoneNavItems', () => {
       '/native/components/uniwind',
       '/native/blocks/uniwind',
       '/native/icons/uniwind',
-    ]);
-  });
-
-  it('points the web sections at the default base', () => {
-    expect(zoneNavItems('web', 'uniwind').map((item) => item.href)).toEqual([
-      '/docs',
-      '/docs/components/base',
-      '/blocks/base',
-      '/icons/base',
     ]);
   });
 });

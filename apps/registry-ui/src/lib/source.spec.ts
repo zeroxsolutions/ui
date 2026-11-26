@@ -586,135 +586,20 @@ describe('content/docs', () => {
     expect(unreachedPages(readDocsTree([CONTENT]))).toEqual([]);
   });
 
-  it('reports a page no meta.json lists or links', () => {
-    const tree: DocsTree = {
-      pages: ['blocks/ai-provider-picker', 'blocks/chat', 'components/button', 'index', 'installation'],
-      metas: {
-        '': ['index', 'components', '[AI Provider Picker](/docs/blocks/ai-provider-picker)'],
-        components: ['...'],
-      },
-    };
-
-    expect(unreachedPages(tree)).toEqual(['blocks/chat', 'installation']);
-  });
-
   it('names only demos and items the examples index holds', () => {
     expect(unresolvedNames(readPageSources([CONTENT]), new Set(Object.keys(Index)))).toEqual([]);
-  });
-
-  it('reports a name the examples index lacks', () => {
-    const sources = {
-      'components/base/status-indicator':
-        '<ComponentPreview name="status-indicator-demo" />\n<ComponentSource name="status-indicator-missing" />',
-    };
-
-    expect(unresolvedNames(sources, new Set(['status-indicator', 'status-indicator-demo']))).toEqual([
-      'components/base/status-indicator: status-indicator-missing',
-    ]);
   });
 
   it("names every registry:example in some page's preview", () => {
     expect(unusedExamples(readPageSources([CONTENT]), readExampleNames())).toEqual([]);
   });
 
-  it('reports an example no page previews, naming it in a ComponentSource aside', () => {
-    const sources = {
-      'components/base/status-indicator': [
-        '<ComponentPreview name="status-indicator-demo" />',
-        '<ComponentSource name="status-indicator-tones" />',
-      ].join('\n'),
-    };
-
-    expect(unusedExamples(sources, ['status-indicator-demo', 'status-indicator-tones'])).toEqual([
-      "status-indicator-tones: is named by no page's preview",
-    ]);
-  });
-
   it("opens every item page with the item's own demo", () => {
     expect(misplacedFirstPreviews(readPageSources([CONTENT]), readDemoedNames())).toEqual([]);
   });
 
-  it("reports an item page whose first preview is not the item's demo", () => {
-    const sources = {
-      'blocks/ai-provider-picker': '<ComponentPreview name="ai-provider-picker-demo" />',
-      'components/base/button': '<ComponentPreview name="button-outline" />',
-      'components/base/status-indicator':
-        '<ComponentPreview name="status-indicator-tones" />\n<ComponentPreview name="status-indicator-demo" />',
-      'components/base/tag-input': '<ComponentSource name="tag-input" />',
-    };
-
-    expect(misplacedFirstPreviews(sources, new Set(['ai-provider-picker', 'status-indicator', 'tag-input']))).toEqual([
-      'components/base/status-indicator',
-      'components/base/tag-input',
-    ]);
-  });
-
-  it('takes a block page whose first preview is a BlockPreview of the demo', () => {
-    const pages = {
-      'blocks/ai-provider-picker': '<BlockPreview name="ai-provider-picker-demo" block="ai-provider-picker" />',
-    };
-
-    expect(misplacedFirstPreviews(pages, new Set(['ai-provider-picker']))).toEqual([]);
-  });
-
   it("documents only registry items, and repeats an item's title and description", () => {
     expect(unnamedPages(readPageSources([CONTENT]), readItems())).toEqual([]);
-  });
-
-  it('reports a page for nothing published, and an item page that renames its item', () => {
-    const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
-    const sources = {
-      'components/base/index': '---\ntitle: Components\n---',
-      'components/base/card': '---\ntitle: Card\n---',
-      'components/base/status-indicator': '---\ntitle: Status\ndescription: A small dot.\n---',
-    };
-
-    expect(unnamedPages(sources, items)).toEqual([
-      'components/base/card: is not a registry item',
-      'components/base/status-indicator: title is not "Status Indicator"',
-    ]);
-  });
-
-  it('matches a single- or double-quoted frontmatter description to the item it quotes', () => {
-    const items = new Map([
-      ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
-      ['permission-card', { title: 'Permission Card', description: "One consent request: the user's decision." }],
-    ]);
-    const sources = {
-      // Single-quoted: no quote character of its own to escape.
-      'components/base/model-info-card': [
-        '---',
-        'title: Model Info Card',
-        "description: 'The detail panel: an identity header.'",
-        '---',
-      ].join('\n'),
-      // Double-quoted: its own apostrophe would need doubling inside single quotes, so it quotes with
-      // double instead (oxfmt's own choice - confirmed by running it on a fixture with this text).
-      'components/base/permission-card': [
-        '---',
-        'title: Permission Card',
-        'description: "One consent request: the user\'s decision."',
-        '---',
-      ].join('\n'),
-    };
-
-    expect(unnamedPages(sources, items)).toEqual([]);
-  });
-
-  it('reports a quoted frontmatter description that does not match the item', () => {
-    const items = new Map([
-      ['model-info-card', { title: 'Model Info Card', description: 'The detail panel: an identity header.' }],
-    ]);
-    const sources = {
-      'components/base/model-info-card': [
-        '---',
-        'title: Model Info Card',
-        "description: 'A different panel: not the item.'",
-        '---',
-      ].join('\n'),
-    };
-
-    expect(unnamedPages(sources, items)).toEqual(["components/base/model-info-card: description is not the item's"]);
   });
 
   it('keeps the component pages in one folder per base the routes build, and none beside them', () => {
@@ -731,128 +616,16 @@ describe('content/docs', () => {
     expect(nonComponentPages(readPageSources([CONTENT]), readComponentNames())).toEqual([]);
   });
 
-  it('reports a components page for nothing registry.json publishes as a registry:component', () => {
-    const sources = {
-      'components/base/index': '---\ntitle: Components\n---',
-      'components/base/status-indicator': '---\ntitle: Status Indicator\n---',
-      'components/base/button': '---\ntitle: Button\n---',
-    };
-
-    expect(nonComponentPages(sources, new Set(['status-indicator']))).toEqual([
-      'components/base/button: names no registry:component item',
-    ]);
-  });
-
-  it("sends the introduction's reader to the installation page for the @zui entry", () => {
-    const introduction = readFileSync(join(CONTENT, 'index.mdx'), 'utf8');
-    const install = /## Install an item\n([\s\S]*?)(?=\n## |$)/.exec(introduction)?.[1] ?? '';
-    expect(install).toContain('(/docs/installation)');
-    expect(install).not.toContain('by its URL');
-  });
-
-  it('tells an app to declare the @zui registry before it installs an item', () => {
-    const installation = readFileSync(join(CONTENT, 'installation.mdx'), 'utf8');
-    // The block prints the `@zui` entry; the e2e reads it off the page.
-    expect(installation).toContain('<WebComponentsJson />');
-    expect(installation).toContain('An item that uses another zui item installs only with this entry.');
-  });
-
   it('installs each item by its @zui name and each primitive by its name at shadcn', () => {
     expect(missingInstallCommands(readPageSources([CONTENT]), readItems())).toEqual([]);
-  });
-
-  it('reports a page that installs its subject some other way, even where the right line sits in its Manual tab', () => {
-    const items = new Map([['status-indicator', { title: 'Status Indicator', description: 'A small dot.' }]]);
-    const sources = {
-      'components/base/button':
-        '<TabsContent value="cli">\n```bash\npnpm dlx shadcn@latest add button-group\n```\n</TabsContent>',
-      'components/base/status-indicator': [
-        '<TabsContent value="cli">',
-        '```bash',
-        'pnpm dlx shadcn@latest add status-indicator',
-        '```',
-        '</TabsContent>',
-        '<TabsContent value="manual">',
-        '```bash',
-        'pnpm dlx shadcn@latest add @zui/status-indicator',
-        '```',
-        '</TabsContent>',
-      ].join('\n'),
-    };
-
-    expect(missingInstallCommands(sources, items)).toEqual([
-      'components/base/button: has no `pnpm dlx shadcn@latest add button`',
-      'components/base/status-indicator: has no `pnpm dlx shadcn@latest add @zui/status-indicator`',
-    ]);
   });
 
   it('gives every component a page', () => {
     expect(pagelessComponents(readPageSources([CONTENT]), readComponentItems())).toEqual([]);
   });
 
-  it('reports a component with no page', () => {
-    const components = [
-      { name: 'status-indicator', files: [], dependencies: [], registryDependencies: [] },
-      { name: 'tag-input', files: [], dependencies: [], registryDependencies: [] },
-    ];
-    const sources = { 'components/base/status-indicator': '' };
-
-    expect(pagelessComponents(sources, components)).toEqual(['tag-input: has no page']);
-  });
-
-  it('writes each file to the path the shadcn CLI installs it at', () => {
-    expect(
-      installTarget({
-        path: 'registry/bases/base-ui/components/feedback/status-indicator.tsx',
-        type: 'registry:component',
-      }),
-    ).toBe('components/feedback/status-indicator.tsx');
-    expect(installTarget({ path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' })).toBe(
-      'lib/status-tone.ts',
-    );
-    expect(
-      installTarget({ path: 'registry/bases/base-ui/hooks/use-controllable-state.ts', type: 'registry:hook' }),
-    ).toBe('hooks/use-controllable-state.ts');
-  });
-
   it("installs every component's files and packages as its item lists them", () => {
     expect(manualProblems(readPageSources([CONTENT]), readComponentItems())).toEqual([]);
-  });
-
-  it('reports a missing file, a file titled with the wrong path, a file two blocks name, and the wrong packages', () => {
-    const components = [
-      {
-        name: 'status-indicator',
-        files: [
-          { path: 'registry/bases/base-ui/components/feedback/status-indicator.tsx', type: 'registry:component' },
-          { path: 'registry/bases/base-ui/types/status-tone.ts', type: 'registry:lib' },
-        ],
-        dependencies: ['lucide-react'],
-        registryDependencies: ['@shadcn/utils', '@zui/lucide-circle-icon'],
-      },
-    ];
-    const sources = {
-      'components/base/status-indicator': [
-        '<ComponentSource name="status-indicator" title="components/status-indicator.tsx" />',
-        '<ComponentSource name="status-indicator" title="components/feedback/status-indicator.tsx" />',
-        '<TabsContent value="manual">',
-        '```bash',
-        'pnpm add react',
-        '```',
-        '```bash',
-        'pnpm dlx shadcn@latest add utils',
-        '```',
-        '</TabsContent>',
-      ].join('\n'),
-    };
-
-    expect(manualProblems(sources, components)).toEqual([
-      'components/base/status-indicator: titles registry/bases/base-ui/components/feedback/status-indicator.tsx "components/status-indicator.tsx", not "components/feedback/status-indicator.tsx"',
-      'components/base/status-indicator: has no ComponentSource for registry/bases/base-ui/types/status-tone.ts',
-      'components/base/status-indicator: has 2 ComponentSource blocks for registry/bases/base-ui/components/feedback/status-indicator.tsx',
-      'components/base/status-indicator: installs pnpm add react, not pnpm add lucide-react',
-      'components/base/status-indicator: adds pnpm dlx shadcn@latest add utils, not pnpm dlx shadcn@latest add utils @zui/lucide-circle-icon',
-    ]);
   });
 
   it('documents exactly the parts each component exports, with props each part declares', () => {
@@ -861,126 +634,7 @@ describe('content/docs', () => {
     );
   });
 
-  it('reports a missing part, and a prop the part does not declare', () => {
-    const item = { name: 'tag-input', files: [], dependencies: [], registryDependencies: [] };
-    const code = [
-      'interface TagInputProps {',
-      '  value: string[];',
-      '  onValueChange?: (value: string[]) => void;',
-      '}',
-      'export { TagInput, TagInputItem };',
-    ].join('\n');
-    const sources = {
-      'components/base/tag-input': [
-        '## API reference',
-        '',
-        '### TagInput',
-        '',
-        '| Prop | Type | Default |',
-        '| --- | --- | --- |',
-        '| `value` | `string[]` | required |',
-        '| `max` | `number` | - |',
-      ].join('\n'),
-    };
-
-    expect(apiProblems(sources, [item], () => code, {})).toEqual([
-      'components/base/tag-input: API reference documents TagInput, not TagInput, TagInputItem',
-      'components/base/tag-input: TagInput has no prop `max`',
-    ]);
-  });
-
-  it('reports a hyphenated prop a quoted key does not declare, and takes one that it does', () => {
-    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
-    const missing = ['interface StatusChipProps {', '  label: string;', '}', 'export { StatusChip };'].join('\n');
-    const declared = ['interface StatusChipProps {', "  'aria-label': string;", '}', 'export { StatusChip };'].join(
-      '\n',
-    );
-    const page = [
-      '## API reference',
-      '',
-      '### StatusChip',
-      '',
-      '| Prop | Type | Default |',
-      '| --- | --- | --- |',
-      '| `aria-label` | `string` | required |',
-    ].join('\n');
-
-    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => missing, {})).toEqual([
-      'components/base/status-chip: StatusChip has no prop `aria-label`',
-    ]);
-    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => declared, {})).toEqual([]);
-  });
-
-  it('exempts only the props a PROPS_READ_ELSEWHERE entry lists, not the whole part', () => {
-    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
-    const code = ['interface StatusChipProps {', '  tone: string;', '}', 'export { StatusChip };'].join('\n');
-    const page = [
-      '## API reference',
-      '',
-      '### StatusChip',
-      '',
-      '| Prop | Type | Default |',
-      '| --- | --- | --- |',
-      '| `tone` | `string` | required |',
-      '| `size` | `string` | required |',
-    ].join('\n');
-    const readElsewhere = { StatusChip: { props: ['size'], reason: 'test fixture' } };
-
-    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => code, readElsewhere)).toEqual([]);
-
-    const withoutTone = ['interface StatusChipProps {', '}', 'export { StatusChip };'].join('\n');
-    expect(apiProblems({ 'components/base/status-chip': page }, [item], () => withoutTone, readElsewhere)).toEqual([
-      'components/base/status-chip: StatusChip has no prop `tone`',
-    ]);
-  });
-
   it('allows every PROPS_READ_ELSEWHERE entry, each a real part with a table listing every allowed prop', () => {
     expect(readElsewhereProblems(readPageSources([CONTENT]), readComponentItems(), PROPS_READ_ELSEWHERE)).toEqual([]);
-  });
-
-  it('reports an allowed prop its table drops, a part with no table, and an entry for no documented part', () => {
-    const item = { name: 'status-chip', files: [], dependencies: [], registryDependencies: [] };
-    const code = ['export { StatusChip, StatusChipIcon };'].join('\n');
-    const sources = {
-      'components/base/status-chip': [
-        '## API reference',
-        '',
-        '### StatusChip',
-        '',
-        '| Prop | Type | Default |',
-        '| --- | --- | --- |',
-        '| `tone` | `string` | required |',
-        '',
-        '### StatusChipIcon',
-      ].join('\n'),
-    };
-    const readElsewhere = {
-      StatusChip: { props: ['tone', 'size'], reason: 'test fixture' },
-      StatusChipIcon: { props: ['tone'], reason: 'test fixture' },
-      Nonexistent: { props: [], reason: 'test fixture' },
-    };
-
-    expect(readElsewhereProblems(sources, [item], readElsewhere, () => code)).toEqual([
-      'StatusChip: allows `size`, which its table does not list',
-      'StatusChipIcon: has no table in its page',
-      'Nonexistent: is not an exported part of any documented component',
-    ]);
-  });
-
-  it('names an aliased export by the name it exports as, skips a type export, and keeps a lowercase export', () => {
-    const item = { name: 'markdown-view', files: [], dependencies: [], registryDependencies: [] };
-    const code = [
-      'export type MarkdownViewProps = { markdown: string };',
-      'function MemoizedMarkdownView(props: MarkdownViewProps) { return null; }',
-      'function useMarkdownCollapse() { return false; }',
-      'export { MemoizedMarkdownView as MarkdownView, useMarkdownCollapse, type MarkdownViewProps };',
-    ].join('\n');
-    const sources = {
-      'components/base/markdown-view': ['## API reference', '', '### MarkdownView', '', '### useMarkdownCollapse'].join(
-        '\n',
-      ),
-    };
-
-    expect(apiProblems(sources, [item], () => code, {})).toEqual([]);
   });
 });

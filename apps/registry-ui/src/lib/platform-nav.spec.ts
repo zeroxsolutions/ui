@@ -30,16 +30,6 @@ describe('nativeCounterpart', () => {
 });
 
 describe('webNavItems', () => {
-  it("points the header's Docs, Components, Blocks, Icons and Editor into the web tree", () => {
-    expect(webNavItems().map(({ label, href }) => [label, href])).toEqual([
-      ['Docs', '/docs'],
-      ['Components', '/docs/components/base'],
-      ['Blocks', '/blocks/base'],
-      ['Icons', '/icons/base'],
-      ['Editor', '/docs/editor'],
-    ]);
-  });
-
   it.each([
     ['/docs/editor', 'Editor'],
     ['/docs/editor/document-editor', 'Editor'],

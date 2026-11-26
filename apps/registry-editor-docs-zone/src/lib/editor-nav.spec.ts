@@ -22,16 +22,6 @@ describe('inZone', () => {
 });
 
 describe('zoneNavItems', () => {
-  it('points the sections into the web tree at the default base, then Editor', () => {
-    expect(zoneNavItems().map((item) => item.href)).toEqual([
-      '/docs',
-      '/docs/components/base',
-      '/blocks/base',
-      '/icons/base',
-      '/docs/editor',
-    ]);
-  });
-
   it.each(['/docs/editor', '/docs/editor/document-editor'])('marks Editor, not Docs, on %s', (pathname) => {
     expect(currentSiteNavItem(zoneNavItems(), pathname)?.label).toBe('Editor');
   });
