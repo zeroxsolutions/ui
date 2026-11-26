@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
+import { render } from 'vitest-browser-react';
 
 import { FieldDescription } from '@/registry/bases/base-ui/ui/field';
 import { Input } from '@/registry/bases/base-ui/ui/input';
@@ -13,10 +14,6 @@ import {
   useFrontmatterFormField,
   type FrontmatterFormValue,
 } from './frontmatter-form';
-
-afterEach(() => {
-  cleanup();
-});
 
 function NameEditor({
   value,
@@ -40,34 +37,30 @@ function NameEditor({
 }
 
 describe('FrontmatterForm', () => {
-  it('associates the label with the control and reflects the value', () => {
-    render(<NameEditor value={{ name: 'pdf-toolkit' }} />);
-    const input = screen.getByLabelText('Name') as HTMLInputElement;
-    expect(input.value).toBe('pdf-toolkit');
+  it('associates the label with the control and reflects the value', async () => {
+    await render(<NameEditor value={{ name: 'pdf-toolkit' }} />);
+    await expect.element(page.getByLabelText('Name')).toHaveValue('pdf-toolkit');
   });
 
-  it('shows the description the field composes', () => {
-    render(<NameEditor value={{ name: 'a' }} />);
-    expect(screen.getByText('Lowercase, dash-separated.')).toBeTruthy();
+  it('shows the description the field composes', async () => {
+    await render(<NameEditor value={{ name: 'a' }} />);
+    await expect.element(page.getByText('Lowercase, dash-separated.')).toBeVisible();
   });
 
-  it('reports the next document when a field changes (controlled)', () => {
+  it('reports the next document, keeping its other keys, as a field is typed in', async () => {
     const onValueChange = vi.fn();
-    render(<NameEditor value={{ name: 'a', description: 'keep' }} onValueChange={onValueChange} />);
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'ab' },
-    });
-    // Merges into the existing document - other keys are preserved.
+    await render(<NameEditor value={{ name: 'a', description: 'keep' }} onValueChange={onValueChange} />);
+    await userEvent.type(page.getByLabelText('Name'), 'b');
     expect(onValueChange).toHaveBeenCalledWith({
       name: 'ab',
       description: 'keep',
     });
   });
 
-  it("calls the control's own onChange as well as binding the value", () => {
+  it("calls the control's own onChange as well as binding the value", async () => {
     const onValueChange = vi.fn();
     const onChange = vi.fn();
-    render(
+    await render(
       <FrontmatterForm value={{ name: 'a' }} onValueChange={onValueChange}>
         <FrontmatterFormField name="name">
           <FrontmatterFormFieldLabel>Name</FrontmatterFormFieldLabel>
@@ -75,27 +68,26 @@ describe('FrontmatterForm', () => {
         </FrontmatterFormField>
       </FrontmatterForm>,
     );
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'ab' } });
+    await userEvent.type(page.getByLabelText('Name'), 'b');
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith({ name: 'ab' });
   });
 
-  it('shows the consumer error and wires invalid-state a11y', () => {
-    render(<NameEditor value={{ name: '' }} errors={{ name: 'Name is required.' }} />);
-    const input = screen.getByLabelText('Name');
-    const alert = screen.getByRole('alert');
-    expect(alert.textContent).toBe('Name is required.');
-    expect(input.getAttribute('aria-invalid')).toBe('true');
-    expect(input.getAttribute('aria-describedby')).toBe(alert.id);
+  it('shows the consumer error and wires invalid-state a11y', async () => {
+    await render(<NameEditor value={{ name: '' }} errors={{ name: 'Name is required.' }} />);
+    const input = page.getByLabelText('Name');
+    await expect.element(page.getByRole('alert')).toHaveTextContent('Name is required.');
+    await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+    await expect.element(input).toHaveAccessibleDescription(expect.stringContaining('Name is required.'));
   });
 
-  it('renders no error region when the field is valid', () => {
-    render(<NameEditor value={{ name: 'ok' }} />);
-    expect(screen.queryByRole('alert')).toBeNull();
-    expect(screen.getByLabelText('Name').getAttribute('aria-invalid')).toBeNull();
+  it('renders no error region when the field is valid', async () => {
+    await render(<NameEditor value={{ name: 'ok' }} />);
+    await expect.element(page.getByRole('alert')).not.toBeInTheDocument();
+    await expect.element(page.getByLabelText('Name')).not.toHaveAttribute('aria-invalid');
   });
 
-  it('exposes the field binding via useFrontmatterFormField for custom controls', () => {
+  it('exposes the field binding via useFrontmatterFormField for custom controls', async () => {
     const onValueChange = vi.fn();
 
     function ToggleField() {
@@ -107,7 +99,7 @@ describe('FrontmatterForm', () => {
       );
     }
 
-    render(
+    await render(
       <FrontmatterForm value={{ network: false }} onValueChange={onValueChange}>
         <FrontmatterFormField name="network">
           <ToggleField />
@@ -115,7 +107,7 @@ describe('FrontmatterForm', () => {
       </FrontmatterForm>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'off' }));
+    await userEvent.click(page.getByRole('button', { name: 'off' }));
     expect(onValueChange).toHaveBeenCalledWith({ network: true });
   });
 });
