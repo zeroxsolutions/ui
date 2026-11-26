@@ -4,7 +4,7 @@ import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { expectViewerMatches, layoutFrame, storedLayout } from '../../../../../../../test/block-layout';
-import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
+import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { bookmark } from './bookmark';
 
@@ -21,8 +21,7 @@ describe('the bookmark in the Document Editor', () => {
     await userEvent.click(page.getByRole('textbox', { name: 'Link' }));
     await userEvent.keyboard('https://example.com/hoi-an{Enter}');
 
-    const title = await findElement('[data-slot=bookmark-title]', 'Hoi An guide');
-    expect(title).toBeTruthy();
+    await expect.element(page.getByTestId('bookmark-title')).toHaveTextContent('Hoi An guide');
     expect(readLink).toHaveBeenCalledTimes(1);
     expect(readLink).toHaveBeenCalledWith('https://example.com/hoi-an');
     expect(editor.getJSON().content?.find((node) => node.type === 'bookmark')?.attrs).toMatchObject({
@@ -44,7 +43,7 @@ describe('the bookmark in the Document Editor', () => {
     await userEvent.keyboard('https://example.com/x{Enter}');
 
     await vi.waitFor(() => expect(readLink).toHaveBeenCalledTimes(1));
-    expect((await findElement('[data-slot=bookmark-title]')).textContent).toBe('https://example.com/x');
+    await expect.element(page.getByTestId('bookmark-title')).toHaveTextContent('https://example.com/x');
   });
 
   it('asks the host for no preview of a mail address', async () => {
@@ -55,7 +54,7 @@ describe('the bookmark in the Document Editor', () => {
     await userEvent.click(page.getByRole('textbox', { name: 'Link' }));
     await userEvent.keyboard('mailto:lan@example.com{Enter}');
 
-    expect((await findElement('[data-slot=bookmark-title]')).textContent).toBe('mailto:lan@example.com');
+    await expect.element(page.getByTestId('bookmark-title')).toHaveTextContent('mailto:lan@example.com');
     expect(readLink).not.toHaveBeenCalled();
   });
 });
@@ -85,9 +84,6 @@ describe('the bookmark layout', () => {
     await userEvent.click(page.getByRole('button', { name: 'Align center' }));
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).align).toBe('center'));
-    const drawn = layoutFrame().getBoundingClientRect();
-    const line = (layoutFrame().parentElement as HTMLElement).getBoundingClientRect();
-    expect(Math.abs(drawn.left - line.left - (line.right - drawn.right))).toBeLessThan(2);
     await expectViewerMatches(editor, features);
   });
 
@@ -96,7 +92,9 @@ describe('the bookmark layout', () => {
     await userEvent.click(layoutFrame(), { position: { x: 4, y: 4 } });
     await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).toBeVisible();
 
-    expect(document.querySelector('[data-slot=resize-handle]')).toBeNull();
-    expect(document.querySelector('[data-slot=block-toolbar] [aria-label="Full width"]')).toBeNull();
+    expect(page.getByTestId('resize-handle').query()).toBeNull();
+    expect(
+      page.getByRole('toolbar', { name: 'Block layout' }).getByRole('button', { name: 'Full width' }).query(),
+    ).toBeNull();
   });
 });

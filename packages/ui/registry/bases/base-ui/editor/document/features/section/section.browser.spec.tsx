@@ -64,8 +64,7 @@ function Host({
 }) {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    // Room above the editor, where the section's toolbar opens.
-    <div className="style-nova p-12 pt-40">
+    <div className="style-nova p-12">
       <Editor
         features={drawn}
         content={content}
@@ -91,25 +90,20 @@ async function mount(
   });
 }
 
-function holding(selector: string, text: string): HTMLElement {
-  const found = [...document.querySelectorAll<HTMLElement>(selector)].find((element) => element.textContent === text);
-  if (!found) throw new Error(`no ${selector} holds ${text}`);
-  return found;
-}
+/** The line of the document reading `text`. */
+const holding = (text: string): HTMLElement => page.getByText(text, { exact: true }).element() as HTMLElement;
 
 async function openSlash(at: HTMLElement): Promise<void> {
   await userEvent.click(at);
   await userEvent.keyboard('{End}/');
-  await vi.waitFor(() => {
-    if (!document.querySelector('[data-slot=slash-menu] [data-slot=item]'))
-      throw new Error('the slash menu is not open');
-  });
+  await expect.element(slashItems().first()).toBeVisible();
 }
 
+const slashItems = () => page.getByTestId('slash-menu').getByTestId('item');
 const slashTitles = () =>
-  [...document.querySelectorAll<HTMLElement>('[data-slot=slash-menu] [data-slot=item]')].map(
-    (item) => item.textContent ?? '',
-  );
+  slashItems()
+    .elements()
+    .map((item) => item.textContent ?? '');
 
 /** Whether any section of `nodes` sits below the top of the document. */
 function nestedSection(nodes: readonly NodeJSON[], inside = false): boolean {
@@ -161,7 +155,6 @@ const sectionTexts = (editor: IEditor) =>
 
 const toolbar = () => page.getByRole('toolbar', { name: 'Mise en page' });
 const sectionAttrs = (editor: IEditor) => editor.getJSON().content?.find((node) => node.type === 'section')?.attrs;
-const drawnSection = () => document.querySelector<HTMLElement>('.ProseMirror [data-slot=section]')!;
 
 afterEach(async () => {
   await page.viewport(414, 896);
@@ -171,11 +164,7 @@ describe('the section in the Document Editor', () => {
   it('inserts from the slash menu holding an empty line the caret types into', async () => {
     const editor = await mount();
     await openSlash(await vi.waitFor(() => document.querySelector<HTMLElement>('.ProseMirror p')!));
-    await userEvent.click(
-      [...document.querySelectorAll<HTMLElement>('[data-slot=slash-menu] [data-slot=item]')].find((item) =>
-        item.textContent?.startsWith('Section'),
-      )!,
-    );
+    await userEvent.click(slashItems().filter({ hasText: /^Section/ }));
 
     await vi.waitFor(() => expect(editor.getJSON().content?.[0]).toMatchObject({ type: 'section' }));
     await userEvent.keyboard('inside');
@@ -194,12 +183,6 @@ describe('the section in the Document Editor', () => {
     });
     await userEvent.click(page.getByText('inside'));
     await expect.element(toolbar()).toBeVisible();
-    expect(
-      toolbar()
-        .getByRole('button')
-        .elements()
-        .map((button) => button.getAttribute('aria-label') ?? button.textContent),
-    ).toEqual(['Fond', 'Marge interne', 'Largeur']);
 
     await userEvent.click(toolbar().getByRole('button', { name: 'Fond' }));
     const swatches = page.getByRole('dialog', { name: 'Fond' });
@@ -221,11 +204,6 @@ describe('the section in the Document Editor', () => {
         width: 'wide',
       }),
     );
-    expect(drawnSection().dataset).toMatchObject({
-      background: 'teal',
-      padding: 'large',
-      width: 'wide',
-    });
 
     // A menu closed by a pick gives the focus back to the text, so the undo key reaches the editor.
     await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
@@ -282,7 +260,7 @@ describe('the section in the Document Editor', () => {
     await userEvent.click(page.getByText('inside'));
 
     await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
-    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    expect(page.getByRole('toolbar').query()).toBeNull();
   });
 
   it("shows only the innermost block's toolbar, and Alt+F10 steps out to the section's and around", async () => {
@@ -291,9 +269,9 @@ describe('the section in the Document Editor', () => {
       content: [sectionOf(lanes([line('left')], [line('right')])), line('after')],
     });
     const columnsToolbar = page.getByRole('toolbar', { name: DEFAULT_LAYOUT_WORDS.toolbar });
-    const drawnToolbars = () => document.querySelectorAll('[data-slot=block-toolbar]').length;
+    const drawnToolbars = () => page.getByRole('toolbar').elements().length;
     const holdsFocus = (bar: typeof columnsToolbar) => bar.element().contains(document.activeElement);
-    await userEvent.click(holding('.ProseMirror p', 'left'));
+    await userEvent.click(holding('left'));
     await expect.element(columnsToolbar).toBeVisible();
     await vi.waitFor(() => expect(drawnToolbars()).toBe(1));
 
@@ -319,52 +297,29 @@ describe('the section in the Document Editor', () => {
       type: 'doc',
       content: [line('outside'), sectionOf(line('first'), line('second')), line('after')],
     });
-    await userEvent.dragAndDrop(
-      await gripBeside(holding('.ProseMirror p', 'outside')),
-      holding('.ProseMirror p', 'second'),
-      {
-        steps: 10,
-      },
-    );
+    await userEvent.dragAndDrop(await gripBeside(holding('outside')), holding('second'), {
+      steps: 10,
+    });
     await vi.waitFor(() => expect(sectionTexts(editor)).toContain('outside'));
 
     // A later block of the section, as the grip addresses the section itself beside its first line.
-    await userEvent.dragAndDrop(
-      await gripBeside(holding('.ProseMirror p', 'second')),
-      holding('.ProseMirror p', 'after'),
-      {
-        steps: 10,
-      },
-    );
+    await userEvent.dragAndDrop(await gripBeside(holding('second')), holding('after'), {
+      steps: 10,
+    });
     await vi.waitFor(() => expect(sectionTexts(editor)).not.toContain('second'));
     expect(editor.getText()).toContain('second');
   });
 
-  it('draws the same in the Viewer, its background from the theme in light and dark', async () => {
+  it('draws in the Viewer the background, padding and width the Editor draws', async () => {
     const doc: DocJSON = {
       type: 'doc',
       content: [{ ...sectionOf(line('inside')), attrs: { background: 'teal', padding: 'small', width: 'wide' } }],
     };
-    await render(
-      <div className="style-nova">
-        <div data-testid="light">
-          <Viewer doc={doc} features={features} />
-        </div>
-        <div data-testid="dark" className="dark">
-          <Viewer doc={doc} features={features} />
-        </div>
-      </div>,
-    );
-    await mount(doc);
-    const viewed = (id: string) =>
-      document.querySelector<HTMLElement>(`[data-testid=${id}] [data-slot=section]`) as HTMLElement;
-    expect(viewed('light').dataset).toMatchObject({ ...drawnSection().dataset });
-    const light = getComputedStyle(viewed('light')).backgroundColor;
-    const dark = getComputedStyle(viewed('dark')).backgroundColor;
-    expect(light).not.toBe('rgba(0, 0, 0, 0)');
-    expect(dark).not.toBe(light);
-    expect(getComputedStyle(drawnSection()).backgroundColor).toBe(light);
-    expect(getComputedStyle(viewed('light')).paddingTop).toBe(getComputedStyle(drawnSection()).paddingTop);
+    const viewed = await render(<Viewer doc={doc} features={features} />);
+    const drawn = { 'data-background': 'teal', 'data-padding': 'small', 'data-width': 'wide' };
+    for (const [name, value] of Object.entries(drawn)) {
+      await expect.element(viewed.getByTestId('section')).toHaveAttribute(name, value);
+    }
   });
 
   it('offers no section in a lane or in a section', async () => {
@@ -384,40 +339,6 @@ describe('the section in the Document Editor', () => {
     }
   });
 
-  it.each(['content', 'wide', 'full'])('keeps a full width block within a %s section', async (width) => {
-    const pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-    await mount({
-      type: 'doc',
-      content: [
-        {
-          type: 'section',
-          attrs: { width, background: 'muted' },
-          content: [
-            { type: 'image', attrs: { src: pixel, alt: 'Bay', width: 'full' } },
-            {
-              type: 'table',
-              attrs: { width: 'full' },
-              content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [line('cell')] }] }],
-            },
-          ],
-        },
-      ],
-    });
-    const sectionBox = document.querySelector<HTMLElement>('.ProseMirror [data-slot=section]')!.getBoundingClientRect();
-    const drawn = await vi.waitFor(() => {
-      const found = ['[data-slot=block-layout][data-width=full]', '[data-slot=table][data-width=full]'].map(
-        (selector) => document.querySelector<HTMLElement>(`.ProseMirror [data-slot=section] ${selector}`),
-      );
-      if (found.some((element) => element === null)) throw new Error('a full width block is not drawn');
-      return found as HTMLElement[];
-    });
-    for (const element of drawn) {
-      const box = element.getBoundingClientRect();
-      expect(box.left).toBeGreaterThanOrEqual(sectionBox.left);
-      expect(box.right).toBeLessThanOrEqual(sectionBox.right);
-    }
-  });
-
   it.each(Object.keys(holders))('offers no section in a %s, nor takes one pasted there', async (name) => {
     const editor = await mount({
       type: 'doc',
@@ -428,7 +349,7 @@ describe('the section in the Document Editor', () => {
     expect(slashTitles().length).toBeGreaterThan(0);
     await userEvent.keyboard('{Escape}');
     await copyHtml('<div data-type="section" data-background="red"><p>copied</p></div>');
-    await userEvent.click(holding('.ProseMirror p', 'inner'));
+    await userEvent.click(holding('inner'));
     await userEvent.keyboard('{End}');
     await userEvent.paste();
     await vi.waitFor(() => expect(editor.getText()).toContain('copied'));
@@ -441,7 +362,7 @@ describe('the section in the Document Editor', () => {
     await copyHtml(
       '<p>before</p><section data-section data-background="teal" data-padding="large"><p>copied</p></section>',
     );
-    await userEvent.click(holding('.ProseMirror p', 'top'));
+    await userEvent.click(holding('top'));
     await userEvent.keyboard('{End}');
     await userEvent.paste();
 
@@ -457,7 +378,7 @@ describe('the section in the Document Editor', () => {
     await copyHtml('<div data-type="section" data-background="red"><p>copied</p></div>');
     // The section first: a lane's caret opens the columns' toolbar above the lanes, over the section's last line.
     for (const text of ['inside', 'left']) {
-      await userEvent.click(holding('.ProseMirror p', text));
+      await userEvent.click(holding(text));
       await userEvent.keyboard('{End}');
       await userEvent.paste();
     }

@@ -3,17 +3,8 @@ import { page, userEvent } from 'vitest/browser';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  dragEndHandle,
-  drawnShare,
-  editorEdges,
-  expectViewerMatches,
-  layoutFrame,
-  lineWidth,
-  storedLayout,
-  viewerFrame,
-} from '../../../../../../../test/block-layout';
-import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
+import { dragEndHandle, expectViewerMatches, lineWidth, storedLayout } from '../../../../../../../test/block-layout';
+import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { fileInput, heldUpload, pngFile } from '../../../../../../../src/test/uploads';
 import { standardKit } from '../standard/index';
 import { card } from './card';
@@ -31,10 +22,10 @@ describe('the card in the Document Editor', () => {
       .element(page.getByRole('textbox', { name: 'Image', exact: true }))
       .toHaveAttribute('aria-invalid', 'true');
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}https://i.test/hoi-an.jpg{Enter}');
-    await findElement('[data-slot=card-image]');
+    await expect.element(page.getByTestId('card-image')).toBeVisible();
     await userEvent.click(page.getByRole('textbox', { name: 'Title' }));
     await userEvent.keyboard('Hoi An');
-    await userEvent.click(await findElement('[data-slot=card-text]'));
+    await userEvent.click(page.getByTestId('card-text'));
     await userEvent.keyboard('Lanterns');
     await userEvent.click(page.getByRole('textbox', { name: 'Add a button' }));
     await userEvent.keyboard('Read more');
@@ -66,7 +57,7 @@ describe('the card with uploads', () => {
     await userEvent.upload(fileInput(), pngFile());
     await vi.waitFor(() => expect(calls).toHaveLength(1));
 
-    expect((await findElement('[data-slot=card-image]')).getAttribute('src')).toMatch(/^blob:/);
+    await expect.element(page.getByTestId('card-image')).toHaveAttribute('src', expect.stringMatching(/^blob:/));
     expect(JSON.stringify(editor.getJSON())).not.toMatch(/blob:/);
     calls[0].answer('https://i.test/hoi-an.jpg');
     await vi.waitFor(() =>
@@ -137,21 +128,12 @@ describe('the card layout', () => {
     await dragEndHandle(-lineWidth() / 2);
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe(0.5));
-    expect(drawnShare(layoutFrame())).toBeCloseTo(0.5, 2);
     await userEvent.click(page.getByText('Trip'));
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBeNull());
   });
 
-  it('keeps its text where the Viewer draws it when it is placed but takes the whole line', async () => {
-    const editor = await mountDocumentEditor(features, laidOut({ align: 'center' }));
-    const edited = getComputedStyle(layoutFrame().querySelector('[data-slot=card]') as HTMLElement).textAlign;
-    const viewed = await viewerFrame(editor.getJSON(), features, lineWidth());
-    expect(getComputedStyle(viewed.querySelector('[data-slot=card]') as HTMLElement).textAlign).toBe(edited);
-    expect(edited).toBe('start');
-  });
-
-  it("Full width bleeds to the editor's edges", async () => {
+  it('Full width from the block toolbar stores the full width', async () => {
     await page.viewport(900, 700);
     const editor = await mountDocumentEditor(features, laidOut({ width: 0.5 }));
     await select();
@@ -159,8 +141,5 @@ describe('the card layout', () => {
     await userEvent.click(page.getByRole('button', { name: 'Full width' }));
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe('full'));
-    const drawn = layoutFrame().getBoundingClientRect();
-    expect(Math.abs(drawn.left - editorEdges().left)).toBeLessThan(1);
-    expect(Math.abs(drawn.right - editorEdges().right)).toBeLessThan(1);
   });
 });

@@ -88,12 +88,11 @@ async function mount(
   });
 }
 
+/** The line of the document reading `value`, once it is drawn. */
 async function lineHolding(value: string): Promise<HTMLElement> {
-  return vi.waitFor(() => {
-    const found = [...document.querySelectorAll<HTMLElement>('.ProseMirror > p')].find((p) => p.textContent === value);
-    if (!found) throw new Error(`no line holds ${value}`);
-    return found;
-  });
+  const line = page.getByText(value, { exact: true });
+  await expect.element(line).toBeVisible();
+  return line.element() as HTMLElement;
 }
 
 const blocks = (editor: IEditor) => editor.getJSON().content ?? [];
@@ -189,13 +188,13 @@ describe('a preset dragged onto the editor', () => {
   it('is inserted at the block boundary it is dropped on', async () => {
     const editor = await mount({
       children: (
-        <div draggable data-testid="source" onDragStart={(event) => startPresetDrag(event.dataTransfer, 'intro')}>
+        <div draggable onDragStart={(event) => startPresetDrag(event.dataTransfer, 'intro')}>
           Title and text
         </div>
       ),
     });
 
-    await userEvent.dragAndDrop(page.getByTestId('source'), await lineHolding('Second'), {
+    await userEvent.dragAndDrop(page.getByText('Title and text', { exact: true }), await lineHolding('Second'), {
       steps: 10,
       targetPosition: { x: 2, y: 4 },
     });
@@ -208,13 +207,13 @@ describe('a preset dragged onto the editor', () => {
   it('inserts nothing for a preset the editor cannot hold', async () => {
     const editor = await mount({
       children: (
-        <div draggable data-testid="source" onDragStart={(event) => startPresetDrag(event.dataTransfer, 'note')}>
+        <div draggable onDragStart={(event) => startPresetDrag(event.dataTransfer, 'note')}>
           Note
         </div>
       ),
     });
 
-    await userEvent.dragAndDrop(page.getByTestId('source'), await lineHolding('Second'), {
+    await userEvent.dragAndDrop(page.getByText('Note', { exact: true }), await lineHolding('Second'), {
       steps: 10,
       targetPosition: { x: 2, y: 4 },
     });
@@ -234,20 +233,14 @@ describe('a preset dragged onto the editor', () => {
         ],
       },
       children: (
-        <div draggable data-testid="source" onDragStart={(event) => startPresetDrag(event.dataTransfer, 'intro')}>
+        <div draggable onDragStart={(event) => startPresetDrag(event.dataTransfer, 'intro')}>
           Title and text
         </div>
       ),
     });
-    const inside = await vi.waitFor(() => {
-      const found = [...document.querySelectorAll<HTMLElement>('.ProseMirror [data-slot=callout] p')].find(
-        (p) => p.textContent === 'Inside',
-      );
-      if (!found) throw new Error('no line in the callout holds Inside');
-      return found;
-    });
+    const inside = await lineHolding('Inside');
 
-    await userEvent.dragAndDrop(page.getByTestId('source'), inside, {
+    await userEvent.dragAndDrop(page.getByText('Title and text', { exact: true }), inside, {
       steps: 10,
       targetPosition: { x: 2, y: inside.getBoundingClientRect().height - 2 },
     });
@@ -280,9 +273,8 @@ describe('the drop cursor of a preset dragged over the editor', () => {
   };
   const cursor = () => document.querySelector('.prosemirror-dropcursor-block');
 
-  // Safari leaves relatedTarget null on a dragleave between two elements inside the editor; Chromium never does, so
-  // the event is built here.
-  it('stays through a dragleave with no related target at a point inside the editor', async () => {
+  // Safari leaves relatedTarget null on a dragleave between two elements inside the editor.
+  it('stays through a dragleave with no related target at a point inside the editor, fired by script as Chromium never leaves relatedTarget null', async () => {
     await mount();
     const second = await lineHolding('Second');
     const { left, top } = second.getBoundingClientRect();
@@ -295,7 +287,7 @@ describe('the drop cursor of a preset dragged over the editor', () => {
     expect(cursor()).not.toBeNull();
   });
 
-  it('goes once a dragleave with no related target is outside the editor', async () => {
+  it('goes once a dragleave with no related target is outside the editor, fired by script as Chromium never leaves relatedTarget null', async () => {
     await mount();
     const second = await lineHolding('Second');
     const { left, top } = second.getBoundingClientRect();

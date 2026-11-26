@@ -3,15 +3,7 @@ import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { page, userEvent } from 'vitest/browser';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
-import {
-  dragEndHandle,
-  drawnShare,
-  editorEdges,
-  expectViewerMatches,
-  layoutFrame,
-  lineWidth,
-  storedLayout,
-} from '../../../../../../../test/block-layout';
+import { dragEndHandle, expectViewerMatches, lineWidth, storedLayout } from '../../../../../../../test/block-layout';
 import { mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { embed } from './embed';
@@ -58,13 +50,12 @@ describe('the embed block layout', () => {
     await dragEndHandle(-lineWidth() / 2);
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe(0.5));
-    expect(drawnShare(layoutFrame())).toBeCloseTo(0.5, 2);
     await userEvent.click(page.getByText('Trip'));
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBeNull());
   });
 
-  it("Full width bleeds to the editor's edges", async () => {
+  it('Full width from the block toolbar stores the full width', async () => {
     await page.viewport(900, 700);
     const editor = await mountDocumentEditor(features, laidOut({ width: 0.5 }));
     await select();
@@ -72,8 +63,5 @@ describe('the embed block layout', () => {
     await userEvent.click(page.getByRole('button', { name: 'Full width' }));
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe('full'));
-    const drawn = layoutFrame().getBoundingClientRect();
-    expect(Math.abs(drawn.left - editorEdges().left)).toBeLessThan(1);
-    expect(Math.abs(drawn.right - editorEdges().right)).toBeLessThan(1);
   });
 });

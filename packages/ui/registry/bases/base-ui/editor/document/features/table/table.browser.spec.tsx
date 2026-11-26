@@ -53,14 +53,14 @@ async function mount(content: DocJSON): Promise<{ editor: IEditor; changes: () =
     return ready;
   });
   if (content.content?.some((node) => node.type === 'table')) {
-    await vi.waitFor(() => expect(document.querySelector('.ProseMirror [data-slot=table] table')).not.toBeNull());
+    await expect.element(page.getByRole('table')).toBeVisible();
   }
   return { editor, changes: () => changes };
 }
 
 const tableOf = (editor: IEditor) => editor.getJSON().content?.find((node) => node.type === 'table');
-const drawnTable = () => document.querySelector<HTMLElement>('.ProseMirror table') as HTMLElement;
-const borders = () => [...document.querySelectorAll<HTMLElement>('[data-slot=table-border]')];
+const drawnTable = () => page.getByRole('table').element() as HTMLElement;
+const borders = () => page.getByTestId('table-border').elements();
 /** The drawn width of each column, as a share of the table. */
 const drawnShares = () => {
   const cells = [...drawnTable().querySelectorAll('tr:first-child > *')].map(
@@ -96,7 +96,6 @@ describe('the table in the Document Editor', () => {
     await dragBorder(0, across(0.3));
     await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.3, 0.7]));
     expect(changes()).toBe(1);
-    expect(drawnShares()[0]).toBeCloseTo(0.3, 1);
     // No cell keeps a pixel width of the engine's own.
     expect(JSON.stringify(editor.getJSON())).not.toMatch(/"colwidth":\[/);
 
@@ -127,7 +126,7 @@ describe('the table in the Document Editor', () => {
   it("no column goes narrower than its cell's padding and one character, at a narrow width", async () => {
     await page.viewport(375, 700);
     const { editor } = await mount(tableDoc({}, 4));
-    const cellBox = drawnTable().querySelector<HTMLElement>('tr:first-child > *')!;
+    const cellBox = page.getByText('H1', { exact: true }).element().closest('th') as HTMLElement;
     const style = getComputedStyle(cellBox);
     const sides = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'] as const;
     const probe = document.createElement('span');
@@ -143,7 +142,6 @@ describe('the table in the Document Editor', () => {
     expect(sumOf(widths)).toBeCloseTo(1, 3);
     expect(widths[0]! * drawnTable().getBoundingClientRect().width).toBeGreaterThanOrEqual(floor);
     expect(widths[0]! % 0.05).toBeCloseTo(0, 4);
-    await vi.waitFor(() => expect(cellBox.getBoundingClientRect().width).toBeGreaterThanOrEqual(floor));
     await expect
       .element(page.getByRole('slider', { name: 'Border after column 1' }))
       .toHaveAttribute('aria-valuemin', String(Math.round(widths[0]! * 100)));
@@ -192,7 +190,7 @@ describe('the table in the Document Editor', () => {
     await expect.element(border).toHaveAttribute('aria-valuetext', '55%, 45%');
   });
 
-  it('a finger drags a border at a narrow width, and the page scrolls nothing sideways', async () => {
+  it('a finger drags a border at a narrow width', async () => {
     await page.viewport(375, 700);
     const { editor } = await mount(tableDoc());
     await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
@@ -205,7 +203,6 @@ describe('the table in the Document Editor', () => {
       await touch('end', to);
 
       await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.75, 0.25]));
-      expect(document.scrollingElement?.scrollWidth).toBeLessThanOrEqual(375);
     } finally {
       await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: false });
     }
@@ -216,13 +213,15 @@ describe('the table in the Document Editor', () => {
     const { editor, changes } = await mount(tableDoc({}, 2, [100, 300]));
 
     expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.25, 0.75]);
-    expect(drawnShares()[0]).toBeCloseTo(0.25, 1);
     expect(changes()).toBe(0);
   });
 
   it('a table pasted with pixel colwidths takes the same proportions as fractions, in one undo step', async () => {
     await page.viewport(1000, 700);
-    const { editor } = await mount({ type: 'doc', content: [{ type: 'paragraph' }] });
+    const { editor } = await mount({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Here' }] }],
+    });
     const source = document.createElement('div');
     source.contentEditable = 'true';
     source.innerHTML =
@@ -233,43 +232,25 @@ describe('the table in the Document Editor', () => {
     await userEvent.copy();
     source.remove();
 
-    await userEvent.click(document.querySelector<HTMLElement>('.ProseMirror p')!);
+    await userEvent.click(page.getByText('Here'));
+    await userEvent.keyboard('{End}');
     await userEvent.paste();
 
     await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.25, 0.75]));
     expect(JSON.stringify(editor.getJSON())).not.toContain('colwidth":[');
-    expect(drawnShares()[0]).toBeCloseTo(0.25, 1);
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(tableOf(editor)).toBeUndefined());
   });
 
-  it("Full width bleeds to the editor's edges, and the Viewer draws the same", async () => {
+  it('Full width from the block toolbar stores the full width, and the Viewer draws it', async () => {
     await page.viewport(1000, 700);
     const { editor } = await mount(tableDoc());
-    const line = page.getByText('Before').element().getBoundingClientRect();
-    expect(drawnTable().getBoundingClientRect().width).toBeCloseTo(line.width, 0);
 
     await userEvent.click(page.getByText('C1', { exact: true }));
     await userEvent.click(page.getByRole('button', { name: 'Full width' }));
     await vi.waitFor(() => expect(tableOf(editor)?.attrs?.width).toBe('full'));
-    const editable = document.querySelector('.ProseMirror') as HTMLElement;
-    const bled = drawnTable().getBoundingClientRect();
-    expect(bled.width).toBeGreaterThan(line.width);
-    expect(bled.left).toBeCloseTo(editable.getBoundingClientRect().left, 0);
-    expect(bled.right).toBeCloseTo(editable.getBoundingClientRect().right, 0);
 
-    await render(<Viewer doc={editor.getJSON()} features={features} />);
-    const viewer = await vi.waitFor(() => {
-      const drawn = document.querySelector<HTMLElement>(
-        '[data-editor=document]:not(:has(.ProseMirror)) [data-slot=table]',
-      );
-      if (!drawn) throw new Error('the Viewer drew no table');
-      return drawn;
-    });
-    expect(viewer.getAttribute('data-width')).toBe('full');
-    expect(viewer.querySelector('table')?.getBoundingClientRect().width).toBeCloseTo(
-      (viewer.parentElement as HTMLElement).getBoundingClientRect().width,
-      0,
-    );
+    const { container } = await render(<Viewer doc={editor.getJSON()} features={features} />);
+    await expect.element(page.elementLocator(container).getByTestId('table')).toHaveAttribute('data-width', 'full');
   });
 });

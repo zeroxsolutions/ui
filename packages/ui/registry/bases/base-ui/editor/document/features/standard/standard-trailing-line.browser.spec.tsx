@@ -36,13 +36,7 @@ describe('the trailing line of a document', () => {
       };
       const editor = await mountDocumentEditor([standardKit(), bookmark(), file(), media()], doc);
       expect(editor.getJSON().content?.at(-1)?.type).toBe('paragraph');
-      const block = await vi.waitFor(() => {
-        const found = document.querySelector<HTMLElement>('.ProseMirror [data-slot=block-layout]');
-        if (!found) throw new Error('the block is not drawn');
-        return found;
-      });
-
-      await userEvent.click(block, { position: { x: 20, y: 10 } });
+      await userEvent.click(page.getByTestId('block-layout'), { position: { x: 20, y: 10 } });
 
       await vi.waitFor(() => expect(editor.getSelection()).toMatchObject({ from: 8, isNode: true }));
       expect(thrown).toEqual([]);

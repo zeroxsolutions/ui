@@ -90,12 +90,17 @@ async function mount(props: Omit<HostProps, 'onReady'>): Promise<IEditor> {
   });
 }
 
+/** The line of the document reading `value`, once it is drawn. */
 async function lineHolding(value: string): Promise<HTMLElement> {
-  return vi.waitFor(() => {
-    const found = [...document.querySelectorAll<HTMLElement>('.ProseMirror > p')].find((p) => p.textContent === value);
-    if (!found) throw new Error(`no line holds ${value}`);
-    return found;
-  });
+  const line = page.getByText(value, { exact: true });
+  await expect.element(line).toBeVisible();
+  return line.element() as HTMLElement;
+}
+
+/** Presses Tab until `target` holds the focus, as a keyboard user reaching it does. */
+async function tabTo(target: Element): Promise<void> {
+  for (let press = 0; press < 10 && document.activeElement !== target; press += 1) await userEvent.keyboard('{Tab}');
+  expect(document.activeElement).toBe(target);
 }
 
 const summary = (editor: IEditor) =>
@@ -220,10 +225,10 @@ describe('EditorPresetsPanel', () => {
     await userEvent.click(await lineHolding('First'));
     const row = page.getByRole('button', { name: /Title and text/ });
 
-    row.element().focus();
+    await tabTo(row.element());
     await userEvent.keyboard('{Enter}');
     await vi.waitFor(() => expect(summary(editor)).toHaveLength(4));
-    row.element().focus();
+    await tabTo(row.element());
     await userEvent.keyboard(' ');
 
     await vi.waitFor(() => expect(summary(editor)).toHaveLength(6));

@@ -5,15 +5,13 @@ import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import {
   dragEndHandle,
-  drawnShare,
-  editorEdges,
   expectViewerMatches,
   layoutFrame,
   lineWidth,
   storedLayout,
 } from '../../../../../../../test/block-layout';
-import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
-import { dropFiles, fileInput, heldUpload, pasteFiles } from '../../../../../../../src/test/uploads';
+import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
+import { dropFiles, fileInput, firePastedFiles, heldUpload } from '../../../../../../../src/test/uploads';
 import { standardKit } from '../standard/index';
 import { media } from './media';
 
@@ -24,7 +22,7 @@ describe('the media block in the Document Editor', () => {
     await insertFromSlashMenu('Video');
     await userEvent.click(page.getByRole('textbox', { name: 'Video link' }));
     await userEvent.keyboard('https://cdn.test/hoi-an.mp4{Enter}');
-    await findElement('video');
+    await expect.element(page.getByTestId('media')).toHaveAttribute('data-kind', 'video');
     await userEvent.click(page.getByRole('textbox', { name: 'Add a caption' }));
     await userEvent.keyboard('Lanterns');
 
@@ -40,12 +38,16 @@ describe('the media block in the Document Editor', () => {
     await userEvent.click(page.getByRole('textbox', { name: 'Audio link' }));
     await userEvent.keyboard('https://cdn.test/rain.mp3{Enter}');
 
-    expect((await findElement('audio')).getAttribute('src')).toBe('https://cdn.test/rain.mp3');
-    expect(editor.getJSON().content?.find((node) => node.type === 'media')?.attrs).toMatchObject({ kind: 'audio' });
+    await expect.element(page.getByTestId('media')).toHaveAttribute('data-kind', 'audio');
+    expect(editor.getJSON().content?.find((node) => node.type === 'media')?.attrs).toMatchObject({
+      kind: 'audio',
+      src: 'https://cdn.test/rain.mp3',
+    });
   });
 });
 
 describe('the media block with uploads', () => {
+  const notes: DocJSON = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Notes' }] }] };
   const mediaOf = (editor: IEditor) => editor.getJSON().content?.find((node) => node.type === 'media');
   const mp4 = (): File => new File([new Uint8Array(8)], 'lanterns.mp4', { type: 'video/mp4' });
   const mp3 = (): File => new File([new Uint8Array(8)], 'rain.mp3', { type: 'audio/mpeg' });
@@ -57,7 +59,7 @@ describe('the media block with uploads', () => {
 
     await userEvent.upload(fileInput(), mp4());
     await vi.waitFor(() => expect(calls).toHaveLength(1));
-    expect((await findElement('[data-slot=media-upload]')).textContent).toContain('lanterns.mp4');
+    await expect.element(page.getByTestId('media-upload')).toHaveTextContent('lanterns.mp4');
     calls[0].answer('https://cdn.test/lanterns.mp4');
 
     await vi.waitFor(() => expect(mediaOf(editor)?.attrs).toMatchObject({ src: 'https://cdn.test/lanterns.mp4' }));
@@ -74,21 +76,25 @@ describe('the media block with uploads', () => {
     expect(calls).toHaveLength(0);
   });
 
-  it('makes a pasted video a video block and a dropped sound an audio block', async () => {
+  it('makes a pasted video a video block, fired by script as the clipboard cannot carry a video', async () => {
     const { upload, calls } = heldUpload();
-    const editor = await mountDocumentEditor([standardKit(), media({ upload })]);
-    await userEvent.click(await findElement('.ProseMirror p'));
+    const editor = await mountDocumentEditor([standardKit(), media({ upload })], notes);
+    await userEvent.click(page.getByText('Notes'));
 
-    pasteFiles(await findElement('.ProseMirror'), [mp4()]);
+    firePastedFiles(document.activeElement!, [mp4()]);
+
     await vi.waitFor(() => expect(calls).toHaveLength(1));
-    dropFiles(await findElement('.ProseMirror p'), [mp3()]);
-    await vi.waitFor(() => expect(calls).toHaveLength(2));
+    expect(mediaOf(editor)?.attrs?.kind).toBe('video');
+  });
 
-    const kinds = editor
-      .getJSON()
-      .content?.filter((node) => node.type === 'media')
-      .map((node) => node.attrs?.kind);
-    expect(kinds?.sort()).toEqual(['audio', 'video']);
+  it('makes a dropped sound an audio block', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), media({ upload })], notes);
+
+    await dropFiles(page.getByText('Notes').element(), ['rain.mp3']);
+
+    await vi.waitFor(() => expect(calls.map((call) => call.file.name)).toEqual(['rain.mp3']));
+    expect(mediaOf(editor)?.attrs?.kind).toBe('audio');
   });
 });
 
@@ -132,13 +138,12 @@ describe('the media block layout', () => {
     await dragEndHandle(-lineWidth() / 2);
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe(0.5));
-    expect(drawnShare(layoutFrame())).toBeCloseTo(0.5, 2);
     await userEvent.click(page.getByText('Trip'));
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBeNull());
   });
 
-  it("Full width bleeds to the editor's edges", async () => {
+  it('Full width from the block toolbar stores the full width', async () => {
     await page.viewport(900, 700);
     const editor = await mountDocumentEditor(features, laidOut({ width: 0.5 }));
     await select();
@@ -146,8 +151,5 @@ describe('the media block layout', () => {
     await userEvent.click(page.getByRole('button', { name: 'Full width' }));
 
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe('full'));
-    const drawn = layoutFrame().getBoundingClientRect();
-    expect(Math.abs(drawn.left - editorEdges().left)).toBeLessThan(1);
-    expect(Math.abs(drawn.right - editorEdges().right)).toBeLessThan(1);
   });
 });

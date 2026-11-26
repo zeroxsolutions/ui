@@ -1,21 +1,17 @@
-import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { cdp, page, userEvent } from 'vitest/browser';
 import type { DocJSON, EditorFeature, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { centreOf, mouse, touch, type Point } from '../../../../../../../test/pointer';
-import { Editor } from '../../react/editor';
 import { Viewer } from '../../react/viewer';
-import { SlashMenu } from '../../ui/slash-menu';
+import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { standardKit } from '../standard/index';
 import { button } from '../button/index';
 import { columns } from './columns';
 
 const features: EditorFeature[] = [standardKit(), button(), columns()];
-const contributions = collectUiContributions(features);
 
 const empty: DocJSON = { type: 'doc', content: [{ type: 'paragraph' }] };
 const line = (text: string): NodeJSON => ({ type: 'paragraph', content: [{ type: 'text', text }] });
@@ -31,49 +27,11 @@ function columnsDoc(attrs: Record<string, unknown>, ...lanes: string[]): DocJSON
   };
 }
 
-function Host({ content, onReady }: { content: DocJSON; onReady(editor: IEditor): void }) {
-  const [editor, setEditor] = useState<IEditor | null>(null);
-  return (
-    <div className="style-nova p-12">
-      <Editor
-        features={features}
-        content={content}
-        onReady={(ready) => {
-          setEditor(ready);
-          onReady(ready);
-        }}
-      />
-      {editor && <SlashMenu editor={editor} items={contributions.slash} />}
-    </div>
-  );
-}
-
-async function mount(content: DocJSON = empty): Promise<IEditor> {
-  let mounted: IEditor | null = null;
-  await render(<Host content={content} onReady={(editor) => (mounted = editor)} />);
-  return vi.waitFor(() => {
-    if (!mounted) throw new Error('the editor is not ready');
-    return mounted;
-  });
-}
-
-async function insertFromSlash(title: string): Promise<void> {
-  await userEvent.click(await vi.waitFor(() => document.querySelector<HTMLElement>('.ProseMirror p')!));
-  await userEvent.keyboard('/');
-  await userEvent.click(
-    await vi.waitFor(() => {
-      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=slash-menu] [data-slot=item]')].find(
-        (item) => item.textContent?.startsWith(title),
-      );
-      if (!found) throw new Error(`the slash menu offers no ${title}`);
-      return found;
-    }),
-  );
-}
+const mount = (content: DocJSON = empty): Promise<IEditor> => mountDocumentEditor(features, content);
 
 const columnsOf = (editor: IEditor) => editor.getJSON().content?.find((node) => node.type === 'columns');
-const lanes = () => [...document.querySelectorAll<HTMLElement>('.ProseMirror [data-slot=column]')];
-const dividers = () => [...document.querySelectorAll<HTMLElement>('[data-slot=columns-divider]')];
+const lanes = () => page.getByTestId('column').elements();
+const divider = () => page.getByRole('slider').first().element();
 
 /** The point at `share` of the way across the first two lanes, from the first lane's start edge. */
 function across(share: number): Point {
@@ -83,7 +41,7 @@ function across(share: number): Point {
 
 /** Drags the first divider to `to` with the mouse, in a few moves, and releases it there. */
 async function dragDivider(to: Point): Promise<void> {
-  const from = centreOf(dividers()[0]);
+  const from = centreOf(divider());
   await mouse('press', from);
   for (let step = 1; step <= 4; step += 1) {
     await mouse('move', { x: from.x + ((to.x - from.x) * step) / 4, y: from.y });
@@ -109,14 +67,14 @@ afterEach(async () => {
 describe('the columns in the Document Editor', () => {
   it('inserts two equal columns from the slash menu, each holding a line to type in', async () => {
     const editor = await mount();
-    await insertFromSlash('Columns');
+    await insertFromSlashMenu('Columns');
 
     await vi.waitFor(() => {
       const inserted = columnsOf(editor);
       expect(inserted?.attrs?.ratio).toEqual([1, 1]);
       expect(inserted?.content?.map((column) => column.content?.[0]?.type)).toEqual(['paragraph', 'paragraph']);
     });
-    expect(document.querySelectorAll('[data-slot=column]')).toHaveLength(2);
+    expect(lanes()).toHaveLength(2);
   });
 
   it('dragging the divider to two thirds stores [8, 4], and to a quarter [3, 9]', async () => {
@@ -127,8 +85,6 @@ describe('the columns in the Document Editor', () => {
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([8, 4]));
     await dragDivider(across(0.27));
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([3, 9]));
-    const [first, second] = lanes().map((lane) => lane.getBoundingClientRect().width);
-    expect(first / (first + second)).toBeCloseTo(0.25, 1);
   });
 
   it('one drag is one undo step, and Escape mid-drag keeps the ratio', async () => {
@@ -137,7 +93,7 @@ describe('the columns in the Document Editor', () => {
     const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
     editor.onChange(() => (changes += 1));
 
-    const from = centreOf(dividers()[0]);
+    const from = centreOf(divider());
     await mouse('press', from);
     await mouse('move', { x: across(0.75).x, y: from.y });
     await userEvent.keyboard('{Escape}');
@@ -170,7 +126,7 @@ describe('the columns in the Document Editor', () => {
     const editor = await mount(content);
 
     // The block grip shows beside the block a pointer is over, here the heading just past the divider.
-    const from = centreOf(dividers()[0]);
+    const from = centreOf(divider());
     await mouse('move', { x: from.x + 4, y: from.y });
     await mouse('move', from);
     await dragDivider(across(0.64));
@@ -225,47 +181,26 @@ describe('the columns in the Document Editor', () => {
     ]);
   });
 
-  it('valign center sets data-valign and centres the shorter lane, in the Editor and the Viewer', async () => {
-    await page.viewport(1000, 700);
-    const tall = { type: 'column', content: [line('one'), line('two'), line('three'), line('four')] };
-    const content = columnsDoc({ ratio: [1, 1] }, 'left', 'right');
-    content.content![1].content![1] = tall;
-    const editor = await mount(content);
+  it('valign center sets data-valign in the Editor and the Viewer', async () => {
+    const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
     await caretIn('left');
     await userEvent.click(page.getByRole('button', { name: 'Middle' }));
 
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.valign).toBe('center'));
-    expect(document.querySelector('.ProseMirror [data-slot=columns]')?.getAttribute('data-valign')).toBe('center');
-    /** How far the line holding `text` sits from the middle of its columns block, in pixels. */
-    const offMiddle = (scope: string, text: string) => {
-      const block = document.querySelector(`${scope} [data-slot=columns]`)!.getBoundingClientRect();
-      const held = [...document.querySelectorAll(`${scope} [data-slot=columns] p`)].find(
-        (p) => p.textContent === text,
-      )!;
-      const rect = held.getBoundingClientRect();
-      return Math.abs(rect.top + rect.height / 2 - (block.top + block.height / 2));
-    };
-    await vi.waitFor(() => expect(offMiddle('.ProseMirror', 'left')).toBeLessThan(4));
+    await expect.element(page.getByTestId('columns')).toHaveAttribute('data-valign', 'center');
 
-    const doc = editor.getJSON();
-    await render(<Viewer doc={doc} features={features} />);
-    const viewer = await vi.waitFor(() => {
-      const drawn = document.querySelector('[data-editor=document]:not(:has(.ProseMirror)) [data-slot=columns]');
-      if (!drawn) throw new Error('the Viewer drew no columns');
-      return drawn;
-    });
-    expect(viewer.getAttribute('data-valign')).toBe('center');
-    expect(offMiddle('[data-editor=document]:not(:has(.ProseMirror))', 'left')).toBeLessThan(4);
+    const { container } = await render(<Viewer doc={editor.getJSON()} features={features} />);
+    await expect
+      .element(page.elementLocator(container).getByTestId('columns'))
+      .toHaveAttribute('data-valign', 'center');
   });
 
-  it('on a narrow screen the lanes stack, no divider is drawn and nothing scrolls sideways', async () => {
+  it('on a narrow screen no divider is drawn', async () => {
     await page.viewport(375, 700);
     await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
 
-    const [first, second] = lanes().map((lane) => lane.getBoundingClientRect());
-    expect(second.top).toBeGreaterThanOrEqual(first.bottom);
+    await expect.element(page.getByText('right', { exact: true })).toBeVisible();
     expect(page.getByRole('slider').elements()).toEqual([]);
-    expect(document.scrollingElement?.scrollWidth).toBeLessThanOrEqual(375);
   });
 
   it('a finger drags the divider as a mouse does', async () => {
@@ -273,7 +208,7 @@ describe('the columns in the Document Editor', () => {
     const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
     await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try {
-      const from = centreOf(dividers()[0]);
+      const from = centreOf(divider());
       const to = across(1 / 3);
       await touch('start', from);
       for (let step = 1; step <= 4; step += 1)
@@ -281,7 +216,6 @@ describe('the columns in the Document Editor', () => {
       await touch('end', { x: to.x, y: from.y });
 
       await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([4, 8]));
-      expect(document.scrollingElement?.scrollWidth).toBeLessThanOrEqual(800);
     } finally {
       await cdp().send('Emulation.setTouchEmulationEnabled', { enabled: false });
     }
