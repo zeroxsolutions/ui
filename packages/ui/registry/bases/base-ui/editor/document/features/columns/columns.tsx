@@ -1,24 +1,47 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
 import { z } from 'zod';
 import { LayoutGridIcon } from '@/registry/bases/base-ui/icons/lucide/layout-grid-icon';
 import {
   defineFeature,
   type EditorFeature,
+  type IEditor,
   type NodeCodec,
   type NodeJSON,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { columnsNodeSpecs } from '@zeroxsolutions/editor-core/profiles/index';
+import { MAX_LANES } from '@zeroxsolutions/editor-core/template/email/index';
+import {
+  SPACES as LAYOUT_SPACES,
+  VALIGNS,
+  type LayoutSpace,
+  type VAlign,
+} from '@zeroxsolutions/editor-core/template/layout/index';
 import type { ReactNodeCodec } from '../../../react-types';
+import { layoutProps } from '../../layout/layout-props';
+import { layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
 import { blockClasses, type BlockStyle } from '../button/block-style';
+import { ColumnsDividers, useColumnsLaneCount } from './columns-divider';
+import { ColumnsToolbar } from './columns-toolbar';
 
 interface ColumnsAttrs extends BlockStyle {
   ratio?: number[] | null;
+  valign?: VAlign | null;
+  spaceBefore?: LayoutSpace | null;
 }
 
 export interface ColumnsOptions {
   /** What a column holds, as a content expression; any block when absent. The email editor's holds no columns. */
   columnContent?: string;
+  /** The most lanes the toolbar adds up to, at most 4; 4 when absent. */
+  maxLanes?: number;
+  /** The toolbar's and the dividers' words over the English, or a getter read on each draw. */
+  messages?: Partial<LayoutWords> | (() => LayoutWords);
+  /**
+   * Whether the author may weigh, add to or align the columns block at `pos`; always when absent. The email editor
+   * refuses in locked structure and on a block the host requires, and draws no toolbar and no divider there.
+   */
+  changeable?(editor: IEditor, pos: number): boolean;
 }
 
 const SPACES = ['small', 'medium', 'large'] as const;
@@ -37,15 +60,36 @@ function weightsOf(ratio: unknown): number[] | null {
   return valid ? (ratio as number[]) : null;
 }
 
+const valignOf = (value: unknown): VAlign | undefined => VALIGNS.find((valign) => valign === value);
+
 // The columns are the content element's children, so the grid is drawn on it in `styles.css`; an absent ratio
 // leaves them equal.
-function ColumnsShell({ attrs, children }: { attrs: ColumnsAttrs; children: ReactNode }) {
+function ColumnsShell({
+  attrs,
+  active,
+  ref,
+  children,
+}: {
+  attrs: ColumnsAttrs;
+  /** Whether the caret is in the block, which shows its dividers. */
+  active?: boolean;
+  ref?: Ref<HTMLDivElement>;
+  children: ReactNode;
+}) {
   const ratio = weightsOf(attrs.ratio);
   const style = ratio
     ? ({ '--columns-ratio': ratio.map((share) => `minmax(0, ${share}fr)`).join(' ') } as CSSProperties)
     : undefined;
   return (
-    <div data-slot="columns" style={style} className={blockClasses(attrs)}>
+    <div
+      ref={ref}
+      data-slot="columns"
+      data-valign={valignOf(attrs.valign)}
+      data-active={active || undefined}
+      {...layoutProps({ spaceBefore: attrs.spaceBefore })}
+      style={style}
+      className={`group/columns relative ${blockClasses(attrs)}`}
+    >
       {children}
     </div>
   );
@@ -59,8 +103,96 @@ function ColumnShell({ children }: { children: ReactNode }) {
   );
 }
 
-function ColumnsView({ attrs, children }: NodeViewProps<ColumnsAttrs>) {
-  return <ColumnsShell attrs={attrs}>{children as ReactNode}</ColumnsShell>;
+/** Whether the caret is inside `root`, kept as the selection moves. */
+function useHoldsCaret(editor: IEditor, root: HTMLElement | null): boolean {
+  const [holds, setHolds] = useState(false);
+  useEffect(() => {
+    if (!root) return;
+    const update = () => {
+      const focus = window.getSelection()?.focusNode;
+      setHolds(editor.isFocused() && focus != null && root.contains(focus));
+    };
+    update();
+    const offSelection = editor.onSelectionUpdate(update);
+    document.addEventListener('focusin', update);
+    document.addEventListener('focusout', update);
+    return () => {
+      offSelection();
+      document.removeEventListener('focusin', update);
+      document.removeEventListener('focusout', update);
+    };
+  }, [editor, root]);
+  return holds;
+}
+
+/** Whether a drag is in flight on the page, as a block dragged by its grip is; its drop target must stay clear. */
+function useDragInFlight(): boolean {
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => {
+    const start = () => setDragging(true);
+    const end = () => setDragging(false);
+    document.addEventListener('dragstart', start);
+    document.addEventListener('dragend', end);
+    document.addEventListener('drop', end);
+    return () => {
+      document.removeEventListener('dragstart', start);
+      document.removeEventListener('dragend', end);
+      document.removeEventListener('drop', end);
+    };
+  }, []);
+  return dragging;
+}
+
+function ColumnsView({
+  attrs,
+  children,
+  editor,
+  editable,
+  getPos,
+  options,
+}: NodeViewProps<ColumnsAttrs> & { options: ColumnsOptions }) {
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const [preview, setPreview] = useState<number[] | null>(null);
+  const lanes = useColumnsLaneCount(root);
+  const active = useHoldsCaret(editor, root);
+  const dragging = useDragInFlight();
+  const pos = getPos();
+  const words = layoutWordsOf(options.messages);
+  const changeable = editable && pos !== undefined && (options.changeable?.(editor, pos) ?? true);
+  const stored = weightsOf(attrs.ratio);
+  const weights = stored?.length === lanes ? stored : Array.from({ length: lanes }, () => 1);
+  const set = (args: { ratio?: number[]; lanes?: number; valign?: VAlign }) =>
+    editor.run('setColumnsLayout', { pos: getPos(), ...args });
+  return (
+    <ColumnsShell ref={setRoot} attrs={{ ...attrs, ratio: preview ?? attrs.ratio }} active={active}>
+      {children as ReactNode}
+      {changeable && lanes >= 2 && (
+        <>
+          <ColumnsDividers
+            root={root}
+            weights={preview ?? weights}
+            words={words}
+            onPreview={setPreview}
+            onCommit={(ratio) => set({ ratio })}
+          />
+          {!dragging && (
+            <ColumnsToolbar
+              editor={editor}
+              pos={pos}
+              anchor={root}
+              lanes={lanes}
+              maxLanes={Math.min(options.maxLanes ?? MAX_LANES, MAX_LANES)}
+              valign={valignOf(attrs.valign)}
+              words={words}
+              // A lane added or removed draws the lanes equal again.
+              onLanes={(count) => set({ lanes: count, ratio: Array.from({ length: count }, () => 1) })}
+              onValign={(valign) => set({ valign })}
+            />
+          )}
+        </>
+      )}
+    </ColumnsShell>
+  );
 }
 
 function ColumnView({ children }: NodeViewProps) {
@@ -89,9 +221,13 @@ const columnsCodecs: ReactNodeCodec[] = [
     toHTML: (node, ctx) => {
       const weights = weightsOf(node.attrs?.ratio);
       const ratio = weights === null ? '' : ` data-ratio="${weights.join(',')}"`;
+      const valign = valignOf(node.attrs?.valign);
+      const aligned = valign ? ` data-valign="${valign}"` : '';
+      const spaceBefore = LAYOUT_SPACES.find((space) => space === node.attrs?.spaceBefore);
+      const before = spaceBefore ? ` data-space-before="${spaceBefore}"` : '';
       const spaceAfter = SPACES.find((space) => space === node.attrs?.spaceAfter);
       const space = spaceAfter ? ` data-space-after="${spaceAfter}"` : '';
-      return `<div data-columns${ratio}${space}>${ctx.serializeChildren(node)}</div>`;
+      return `<div data-columns${ratio}${aligned}${before}${space}>${ctx.serializeChildren(node)}</div>`;
     },
     // Markdown has no columns: each column's blocks in order, a blank line between columns.
     toMarkdown: (node, ctx) =>
@@ -107,6 +243,8 @@ const columnsCodecs: ReactNodeCodec[] = [
     fromHTML: (element, ctx) => {
       if (!element.hasAttribute('data-columns')) return null;
       const ratio = ratioOf(element.getAttribute('data-ratio'));
+      const valign = valignOf(element.getAttribute('data-valign'));
+      const spaceBefore = LAYOUT_SPACES.find((space) => space === element.getAttribute('data-space-before'));
       const spaceAfter = SPACES.find((space) => space === element.getAttribute('data-space-after'));
       const content = ctx.fromHTMLChildren(element).filter((child) => child.type === 'column');
       if (content.length === 0) return null;
@@ -114,6 +252,8 @@ const columnsCodecs: ReactNodeCodec[] = [
         type: 'columns',
         attrs: {
           ...(ratio && ratio.length === content.length ? { ratio } : {}),
+          ...(valign ? { valign } : {}),
+          ...(spaceBefore ? { spaceBefore } : {}),
           ...(spaceAfter ? { spaceAfter } : {}),
         },
         content,
@@ -164,15 +304,20 @@ function linesOf(nodes: readonly NodeJSON[]): NodeJSON[] {
 }
 
 /**
- * Columns of blocks side by side, weighed by `ratio`, stacking on a narrow screen. HTML keeps them whole;
- * Markdown, which has no columns, writes each column's blocks in order.
+ * Columns of blocks side by side, weighed by `ratio`, stacking on a narrow screen. In an editable editor a divider
+ * between two lanes drags their share, and the block's toolbar adds and removes a lane and aligns the lanes, each
+ * through `setColumnsLayout`. HTML keeps them whole; Markdown, which has no columns, writes each column's blocks in
+ * order.
  */
 export function columns(options: ColumnsOptions = {}): EditorFeature {
   const [columnsNode, columnNode] = columnsNodeSpecs(options.columnContent);
   return defineFeature({
     id: 'columns',
     nodes: [
-      { ...columnsNode, render: ColumnsView },
+      {
+        ...columnsNode,
+        render: (props) => <ColumnsView {...(props as NodeViewProps<ColumnsAttrs>)} options={options} />,
+      },
       { ...columnNode, render: ColumnView },
     ],
     codecs: columnsCodecs as NodeCodec[],

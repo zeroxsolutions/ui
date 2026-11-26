@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/editor-button @zui/lucide-layout-grid-icon
+pnpm dlx shadcn@latest add button separator toggle-group tooltip @zui/editor-button @zui/editor-layout @zui/lucide-arrow-down-icon @zui/lucide-arrow-up-icon @zui/lucide-chevrons-down-up-icon @zui/lucide-layout-grid-icon @zui/lucide-minus-icon @zui/lucide-plus-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -52,6 +52,18 @@ pnpm dlx shadcn@latest add @zui/editor-button @zui/lucide-layout-grid-icon
   name="editor-columns"
   file="registry/bases/base-ui/editor/document/features/columns/columns.tsx"
   title="components/editor/document/features/columns/columns.tsx"
+/>
+
+<ComponentSource
+  name="editor-columns"
+  file="registry/bases/base-ui/editor/document/features/columns/columns-divider.tsx"
+  title="components/editor/document/features/columns/columns-divider.tsx"
+/>
+
+<ComponentSource
+  name="editor-columns"
+  file="registry/bases/base-ui/editor/document/features/columns/columns-toolbar.tsx"
+  title="components/editor/document/features/columns/columns-toolbar.tsx"
 />
 
 <Step>Add its styles to your global CSS.</Step>
@@ -93,6 +105,57 @@ pnpm dlx shadcn@latest add @zui/editor-button @zui/lucide-layout-grid-icon
       > *
   ) {
   margin-bottom: 0;
+}
+.document-editor
+  [data-slot='columns']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > [data-node-view-wrapper] {
+  height: 100%;
+}
+.document-editor
+  [data-slot='columns']:is([data-valign='center'], [data-valign='bottom'])
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns']:is([data-valign='center'], [data-valign='bottom'])
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
+  display: flex;
+  flex-direction: column;
+}
+.document-editor
+  [data-slot='columns'][data-valign='center']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns'][data-valign='center']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
+  justify-content: center;
+}
+.document-editor
+  [data-slot='columns'][data-valign='bottom']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns'][data-valign='bottom']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
+  justify-content: flex-end;
 }
 ```
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { EditorFeature, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
@@ -1121,6 +1121,89 @@ describe('the email kit', () => {
     await expect.element(refused).toBeDisabled();
     await userEvent.hover(refused, { force: true });
     await expect.element(page.getByText(locked)).toBeVisible();
+  });
+
+  it('weighs, adds to and aligns the lanes from the dividers and the toolbar, as the Document Editor does', async () => {
+    // Lanes side by side; on a phone they stack and draw no divider.
+    await page.viewport(1000, 800);
+    onTestFinished(() => page.viewport(414, 896));
+    const editor = await mount([
+      block({
+        id: 'cols',
+        key: 'cols',
+        type: 'columns',
+        attributes: { ratio: [1, 1] },
+        lanes: [[paragraph('left', 'l')], [paragraph('right', 'r')]],
+      }),
+    ]);
+    const lanes = () => [...document.querySelectorAll<HTMLElement>('[contenteditable=true] [data-slot=column]')];
+    const divider = await vi.waitFor(() => find('[data-slot=columns-divider]'));
+    divider.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ ratio: [8, 4] }));
+    const [first, second] = lanes().map((lane) => lane.getBoundingClientRect().width);
+    expect(first / (first + second)).toBeCloseTo(2 / 3, 1);
+
+    await caretAfter('left');
+    await userEvent.click(page.getByRole('button', { name: 'Middle' }));
+    await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ ratio: [8, 4], valign: 'center' }));
+    await userEvent.click(page.getByRole('button', { name: 'Add column' }));
+    await vi.waitFor(() => expect(exported(editor)[0].lanes).toHaveLength(3));
+    expect(exported(editor)[0].attributes).toEqual({ ratio: [1, 1, 1], valign: 'center' });
+  });
+
+  it("adds lanes up to the profile's bound", async () => {
+    await mount(
+      [block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[paragraph('left')], [paragraph('right')]] })],
+      {
+        profile: emailProfile({ variables: declared, bounds: { lanes: 2 } }),
+      },
+    );
+    await caretAfter('left');
+    await expect.element(page.getByRole('button', { name: 'Add column' })).toBeDisabled();
+  });
+
+  it('draws no divider and no lane toolbar in locked structure', async () => {
+    await mount(
+      [block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[paragraph('left')], [paragraph('right')]] })],
+      {
+        options: { structure: () => 'locked' },
+      },
+    );
+    await caretAfter('left');
+    expect(document.querySelector('[data-slot=columns-divider]')).toBeNull();
+    expect(page.getByRole('button', { name: 'Add column' }).elements()).toEqual([]);
+  });
+
+  it('checks the menu choice a dragged ratio equals, and offers it no second time', async () => {
+    await mount([
+      block({ type: 'columns', attributes: { ratio: [8, 4] }, lanes: [[paragraph('left')], [paragraph('right')]] }),
+    ]);
+    await openBlockMenu('left');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Lanes' }));
+
+    await expect.element(page.getByRole('menuitemradio', { name: '2 : 1', exact: true })).toBeChecked();
+    expect(page.getByRole('menuitemradio', { name: '8 : 4' }).elements()).toEqual([]);
+  });
+
+  it("sizes a table's columns from a border and exports them as shares, offering no full width", async () => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })]);
+    const border = await vi.waitFor(() => find('[data-slot=table-border]'));
+    border.focus();
+    await userEvent.keyboard('{ArrowRight}');
+
+    await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ columnWidths: [0.55, 0.45] }));
+    await caretAfter('cellA');
+    expect(page.getByRole('button', { name: 'Full width' }).elements()).toEqual([]);
+    expect(editor.can('setBlockLayout', { layout: { width: 'full' } })).toBe(false);
+  });
+
+  it('draws no table border in locked structure', async () => {
+    await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })], {
+      options: { structure: () => 'locked' },
+    });
+    await caretAfter('cellA');
+    expect(document.querySelector('[data-slot=table-border]')).toBeNull();
   });
 
   it('includes a stored lane ratio the menu does not offer, checked', async () => {

@@ -43,6 +43,7 @@ import {
 import {
   ALIGNS as LAYOUT_ALIGNS,
   LAYOUT_NODES,
+  ratioFractions,
   TEXT_ALIGN_NODES,
   type LayoutAlign,
 } from '@zeroxsolutions/editor-core/template/layout/index';
@@ -836,6 +837,13 @@ export function emailKit(
     return ratio.length <= profile.bounds.lanes ? { engine: found.engine, columns } : undefined;
   };
 
+  // As the block menu refuses a change of attributes: in locked structure, and on a block the host requires.
+  const changeable = (editor: IEditor, pos: number): boolean => {
+    const found = contextOf(editor);
+    const node = found?.engine.state.doc.nodeAt(pos);
+    return !!found && !!node && refusal(context, { node, pos }, false) === null;
+  };
+
   const blocks = defineFeature({
     id: 'emailBlocks',
     nodes: [emailHtmlNode(), emailUnknownNode()],
@@ -946,7 +954,16 @@ export function emailKit(
     // The document's own button and columns, inserted only through the email's commands, which check the profile,
     // locked structure and lanes.
     { ...button({ labelField: EmailButtonLabelField, linkField: false }), slash: [], commands: {} },
-    { ...columns({ columnContent: laneContent }), slash: [], commands: {} },
+    {
+      ...columns({
+        columnContent: laneContent,
+        maxLanes: profile.bounds.lanes,
+        messages: () => messages().layout,
+        changeable,
+      }),
+      slash: [],
+      commands: {},
+    },
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
     {
       ...image({
@@ -965,7 +982,7 @@ export function emailKit(
       slash: [],
       commands: {},
     },
-    { ...table(), slash: [], commands: {} },
+    { ...table({ messages: () => messages().layout, changeable }), slash: [], commands: {} },
     ...library,
     blocks,
     defineFeature({
@@ -984,7 +1001,17 @@ export function emailKit(
   ];
 }
 
-/** The lane shares offered for each lane count up to `maxLanes`, `current` among them when it is none of them. */
+/** Whether two ratios draw the same shares, as a dragged `[8, 4]` draws `[2, 1]`. */
+function sameShares(a: readonly number[], b: readonly number[]): boolean {
+  return (
+    a.length === b.length && ratioFractions(a).every((share, lane) => Math.abs(share - ratioFractions(b)[lane]) < 1e-9)
+  );
+}
+
+/**
+ * The lane shares offered for each lane count up to `maxLanes`, `current` among them when it draws as none of
+ * them.
+ */
 function ratioChoices(maxLanes: number, current: readonly number[] | null): number[][] {
   const choices: number[][] = [];
   for (let lanes = 2; lanes <= maxLanes; lanes += 1) {
@@ -992,7 +1019,7 @@ function ratioChoices(maxLanes: number, current: readonly number[] | null): numb
     if (lanes === 2) choices.push([2, 1], [1, 2]);
     if (lanes === 3) choices.push([1, 2, 1]);
   }
-  if (!current || choices.some((choice) => choice.join(':') === current.join(':'))) return choices;
+  if (!current || choices.some((choice) => sameShares(choice, current))) return choices;
   return [...choices, [...current]];
 }
 
@@ -1073,7 +1100,7 @@ function emailBlockMenuItems(
         group: words.columns,
         command: 'setColumnsRatio',
         args: { ratio },
-        active: () => current?.join(':') === ratio.join(':'),
+        active: () => current !== null && sameShares(current, ratio),
         disabledReason: () => refusal(context, columns, false),
       }))
     : [];

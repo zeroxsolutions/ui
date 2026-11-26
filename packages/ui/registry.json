@@ -3025,9 +3025,9 @@
       "name": "editor-table",
       "type": "registry:component",
       "title": "Editor Table",
-      "description": "A table with header cells, resizable columns and selectable cells.",
+      "description": "A table with header cells and selectable cells, its columns sized as shares of the table by dragging a border, and a full width toggle.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor", "@zui/lucide-table-icon"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-layout", "@zui/lucide-table-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/table/index.ts",
@@ -3038,6 +3038,21 @@
           "path": "registry/bases/base-ui/editor/document/features/table/table.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/features/table/table.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-borders.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-borders.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-widths.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-widths.ts"
         }
       ],
       "css": {
@@ -3093,9 +3108,15 @@
             "background": "color-mix(in oklab, var(--primary) 12%, transparent)",
             "pointer-events": "none"
           }
+        },
+        ".document-editor [data-slot='table'][data-sized] table": {
+          "table-layout": "fixed"
+        },
+        ".document-editor .ProseMirror[contenteditable='true'] > * > [data-slot='table'][data-width='full']": {
+          "margin-inline": "-3rem"
         }
       },
-      "dependencies": ["@tiptap/extension-table", "@zeroxsolutions/editor-core"]
+      "dependencies": ["@tiptap/extension-table", "@tiptap/react", "@zeroxsolutions/editor-core"]
     },
     {
       "name": "editor-table-demo",
@@ -3542,7 +3563,21 @@
       "title": "Editor Columns",
       "description": "Columns of blocks side by side, weighed by a ratio, which stack on a narrow screen.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-button", "@zui/lucide-layout-grid-icon"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/separator",
+        "@shadcn/toggle-group",
+        "@shadcn/tooltip",
+        "@zui/document-editor",
+        "@zui/editor-button",
+        "@zui/editor-layout",
+        "@zui/lucide-arrow-down-icon",
+        "@zui/lucide-arrow-up-icon",
+        "@zui/lucide-chevrons-down-up-icon",
+        "@zui/lucide-layout-grid-icon",
+        "@zui/lucide-minus-icon",
+        "@zui/lucide-plus-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/columns/index.ts",
@@ -3553,6 +3588,16 @@
           "path": "registry/bases/base-ui/editor/document/features/columns/columns.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/features/columns/columns.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/columns-divider.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/columns-divider.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/columns-toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/columns-toolbar.tsx"
         }
       ],
       "css": {
@@ -3574,6 +3619,19 @@
         },
         ".document-editor :where( [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
+        },
+        ".document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react] > * > [data-node-view-wrapper]": {
+          "height": "100%"
+        },
+        ".document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
+          "display": "flex",
+          "flex-direction": "column"
+        },
+        ".document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
+          "justify-content": "center"
+        },
+        ".document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
+          "justify-content": "flex-end"
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "zod"]
