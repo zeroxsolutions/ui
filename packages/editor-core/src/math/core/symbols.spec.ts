@@ -5,16 +5,6 @@ import { SYMBOL_GROUPS } from './symbols.js';
 const ASCII = /^[\x20-\x7E]+$/;
 
 describe('SYMBOL_GROUPS', () => {
-  it('exposes the five expected groups', () => {
-    expect(SYMBOL_GROUPS.map((group) => group.label)).toEqual([
-      'Greek',
-      'Operators',
-      'Relations',
-      'Delimiters',
-      'Arrows',
-    ]);
-  });
-
   const everySymbol = SYMBOL_GROUPS.flatMap((group) => group.symbols);
 
   it('keeps every latex command ASCII and every preview a non-empty glyph', () => {

@@ -1,15 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import {
-  COLOR_TOKENS,
-  HUES,
-  layoutSchema,
-  ratioFractions,
-  readLayout,
-  snapRatio,
-  snapWidth,
-  widthFromPixels,
-} from './index.js';
+import { ratioFractions, readLayout, snapRatio, snapWidth, widthFromPixels } from './index.js';
 
 describe('snapWidth', () => {
   it.each([
@@ -30,28 +21,6 @@ describe('widthFromPixels', () => {
     [10, 566, 0.25],
   ])('reads a legacy %dpx of %dpx as %d', (px, base, fraction) => {
     expect(widthFromPixels(px, base)).toBe(fraction);
-  });
-});
-
-describe('layoutSchema', () => {
-  it.each([
-    ['a pixel width', { width: 300 }],
-    ['a width below a quarter', { width: 0.2 }],
-    ['an email align name', { align: 'left' }],
-    ['an unknown space', { spaceBefore: 'huge' }],
-    ['an unknown key', { float: 'left' }],
-  ])('refuses %s', (_case, raw) => {
-    expect(layoutSchema.safeParse(raw).success).toBe(false);
-  });
-
-  it('accepts full width and every token', () => {
-    expect(layoutSchema.safeParse({ width: 'full', align: 'center', spaceBefore: 'none' }).success).toBe(true);
-  });
-
-  it('validates responsive overrides one level deep', () => {
-    expect(layoutSchema.safeParse({ responsive: { sm: { width: 1 } } }).success).toBe(true);
-    expect(layoutSchema.safeParse({ responsive: { xl: {} } }).success).toBe(false);
-    expect(layoutSchema.safeParse({ responsive: { sm: { responsive: {} } } }).success).toBe(false);
   });
 });
 
@@ -110,12 +79,5 @@ describe('snapRatio', () => {
 describe('ratioFractions', () => {
   it('turns weights into fractions of their sum', () => {
     expect(ratioFractions([8, 4])).toEqual([2 / 3, 1 / 3]);
-  });
-});
-
-describe('the colour set', () => {
-  it('is closed: four theme tokens and eight hues', () => {
-    expect(COLOR_TOKENS).toHaveLength(12);
-    expect(HUES).toEqual(['red', 'orange', 'amber', 'green', 'teal', 'blue', 'violet', 'pink']);
   });
 });

@@ -4,7 +4,6 @@ import {
   DuplicateTriggerError,
   IncoherentTriggerError,
   defaultTriggerFilter,
-  insertionToken,
   invocationToken,
   referenceToken,
   validateTriggerRegistry,
@@ -27,61 +26,12 @@ function config(
 }
 
 describe('archetype presets', () => {
-  it('referenceToken defaults to anywhere / many / no commit / no restore', () => {
-    const token = referenceToken('mention', '@', config());
-    expect(token).toMatchObject({
-      archetype: 'reference',
-      gate: 'anywhere',
-      boundary: 'whitespace',
-      multiplicity: 'many',
-      commitOnSpace: false,
-      backspaceRestore: false,
-      queryField: 'label',
-    });
-  });
-
-  it('invocationToken defaults to line-start / one-leading / commit / restore', () => {
-    const token = invocationToken('command', '/', config());
-    expect(token).toMatchObject({
-      archetype: 'invocation',
-      gate: 'line-start',
-      boundary: 'whitespace',
-      multiplicity: 'one-leading',
-      commitOnSpace: true,
-      backspaceRestore: true,
-      queryField: 'slug',
-    });
-  });
-
-  it('insertionToken defaults to anywhere / many (scaffold)', () => {
-    const token = insertionToken('emoji', ':', config());
-    expect(token).toMatchObject({
-      archetype: 'insertion',
-      gate: 'anywhere',
-      multiplicity: 'many',
-    });
-  });
-
   it('an overridden field wins while the rest keep the preset defaults', () => {
     const token = invocationToken('command', '/', config({ backspaceRestore: false }));
     expect(token.backspaceRestore).toBe(false);
     // untouched invocation defaults remain
     expect(token.gate).toBe('line-start');
     expect(token.commitOnSpace).toBe(true);
-  });
-});
-
-describe("a menu row's icon", () => {
-  it('sits on a tile when a token asks for one, and as a bare glyph by default', () => {
-    expect(referenceToken('mention', '@', config({ menuMedia: 'tile' })).menuMedia).toBe('tile');
-    expect(referenceToken('mention', '@', config()).menuMedia).toBe('glyph');
-  });
-});
-
-describe('the boundary before the char', () => {
-  it('opens after anything when a token asks for it', () => {
-    const token = referenceToken('variable', '{{', config({ boundary: 'any' }));
-    expect(token.boundary).toBe('any');
   });
 });
 

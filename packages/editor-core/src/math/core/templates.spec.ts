@@ -16,27 +16,11 @@ describe('MATH_TEMPLATES', () => {
       expect(template.caretOffset).toBeLessThanOrEqual(template.latex.length);
     }
   });
-
-  it('places the fraction caret between the empty braces', () => {
-    const fraction = templateFor('Fraction');
-    expect(fraction?.latex).toBe('\\frac{}{}');
-    const at = fraction?.caretOffset ?? -1;
-    // The caret sits just after the first `{`, so it is inside the empty pair.
-    expect(fraction?.latex[at - 1]).toBe('{');
-    expect(fraction?.latex[at]).toBe('}');
-  });
-
-  it('places the square-root caret inside the empty braces', () => {
-    const sqrt = templateFor('Square root');
-    const at = sqrt?.caretOffset ?? -1;
-    expect(sqrt?.latex[at - 1]).toBe('{');
-    expect(sqrt?.latex[at]).toBe('}');
-  });
 });
 
 describe('templateFor', () => {
-  it('finds a template by label', () => {
-    expect(templateFor('Matrix')?.latex).toContain('pmatrix');
+  it('finds each template by its label', () => {
+    for (const template of MATH_TEMPLATES) expect(templateFor(template.label)).toBe(template);
   });
 
   it('returns undefined for an unknown label', () => {

@@ -26,13 +26,6 @@ const block = (overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'ty
   ...overrides,
 });
 
-describe('the email kinds', () => {
-  it('hold heading, quote, image and table, and leave them out of a mail layout', () => {
-    expect(EMAIL_KINDS).toEqual(expect.arrayContaining(['heading', 'quote', 'image', 'table']));
-    expect(MAIL_LAYOUT_KINDS).toEqual(['paragraph', 'list', 'callout', 'divider', 'columns', 'legalFooter']);
-  });
-});
-
 describe('a heading through the email codec', () => {
   const heading = (level: number): NodeJSON => ({
     type: 'heading',

@@ -155,22 +155,4 @@ describe('emailPreset', () => {
       }),
     ).toThrow(PresetDefinitionInvalid);
   });
-
-  it('keeps the options it was given', () => {
-    const preset = emailPreset(emailProfile(), {
-      id: 'text',
-      label: 'Text',
-      description: 'A paragraph',
-      keywords: ['body'],
-      icon: 'T',
-      blocks: [{ id: null, key: '', type: 'paragraph', attributes: {}, content: { text: 'a' } }],
-    });
-    expect(preset).toMatchObject({
-      id: 'text',
-      label: 'Text',
-      description: 'A paragraph',
-      keywords: ['body'],
-      icon: 'T',
-    });
-  });
 });

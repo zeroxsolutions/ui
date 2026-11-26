@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createPmStepsBackend } from './pm-steps-backend.js';
 import type { BackendTransaction } from '../types/document-backend.js';
 import type { DocJSON } from '../types/json.js';
@@ -15,9 +15,6 @@ const tx = (text: string, changes: unknown, docChanged = true): BackendTransacti
 });
 
 describe('PmStepsBackend', () => {
-  beforeEach(() => vi.useFakeTimers());
-  afterEach(() => vi.useRealTimers());
-
   it('starts at version 0 and reports the initial snapshot on demand', () => {
     const backend = createPmStepsBackend({ doc: doc('hello') });
     expect(backend.version).toBe(0);
@@ -56,11 +53,8 @@ describe('PmStepsBackend', () => {
     expect(backend.version).toBe(0);
   });
 
-  it('debounces snapshots to at most one per settling burst', () => {
-    const backend = createPmStepsBackend({
-      doc: doc(''),
-      snapshotDebounceMs: 500,
-    });
+  it('debounces snapshots to at most one per settling burst', async () => {
+    const backend = createPmStepsBackend({ doc: doc(''), snapshotDebounceMs: 20 });
     const snapshots: unknown[] = [];
     backend.subscribe({ onSnapshot: (s) => snapshots.push(s) });
 
@@ -69,8 +63,7 @@ describe('PmStepsBackend', () => {
     backend.record(tx('abc', [3]));
     expect(snapshots).toHaveLength(0); // burst still settling
 
-    vi.advanceTimersByTime(500);
-    expect(snapshots).toEqual([{ version: 3, doc: doc('abc') }]);
+    await vi.waitFor(() => expect(snapshots).toEqual([{ version: 3, doc: doc('abc') }]));
   });
 
   it('produces an on-demand snapshot immediately via requestSnapshot', () => {

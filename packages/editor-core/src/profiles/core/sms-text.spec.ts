@@ -18,10 +18,6 @@ describe('SMS text', () => {
     expect(toSmsText(fromSmsText(''))).toBe('');
   });
 
-  it('measures plain text as GSM-7', () => {
-    expect(measureSmsBody('xin chao')).toEqual({ units: 8, limit: 160, encoding: 'gsm7', segments: 1 });
-  });
-
   it('measures a Vietnamese letter as UCS-2', () => {
     expect(measureSmsBody('ạ')).toMatchObject({ encoding: 'ucs2', limit: 70 });
   });

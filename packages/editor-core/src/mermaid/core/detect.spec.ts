@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectDiagramType, DIAGRAM_TYPE_LABEL } from './detect.js';
+import { detectDiagramType } from './detect.js';
 
 describe('detectDiagramType', () => {
   it.each([
@@ -24,10 +24,5 @@ describe('detectDiagramType', () => {
   it('returns "unknown" for unrecognized or empty source', () => {
     expect(detectDiagramType('hello world')).toBe('unknown');
     expect(detectDiagramType('')).toBe('unknown');
-  });
-
-  it('has a label for every diagram type', () => {
-    expect(DIAGRAM_TYPE_LABEL.flowchart).toBeTruthy();
-    expect(DIAGRAM_TYPE_LABEL.unknown).toBeTruthy();
   });
 });

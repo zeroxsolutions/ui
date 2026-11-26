@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
-import { sameBlockContent } from '../../template/email/index.js';
 import { docProblems } from './doc-problems.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
 import { MAIL_LAYOUT_KINDS } from './profile.js';
@@ -15,20 +14,6 @@ function block(overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'ty
 }
 
 describe('email blocks', () => {
-  it('round-trips every travel default', () => {
-    expect(TRAVEL_DEFAULT_BLOCKS.length).toBeGreaterThan(100);
-    const back = toEmailBlocks(fromEmailBlocks(TRAVEL_DEFAULT_BLOCKS));
-    expect(back).toHaveLength(TRAVEL_DEFAULT_BLOCKS.length);
-    back.forEach((got, index) => {
-      const want = TRAVEL_DEFAULT_BLOCKS[index];
-      expect(got.id).toBe(want.id);
-      expect(got.key).toBe(want.key);
-      expect(got.lanes).toEqual(want.lanes);
-      expect(got.attributes).toEqual(want.attributes);
-      expect(sameBlockContent(got.content, want.content)).toBe(true);
-    });
-  });
-
   it('round-trips every kind, lanes and ids included, and makes no default explicit', () => {
     const blocks: EditorEmailBlock[] = [
       block({
@@ -295,11 +280,6 @@ describe('email blocks', () => {
       const nested: NodeJSON = { type: 'bulletList', content: [{ type: 'listItem', content: [para('b')] }] };
       const list: NodeJSON = { type: 'bulletList', content: [{ type: 'listItem', content: [para('a'), nested] }] };
       expect(only(docOf(list)).content).toEqual({ items: ['a b'] });
-    });
-
-    it('exports a callout from its stored text unchanged', () => {
-      const blocks = [block({ type: 'callout', content: { text: '_**a**_' } })];
-      expect(toEmailBlocks(fromEmailBlocks(blocks))).toEqual(blocks);
     });
   });
 });

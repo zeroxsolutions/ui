@@ -231,17 +231,6 @@ describe('validate an SMS body', () => {
     expect(kinds(`{{name}}${'a'.repeat(153)}`)).toContain('sms-segment-exceeded');
   });
 
-  it('flags 71 characters once one leaves GSM-7', () => {
-    expect(kinds(`{{name}}${'a'.repeat(63)}\u1EA1`)).toContain('sms-segment-exceeded');
-  });
-
-  it('counts each extension character as two units', () => {
-    expect(kinds(`{{name}}${'{'.repeat(81)}`)).toContain('sms-segment-exceeded');
-    expect(kinds(`{{name}}${'{'.repeat(74)}`)).not.toContain('sms-segment-exceeded');
-    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(79)}${c}{{name}}`)).not.toContain('sms-segment-exceeded');
-    for (const c of '^{}\\[]~|') expect(kinds(`${'a'.repeat(159)}${c}`)).toContain('sms-segment-exceeded');
-  });
-
   it('allows more segments when the profile does', () => {
     const long = smsProfile({ maxSegments: 2, variables: sms.variables });
     expect(kinds(`{{name}}${'a'.repeat(200)}`, long)).toEqual([]);

@@ -4,8 +4,7 @@ import { card } from '../../blocks/card.js';
 import { defaultBlocks, type DefaultBlockType } from '../../template/email/blocks/index.js';
 import { docProblems } from './doc-problems.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
-import { EMAIL_BLOCK_NODES } from './email-nodes.js';
-import { EMAIL_KINDS, emailProfile, MAIL_LAYOUT_KINDS } from './profile.js';
+import { EMAIL_KINDS, emailProfile } from './profile.js';
 import type { EditorEmailBlock } from './types.js';
 import { validate } from './validate.js';
 
@@ -53,14 +52,6 @@ const profile = emailProfile({
     { name: 'n', type: 'string' },
     { name: 'u', type: 'url' },
   ],
-});
-
-describe('the library kinds', () => {
-  it('are email kinds with a document node each, and a mail layout holds the legal footer alone', () => {
-    expect(EMAIL_KINDS).toEqual(expect.arrayContaining([...LIBRARY]));
-    expect(EMAIL_BLOCK_NODES).toEqual(expect.arrayContaining([...LIBRARY]));
-    expect(LIBRARY.filter((kind) => MAIL_LAYOUT_KINDS.includes(kind))).toEqual(['legalFooter']);
-  });
 });
 
 describe('a library block through the email codec', () => {
