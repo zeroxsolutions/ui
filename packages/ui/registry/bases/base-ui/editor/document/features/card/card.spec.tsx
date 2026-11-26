@@ -49,9 +49,10 @@ describe('card', () => {
     expect(hostile.querySelector('img')).toBeNull();
   });
 
-  it('round-trips through HTML with the Viewer features', () => {
+  it('round-trips through HTML with its layout, with the Viewer features', () => {
     const registry = createCodecRegistry(features);
-    const doc = docOf(full);
+    const doc = docOf({ ...full, align: 'center', width: 0.5 });
+    expect(serialize(doc, 'html', registry)).toContain('data-align="center" data-width="0.5"');
     expect(importHTML(serialize(doc, 'html', registry), registry).doc).toEqual(doc);
   });
 });

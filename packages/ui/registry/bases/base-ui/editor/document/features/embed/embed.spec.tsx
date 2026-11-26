@@ -68,4 +68,15 @@ describe('embed', () => {
     expect(node?.type).toBe('embed');
     expect(node?.attrs?.url).toBe('https://example.com');
   });
+
+  it('round-trips its layout through HTML, and Markdown drops it', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [{ type: 'embed', attrs: { url: 'https://example.com', title: 'Map', align: 'center', width: 0.5 } }],
+    };
+    const html = serialize(doc, 'html', registry);
+    expect(html).toContain('data-align="center" data-width="0.5"');
+    expect(importHTML(html, registry).doc).toEqual(doc);
+    expect(serialize(doc, 'markdown', registry)).toBe('[Map](https://example.com)');
+  });
 });

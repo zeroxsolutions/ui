@@ -20,8 +20,17 @@ import type {
   EmailBlockField,
   RichTextField,
 } from '@zeroxsolutions/editor-core/template/email/index';
+import {
+  layoutDataAttributes,
+  layoutFromElement,
+  type LayoutAttributes,
+} from '@zeroxsolutions/editor-core/document/layout/index';
+import { LAYOUT_NODES } from '@zeroxsolutions/editor-core/template/layout/index';
 import type { ReactNodeCodec, ReactSerializeContext } from '../../react-types';
+import { layoutWordsOf, type LayoutWords } from '../layout/layout-words';
 import type { BlockPlace } from '../uploads/use-block-upload';
+import { blockLayoutAttrs } from './block-layout-attrs';
+import { BlockLayoutFrame } from './block-layout-frame';
 
 type FieldMap = Readonly<Record<string, EmailBlockField>>;
 type AttributeMap = Readonly<Record<string, EmailBlockAttribute>>;
@@ -61,6 +70,22 @@ export interface BlockFeatureOptions<F extends FieldMap, A extends AttributeMap>
   insert?: Readonly<Record<string, unknown>>;
   /** The view reads `doc`, drawn again on every change of the document. */
   readsDocument?: boolean;
+  /**
+   * The block takes the layout `LAYOUT_NODES` gives its node, drawn in a frame around the view, in the editor with
+   * a toolbar and, where the layout gives it a width, width handles; none when absent.
+   */
+  layout?: BlockFeatureLayout<A>;
+}
+
+/** How a block's view takes its place across its line and its width. */
+export interface BlockFeatureLayout<A extends AttributeMap = AttributeMap> {
+  /** The words of its toolbar and width handles, over the English; a getter is read each time it draws. */
+  words?: Partial<LayoutWords> | (() => LayoutWords);
+  /**
+   * Whether the block is drawn at its own width while it sets none, as a file's row, placed by its alignment; it
+   * takes the whole line when absent or false.
+   */
+  fit?(attributes: EmailBlockAttributes<A>, align: unknown): boolean;
 }
 
 type AttributeValue = string | boolean | number;
@@ -159,37 +184,106 @@ export function blockFeature<Type extends string, F extends FieldMap, A extends 
   const View = options.view as (props: BlockViewProps<FieldMap, AttributeMap>) => ReactNode;
   const readsDocument = options.readsDocument ?? false;
   const insertCommand = `insertBlock:${block.type}`;
-  const attrs = side.node.attrs as z.ZodObject<Record<string, z.ZodType>>;
+  const layoutKeys: readonly string[] = (LAYOUT_NODES as Readonly<Record<string, readonly string[]>>)[block.node] ?? [];
+  const layout = options.layout && layoutKeys.includes('align') ? options.layout : null;
+  const resizable = layoutKeys.includes('width');
+  // The layout's keys join the node's own, so an HTML import, which keeps only what the schema names, keeps them.
+  const attrs = (side.node.attrs as z.ZodObject<Record<string, z.ZodType>>).extend(
+    layout ? blockLayoutAttrs(block.node) : {},
+  );
+
+  /** `view` in the block's layout frame, where it takes a layout. */
+  const framed = (
+    values: Readonly<Record<string, unknown>>,
+    attributes: EmailBlockAttributes<AttributeMap>,
+    place: BlockPlace | null,
+    view: ReactNode,
+  ): ReactNode =>
+    layout ? (
+      <BlockLayoutFrame
+        align={values.align}
+        width={values.width}
+        resizable={resizable}
+        fit={layout.fit?.(attributes as EmailBlockAttributes<A>, values.align) ?? false}
+        place={place}
+        words={layoutWordsOf(layout.words)}
+      >
+        {view}
+      </BlockLayoutFrame>
+    ) : (
+      view
+    );
 
   function BlockNodeView({ attrs: values, updateAttrs, editable, selected, editor, getPos, children }: NodeViewProps) {
     useDocumentChanges(editor, readsDocument);
-    return (
+    const read = viewValues(block, values);
+    return framed(
+      values,
+      read.attributes,
+      editable ? { editor, getPos } : null,
       <View
-        {...viewValues(block, values)}
+        {...read}
         body={block.body === null ? null : (children as ReactNode)}
         editable={editable}
         selected={selected}
         update={(patch) => updateAttrs(patch)}
         doc={readsDocument ? editor.getJSON() : null}
         place={{ editor, getPos }}
-      />
+      />,
     );
   }
 
   const reactCodec: ReactNodeCodec = {
     node: block.node,
-    toReact: (node: NodeJSON, ctx: ReactSerializeContext) => (
-      <View
-        {...viewValues(block, node.attrs ?? {})}
-        body={block.body === null ? null : ctx.renderChildren(node)}
-        editable={false}
-        selected={false}
-        update={() => {}}
-        doc={readsDocument ? ctx.doc : null}
-        place={null}
-      />
-    ),
+    toReact: (node: NodeJSON, ctx: ReactSerializeContext) => {
+      const read = viewValues(block, node.attrs ?? {});
+      return framed(
+        node.attrs ?? {},
+        read.attributes,
+        null,
+        <View
+          {...read}
+          body={block.body === null ? null : ctx.renderChildren(node)}
+          editable={false}
+          selected={false}
+          update={() => {}}
+          doc={readsDocument ? ctx.doc : null}
+          place={null}
+        />,
+      );
+    },
   };
+
+  /**
+   * The block's HTML with its layout as `data-*` attributes on its outer element, read back from them; its
+   * Markdown, which says no layout, drops it.
+   */
+  const codec: NodeCodec = layout
+    ? {
+        ...side.codec,
+        toHTML: (node, ctx) => {
+          const html = side.codec.toHTML?.(node, ctx) ?? '';
+          const written = Object.entries(
+            layoutDataAttributes({ align: node.attrs?.align, width: node.attrs?.width } as LayoutAttributes),
+          )
+            .map(([name, value]) => ` ${name}="${value}"`)
+            .join('');
+          return written === '' ? html : html.replace(/^<div\b/, `<div${written}`);
+        },
+        fromHTML: (element, ctx) => {
+          const read = side.codec.fromHTML?.(element, ctx);
+          if (!read) return read ?? null;
+          const placed = layoutFromElement(element);
+          const kept = Object.fromEntries(
+            layoutKeys.flatMap((key) => {
+              const value = placed[key as keyof LayoutAttributes];
+              return key !== 'responsive' && value !== undefined ? [[key, value]] : [];
+            }),
+          );
+          return Object.keys(kept).length === 0 ? read : { ...read, attrs: { ...read.attrs, ...kept } };
+        },
+      }
+    : side.codec;
 
   /** What `values` holds that the node takes, each read through its schema; the rest is dropped. */
   const accepted = (values: Readonly<Record<string, unknown>>): Record<string, unknown> =>
@@ -203,8 +297,8 @@ export function blockFeature<Type extends string, F extends FieldMap, A extends 
 
   return defineFeature({
     id: `block:${block.type}`,
-    nodes: [{ ...side.node, render: BlockNodeView }],
-    codecs: [{ ...side.codec, toReact: reactCodec.toReact } as NodeCodec],
+    nodes: [{ ...side.node, attrs, render: BlockNodeView }],
+    codecs: [{ ...codec, toReact: reactCodec.toReact } as NodeCodec],
     commands: {
       [insertCommand]: {
         args: z.object({ attributes: z.record(z.string(), z.unknown()).optional() }).optional(),

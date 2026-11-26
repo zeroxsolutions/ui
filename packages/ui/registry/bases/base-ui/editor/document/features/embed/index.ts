@@ -1,1 +1,1 @@
-export { embed } from './embed';
+export { embed, type EmbedOptions } from './embed';

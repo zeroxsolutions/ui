@@ -9,6 +9,7 @@ import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { Block } from '@zeroxsolutions/editor-core/blocks/index';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockFeature, type BlockViewPropsOf } from '../../blocks/block-feature';
+import type { LayoutWords } from '../../layout/layout-words';
 import { BlockAddressPopover } from '../../blocks/block-address-popover';
 import { linkAddress, sourceAddress } from '../../blocks/block-address';
 import {
@@ -34,6 +35,8 @@ export interface CardFields {
 export interface CardOptions extends BlockUploadOptions {
   /** The host's words for what the editor shows on a card. */
   words?: Partial<CardWords>;
+  /** The words of its layout toolbar and width handles, over the English; a getter is read each time it draws. */
+  layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
 }
 
 /** The words a card's view draws in the editor. */
@@ -434,6 +437,10 @@ export function card(definition: Block, options: CardOptions = {}): EditorFeatur
     );
   }
 
-  const feature = blockFeature(definition, { icon: IdCardIcon, view: CardFeatureView });
+  const feature = blockFeature(definition, {
+    icon: IdCardIcon,
+    view: CardFeatureView,
+    layout: { words: options.layoutWords },
+  });
   return options.upload ? { ...feature, advanced: { engineExtensions: [uploadsExtension('card', null)] } } : feature;
 }

@@ -59,3 +59,20 @@ export function storedLayout(editor: IEditor, index: number): { align?: unknown;
   const attrs = editor.getJSON().content?.[index]?.attrs ?? {};
   return { align: attrs.align, width: attrs.width };
 }
+
+/**
+ * Draws the editor's document in the Viewer at the editor's line width and checks that its block frame carries
+ * the editor's `data-align` and `data-width` and is drawn at the same share of its line, within 1%.
+ */
+export async function expectViewerMatches(editor: IEditor, features: EditorFeature[]): Promise<void> {
+  const edited = layoutFrame();
+  const viewed = await viewerFrame(editor.getJSON(), features, lineWidth());
+  expect(viewed.getAttribute('data-align')).toBe(edited.getAttribute('data-align'));
+  expect(viewed.getAttribute('data-width')).toBe(edited.getAttribute('data-width'));
+  expect(Math.abs(drawnShare(viewed) - drawnShare(edited))).toBeLessThan(0.01);
+}
+
+/** The edges of the editable text, which a full width block bleeds to. */
+export function editorEdges(): DOMRect {
+  return (document.querySelector('.ProseMirror') as HTMLElement).getBoundingClientRect();
+}

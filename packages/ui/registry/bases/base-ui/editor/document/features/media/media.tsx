@@ -4,6 +4,7 @@ import { ClapperboardIcon } from '@/registry/bases/base-ui/icons/lucide/clapperb
 import { media as mediaBlock } from '@zeroxsolutions/editor-core/blocks/library/index';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockFeature, type BlockViewPropsOf } from '../../blocks/block-feature';
+import type { LayoutWords } from '../../layout/layout-words';
 import { BlockAddressField } from '../../blocks/block-address-field';
 import { sourceAddress } from '../../blocks/block-address';
 import { fileSizeText } from '@zeroxsolutions/editor-core/blocks/library/index';
@@ -28,6 +29,8 @@ export interface MediaOptions extends BlockUploadOptions {
     readonly audioPlaceholder?: string;
     readonly caption?: string;
   };
+  /** The words of its layout toolbar and width handles, over the English; a getter is read each time it draws. */
+  layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
 }
 
 type MediaViewProps = BlockViewPropsOf<typeof mediaBlock>;
@@ -148,7 +151,12 @@ export function media(options: MediaOptions = {}): EditorFeature {
     );
   }
 
-  const feature = blockFeature(mediaBlock, { view: MediaView, icon: ClapperboardIcon, insert: { kind: 'video' } });
+  const feature = blockFeature(mediaBlock, {
+    view: MediaView,
+    icon: ClapperboardIcon,
+    insert: { kind: 'video' },
+    layout: { words: options.layoutWords },
+  });
   const taker: UploadTaker = {
     accept: 'video/*,audio/*',
     slot: MEDIA_SLOT,
