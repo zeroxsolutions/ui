@@ -12,6 +12,8 @@ import { TextAlignStartIcon } from '@/registry/bases/base-ui/icons/lucide/text-a
 import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
 import {
   CONTENT_LOAD_META,
+  Decoration,
+  DecorationSet,
   Extension,
   isHistoryTransaction,
   Plugin,
@@ -40,6 +42,8 @@ import {
   type DefaultBlockType,
   type LibraryBlockType,
 } from '@zeroxsolutions/editor-core/template/email/index';
+import { DEFAULT_SECTION_PADDING, SECTION_PADDING_PX } from '@zeroxsolutions/editor-core/template/email/blocks/section';
+import { CARD_INNER_WIDTH } from '@zeroxsolutions/editor-core/template/email/blocks/shared';
 import {
   ALIGNS as LAYOUT_ALIGNS,
   LAYOUT_NODES,
@@ -711,6 +715,37 @@ function laneWidths(): Plugin {
 }
 
 /**
+ * The px the email draws a section's blocks within, as its renderer does: the card's content width, or its inner
+ * width for a wide section, less the section's padding at each side.
+ */
+function sectionContentWidth(section: ProseMirrorNode): number {
+  const outer = section.attrs.width === 'wide' ? CARD_INNER_WIDTH : CONTENT_WIDTH;
+  const padding = section.attrs.padding as keyof typeof SECTION_PADDING_PX | null | undefined;
+  return outer - 2 * SECTION_PADDING_PX[padding ?? DEFAULT_SECTION_PADDING];
+}
+
+/**
+ * Gives each section the width its blocks are a share of, as `--layout-container`, so an image in a section is
+ * drawn and dragged against the width the email draws it at rather than the card's content width.
+ */
+function sectionWidths(): Plugin {
+  return new Plugin({
+    key: new PluginKey('emailSectionWidths'),
+    props: {
+      decorations(state) {
+        const decorations: Decoration[] = [];
+        state.doc.forEach((node, pos) => {
+          if (node.type.name !== 'section') return;
+          const style = `--layout-container: ${sectionContentWidth(node)}px`;
+          decorations.push(Decoration.node(pos, pos + node.nodeSize, { style }));
+        });
+        return DecorationSet.create(state.doc, decorations);
+      },
+    },
+  });
+}
+
+/**
  * The engine half: the email attributes on the document's nodes, the blocks and marks an author may add, the
  * input and paste rules of only what the email stores, and the context the commands read.
  */
@@ -735,6 +770,7 @@ function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: r
         key: new PluginKey('emailContentWidth'),
         props: { attributes: { style: `--layout-container: ${CONTENT_WIDTH}px` } },
       }),
+      sectionWidths(),
       admittedBlocks(context.admitted, carried),
       cellLines(),
       laneWidths(),

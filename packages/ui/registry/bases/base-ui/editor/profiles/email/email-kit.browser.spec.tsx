@@ -457,6 +457,73 @@ describe('the email kit', () => {
     await page.viewport(414, 896);
   });
 
+  it("draws and drags an image in a section against the section's width in the email", async () => {
+    await page.viewport(1100, 800);
+    const editor = await mount([
+      block({
+        id: 's',
+        key: 's',
+        type: 'section',
+        attributes: { padding: 'large' },
+        content: {},
+        lanes: [
+          [
+            block({
+              id: 'i',
+              key: 'i',
+              type: 'image',
+              attributes: { width: 0.5 },
+              content: { src: PIXEL, alt: 'i' },
+            }),
+          ],
+        ],
+      }),
+    ]);
+    // The renderer draws a content section's blocks within 566px less 24px of padding at each side.
+    const inner = 566 - 2 * 24;
+    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
+    expect(frame.getBoundingClientRect().width).toBeCloseTo(inner / 2, 0);
+
+    await userEvent.click(frame, { position: { x: 4, y: 4 } });
+    const handle = await vi.waitFor(() => find('[data-slot=resize-handle][data-side=end]'));
+    const from = { x: handle.getBoundingClientRect().left + 3, y: handle.getBoundingClientRect().top + 8 };
+    // 200px is 0.4 of the section's width and 0.35 of the card's content width.
+    await mouse('press', from);
+    await mouse('move', { x: from.x + 100, y: from.y });
+    await mouse('move', { x: from.x + 200, y: from.y });
+    await mouse('release', { x: from.x + 200, y: from.y });
+
+    await vi.waitFor(() => expect(exported(editor)[0].lanes?.[0][0].attributes).toEqual({ width: 0.9 }));
+    await page.viewport(414, 896);
+  });
+
+  it("draws a wide section's image against the card's inner width in the email", async () => {
+    await page.viewport(1100, 800);
+    await mount([
+      block({
+        id: 's',
+        key: 's',
+        type: 'section',
+        attributes: { width: 'wide', padding: 'none' },
+        content: {},
+        lanes: [
+          [
+            block({
+              id: 'i',
+              key: 'i',
+              type: 'image',
+              attributes: { width: 0.5 },
+              content: { src: PIXEL, alt: 'i' },
+            }),
+          ],
+        ],
+      }),
+    ]);
+    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
+    expect(frame.getBoundingClientRect().width).toBeCloseTo(598 / 2, 0);
+    await page.viewport(414, 896);
+  });
+
   it("names an image's layout toolbar in the host's words", async () => {
     await mount(
       [
