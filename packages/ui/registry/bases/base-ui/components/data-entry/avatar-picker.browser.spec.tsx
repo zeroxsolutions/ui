@@ -121,7 +121,7 @@ const pane = page.getByRole('tabpanel');
 // The input is hidden, so no role or label reaches it.
 const fileInput = (): HTMLInputElement => document.querySelector<HTMLInputElement>('input[type="file"]')!;
 
-/** A file in `src/test/files`, which a drag carries from the disk. */
+/** A file in `test/files`, which a drag carries from the disk. */
 type DiskFile = 'drop.png' | 'plan.pdf';
 
 /** `point` in the page around the spec's frame, where the browser's input lands. */
@@ -142,7 +142,7 @@ async function drag(
 ) {
   const data = {
     items: [],
-    files: files.map((name) => `${server.config.root}/src/test/files/${name}`),
+    files: files.map((name) => `${server.config.root}/test/files/${name}`),
     dragOperationsMask: 1,
   };
   await cdp().send('Input.dispatchDragEvent', { type, ...onPage(point), data });
