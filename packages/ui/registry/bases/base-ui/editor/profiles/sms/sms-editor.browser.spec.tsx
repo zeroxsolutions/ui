@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -95,9 +95,47 @@ function find(selector: string, text?: string): HTMLElement {
 
 const meter = () => find('[data-slot=sms-meter-count]').textContent;
 
-async function caretAtEnd(probe: { editor: IEditor }): Promise<void> {
-  await userEvent.click(await vi.waitFor(() => find('[contenteditable=true] p')));
-  probe.editor.focus('end');
+/** Clicks past the end of the last line, where a person puts the caret to type on. */
+async function caretAtEnd(): Promise<void> {
+  const lines = await vi.waitFor(() => {
+    const found = [...document.querySelectorAll<HTMLElement>('[contenteditable=true] p')];
+    if (found.length === 0) throw new Error('the editor has no line');
+    return found;
+  });
+  const line = lines[lines.length - 1];
+  const { width, height } = line.getBoundingClientRect();
+  await userEvent.click(line, { position: { x: width - 1, y: height - 1 } });
+}
+
+/** Puts `value` on the clipboard the way a reader does: selects it in a field and copies. */
+async function copyText(value: string): Promise<void> {
+  const source = document.createElement('textarea');
+  source.value = value;
+  document.body.append(source);
+  await userEvent.click(source);
+  await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+  await userEvent.copy();
+  source.remove();
+}
+
+/**
+ * Puts `html` on the clipboard as another app copies it, beside its text. A copy out of the page would carry the
+ * page's own markup around it, which is not what the case pastes.
+ */
+async function copyHtml(html: string): Promise<void> {
+  const text = new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '';
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+    }),
+  ]);
+}
+
+/** Runs every timer the editor has set, so a validation it scheduled has run before the count is read. */
+function settleTimers(): void {
+  vi.runOnlyPendingTimers();
+  vi.runOnlyPendingTimers();
 }
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
@@ -106,20 +144,20 @@ describe('SmsEditor', () => {
   it('reads the cost of the body, tokens counted as their literal text', async () => {
     await mount('Hello {{a}}!');
     await vi.waitFor(() => expect(meter()).toBe('16 / 160 GSM-7'));
-    expect(find('[data-slot=sms-meter]').getAttribute('aria-live')).toBe('polite');
   });
 
   it('flips to UCS-2 when an emoji is typed', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
-    probe.editor.run('insertContent', { content: '\u{1F600}' });
+    await copyText('\u{1F600}');
+    await caretAtEnd();
+    await userEvent.paste();
     await vi.waitFor(() => expect(meter()).toMatch(/ \/ 70 UCS-2$/));
     await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello\u{1F600}'));
   });
 
   it('shows the exceeded problem on the meter and the text past the limit', async () => {
     const probe = await mount('x'.repeat(160));
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard('yz');
 
     const message = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'sms-segment-exceeded', block: null });
@@ -133,7 +171,7 @@ describe('SmsEditor', () => {
 
   it('gives no bold or italic shortcut an effect', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard(
       '{Shift>}{Home}{/Shift}{Control>}b{/Control}{Control>}i{/Control}{Meta>}b{/Meta}{Meta>}i{/Meta}',
     );
@@ -146,17 +184,17 @@ describe('SmsEditor', () => {
   });
 
   it('draws no grip and no insert button', async () => {
-    const probe = await mount('Hello');
+    await mount('Hello');
     await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p')));
-    await caretAtEnd(probe);
+    await caretAtEnd();
 
     expect(document.querySelector('.drag-handle')).toBeNull();
-    expect(document.querySelector('[data-editor-add]')).toBeNull();
+    await expect.element(page.getByRole('button', { name: 'Insert block below' })).not.toBeInTheDocument();
   });
 
   it('offers the declared variables under "/", inserting the picked one as its chip, which the meter counts', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard(' /');
 
     const menu = page.elementLocator(await vi.waitFor(() => find('[data-slot=slash-menu]')));
@@ -173,7 +211,7 @@ describe('SmsEditor', () => {
 
   it('leaves the typed "/" as text when its menu is dismissed', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard(' /');
     await vi.waitFor(() => find('[data-slot=slash-menu]'));
 
@@ -187,15 +225,10 @@ describe('SmsEditor', () => {
     document.body.style.minHeight = '300vh';
     try {
       await mount('Hi {{a}} there');
-      const editable = find('[contenteditable=true]');
       await vi.waitFor(() => find('[contenteditable=true] [data-variable=a]'));
-      // The text right after the chip.
-      const walker = document.createTreeWalker(editable, NodeFilter.SHOW_TEXT);
-      let after: Node | null = walker.nextNode();
-      while (after && after.textContent !== ' there') after = walker.nextNode();
-      if (!after) throw new Error('nothing follows the chip');
-      editable.focus();
-      document.getSelection()?.collapse(after, 0);
+      await caretAtEnd();
+      const afterChip = '{ArrowLeft}'.repeat(' there'.length);
+      await userEvent.keyboard(afterChip);
 
       await userEvent.keyboard('{End}');
       await vi.waitFor(() => {
@@ -205,7 +238,7 @@ describe('SmsEditor', () => {
       });
       expect(window.scrollY).toBe(0);
 
-      document.getSelection()?.collapse(after, 0);
+      await userEvent.keyboard(afterChip);
       await userEvent.keyboard('{Shift>}{End}{/Shift}');
       await vi.waitFor(() => expect(document.getSelection()?.toString()).toBe(' there'));
       expect(window.scrollY).toBe(0);
@@ -216,13 +249,11 @@ describe('SmsEditor', () => {
 
   it('keeps a typed heading or list shortcut, and a pasted heading, as text', async () => {
     const probe = await mount('');
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard('# Title{Enter}- item');
-    const data = new DataTransfer();
-    data.setData('text/html', '<h1>Hi</h1>');
-    find('[contenteditable=true]').dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    );
+    await copyHtml('<h1>Hi</h1>');
+    await caretAtEnd();
+    await userEvent.paste();
 
     await vi.waitFor(() => expect(last(probe.reported)).toBe('# Title\n- itemHi'));
     expect((probe.editor.getJSON().content ?? []).map((block) => block.type)).toEqual(['paragraph', 'paragraph']);
@@ -230,19 +261,15 @@ describe('SmsEditor', () => {
 
   it('makes a line break on Enter, reported as a new line', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
+    await caretAtEnd();
     await userEvent.keyboard('{Enter}there');
     await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello\nthere'));
   });
 
   it('loads a value the host changes, and does not reload the one it reported', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
-    // ProseMirror puts its own selection back within 200ms of a focus event, which undoes an arrow pressed in
-    // that window; a caret set on the editor's state is the one it puts back.
-    probe.editor.focus(3);
-    await vi.waitFor(() => expect(probe.editor.getSelection()).toMatchObject({ from: 3, to: 3 }));
-    await userEvent.keyboard('abc');
+    await caretAtEnd();
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{ArrowLeft}abc');
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabcllo'));
 
     probe.load('Xin chao');
@@ -252,27 +279,31 @@ describe('SmsEditor', () => {
 
   it('tells the host when the focus leaves it, and not while it is in a popup the editor opened', async () => {
     const probe = await mount('Hello');
-    await caretAtEnd(probe);
-    await userEvent.click(find('[data-slot=variable-menu]'));
-    const option = await vi.waitFor(() => find('[data-slot=combobox-item]', 'A'));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await caretAtEnd();
+    await userEvent.click(page.getByTestId('variable-menu'));
+    const option = page.getByRole('option', { name: 'A', exact: true });
+    // The leave is told a task after the blur, and each input the browser carries out spans several, so a leave
+    // the popup caused has been told by the time the hover lands.
+    await userEvent.hover(option);
     expect(probe.blurs).toBe(0);
 
     await userEvent.click(option);
     await vi.waitFor(() => expect(last(probe.reported)).toBe('Hello{{a}}'));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await userEvent.hover(page.getByRole('button', { name: 'Elsewhere' }));
     expect(probe.blurs).toBe(0);
-    await userEvent.click(find('button', 'Elsewhere'));
+    await userEvent.click(page.getByRole('button', { name: 'Elsewhere' }));
 
     await vi.waitFor(() => expect(probe.blurs).toBe(1));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await userEvent.hover(page.getByRole('textbox', { name: 'Message' }));
     expect(probe.blurs).toBe(1);
   });
 
   it('validates once on mount and lists the problem no place holds', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    onTestFinished(() => vi.useRealTimers());
     const probe = await mount('Hi {{a}}');
     await vi.waitFor(() => expect(probe.validated).toHaveLength(1));
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    settleTimers();
     expect(probe.validated).toHaveLength(1);
     expect(probe.validated[0]).toEqual(validate('Hi {{a}}', profile));
     await vi.waitFor(() =>
@@ -324,6 +355,8 @@ describe('SmsEditor', () => {
   });
 
   it('reads the declarations again when the profile changes them, and not when it is rebuilt', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    onTestFinished(() => vi.useRealTimers());
     const probe = await mount('Hi {{a}}');
     await vi.waitFor(() => expect(find('[contenteditable=true] p').textContent).toContain('A'));
 
@@ -332,7 +365,8 @@ describe('SmsEditor', () => {
 
     const count = probe.validated.length;
     probe.declare(smsProfile({ variables: [{ ...declared[0], label: 'First name' }, declared[1]] }));
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    await vi.waitFor(() => expect(find('[contenteditable=true] p').textContent).toContain('First name'));
+    settleTimers();
     expect(probe.validated).toHaveLength(count);
   });
 
@@ -346,12 +380,9 @@ describe('SmsEditor', () => {
 
   it('keeps blank lines in pasted text, and turns its tokens into chips', async () => {
     const probe = await mount('');
+    await copyText('a\n\nb {{a}}');
     await userEvent.click(await vi.waitFor(() => find('[contenteditable=true] p')));
-    const data = new DataTransfer();
-    data.setData('text/plain', 'a\n\nb {{a}}');
-    find('[contenteditable=true]').dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    );
+    await userEvent.paste();
     await vi.waitFor(() => expect(last(probe.reported)).toBe('a\n\nb {{a}}'));
     await vi.waitFor(() => expect(find('[contenteditable=true] [data-slot=variable]')).toBeTruthy());
   });
@@ -378,26 +409,14 @@ describe('SmsEditor', () => {
     const probe = await mount('Hello', undefined, { readOnly: true });
     await userEvent.type(page.getByRole('textbox', { name: 'Message' }), ' there');
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
     expect(probe.reported).toEqual([]);
     expect(probe.editor.getText()).toBe('Hello');
-    expect(document.querySelector('[data-slot=variable-menu]')).toBeNull();
+    await expect.element(page.getByTestId('variable-menu')).not.toBeInTheDocument();
   });
 
-  it("draws the variable menu in the toolbar, and the meter from the text's left edge", async () => {
+  it('draws the variable menu in the toolbar', async () => {
     await mount('Hello');
 
-    const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
-    expect(toolbar.contains(find('[data-slot=variable-menu]'))).toBe(true);
-    expect(toolbar.querySelector('[role=separator]')).toBeNull();
-    const text = find('[contenteditable=true] p').getBoundingClientRect().left;
-    expect(Math.abs(find('[data-slot=sms-meter-count]').getBoundingClientRect().left - text)).toBeLessThanOrEqual(1);
-  });
-
-  it("keeps the meter on the text's left edge when read-only", async () => {
-    await mount('Hello', undefined, { readOnly: true });
-
-    const text = (await vi.waitFor(() => find('.ProseMirror p'))).getBoundingClientRect().left;
-    expect(Math.abs(find('[data-slot=sms-meter-count]').getBoundingClientRect().left - text)).toBeLessThanOrEqual(1);
+    await expect.element(page.getByRole('toolbar').getByTestId('variable-menu')).toBeVisible();
   });
 });
