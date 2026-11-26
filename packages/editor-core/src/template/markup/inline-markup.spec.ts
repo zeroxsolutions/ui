@@ -292,17 +292,29 @@ describe('colour markers', () => {
   });
 
   it.each([
-    ['an unclosed colour', '{color=red}x', 'color-unclosed', 0],
-    ['an unclosed background', 'a {bg=red}x', 'color-unclosed', 2],
-    ['a close with nothing open', 'x{/color}', 'color-unclosed', 1],
-    ['a colour outside the set', '{color=magenta}x{/color}', 'color-token-unknown', 0],
-    ['default, which is no colour', '{color=default}x{/color}', 'color-token-unknown', 0],
-    ['a colour inside a colour', '{color=red}{color=blue}x{/color}{/color}', 'color-nested', 11],
-    ['a colour in a label inside a colour', '{color=red}[{color=blue}x{/color}]({{u}}){/color}', 'color-nested', 12],
-    ['a colour left open in a label', '[{color=red}x]({{u}}){/color}', 'color-unclosed', 1],
-    ['an empty colour span that joins a token', '{{na{color=red}{/color}me}}', 'marker-inside-token', 0],
-  ])('refuses %s', (_case, source, problem, offset) => {
-    expect(parseInlineMarkup(source)).toEqual({ ok: false, problem, offset });
+    ['an unclosed colour', '{color=red}x'],
+    ['an unclosed background', 'a {bg=red}x'],
+    ['a close with nothing open', 'x{/color}'],
+    ['a colour outside the set', '{color=magenta}x{/color}'],
+    ['default, which is no colour', '{color=default}x{/color}'],
+    ['a colour left open in a label', '[{color=red}x]({{u}}){/color}'],
+  ])('reads %s as the literal text an older string meant', (_case, source) => {
+    const parsed = parseInlineMarkup(source);
+    expect(parsed.ok).toBe(true);
+    expect(plainInlineText(source)).toBe(source.replace(/\[|\]\(\{\{u\}\}\)/g, ''));
+    expect(printInlineMarkup(runsOf(source))).toBe(source);
+  });
+
+  it('reads a colour opened inside the same colour as text, the pair around it kept', () => {
+    expect(runsOf('{color=red}{color=blue}x{/color}')).toEqual([coloured('{color=blue}x', { color: 'red' })]);
+  });
+
+  it('refuses an empty colour span that joins a token', () => {
+    expect(parseInlineMarkup('{{na{color=red}{/color}me}}')).toEqual({
+      ok: false,
+      problem: 'marker-inside-token',
+      offset: 0,
+    });
   });
 
   it.each(['a {b} c', '{{name}}', '{ color=red }', '{color=Red}', '{color=}', '{/colour}'])(
@@ -313,9 +325,22 @@ describe('colour markers', () => {
     },
   );
 
-  it('reads an escaped brace as the literal text of a marker', () => {
-    expect(runsOf('\\{color=red}')).toEqual([plain('{color=red}')]);
-    expect(printInlineMarkup([plain('{color=red} and {/bg}')])).toBe('\\{color=red} and \\{/bg}');
+  it('keeps the backslash before a brace that would not open a colour', () => {
+    expect(runsOf('\\{color=red}')).toEqual([plain('\\{color=red}')]);
+    expect(runsOf('a \\{/bg} b')).toEqual([plain('a \\{/bg} b')]);
+  });
+
+  it('reads an escaped brace that would open a colour as its literal text', () => {
+    expect(runsOf('\\{color=red}x{/color}')).toEqual([plain('{color=red}x{/color}')]);
+  });
+
+  it.each([
+    [[plain('{color=red} and {/bg}')], '{color=red} and {/bg}'],
+    [[plain('{color=red}a{/color}')], '\\{color=red}a\\{/color}'],
+    [[plain('{color=red}'), coloured('x', { color: 'blue' })], '\\{color=red}{color=blue}x{/color}'],
+  ])('prints the literal braces of %j so they read back as text', (runs, printed) => {
+    expect(printInlineMarkup(runs)).toBe(printed);
+    expect(runsOf(printed)).toEqual(runs);
   });
 
   it('strips colour markers from the plain text', () => {

@@ -45,6 +45,16 @@ export type ParsedInlineMarkup =
 
 type Refusal = Extract<ParsedInlineMarkup, { ok: false }>;
 
+/**
+ * The refusals a colour marker meets: never returned, since the parse then reads that marker as literal text, as
+ * every string written before colour markers existed meant it.
+ */
+const PAINT_PROBLEMS: ReadonlySet<InlineMarkupProblem> = new Set([
+  'color-unclosed',
+  'color-token-unknown',
+  'color-nested',
+]);
+
 /** A text run as the parse builds it: `at[i]` is where `text[i]` sits in the source. */
 interface DraftText extends InlineText {
   readonly at: readonly number[];
@@ -67,7 +77,8 @@ const MARKER_COLORS: readonly string[] = COLOR_TOKENS.filter((token) => token !=
 
 /**
  * `{color=<word>}`, `{bg=<word>}`, `{/color}` or `{/bg}` exactly, sticky. Any other `{` is literal text, so a
- * brace an older string spells (`{b}`, `{ color=red }`) reads as it always did.
+ * brace an older string spells (`{b}`, `{ color=red }`) reads as it always did; one of these reads as a marker
+ * only where it pairs, which `parseOnce` settles.
  */
 const PAINT_MARKER_HERE = /\{(?:(color|bg)=([a-z]+)|\/(color|bg))\}/y;
 
@@ -91,6 +102,16 @@ function paintMarkerAt(source: string, index: number): PaintMarkerAt | undefined
 interface Seen {
   readonly tokens: Set<number>;
   readonly markers: number[];
+  /** Where a colour marker's brace follows a backslash read as text: an escape, if the brace pairs without it. */
+  readonly escapable: number[];
+}
+
+/** Which colour markers one parse reads as text: by where each brace sits in the whole source. */
+interface Braces {
+  /** Braces read as literal text, as no pair holds them. */
+  readonly literal: ReadonlySet<number>;
+  /** Braces whose backslash escapes them: each would pair without it, so the backslash is dropped. */
+  readonly escaped: ReadonlySet<number>;
 }
 
 type ParsedDraft = { readonly ok: true; readonly runs: readonly DraftRun[] } | Refusal;
@@ -130,21 +151,21 @@ function tokenAt(source: string, index: number): string | undefined {
 }
 
 /**
- * Whether a `\\` at `index` escapes the character after it: a marker character, or a `{` that opens a colour
- * marker. A `\\` that ends the source, or comes before any other character, is text.
+ * Whether a `\\` at `index` escapes the character after it: a marker character, or the brace of a colour marker
+ * that `braces` names as escaped. A `\\` that ends the source, or comes before any other character, is text.
  */
-function escapedAt(source: string, index: number): boolean {
+function escapedAt(source: string, index: number, base: number, braces: Braces): boolean {
   if (source[index] !== '\\' || index + 1 >= source.length) return false;
-  return ESCAPABLE.includes(source[index + 1]) || paintMarkerAt(source, index + 1) !== undefined;
+  return ESCAPABLE.includes(source[index + 1]) || braces.escaped.has(base + index + 1);
 }
 
 /** The index of the `]` that closes a label opened before `from`, or the refusal that stops the search. */
-function labelEnd(source: string, from: number, base: number): number | Refusal {
+function labelEnd(source: string, from: number, base: number, braces: Braces): number | Refusal {
   let index = from;
   while (index < source.length) {
     const token = tokenAt(source, index);
     if (token) index += token.length;
-    else if (escapedAt(source, index)) index += 2;
+    else if (escapedAt(source, index, base, braces)) index += 2;
     else if (source[index] === '[') return refuse('link-nested', base + index);
     else if (source[index] === ']') return index;
     else index += 1;
@@ -183,7 +204,7 @@ interface OpenPaint {
  * `seen` collects the offset of every token read whole and of every marker. `outer` is the paint a link's
  * label sits in, which a marker in the label may not open again.
  */
-function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}): ParsedDraft {
+function parseRuns(source: string, base: number, seen: Seen, braces: Braces, outer: Paint = {}): ParsedDraft {
   const runs: DraftRun[] = [];
   let buffer = '';
   let at: number[] = [];
@@ -211,7 +232,10 @@ function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}):
     const char = source[index];
     const token = tokenAt(source, index);
     const marker = token ? undefined : paintMarkerAt(source, index);
-    if (marker) {
+    if (marker && (braces.literal.has(base + index) || braces.escaped.has(base + index))) {
+      take(source.slice(index, index + marker.length), base + index);
+      index += marker.length;
+    } else if (marker) {
       flush();
       seen.markers.push(base + index);
       if (marker.token === undefined) {
@@ -229,7 +253,12 @@ function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}):
       seen.tokens.add(base + index);
       take(token, base + index);
       index += token.length;
-    } else if (escapedAt(source, index)) {
+    } else if (escapedAt(source, index, base, braces)) {
+      // An escaped brace is read, as literal text, by the marker arm on the next turn.
+      if (braces.escaped.has(base + index + 1)) {
+        index += 1;
+        continue;
+      }
       take(source[index + 1], base + index + 1);
       index += 2;
     } else if (char === '*' && source[index + 1] === '*') {
@@ -243,9 +272,12 @@ function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}):
       italic = italic >= 0 ? -1 : base + index;
       index += 1;
     } else if (char === '[') {
-      const end = labelEnd(source, index + 1, base);
+      const end = labelEnd(source, index + 1, base, braces);
       if (typeof end !== 'number') return end;
-      const label = parseRuns(source.slice(index + 1, end), base + index + 1, seen, { ...outer, ...painted() });
+      const label = parseRuns(source.slice(index + 1, end), base + index + 1, seen, braces, {
+        ...outer,
+        ...painted(),
+      });
       if (!label.ok) return label;
       if (label.runs.length === 0) return refuse('link-label-empty', base + index);
       const target = hrefAt(source, end + 1, base);
@@ -259,6 +291,7 @@ function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}):
       runs.push({ kind: 'link', href: target.href, label: folded });
       index = target.end;
     } else {
+      if (char === '\\' && paintMarkerAt(source, index + 1) !== undefined) seen.escapable.push(base + index + 1);
       take(char, base + index);
       index += 1;
     }
@@ -297,10 +330,42 @@ function published(run: DraftText): InlineText {
   };
 }
 
-/** The parse without the print-back check: every rule but `marker-ambiguous`. */
+/**
+ * The parse with each colour marker that pairs with none read as text: a refused marker is made literal and the
+ * parse run again, until none is refused.
+ */
+function parsePaired(
+  source: string,
+  escaped: ReadonlySet<number>,
+): { parsed: ParsedDraft; seen: Seen; literal: Set<number> } {
+  const literal = new Set<number>();
+  for (;;) {
+    const seen: Seen = { tokens: new Set(), markers: [], escapable: [] };
+    const parsed = parseRuns(source, 0, seen, { literal, escaped });
+    if (parsed.ok || !PAINT_PROBLEMS.has(parsed.problem) || literal.has(parsed.offset)) {
+      return { parsed, seen, literal };
+    }
+    literal.add(parsed.offset);
+  }
+}
+
+/**
+ * The parse without the print-back check: every rule but `marker-ambiguous`. A colour marker that pairs with none,
+ * or names no colour, is literal text; a backslash before one that pairs escapes it, and before any other brace
+ * is text, as it was before colour markers existed.
+ */
 function parseOnce(source: string): ParsedInlineMarkup & { readonly markers?: readonly number[] } {
-  const seen: Seen = { tokens: new Set(), markers: [] };
-  const parsed = parseRuns(source, 0, seen);
+  let escaped = new Set<number>();
+  let read = parsePaired(source, escaped);
+  for (;;) {
+    const { parsed, seen, literal } = read;
+    if (!parsed.ok) break;
+    const pairing = seen.escapable.filter((brace) => !literal.has(brace) && !escaped.has(brace));
+    if (pairing.length === 0) break;
+    escaped = new Set([...escaped, ...pairing]);
+    read = parsePaired(source, escaped);
+  }
+  const { parsed, seen } = read;
   if (!parsed.ok) return parsed;
   const joined = joinedToken(parsed.runs, seen.tokens);
   if (joined !== undefined) return refuse('marker-inside-token', joined);
@@ -331,10 +396,21 @@ export function parseInlineMarkup(source: string): ParsedInlineMarkup {
 }
 
 /**
- * Text with its markers escaped, and each `{` that would open a colour marker, a `{{name}}` token left whole so
- * the `_` inside it is not escaped.
+ * How a print writes the colour marker braces its text holds: the nth such brace, in print order, takes a
+ * backslash where `escaped` holds n, and every other is written after `mark`, which `printInlineMarkup` strips
+ * once it has read where each sits.
  */
-function escapeText(text: string): string {
+interface BracePrint {
+  readonly escaped: ReadonlySet<number>;
+  readonly mark: string;
+  count: number;
+}
+
+/**
+ * Text with its markers escaped and its colour marker braces written as `braces` says, a `{{name}}` token left
+ * whole so the `_` inside it is not escaped.
+ */
+function escapeText(text: string, braces: BracePrint): string {
   let out = '';
   let index = 0;
   while (index < text.length) {
@@ -342,9 +418,12 @@ function escapeText(text: string): string {
     if (token) {
       out += token;
       index += token.length;
+    } else if (paintMarkerAt(text, index) !== undefined) {
+      out += braces.escaped.has(braces.count) ? '\\{' : `${braces.mark}{`;
+      braces.count += 1;
+      index += 1;
     } else {
-      const escaped = ESCAPABLE.includes(text[index]) || paintMarkerAt(text, index) !== undefined;
-      out += escaped ? `\\${text[index]}` : text[index];
+      out += ESCAPABLE.includes(text[index]) ? `\\${text[index]}` : text[index];
       index += 1;
     }
   }
@@ -439,6 +518,7 @@ function printTexts(
   printing: Printing,
   outer: readonly Mark[],
   outerPaint: Paint,
+  braces: BracePrint,
 ): string {
   let out = '';
   for (const run of runs) {
@@ -451,7 +531,7 @@ function printTexts(
       printing.marks,
       MARKS.filter((mark) => run[mark] && !outer.includes(mark)),
     );
-    out += escapeText(run.text);
+    out += escapeText(run.text, braces);
   }
   return out;
 }
@@ -463,17 +543,54 @@ function printTexts(
  * the parser refuses or reads differently, so a caller should parse what it prints.
  */
 export function printInlineMarkup(runs: readonly InlineRun[]): string {
+  const texts = runs.flatMap((run) => (run.kind === 'text' ? [run.text] : run.label.map((part) => part.text)));
+  const mark = unusedCharacter(texts.join(''));
+  // A literal brace needs its backslash only where it would pair with a marker the print holds, and each escape
+  // can free another brace to pair, so the braces that pair are escaped until none does.
+  let escaped = new Set<number>();
+  for (;;) {
+    const marked = printWith(runs, { escaped, mark, count: 0 });
+    const { out, braces } = unmarked(marked, mark);
+    const parsed = parseOnce(out);
+    const live = new Set(parsed.ok ? parsed.markers : []);
+    const pairing = braces.flatMap((offset, nth) => (live.has(offset) ? [nth] : []));
+    if (pairing.length === 0) return out;
+    escaped = new Set([...escaped, ...pairing]);
+  }
+}
+
+/** A character `text` does not hold, from the private use area. */
+function unusedCharacter(text: string): string {
+  let code = 0xe000;
+  while (text.includes(String.fromCharCode(code))) code += 1;
+  return String.fromCharCode(code);
+}
+
+/** `marked` without `mark`, and where each brace it marked now sits. */
+function unmarked(marked: string, mark: string): { out: string; braces: number[] } {
+  const parts = marked.split(mark);
+  const braces: number[] = [];
+  let out = parts[0] ?? '';
+  for (const part of parts.slice(1)) {
+    braces.push(out.length);
+    out += part;
+  }
+  return { out, braces };
+}
+
+/** The source for `runs`, its colour marker braces written as `braces` says. */
+function printWith(runs: readonly InlineRun[], braces: BracePrint): string {
   const printing: Printing = { marks: [] };
   let out = '';
   for (const run of runs) {
     if (run.kind === 'text') {
-      out += printTexts([run], printing, [], {});
+      out += printTexts([run], printing, [], {}, braces);
       continue;
     }
     const outer = MARKS.filter((mark) => run.label.every((part) => part[mark]));
     const outerPaint = sharedPaint(run.label);
     const inside: Printing = { marks: [] };
-    const label = printTexts(run.label, inside, outer, outerPaint) + closeAll(inside);
+    const label = printTexts(run.label, inside, outer, outerPaint, braces) + closeAll(inside);
     out += `${paintTo(printing, outerPaint)}${turnTo(printing.marks, outer)}[${label}](${escapeHref(run.href)})`;
   }
   return out + closeAll(printing);
