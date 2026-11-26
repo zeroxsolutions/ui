@@ -16,12 +16,9 @@ function ResizeHandleDemo(): ReactNode {
     <Card className="bg-muted/50 relative h-48 w-full py-0">
       <p className="text-muted-foreground absolute right-3 bottom-3 text-sm">Canvas</p>
       <div className="absolute inset-y-3 left-3 flex">
-        <div
-          className="bg-popover text-popover-foreground overflow-hidden rounded-l-lg border border-r-0 p-2 text-sm"
-          style={{ width: collapsed ? COLLAPSED_WIDTH : width }}
-        >
+        <Card size="sm" className="block p-2 text-sm" style={{ width: collapsed ? COLLAPSED_WIDTH : width }}>
           {collapsed ? 'Panel' : `Floating panel (${width}px)`}
-        </div>
+        </Card>
         <ResizeHandle
           aria-label="Resize panel"
           value={collapsed ? COLLAPSED_WIDTH : width}
