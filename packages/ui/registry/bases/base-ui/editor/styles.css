@@ -295,6 +295,56 @@
 }
 
 /* MARK: layout - media */
+/* A media block's frame (`BlockLayoutFrame`), in the editor and the Viewer. Its own text starts at the start
+ * edge, whatever line alignment the editor draws its block's host with, so a caption reads the same in both. */
+.document-editor [data-slot='block-layout'] {
+  text-align: start;
+}
+
+/* A block at its own width, such as an image that sets none or an aligned file's row, placed by its alignment. */
+.document-editor [data-slot='block-layout'][data-fit] {
+  width: fit-content;
+  max-width: 100%;
+}
+.document-editor [data-slot='block-layout'][data-fit][data-align='center'] {
+  margin-inline: auto;
+}
+.document-editor [data-slot='block-layout'][data-fit][data-align='end'] {
+  margin-inline-start: auto;
+}
+
+/* An image given a width fills it; at its own width it keeps its own size. */
+.document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image'] {
+  display: block;
+  width: 100%;
+}
+.document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image'] img {
+  width: 100%;
+}
+
+/* A full width block bleeds over the editable editor's gutters to its edges; a lane, whose edges are its own,
+ * and the Viewer, which draws no gutter, keep it at their width. */
+.document-editor .ProseMirror[contenteditable='true'] {
+  --layout-bleed: 3rem;
+}
+.document-editor [data-slot='column'] {
+  --layout-bleed: 0px;
+}
+.document-editor [data-slot='block-layout'][data-width='full'] {
+  margin-inline: calc(-1 * var(--layout-bleed, 0px));
+}
+
+/* The width handles show while the block is pointed at, selected, focused or dragged. */
+.document-editor [data-slot='block-layout'] > [data-slot='resize-handle'] {
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.document-editor [data-slot='block-layout']:hover > [data-slot='resize-handle'],
+.document-editor [data-slot='block-layout']:focus-within > [data-slot='resize-handle'],
+.document-editor .ProseMirror-selectednode [data-slot='block-layout'] > [data-slot='resize-handle'],
+.document-editor [data-slot='block-layout'] > [data-slot='resize-handle'][data-dragging] {
+  opacity: 1;
+}
 
 /* MARK: layout - columns */
 

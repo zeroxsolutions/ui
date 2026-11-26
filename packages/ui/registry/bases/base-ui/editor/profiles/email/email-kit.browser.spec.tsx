@@ -24,6 +24,8 @@ import { libraryBlocks } from '@zeroxsolutions/editor-core/template/email/index'
 import { emailBlockFeature } from './email-block-feature';
 import { emailKit, emailUi, type EmailKitOptions } from './email-kit';
 import { EmailLinkPopover } from './email-link-popover';
+import { mouse } from '../../../../../../test/pointer';
+import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 
 const declared: VariableDeclaration[] = [
   { name: 'name', type: 'string', label: 'Name' },
@@ -402,12 +404,95 @@ describe('the email kit', () => {
     ]);
 
     const figure = await vi.waitFor(() => find('[data-slot=image]'));
-    const line = figure.closest<HTMLElement>('[data-align]');
-    expect(line?.getAttribute('data-align')).toBe('end');
+    const frame = figure.closest<HTMLElement>('[data-slot=block-layout]') as HTMLElement;
+    expect(frame.getAttribute('data-align')).toBe('end');
     const drawn = figure.getBoundingClientRect();
-    const bounds = (line as HTMLElement).getBoundingClientRect();
+    const bounds = (frame.parentElement as HTMLElement).getBoundingClientRect();
     expect(Math.abs(drawn.right - bounds.right)).toBeLessThan(2);
     expect(drawn.left - bounds.left).toBeGreaterThan(drawn.width / 4);
+  });
+
+  it('offers an image no full width, aligns it from its toolbar, and stops a drag past 566px at the whole', async () => {
+    await page.viewport(1100, 800);
+    const editor = await mount([
+      paragraph('Before', 'p'),
+      block({
+        id: 'i',
+        key: 'i',
+        type: 'image',
+        attributes: { width: 0.5 },
+        content: { src: PIXEL, alt: 'i' },
+      }),
+    ]);
+    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
+    await userEvent.click(frame, { position: { x: 4, y: 4 } });
+    await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).toBeVisible();
+    expect(document.querySelector('[data-slot=block-toolbar] [aria-label="Full width"]')).toBeNull();
+
+    await userEvent.click(page.getByRole('button', { name: 'Align right' }));
+    await vi.waitFor(() =>
+      expect(exported(editor)[1].attributes).toEqual({
+        align: 'right',
+        width: 0.5,
+      }),
+    );
+
+    const handle = find('[data-slot=resize-handle][data-side=start]');
+    const from = {
+      x: handle.getBoundingClientRect().left + 3,
+      y: handle.getBoundingClientRect().top + 8,
+    };
+    await mouse('press', from);
+    for (let step = 1; step <= 4; step += 1) await mouse('move', { x: from.x - 150 * step, y: from.y });
+    await mouse('release', { x: from.x - 600, y: from.y });
+
+    await vi.waitFor(() =>
+      expect(exported(editor)[1].attributes).toEqual({
+        align: 'right',
+        width: 1,
+      }),
+    );
+    expect(find('[data-slot=block-layout]').getBoundingClientRect().width).toBeCloseTo(566, 0);
+    await page.viewport(414, 896);
+  });
+
+  it("names an image's layout toolbar in the host's words", async () => {
+    await mount(
+      [
+        block({
+          id: 'i',
+          key: 'i',
+          type: 'image',
+          attributes: { width: 0.5 },
+          content: { src: PIXEL, alt: 'i' },
+        }),
+      ],
+      {
+        options: {
+          messages: () => ({
+            ...DEFAULT_PROFILE_MESSAGES,
+            layout: {
+              ...DEFAULT_PROFILE_MESSAGES.layout,
+              toolbar: 'Mise en page',
+              aligns: { start: 'Gauche', center: 'Centre', end: 'Droite' },
+            },
+          }),
+        },
+      },
+    );
+    await userEvent.click(await vi.waitFor(() => find('[data-slot=block-layout]')), { position: { x: 4, y: 4 } });
+
+    await expect.element(page.getByRole('toolbar', { name: 'Mise en page' })).toBeVisible();
+    await expect.element(page.getByRole('button', { name: 'Centre' })).toBeVisible();
+  });
+
+  it('draws no layout controls on a card, whose place and width the email does not carry', async () => {
+    await mount([paragraph('Before', 'p'), block({ id: 'c', key: 'c', type: 'card', content: { heading: 'Bay' } })]);
+    const card = await vi.waitFor(() => find('[data-slot=card]'));
+    await userEvent.click(card, { position: { x: 4, y: 4 } });
+
+    expect(document.querySelector('[data-slot=block-layout]')).toBeNull();
+    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
   });
 
   it('draws a stored right-aligned button at the end of its line, and exports it as it was stored', async () => {

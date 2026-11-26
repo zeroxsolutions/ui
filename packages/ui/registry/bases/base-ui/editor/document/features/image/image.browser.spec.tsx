@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { Extension, Plugin } from '@zeroxsolutions/editor-core/document/advanced';
 import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -6,6 +6,15 @@ import { createCodecRegistry, serialize } from '@zeroxsolutions/editor-core/docu
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { findElement, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
+import {
+  drawnShare,
+  dragEndHandle,
+  layoutFrame,
+  lineWidth,
+  selectBlock,
+  storedLayout,
+  viewerFrame,
+} from '../../../../../../../test/block-layout';
 import { dropFiles, fileInput, heldUpload, pasteFiles, pngFile } from '../../../../../../../src/test/uploads';
 import { standardKit } from '../standard/index';
 import { image, type ImageOptions } from './image';
@@ -339,5 +348,85 @@ describe('the image block with uploads', () => {
 
     await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
     expect(srcOf(editor)).toBe('https://cdn.test/typed.png');
+  });
+});
+
+describe('the image block layout', () => {
+  /** A one-pixel image, drawn at whatever width the layout gives it. */
+  const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  const features = [standardKit(), image()];
+  const sized = (attrs: Record<string, unknown>): DocJSON => ({
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
+      { type: 'image', attrs: { src: PIXEL, alt: 'Bay', ...attrs } },
+    ],
+  });
+
+  afterEach(async () => {
+    await page.viewport(414, 896);
+  });
+
+  it('align from the block toolbar sets data-align and survives the Viewer', async () => {
+    await page.viewport(900, 700);
+    const editor = await mountDocumentEditor(features, sized({ width: 0.5 }));
+    await selectBlock();
+
+    await userEvent.click(page.getByRole('button', { name: 'Align center' }));
+
+    await vi.waitFor(() => expect(storedLayout(editor, 1)).toEqual({ align: 'center', width: 0.5 }));
+    const edited = layoutFrame();
+    const viewed = await viewerFrame(editor.getJSON(), features, lineWidth());
+    expect(viewed.getAttribute('data-align')).toBe('center');
+    expect(edited.getAttribute('data-align')).toBe('center');
+    expect(viewed.getAttribute('data-width')).toBe(edited.getAttribute('data-width'));
+    expect(Math.abs(drawnShare(viewed) - drawnShare(edited))).toBeLessThan(0.01);
+  });
+
+  it('dragging the right handle to half the column stores 0.5 in one undo step', async () => {
+    await page.viewport(900, 700);
+    const editor = await mountDocumentEditor(features, sized({ width: 1 }));
+    await selectBlock();
+
+    await dragEndHandle(-lineWidth() / 2);
+
+    await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe(0.5));
+    expect(drawnShare(layoutFrame())).toBeCloseTo(0.5, 2);
+    await userEvent.click(page.getByText('Trip'));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe(1));
+  });
+
+  it("Full width bleeds to the editor's edges, and takes the handles away", async () => {
+    await page.viewport(900, 700);
+    const editor = await mountDocumentEditor(features, sized({ width: 0.5 }));
+    await selectBlock();
+
+    await userEvent.click(page.getByRole('button', { name: 'Full width' }));
+
+    await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBe('full'));
+    const edges = (document.querySelector('.ProseMirror') as HTMLElement).getBoundingClientRect();
+    const drawn = layoutFrame().getBoundingClientRect();
+    expect(Math.abs(drawn.left - edges.left)).toBeLessThan(1);
+    expect(Math.abs(drawn.right - edges.right)).toBeLessThan(1);
+    expect(document.querySelector('[data-slot=resize-handle]')).toBeNull();
+  });
+
+  it('a stored width 360 draws at half, the old width field is gone, and no pixel reaches the document', async () => {
+    await page.viewport(900, 700);
+    const editor = await mountDocumentEditor(features, sized({ width: 360 }));
+
+    await vi.waitFor(() => expect(drawnShare(layoutFrame())).toBeCloseTo(0.5, 2));
+    expect(storedLayout(editor, 1).width).toBe(0.5);
+    expect(JSON.stringify(editor.getJSON())).not.toMatch(/\d+px/);
+    await openEdit();
+    await expect.element(page.getByRole('textbox', { name: 'Alt text' })).toBeVisible();
+    expect(document.querySelector('input[type=number]')).toBeNull();
+  });
+
+  it('draws a stored width 360 at half in the Viewer too', async () => {
+    const viewed = await viewerFrame(sized({ width: 360 }), features, 720);
+    expect(viewed.getAttribute('data-width')).toBe('0.5');
+    expect(drawnShare(viewed)).toBeCloseTo(0.5, 2);
   });
 });

@@ -52,19 +52,40 @@ describe('image', () => {
     expect(node?.attrs?.alt).toBe('Cat');
   });
 
-  it('round-trips a caption and a link through HTML', () => {
+  it('round-trips a caption, a link and the layout through HTML', () => {
     const doc: DocJSON = {
       type: 'doc',
       content: [
         {
           type: 'image',
-          attrs: { src: 'https://x/y.png', alt: 'Cat', title: '', width: 300, caption: 'A "cat"', href: 'https://x/c' },
+          attrs: {
+            src: 'https://x/y.png',
+            alt: 'Cat',
+            title: '',
+            caption: 'A "cat"',
+            href: 'https://x/c',
+            align: 'center',
+            width: 0.5,
+          },
         },
       ],
     };
     const html = serialize(doc, 'html', registry);
+    expect(html).toContain('data-align="center" data-width="0.5"');
     expect(html).toContain('data-caption="A &quot;cat&quot;" data-href="https://x/c"');
     expect(importHTML(html, registry).doc).toEqual(doc);
+  });
+
+  it('writes a stored pixel width as a share, and reads an exported pixel width as one', () => {
+    const stored: DocJSON = {
+      type: 'doc',
+      content: [{ type: 'image', attrs: { src: 'https://x/y.png', width: 360 } }],
+    };
+    const html = serialize(stored, 'html', registry);
+    expect(html).toContain('data-width="0.5"');
+    expect(html).not.toMatch(/\swidth="/);
+    const read = importHTML('<img src="https://x/y.png" alt="" width="180">', registry).doc.content?.[0];
+    expect(read?.attrs?.width).toBe(0.25);
   });
 
   it('draws its caption, and links it in the Viewer only to an address a reader would open', () => {
