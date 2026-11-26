@@ -1,10 +1,39 @@
-import { resolve } from 'node:path';
+import { globSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 import tailwindcss from '@tailwindcss/postcss';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { msw } from 'msw/vite';
 import { defineConfig } from 'vitest/config';
+
+/** Input or reads that reach the browser's clipboard, directly or through `test/uploads.ts`'s `pasteImage`. */
+const CLIPBOARD_USE = /userEvent\.(copy|cut|paste)\(|navigator\.clipboard|pasteImage\(/;
+
+/**
+ * The browser specs that use the clipboard, which every page of one browser shares, so a spec copying in one page
+ * would read another's paste. A run leaves a directory named after a failed spec, so only files are read.
+ */
+const CLIPBOARD_SPECS = globSync('{registry,src}/**/*.browser.spec.tsx', {
+  cwd: import.meta.dirname,
+  withFileTypes: true,
+})
+  .filter((entry) => entry.isFile())
+  .map((entry) => join(entry.parentPath, entry.name))
+  .filter((path) => CLIPBOARD_USE.test(readFileSync(path, 'utf8')))
+  .map((path) => path.slice(import.meta.dirname.length + 1));
+
+/** The browser every browser spec runs in, as a reader who asked for reduced motion, with or without the clipboard. */
+function browserOf(permissions: string[]) {
+  return {
+    enabled: true,
+    headless: true,
+    provider: playwright({ contextOptions: { reducedMotion: 'reduce' as const, permissions } }),
+    instances: [{ browser: 'chromium' as const }],
+    // Every registry part carries a `data-slot`, so `getByTestId('<slot>')` finds a part with no role, text or label.
+    locators: { testIdAttribute: 'data-slot' },
+  };
+}
 
 export default defineConfig({
   root: import.meta.dirname,
@@ -55,19 +84,19 @@ export default defineConfig({
           name: '@zeroxsolutions/ui:browser',
           setupFiles: ['test/browser-setup.ts'],
           include: ['registry/**/*.browser.spec.tsx', 'src/**/*.browser.spec.tsx'],
-          // The pages share one clipboard, so a spec copying in one would read another's paste.
+          exclude: [...CLIPBOARD_SPECS, '**/node_modules/**'],
+          browser: browserOf([]),
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: '@zeroxsolutions/ui:browser-clipboard',
+          setupFiles: ['test/browser-setup.ts'],
+          include: CLIPBOARD_SPECS,
+          // One spec at a time, as the pages share the clipboard.
           fileParallelism: false,
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({
-              contextOptions: { reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'] },
-            }),
-            instances: [{ browser: 'chromium' }],
-            // Every registry part carries a `data-slot`, so `getByTestId('<slot>')` finds a part with no role,
-            // text or label.
-            locators: { testIdAttribute: 'data-slot' },
-          },
+          browser: browserOf(['clipboard-read', 'clipboard-write']),
         },
       },
     ],
