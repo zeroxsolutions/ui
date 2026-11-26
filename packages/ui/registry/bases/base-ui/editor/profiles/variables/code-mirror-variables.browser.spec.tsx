@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { VariableDeclaration } from '@zeroxsolutions/editor-core/profiles/index';
@@ -84,8 +84,8 @@ async function typeAtEnd(text: string): Promise<void> {
   await userEvent.keyboard(text);
 }
 
-/** `@codemirror/autocomplete`'s default `interactionDelay`, with room for a frame. */
-const AUTOCOMPLETE_INTERACTION_DELAY_MS = 75 + 50;
+/** How long `@codemirror/autocomplete`'s list ignores keys after it opens, its default `interactionDelay`. */
+const AUTOCOMPLETE_INTERACTION_DELAY_MS = 75;
 
 describe('variables in a code pane', () => {
   it('lists the declarations on {{, each with its icon, and filters them by label or name', async () => {
@@ -106,10 +106,12 @@ describe('variables in a code pane', () => {
     const probe = await mount('Hi ');
     await typeAtEnd('{{{{');
     await expect.element(page.getByRole('option', { name: 'Name' })).toBeVisible();
-    // @codemirror/autocomplete takes an arrow pressed within its `interactionDelay` of the list opening as a caret
-    // move, which closes the list. Nothing on the page marks the end of that delay, so the spec waits it out, as a
-    // person reading the list does.
-    await new Promise((resolve) => setTimeout(resolve, AUTOCOMPLETE_INTERACTION_DELAY_MS));
+    // The list takes an arrow pressed within its delay of opening, by the page's clock, as a caret move that closes
+    // it; a person reading the list presses later, so the page's clock is moved on by the delay.
+    vi.useFakeTimers({ toFake: ['Date'], now: Date.now() + AUTOCOMPLETE_INTERACTION_DELAY_MS });
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
     await userEvent.keyboard('{ArrowDown}');
     await expect.element(page.getByRole('option', { name: 'Reset link', selected: true })).toBeInTheDocument();
     await userEvent.keyboard('{Enter}');
