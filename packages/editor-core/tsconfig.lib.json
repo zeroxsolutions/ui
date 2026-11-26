@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "out-tsc/lib",
     "lib": ["es2022", "dom", "dom.iterable"],
     "types": ["@nx/react/typings/cssmodule.d.ts", "@nx/react/typings/image.d.ts", "vite/client"],
     "rootDir": "src",
@@ -13,7 +13,6 @@
     },
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "ignoreDeprecations": "6.0"
   },
   "exclude": [

@@ -42,7 +42,7 @@ export default defineConfig(() => ({
     react(),
     dts({
       entryRoot: 'src',
-      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.build.json'),
     }),
     {
       // Guard the engine-hiding invariant: no emitted declaration file may

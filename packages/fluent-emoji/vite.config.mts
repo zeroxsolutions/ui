@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     react(),
     dts({
       entryRoot: 'src',
-      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.build.json'),
     }),
     {
       // Ship the emoji artwork as RAW files. Vite library mode force-inlines any

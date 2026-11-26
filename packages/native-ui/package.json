@@ -116,7 +116,9 @@
         "cache": true,
         "inputs": [
           "{projectRoot}/registry.json",
-          "{projectRoot}/styles/**/*",
+          "{projectRoot}/package.json",
+          "{workspaceRoot}/packages/shadcn-upstream/snapshot/**/*",
+          "{workspaceRoot}/packages/ui/registry/styles/*.css",
           "{projectRoot}/tools/build-registry.mts",
           "{projectRoot}/src/build/**/*",
           "{projectRoot}/src/registry/**/*",

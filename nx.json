@@ -26,6 +26,16 @@
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
+      "include": ["packages/icons/**/*"],
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      }
+    },
+    {
+      "plugin": "@nx/js/typescript",
+      "exclude": ["packages/icons/**/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"

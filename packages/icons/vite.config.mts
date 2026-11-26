@@ -44,7 +44,7 @@ export default defineConfig(() => ({
     react(),
     dts({
       entryRoot: 'src',
-      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.build.json'),
       // Declarations mirror the `src/` tree under `dist/` (e.g.
       // `dist/brand-mark.d.ts`), matching the path-keyed `.js` output.
     }),
