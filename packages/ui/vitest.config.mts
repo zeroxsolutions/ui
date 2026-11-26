@@ -39,10 +39,14 @@ export default defineConfig({
           name: '@zeroxsolutions/ui:browser',
           setupFiles: ['test/browser-setup.ts'],
           include: ['registry/**/*.browser.spec.tsx', 'src/**/*.browser.spec.tsx'],
+          // The pages share one clipboard, so a spec copying in one would read another's paste.
+          fileParallelism: false,
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'] },
+            }),
             instances: [{ browser: 'chromium' }],
             // Every registry part carries a `data-slot`, so `getByTestId('<slot>')` finds a part with no role,
             // text or label.
