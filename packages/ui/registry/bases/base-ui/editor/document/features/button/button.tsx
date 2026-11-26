@@ -117,6 +117,7 @@ function buttonView(options: ButtonOptions) {
     return (
       <ButtonShell attrs={attrs}>
         <div
+          data-slot="link-button-label"
           contentEditable={false}
           className={cn(buttonVariants({ variant: 'default' }), attrs.width === 'full' && 'w-full')}
         >
@@ -172,9 +173,11 @@ const buttonCodec: ReactNodeCodec<ButtonAttrs> = {
     return (
       <ButtonShell attrs={attrs}>
         {href === null ? (
-          <span className={look}>{labelOf(attrs)}</span>
+          <span data-slot="link-button-label" className={look}>
+            {labelOf(attrs)}
+          </span>
         ) : (
-          <a href={href} className={look}>
+          <a href={href} data-slot="link-button-label" className={look}>
             {labelOf(attrs)}
           </a>
         )}

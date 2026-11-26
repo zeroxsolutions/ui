@@ -1376,7 +1376,7 @@
           ".document-editor :where(pre)": {
             "overflow-x": "auto"
           },
-          ".document-editor .ProseMirror-selectednode:not(span, img, video, iframe, [data-slot='image'], :has([data-slot='image']))": {
+          ".document-editor .ProseMirror-selectednode:not( span, img, video, iframe, [data-slot='image'], :has([data-slot='image']), :has(> [data-node-view-wrapper] > [data-slot='link-button']) )": {
             "background-color": "color-mix(in oklab, var(--primary) 6%, transparent)",
             "outline": "1px solid color-mix(in oklab, var(--ring) 60%, transparent)"
           },
@@ -3130,6 +3130,12 @@
           "target": "@components/editor/document/features/button/block-style.ts"
         }
       ],
+      "css": {
+        ".document-editor .ProseMirror-selectednode > [data-node-view-wrapper] > [data-slot='link-button'] > [data-slot='link-button-label']": {
+          "outline": "1px solid color-mix(in oklab, var(--ring) 60%, transparent)",
+          "outline-offset": "2px"
+        }
+      },
       "dependencies": ["@zeroxsolutions/editor-core", "zod"]
     },
     {

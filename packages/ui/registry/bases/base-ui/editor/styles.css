@@ -220,6 +220,17 @@
   margin-bottom: 0;
 }
 
+/* A selected button: the grip's outline goes round the button, following its corners. Unlayered to beat the
+ * `outline-none` of the design system's button, a utility. */
+.document-editor
+  .ProseMirror-selectednode
+  > [data-node-view-wrapper]
+  > [data-slot='link-button']
+  > [data-slot='link-button-label'] {
+  outline: 1px solid color-mix(in oklab, var(--ring) 60%, transparent);
+  outline-offset: 2px;
+}
+
 /* The variable text field: one line of text and variable chips, which a block of a document may hold, so it
  * drops the document's gutter, its outline and its paragraph margin. Unlayered, as the gutter is in
  * `@layer components` and the typography plugin's margin in a later layer. */
@@ -412,9 +423,18 @@
     outline-offset: 2px;
   }
   /* A block the grip selected for its menu. An inline atom (a chip) is a span and keeps its own look; an image
-   * keeps the ring above. No radius: the block's own corners are the style's, and the root slot rounds none. */
+   * keeps the ring above. No radius: the block's own corners are the style's, and the root slot rounds none. A
+   * button's row spans the line past the button and its Link, so the outline goes round the button instead. */
   .document-editor
-    .ProseMirror-selectednode:not(span, img, video, iframe, [data-slot='image'], :has([data-slot='image'])) {
+    .ProseMirror-selectednode:not(
+      span,
+      img,
+      video,
+      iframe,
+      [data-slot='image'],
+      :has([data-slot='image']),
+      :has(> [data-node-view-wrapper] > [data-slot='link-button'])
+    ) {
     background-color: color-mix(in oklab, var(--primary) 6%, transparent);
     outline: 1px solid color-mix(in oklab, var(--ring) 60%, transparent);
   }
