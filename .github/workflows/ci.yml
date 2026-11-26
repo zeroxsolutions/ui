@@ -1,4 +1,4 @@
-# The pull-request gate. Five jobs:
+# The pull-request gate. Six jobs:
 #
 #   gate  - the shared `nx-gate` workflow: the pre-push hook's targets plus
 #           `test`, over the projects the change reaches, on a clean checkout.
@@ -7,6 +7,8 @@
 #   e2e   - gate-only. The hook's set stays inside the gate's and never the
 #           reverse, so a target that starts a runtime, or runs every spec, lands
 #           here instead.
+#   visual - gate-only, `test-visual` over the projects the change reaches: each capture compared with
+#           the committed Linux reference, and on a failure the diffs uploaded as an artefact.
 #   format - the whole tree through the formatter, which no nx target runs.
 #   dependabot - the Dependabot config's ignore list checked against what `nx migrate` manages.
 #
@@ -17,8 +19,8 @@
 # repository is public, so a pull request from a fork runs its own code on the runner, and a
 # self-hosted one keeps its disk and grants the runner user passwordless sudo.
 #
-# No project and no path is named, and the branch list carries both default-branch
-# spellings, so the file copies to another repository unchanged.
+# No project is named, the one path is the workspace's own `test-output/visual`, and the branch
+# list carries both default-branch spellings, so the file copies to another repository unchanged.
 name: ci
 
 on:
@@ -78,6 +80,39 @@ jobs:
       # Each zone has its own e2e project, each in three browsers; a change reaching both ran
       # 14 minutes for the native zone alone and passed 30 (2026-11-03).
       timeout-minutes: 60
+
+  # Its own job rather than `nx-gate`, which admits no step after its targets to upload the diffs from.
+  # The references are this runner image's Linux captures, so the job stays on the image that made them;
+  # `packages/ui/README.md` says how they are made.
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: zeroxsolutions/github-actions/nx-setup@v1
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # `nx-gate`'s own range resolution, which a push that creates a branch or an unreachable base needs.
+      - name: Compare every capture with its reference
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          case "$BASE" in ''|0000000000000000000000000000000000000000) BASE='' ;; esac
+          if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            NX_BASE="$BASE" NX_HEAD='${{ github.sha }}' pnpm nx affected -t test-visual
+          else
+            pnpm nx run-many -t test-visual
+          fi
+
+      - name: Upload the diffs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-diffs
+          path: test-output/visual/
+          if-no-files-found: ignore
 
   dependabot:
     runs-on: ubuntu-latest
