@@ -15,6 +15,7 @@ import { CheckIcon } from '../../icons/lucide/check-icon';
 import { TrashIcon } from '../../icons/lucide/trash-icon';
 import { iconTrigger, usePlayOnReach, type IconHandle } from '../../lib/icon-motion';
 import { avatarPickerCheckColor } from '../../lib/avatar-picker-check-color';
+import { useFocusVisible } from '../../lib/focus-visible';
 import { textOf } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
 import { Avatar, AvatarImage, type AvatarProps } from '../../ui/avatar';
@@ -429,6 +430,7 @@ interface AvatarPickerColorSwatchProps {
  */
 function AvatarPickerColorSwatch({ color, selected, onPress }: AvatarPickerColorSwatchProps): ReactNode {
   const check = useRef<IconHandle>(null);
+  const focus = useFocusVisible();
   usePlayOnReach(check, selected);
   return (
     <Pressable
@@ -436,8 +438,13 @@ function AvatarPickerColorSwatch({ color, selected, onPress }: AvatarPickerColor
       aria-label={color}
       aria-selected={selected}
       onPress={onPress}
+      onFocus={focus.onFocus}
+      onBlur={focus.onBlur}
       style={{ backgroundColor: color }}
-      className="size-8 items-center justify-center rounded-full"
+      className={cn(
+        'size-8 items-center justify-center rounded-full',
+        focus.focusVisible && 'cn-avatar-picker-color-focus-ring@focused',
+      )}
     >
       {selected && <Icon as={CheckIcon} ref={check} color={avatarPickerCheckColor(color)} className="size-4" />}
     </Pressable>

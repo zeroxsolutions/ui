@@ -31,6 +31,8 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
   ['editor-media', EDITOR],
   ['editor-table-of-contents', EDITOR],
   ['block-library', EDITOR],
+  ['block-presets', EDITOR],
+  ['editor-uploads', EDITOR],
   ['editor-features', EDITOR],
   ['math-editor', EDITOR],
   ['mermaid-editor', EDITOR],
@@ -42,9 +44,6 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
 
 /** The web items a later wave of the port brings, which the list loses as each wave lands. */
 const PENDING: ReadonlySet<string> = new Set([]);
-
-const FOCUS_RING =
-  "a ring the web draws at :focus-visible; a phone draws keyboard focus from the item's own focused state";
 
 /** Per ported item, the zui slots its web twin writes that a phone does not draw, each with its reason. */
 const UNDRAWN_SLOTS: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
@@ -64,17 +63,6 @@ const UNDRAWN_SLOTS: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map(
         'cn-number-field',
         "redraws InputGroup's focus ring for the web's own input slot; native InputGroup rings itself from its focused state",
       ],
-    ]),
-  ],
-  ['ai-provider-card', new Map([['cn-ai-provider-card-trigger-focus-ring', FOCUS_RING]])],
-  ['tree-item', new Map([['cn-tree-item-focus-ring', FOCUS_RING]])],
-  ['avatar-picker', new Map([['cn-avatar-picker-color-focus-ring', FOCUS_RING]])],
-  ['file-tree', new Map([['cn-file-tree-item-focus-ring', FOCUS_RING]])],
-  [
-    'tab-bar',
-    new Map([
-      ['cn-tab-bar-item-focus-ring', FOCUS_RING],
-      ['cn-tab-bar-indicator-focus-ring', FOCUS_RING],
     ]),
   ],
 ]);
