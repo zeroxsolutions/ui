@@ -84,9 +84,16 @@ jobs:
   # Its own job rather than `nx-gate`, which admits no step after its targets to upload the diffs from.
   # The references are this runner image's Linux captures, so the job stays on the image that made them;
   # `packages/ui/README.md` says how they are made.
+  #
+  # Four runners each take a quarter of every project's spec files, as Vitest's `--shard` splits them, so the
+  # matrix of styles, themes and widths finishes in the time of a quarter of it.
   visual:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: zeroxsolutions/github-actions/nx-setup@v1
 
@@ -101,16 +108,16 @@ jobs:
         run: |
           case "$BASE" in ''|0000000000000000000000000000000000000000) BASE='' ;; esac
           if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
-            NX_BASE="$BASE" NX_HEAD='${{ github.sha }}' pnpm nx affected -t test-visual
+            NX_BASE="$BASE" NX_HEAD='${{ github.sha }}' pnpm nx affected -t test-visual -- --shard=${{ matrix.shard }}/4
           else
-            pnpm nx run-many -t test-visual
+            pnpm nx run-many -t test-visual -- --shard=${{ matrix.shard }}/4
           fi
 
       - name: Upload the diffs
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: visual-diffs
+          name: visual-diffs-${{ matrix.shard }}
           path: test-output/visual/
           if-no-files-found: ignore
 
