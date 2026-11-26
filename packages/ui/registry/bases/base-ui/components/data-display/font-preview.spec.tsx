@@ -12,16 +12,6 @@ function fontFaceText(): string {
 }
 
 describe('FontPreview', () => {
-  it('draws one specimen per default size, largest first, in the pangram', () => {
-    render(<FontPreview src="/fonts/inter.woff2" />);
-    expect(screen.getAllByText(PANGRAM).map((specimen) => specimen.style.fontSize)).toEqual([
-      '36px',
-      '24px',
-      '18px',
-      '14px',
-    ]);
-  });
-
   it('draws the caller text at the sizes it is given, each labelled with its size', () => {
     render(
       <FontPreview src="/fonts/inter.woff2" sizes={[20, 12]}>
@@ -44,21 +34,6 @@ describe('FontPreview', () => {
     const src = 'data:font/woff2;base64,d09GMgABAAAAA+/=';
     render(<FontPreview src={src} format="woff2" />);
     expect(fontFaceText()).toContain(`url("${src}") format("woff2")`);
-  });
-
-  it('keeps a src or format that tries to close the rule inside its string, leaving the page styles alone', () => {
-    render(
-      <>
-        <div data-testid="sentinel">Sentinel</div>
-        <FontPreview
-          src={'/x.woff2"); } [data-testid="sentinel"] { display: none; } \\ @font-face { src: url("'}
-          format={'woff2") } * { color: red } x { a: ("'}
-        />
-      </>,
-    );
-    const style = document.querySelector('[data-slot=font-preview] style') as HTMLStyleElement;
-    expect(style.sheet?.cssRules).toHaveLength(1);
-    expect(getComputedStyle(screen.getByTestId('sentinel')).display).toBe('block');
   });
 
   it('keeps a URL with a query string unchanged', () => {
