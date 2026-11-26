@@ -1,4 +1,5 @@
-import { describe, it } from 'vitest';
+import type { ReactNode } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-react';
 
@@ -8,6 +9,7 @@ import {
   ReasoningCollapsibleContent,
   ReasoningCollapsibleTrigger,
 } from './reasoning-collapsible';
+import { useReasoningCollapsible } from '../../hooks/use-reasoning-collapsible';
 
 function Reasoning() {
   return (
@@ -17,6 +19,63 @@ function Reasoning() {
     </ReasoningCollapsible>
   );
 }
+
+function Label(): ReactNode {
+  const { streaming, duration } = useReasoningCollapsible();
+  return streaming ? 'Thinking' : `Thought for ${duration ?? '?'}s`;
+}
+
+function Streamed({ streaming, defaultOpen }: { streaming?: boolean; defaultOpen?: boolean }): ReactNode {
+  return (
+    <ReasoningCollapsible streaming={streaming} defaultOpen={defaultOpen}>
+      <ReasoningCollapsibleTrigger>
+        <Label />
+      </ReasoningCollapsibleTrigger>
+      <ReasoningCollapsibleContent>
+        <strong>bold</strong> thought
+      </ReasoningCollapsibleContent>
+    </ReasoningCollapsible>
+  );
+}
+
+describe('ReasoningCollapsible', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('renders the node it is given as content while open', async () => {
+    await render(<Streamed defaultOpen />);
+
+    await expect.element(page.getByText('bold')).toBeVisible();
+  });
+
+  it('renders the consumer label inside the trigger', async () => {
+    await render(<Streamed streaming />);
+
+    await expect.element(page.getByRole('button')).toHaveTextContent('Thinking');
+  });
+
+  it('opens while streaming, reports the elapsed seconds and closes after the stream ends', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    vi.setSystemTime(0);
+    const { rerender } = await render(<Streamed streaming />);
+    await expect.element(page.getByText('bold')).toBeVisible();
+
+    vi.setSystemTime(2500);
+    await rerender(<Streamed streaming={false} />);
+    await expect.element(page.getByRole('button')).toHaveTextContent('Thought for 3s');
+
+    await vi.advanceTimersByTimeAsync(1000);
+    await expect.element(page.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('throws when the hook is used outside <ReasoningCollapsible>', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(render(<Label />)).rejects.toThrow(/must be used within <ReasoningCollapsible>/);
+  });
+});
 
 // The browser project runs as a viewer who asked for reduced motion.
 describe('ReasoningCollapsibleTrigger under reduced motion', () => {
