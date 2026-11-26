@@ -162,6 +162,21 @@ describe('the columns in the Document Editor', () => {
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([1, 1]));
   });
 
+  it('drags a divider the pointer reached over the lane after it, where that lane opens on a heading', async () => {
+    await page.viewport(1000, 700);
+    const content = columnsDoc({ ratio: [1, 1] }, 'left', 'right');
+    const [, second] = content.content![1].content!;
+    second.content = [{ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Right' }] }];
+    const editor = await mount(content);
+
+    // The block grip shows beside the block a pointer is over, here the heading just past the divider.
+    const from = centreOf(dividers()[0]);
+    await mouse('move', { x: from.x + 4, y: from.y });
+    await mouse('move', from);
+    await dragDivider(across(0.64));
+    await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([8, 4]));
+  });
+
   it('the divider is a slider named from words and moves by keyboard to the next snap', async () => {
     await page.viewport(1000, 700);
     const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));

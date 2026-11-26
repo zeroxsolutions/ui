@@ -290,6 +290,19 @@ export function Editor({
     return () => rootEl.removeEventListener('mouseout', keepHandle, true);
   }, [rootEl]);
 
+  // The extension places the grip beside the block 50px past the pointer, so over a block's own handle (a
+  // columns divider, a resize handle, a table border) it shows the grip of the block beyond, which can sit on
+  // that handle and take its press. Its listener is on the editor's content, inside the root, so this one runs
+  // after it on each move and hides the grip again.
+  useEffect(() => {
+    if (!rootEl || !handleEl) return;
+    const overHandle = (event: MouseEvent) => {
+      if ((event.target as Element | null)?.closest?.('.cn-editor-handle')) handleEl.classList.add('hide');
+    };
+    rootEl.addEventListener('mousemove', overHandle);
+    return () => rootEl.removeEventListener('mousemove', overHandle);
+  }, [rootEl, handleEl]);
+
   // Grayout-while-dragging: the block drag handle is a *sibling* of the editor
   // DOM (the extension appends it next to `.ProseMirror`), so a handle-initiated
   // drag's native `dragstart` never bubbles through `.ProseMirror` and the
