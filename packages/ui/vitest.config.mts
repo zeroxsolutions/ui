@@ -7,20 +7,24 @@ import { playwright } from '@vitest/browser-playwright';
 import { msw } from 'msw/vite';
 import { defineConfig } from 'vitest/config';
 
-/** Input or reads that reach the browser's clipboard, directly or through `test/uploads.ts`'s `pasteImage`. */
-const CLIPBOARD_USE = /userEvent\.(copy|cut|paste)\(|navigator\.clipboard|pasteImage\(/;
+/**
+ * Input or reads that reach the browser's clipboard, directly or through `test/uploads.ts`'s `pasteImage`, and the
+ * motion a spec lets play, through `test/motion.ts`'s `playMotion` or the media it emulates itself.
+ */
+const SERIAL_USE = /userEvent\.(copy|cut|paste)\(|navigator\.clipboard|pasteImage\(|playMotion\(|setEmulatedMedia/;
 
 /**
- * The browser specs that use the clipboard, which every page of one browser shares, so a spec copying in one page
- * would read another's paste. A run leaves a directory named after a failed spec, so only files are read.
+ * The browser specs that run one at a time: every page of one browser shares the clipboard, so a spec copying in one
+ * page would read another's paste, and a spec watching motion frame by frame draws no frame while another page has
+ * the browser's front. A run leaves a directory named after a failed spec, so only files are read.
  */
-const CLIPBOARD_SPECS = globSync('{registry,src}/**/*.browser.spec.tsx', {
+const SERIAL_SPECS = globSync('{registry,src}/**/*.browser.spec.tsx', {
   cwd: import.meta.dirname,
   withFileTypes: true,
 })
   .filter((entry) => entry.isFile())
   .map((entry) => join(entry.parentPath, entry.name))
-  .filter((path) => CLIPBOARD_USE.test(readFileSync(path, 'utf8')))
+  .filter((path) => SERIAL_USE.test(readFileSync(path, 'utf8')))
   .map((path) => path.slice(import.meta.dirname.length + 1));
 
 /** The browser every browser spec runs in, as a reader who asked for reduced motion, with or without the clipboard. */
@@ -84,17 +88,16 @@ export default defineConfig({
           name: '@zeroxsolutions/ui:browser',
           setupFiles: ['test/browser-setup.ts'],
           include: ['registry/**/*.browser.spec.tsx', 'src/**/*.browser.spec.tsx'],
-          exclude: [...CLIPBOARD_SPECS, '**/node_modules/**'],
+          exclude: [...SERIAL_SPECS, '**/node_modules/**'],
           browser: browserOf([]),
         },
       },
       {
         extends: true,
         test: {
-          name: '@zeroxsolutions/ui:browser-clipboard',
+          name: '@zeroxsolutions/ui:browser-serial',
           setupFiles: ['test/browser-setup.ts'],
-          include: CLIPBOARD_SPECS,
-          // One spec at a time, as the pages share the clipboard.
+          include: SERIAL_SPECS,
           fileParallelism: false,
           browser: browserOf(['clipboard-read', 'clipboard-write']),
         },
