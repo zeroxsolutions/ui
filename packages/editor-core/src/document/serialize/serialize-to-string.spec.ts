@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
+import { defineFeature } from '../core/define-feature.js';
+import type { SerializeContext } from '../core/index.js';
 import type { EditorFeature } from '../core/types/feature.js';
 import type { DocJSON, MarkJSON, NodeJSON } from '../core/types/json.js';
 import { createCodecRegistry } from './create-codec-registry.js';
 import { importMarkdown } from './import-markdown.js';
 import { serialize } from './serialize-to-string.js';
+import { validateDoc, type ImportReport } from './validate-doc.js';
 
 /** Bold, inline code, a link that reads back any address, and a hard break, as a document's features write them. */
 const marks: EditorFeature = {
@@ -198,5 +202,86 @@ describe('serialize', () => {
         text('https://y.test', { type: 'link', attrs: { href: 'https://y.test' } }),
       ),
     );
+  });
+});
+
+describe('the codec walkers over the features a registry holds', () => {
+  const strong = defineFeature({
+    id: 'strong',
+    marks: [{ name: 'bold', htmlTag: 'strong' }],
+    markCodecs: [
+      {
+        mark: 'bold',
+        toMarkdown: () => ({ open: '**', close: '**' }),
+        toHTML: () => ({ open: '<strong>', close: '</strong>' }),
+        fromMarkdown: (token) => (token.type === 'strong' ? { type: 'bold' } : null),
+      },
+    ],
+  });
+  // A block whose Markdown is a fenced `diagram` code block, as a custom block's is.
+  const diagram = defineFeature({
+    id: 'diagram',
+    nodes: [{ name: 'diagram', group: 'block', atom: true, attrs: z.object({ source: z.string() }) }],
+    codecs: [
+      {
+        node: 'diagram',
+        toMarkdown: (node) => '```diagram\n' + String(node.attrs?.source ?? '') + '\n```',
+        toHTML: (node) => `<pre data-diagram>${String(node.attrs?.source ?? '')}</pre>`,
+        fromMarkdown: (token) =>
+          token.type === 'code' && token.lang === 'diagram'
+            ? { type: 'diagram', attrs: { source: token.value ?? '' } }
+            : null,
+      },
+    ],
+  });
+  const featured = createCodecRegistry([strong, diagram]);
+  const paragraph = (...content: NodeJSON[]): NodeJSON => ({ type: 'paragraph', content });
+  const sample: DocJSON = {
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [text('hello '), text('world', { type: 'bold' })] },
+      { type: 'diagram', attrs: { source: 'A-->B' } },
+    ],
+  };
+
+  it("writes each node and mark through its feature's codec, in Markdown and in HTML", () => {
+    expect(serialize(sample, 'markdown', featured)).toBe('hello **world**\n\n```diagram\nA-->B\n```');
+    expect(serialize(sample, 'html', featured)).toBe(
+      '<p>hello <strong>world</strong></p><pre data-diagram>A-->B</pre>',
+    );
+  });
+
+  it('writes the text of a node no codec reads, rather than throwing', () => {
+    const doc: DocJSON = { type: 'doc', content: [{ type: 'unknownWrapper', content: [paragraph(text('x'))] }] };
+    expect(serialize(doc, 'markdown', createCodecRegistry([]))).toContain('x');
+  });
+
+  it("reads a custom block back from its Markdown through its codec's token", () => {
+    const [line, block] = importMarkdown('hello **world**\n\n```diagram\nA-->B\n```', featured).doc.content ?? [];
+    expect(line?.content?.[1]?.marks).toEqual([{ type: 'bold' }]);
+    expect(block).toEqual({ type: 'diagram', attrs: { source: 'A-->B' } });
+  });
+
+  it('reports what an import could not read instead of dropping it unseen', () => {
+    const result = importMarkdown('| a | b |\n| - | - |\n| 1 | 2 |', featured);
+    expect(result.dropped.map(({ source }) => source)).toContain('table');
+    expect(result.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('drops a node whose attributes its schema refuses, and reports it', () => {
+    const report: ImportReport = { warnings: [], dropped: [] };
+    const doc = validateDoc({ type: 'doc', content: [{ type: 'diagram', attrs: { source: 123 } }] }, featured, report);
+    expect(doc.content).toEqual([]);
+    expect(report.dropped.map(({ source }) => source)).toEqual(['diagram']);
+  });
+
+  it('writes a format registered after the registry was built', () => {
+    const custom = createCodecRegistry([]);
+    custom.registerNodeSerializer(
+      'bbcode',
+      'paragraph',
+      (node, context) => `[p]${(context as SerializeContext).serializeChildren(node)}[/p]`,
+    );
+    expect(serialize({ type: 'doc', content: [paragraph(text('hi'))] }, 'bbcode', custom)).toBe('[p]hi[/p]');
   });
 });
