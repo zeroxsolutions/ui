@@ -3533,6 +3533,124 @@
       ]
     },
     {
+      "name": "editor-section",
+      "type": "registry:component",
+      "title": "Editor Section",
+      "description": "Blocks set together on a background from the theme, inside a padding, at the content's width, wider or the editor's full width.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/toggle-group",
+        "@shadcn/tooltip",
+        "@zui/document-editor",
+        "@zui/editor-layout",
+        "@zui/lucide-layout-panel-top-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/features/section/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/section/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/section/section.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/section/section.tsx"
+        }
+      ],
+      "css": {
+        ".document-editor [data-slot='section']": {
+          "padding": "1rem"
+        },
+        ".document-editor [data-slot='section'][data-padding='none']": {
+          "padding": "0"
+        },
+        ".document-editor [data-slot='section'][data-padding='small']": {
+          "padding": "0.5rem"
+        },
+        ".document-editor [data-slot='section'][data-padding='large']": {
+          "padding": "1.5rem"
+        },
+        ".document-editor .ProseMirror[contenteditable='true']": {
+          "--section-bleed": "3rem"
+        },
+        ".document-editor [data-slot='section'][data-width='wide']": {
+          "margin-inline": "calc(var(--section-bleed, 0px) / -2)"
+        },
+        ".document-editor [data-slot='section'][data-width='full']": {
+          "margin-inline": "calc(var(--section-bleed, 0px) * -1)"
+        },
+        ".document-editor .ProseMirror[contenteditable='true'] [data-slot='section']:is(:not([data-background]), [data-background='none'])": {
+          "outline": "1px dashed var(--border)"
+        },
+        ".document-editor [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > :first-child, .document-editor [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='email-block-row']:first-child + *": {
+          "margin-top": "0"
+        },
+        ".document-editor :where( [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
+          "margin-bottom": "0"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='muted']": {
+          "background-color": "var(--muted)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='primary']": {
+          "background-color": "color-mix(in oklab, var(--primary) 15%, var(--background))"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='accent']": {
+          "background-color": "var(--accent)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='red']": {
+          "background-color": "var(--hue-red-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='orange']": {
+          "background-color": "var(--hue-orange-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='amber']": {
+          "background-color": "var(--hue-amber-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='green']": {
+          "background-color": "var(--hue-green-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='teal']": {
+          "background-color": "var(--hue-teal-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='blue']": {
+          "background-color": "var(--hue-blue-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='violet']": {
+          "background-color": "var(--hue-violet-surface)"
+        },
+        ":is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='pink']": {
+          "background-color": "var(--hue-pink-surface)"
+        },
+        "[data-slot='section-swatch']": {
+          "display": "block",
+          "width": "1rem",
+          "height": "1rem",
+          "border-radius": "9999px",
+          "box-shadow": "inset 0 0 0 1px var(--border)"
+        },
+        "[data-slot='section-swatch'][data-background='none']": {
+          "background-image": "linear-gradient( to top right, transparent calc(50% - 0.5px), var(--muted-foreground) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px) )"
+        }
+      },
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-section-demo",
+      "type": "registry:example",
+      "title": "Editor Section Demo",
+      "description": "A document holding a section on a tinted background, with columns inside it.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-columns", "@zui/editor-section"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-section-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-section-demo.tsx"
+        }
+      ]
+    },
+    {
       "name": "editor-file",
       "type": "registry:component",
       "title": "Editor File",
