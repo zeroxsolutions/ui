@@ -37,13 +37,13 @@ git ignores: locally the suite says what changed since your own last run.
 To change a reference on purpose:
 
 1. Push. CI's `visual` job fails on each capture that changed, and on each new one, and uploads the
-   `visual-diffs` artefact: per capture its `-reference-`, `-actual-` and `-diff-` images, or for a new one only
+   `visual-diffs-<shard>` artefacts: per capture its `-reference-`, `-actual-` and `-diff-` images, or for a new one only
    what CI captured.
 2. Review every `-diff-` image, and every new capture, as the change's evidence.
 3. Take CI's captures as the references, and commit the files it lists:
 
    ```bash
-   gh run download <run id> -n visual-diffs -D /tmp/visual-diffs
+   gh run download <run id> -p 'visual-diffs-*' -D /tmp/visual-diffs
    pnpm nx adopt-visual @zeroxsolutions/ui -- /tmp/visual-diffs
    ```
 

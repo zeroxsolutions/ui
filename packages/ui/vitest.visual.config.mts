@@ -65,6 +65,9 @@ export default defineConfig({
     // A case opens an editor, acts on it and waits for a stable capture while fifteen other browsers do the same,
     // which outlasts the 15s default on a loaded runner.
     testTimeout: 60_000,
+    // Four browsers at a time, whatever the core count: sixteen started together starve each other on a shared
+    // machine, and the last ones miss their connection deadline.
+    maxWorkers: 4,
     include: ['registry/**/*.visual.spec.tsx', 'src/**/*.visual.spec.tsx'],
     // A failed comparison writes the reference, the capture and their diff under the workspace's
     // `test-output/visual`, the one directory CI uploads for every project's visual suite.

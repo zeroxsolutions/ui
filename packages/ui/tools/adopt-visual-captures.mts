@@ -1,6 +1,6 @@
 /**
- * Takes CI's captures as the visual suite's references. Given the `visual-diffs` artefact a failed `visual` job
- * uploaded, unpacked into a directory, it copies each capture over the reference it was compared with: a
+ * Takes CI's captures as the visual suite's references. Given the `visual-diffs-<shard>` artefacts a failed
+ * `visual` job uploaded, unpacked into one directory, it copies each capture over the reference it was compared with: a
  * mismatch's `-actual-` file, and a missing reference's `-reference-` file, which is what CI captured where it
  * found none. The diff images are left where they are. Prints each reference it wrote, so the commit holding
  * them can be checked against the diffs that were reviewed.
@@ -12,12 +12,14 @@ import { dirname, join, relative, resolve } from 'node:path';
 
 const APP = resolve(import.meta.dirname, '..');
 const BASELINES = join(APP, 'visual-baselines');
-// The artefact holds `<project>/<spec directory>/<spec file>/<capture>-<kind>-<browser>-<platform>.png`.
+// Each artefact holds `<project>/<spec directory>/<spec file>/<capture>-<kind>-<browser>-<platform>.png`, under a
+// directory named after the artefact.
 const CAPTURE =
-  /^ui\/(?<directory>.+)\/(?<file>[^/]+)\.tsx\/(?<arg>.+)-(?<kind>actual|reference)-(?<suffix>[^-]+-[^-]+\.png)$/;
+  /(?:^|\/)ui\/(?<directory>.+)\/(?<file>[^/]+)\.tsx\/(?<arg>.+)-(?<kind>actual|reference)-(?<suffix>[^-]+-[^-]+\.png)$/;
 
 const [artefact] = process.argv.slice(2);
-if (artefact === undefined) throw new Error('usage: adopt-visual-captures <unpacked visual-diffs artefact>');
+if (artefact === undefined)
+  throw new Error('usage: adopt-visual-captures <directory of unpacked visual-diffs artefacts>');
 
 const root = resolve(artefact);
 let adopted = 0;

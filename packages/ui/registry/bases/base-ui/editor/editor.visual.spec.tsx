@@ -54,7 +54,7 @@ describeVisual('the editors, acted on', [
     arrange: async () => {
       await userEvent.click(page.getByText('An Bang beach in the morning', { exact: true }));
       await userEvent.keyboard('{End}{Enter}{Enter}/');
-      await expect.element(page.getByRole('listbox').first()).toBeVisible();
+      await expect.element(page.getByText('Heading 1', { exact: true })).toBeVisible();
       return undefined;
     },
   },
@@ -64,7 +64,10 @@ describeVisual('the editors, acted on', [
     render: () => <DocumentEditorDemo />,
     arrange: async () => {
       await userEvent.hover(page.getByText(LEAD, { exact: true }));
-      await userEvent.click(page.getByTestId('grip-vertical-icon'));
+      // The grip is the drag extension's own element, which carries no role, name or test id to find it by.
+      const grip = document.querySelector<HTMLElement>('.drag-handle');
+      if (grip === null) throw new Error('the editor drew no grip');
+      await userEvent.click(page.elementLocator(grip));
       await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
       return undefined;
     },

@@ -80,6 +80,7 @@ import {
 } from './dropdown-menu';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './empty';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from './field';
+import { Highlighter } from './highlighter';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from './input-group';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from './input-otp';
@@ -97,7 +98,13 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from './menubar';
-import { MessageScroller, MessageScrollerContent, MessageScrollerItem, MessageScrollerViewport } from './message-scroller';
+import {
+  MessageScroller,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from './message-scroller';
 import { Message, MessageAvatar, MessageContent, MessageGroup, MessageHeader } from './message';
 import { NativeSelect, NativeSelectOption } from './native-select';
 import {
@@ -161,8 +168,14 @@ async function open(role: 'button' | 'combobox', name: string): Promise<undefine
 }
 
 /** Waits for the popup of `role` to be on the page, so the capture holds it. */
-async function shown(role: 'dialog' | 'alertdialog' | 'menu' | 'listbox' | 'tooltip'): Promise<undefined> {
+async function shown(role: 'dialog' | 'alertdialog' | 'menu'): Promise<undefined> {
   await expect.element(page.getByRole(role).first()).toBeVisible();
+  return undefined;
+}
+
+/** Waits for `text` to be on the page, for a popup whose role its primitive does not set. */
+async function showing(text: string): Promise<undefined> {
+  await expect.element(page.getByText(text, { exact: true })).toBeVisible();
   return undefined;
 }
 
@@ -446,7 +459,7 @@ const SUBJECTS = {
         </ComboboxContent>
       </Combobox>
     ),
-    arrange: () => open('combobox', 'Fruit').then(() => shown('listbox')),
+    arrange: () => open('combobox', 'Fruit').then(() => showing('Banana')),
   },
   command: {
     render: () => (
@@ -582,6 +595,17 @@ const SUBJECTS = {
       </FieldSet>
     ),
   },
+  highlighter: {
+    render: () => (
+      <p className="max-w-md">
+        The <Highlighter>build is green</Highlighter> and it{' '}
+        <Highlighter action="underline" color="#2563eb">
+          shipped
+        </Highlighter>
+        .
+      </p>
+    ),
+  },
   'hover-card': {
     window: true,
     render: () => (
@@ -714,15 +738,17 @@ const SUBJECTS = {
   },
   'message-scroller': {
     render: () => (
-      <MessageScroller className="h-48 max-w-md rounded-lg border">
-        <MessageScrollerViewport>
-          <MessageScrollerContent>
-            {['Morning', 'The build is green', 'Shipping now'].map((text) => (
-              <MessageScrollerItem key={text}>{text}</MessageScrollerItem>
-            ))}
-          </MessageScrollerContent>
-        </MessageScrollerViewport>
-      </MessageScroller>
+      <MessageScrollerProvider>
+        <MessageScroller className="h-48 max-w-md rounded-lg border">
+          <MessageScrollerViewport>
+            <MessageScrollerContent>
+              {['Morning', 'The build is green', 'Shipping now'].map((text) => (
+                <MessageScrollerItem key={text}>{text}</MessageScrollerItem>
+              ))}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+        </MessageScroller>
+      </MessageScrollerProvider>
     ),
   },
   message: {
@@ -887,7 +913,7 @@ const SUBJECTS = {
         </SelectContent>
       </Select>
     ),
-    arrange: () => open('combobox', 'Fruit').then(() => shown('listbox')),
+    arrange: () => open('combobox', 'Fruit').then(() => showing('Cherry')),
   },
   separator: {
     render: () => (
@@ -1061,7 +1087,7 @@ const SUBJECTS = {
     ),
     arrange: async () => {
       await userEvent.hover(page.getByRole('button', { name: 'Hover' }));
-      return shown('tooltip');
+      return showing('Add to library');
     },
   },
 } satisfies Record<string, Omit<VisualSubject, 'name'>>;
@@ -1069,7 +1095,6 @@ const SUBJECTS = {
 /** The primitives with no capture of their own, each with what it draws instead. */
 const UNDRAWN: Record<string, string> = {
   direction: 'a provider with no surface; the items under it are captured',
-  highlighter: 'its strokes are drawn at random on each mount, so no two captures match',
 };
 
 describeVisual(

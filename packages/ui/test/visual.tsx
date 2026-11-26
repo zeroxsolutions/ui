@@ -33,21 +33,43 @@ export interface VisualSubject {
    * the element to capture, else the stage is captured.
    */
   arrange?(stage: HTMLElement): Promise<HTMLElement | undefined | void>;
-  /** Captures the whole window rather than the stage, for a surface whose popups portal out of it. */
+  /**
+   * Draws the stage at the window's size, for a surface whose popups portal out of it: a capture is a clip of the
+   * page, so the popups over the stage are in it.
+   */
   window?: boolean;
 }
 
 /** Resolves once every image on the page has loaded, every font it uses is in, and a frame has painted. */
 async function settled(): Promise<void> {
-  await vi.waitFor(() => {
-    const loading = [...document.images].filter((image) => !image.complete);
-    if (loading.length > 0) throw new Error(`${loading.length} images still loading`);
-  });
+  await vi.waitFor(
+    () => {
+      const loading = [...document.images].filter((image) => !image.complete);
+      if (loading.length > 0) throw new Error(`${loading.length} images still loading`);
+    },
+    // An emoji picker loads a picture per emoji, which outlasts the one-second default.
+    { timeout: 30_000 },
+  );
   await document.fonts.ready;
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
+/**
+ * Makes `Math.random` answer one fixed sequence from here on (mulberry32), so a part placed at random, such as
+ * the animated grid's lit cells or the highlighter's strokes, lands in the same place on every run.
+ */
+function seedRandom(): void {
+  let state = 0x9e3779b9;
+  Math.random = () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 async function capture(subject: VisualSubject, width: number): Promise<void> {
+  seedRandom();
   const style = inject('visualStyle');
   const theme = inject('visualTheme');
   await page.viewport(width, VISUAL_VIEWPORT.height);
@@ -61,7 +83,8 @@ async function capture(subject: VisualSubject, width: number): Promise<void> {
     <div
       data-visual-stage=""
       className="bg-background text-foreground p-6"
-      style={subject.window ? { minHeight: VISUAL_VIEWPORT.height } : undefined}
+      // The window's height exactly: a taller page would scroll under the capture and move the popups with it.
+      style={subject.window ? { height: VISUAL_VIEWPORT.height, overflow: 'hidden' } : undefined}
     >
       {subject.render()}
     </div>,
@@ -69,7 +92,7 @@ async function capture(subject: VisualSubject, width: number): Promise<void> {
   const stage = screen.container.querySelector<HTMLElement>('[data-visual-stage]');
   if (stage === null) throw new Error('the stage did not render');
   await settled();
-  const target = (await subject.arrange?.(stage)) ?? (subject.window ? document.documentElement : stage);
+  const target = (await subject.arrange?.(stage)) ?? stage;
   await settled();
 
   await expect.element(target).toMatchScreenshot(`${subject.name}-${style}-${theme}-${width}`);
