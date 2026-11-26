@@ -2,6 +2,27 @@ import { render, screen } from '@testing-library/react-native';
 import type * as FluentEmojiPackage from '@zeroxsolutions/fluent-emoji';
 import { FLUENT_EMOJI_BASE, FluentEmoji, fluentEmojiUrl, type FluentEmojiStyle } from './fluent-emoji';
 
+/** The URLs the fake CDN answers with an error, as a missing or blocked file would. */
+const mockUnreachable = new Set<string>();
+
+/**
+ * expo-image's Image over a fake network: for a URL in {@link mockUnreachable} it reports an error once its request
+ * settles, a turn after it mounts, as a failed request does.
+ */
+jest.mock('expo-image', () => {
+  const React: typeof import('react') = jest.requireActual('react');
+  const ReactNative: typeof import('react-native') = jest.requireActual('react-native');
+  function Image({ source, onError }: { source: string; onError?: () => void }) {
+    React.useEffect(() => {
+      if (mockUnreachable.has(source)) void Promise.resolve().then(() => onError?.());
+    }, [source]);
+    return React.createElement(ReactNative.View, { testID: 'fluent-emoji-image' });
+  }
+  return { Image };
+});
+
+afterEach(() => mockUnreachable.clear());
+
 /**
  * The package's own URL builder. The package works out its default base from `import.meta.url` as it loads,
  * which Expo's Babel preset reads off `globalThis.__ExpoImportMetaRegistry`, and that has no bundle URL under
@@ -75,6 +96,15 @@ describe('FluentEmoji', () => {
 
     await screen.rerender(<FluentEmoji glyph={family} name="family" variant="3d" />);
     expect(screen.queryByText(family, { includeHiddenElements: true })).toBeNull();
+  });
+
+  it('draws the glyph as text once the CDN refuses its artwork', async () => {
+    const grinning = String.fromCodePoint(0x1f600);
+    mockUnreachable.add(fluentEmojiUrl(grinning, { style: '3d' }) ?? '');
+    await render(<FluentEmoji glyph={grinning} name="grinning face" variant="3d" />);
+
+    expect(await screen.findByText(grinning, { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.queryByTestId('fluent-emoji-image', { includeHiddenElements: true })).toBeNull();
   });
 
   it('is hidden from a screen reader when aria-hidden', async () => {
