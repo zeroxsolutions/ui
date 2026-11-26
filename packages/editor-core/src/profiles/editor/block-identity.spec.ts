@@ -5,7 +5,7 @@ import type { Editor } from '../../document/advanced.js';
 import { createDocumentEditor } from '../../document/core/create-document-editor.js';
 import type { EditorFeature, IEditor, NodeJSON, NodeSpec } from '../../document/core/types/index.js';
 import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
-import { buttonNodeSpec, columnsNodeSpecs, emailNodeSpecs } from '../core/email-nodes.js';
+import { buttonNodeSpec, columnsNodeSpecs, emailNodeSpecs, sectionNodeSpecs } from '../core/email-nodes.js';
 
 // Stand-ins for the document's own callout and rule, which live outside editor-core; the callout holds
 // inline text here so a caret in it sits in the block itself.
@@ -22,7 +22,7 @@ const documentNodes: NodeSpec[] = [
 
 const email: EditorFeature = {
   id: 'email',
-  nodes: [...documentNodes, buttonNodeSpec, ...columnsNodeSpecs(), ...emailNodeSpecs.nodes],
+  nodes: [...documentNodes, buttonNodeSpec, ...columnsNodeSpecs(), ...sectionNodeSpecs(), ...emailNodeSpecs.nodes],
   marks: [{ name: 'bold', htmlTag: 'strong' }, ...emailNodeSpecs.marks],
 };
 const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
@@ -120,6 +120,21 @@ describe('blockIdentity', () => {
     expect(callouts[0]).toEqual({ type: 'callout', id: 'b', key: 'kb' });
     expect(callouts[1].id).toBeNull();
     expect(keysAreUnique(editor)).toBe(true);
+  });
+
+  it('keys the blocks a section holds, those it opens with and those added in it', () => {
+    const { editor, engine } = mount([{ type: 'section', content: [paragraph('in', { id: 'a' })] }]);
+    const inside = () =>
+      (editor.getJSON().content?.[0]?.content ?? []).map((block) => (block.attrs as Attrs | undefined)?.key);
+
+    expect(inside()).toHaveLength(1);
+    engine.commands.setTextSelection(4);
+    engine.commands.splitBlock();
+
+    const keys = [blocks(editor)[0]?.key, ...inside()];
+    expect(keys).toHaveLength(3);
+    expect(keys.every((key) => typeof key === 'string' && key !== '')).toBe(true);
+    expect(new Set(keys).size).toBe(3);
   });
 
   it('keeps the id on the half that keeps the text when Enter splits a block', () => {

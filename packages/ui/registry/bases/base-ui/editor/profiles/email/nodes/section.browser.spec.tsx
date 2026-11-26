@@ -115,6 +115,9 @@ describe('the section in the email editor', () => {
         { type: 'section', lanes: [[{ type: 'paragraph', content: { text: 'Inside' } }]] },
       ]),
     );
+    // Each block carries a key, which the host and the preview tell blocks apart by.
+    const [inserted] = probe.value;
+    expect([inserted?.key, ...(inserted?.lanes?.[0] ?? []).map((block) => block.key)]).not.toContain('');
   });
 
   it('offers content and wide, never full, and sends the width set', async () => {
