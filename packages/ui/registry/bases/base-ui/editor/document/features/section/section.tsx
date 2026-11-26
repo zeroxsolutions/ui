@@ -129,8 +129,11 @@ function SectionToolbarGroup<T extends string>({
   nameOf,
   render,
   onChange,
+  wrap = false,
 }: {
   label: string;
+  /** Lets the toggles run onto more rows where the toolbar is narrower than the group. */
+  wrap?: boolean;
   values: readonly T[];
   value: T | undefined;
   fallback: T;
@@ -141,6 +144,7 @@ function SectionToolbarGroup<T extends string>({
   return (
     <ToggleGroup
       aria-label={label}
+      className={wrap ? 'flex-wrap' : undefined}
       size="sm"
       value={[value ?? fallback]}
       // At the group's edge the arrow keys go on to the toolbar's next control.
@@ -172,13 +176,14 @@ function SectionToolbarGroup<T extends string>({
   );
 }
 
-/** The section's floating toolbar: its background's swatches on one row, its padding and its width below. */
+/** The section's floating toolbar: its background's swatches, then its padding and its width, each row wrapping. */
 function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionToolbarProps) {
   const set = (layout: Partial<Record<keyof SectionLayout, string | null>>) =>
     editor.run('setSectionLayout', { pos, layout });
   return (
     <BlockToolbar editor={editor} pos={pos} anchor={anchor} label={words.toolbar}>
-      <div data-slot="section-toolbar" className="flex flex-col items-start">
+      {/* At most the viewport's width less the toolbar's margin, so a phone's page never scrolls sideways. */}
+      <div data-slot="section-toolbar" className="flex max-w-[calc(100vw-2rem)] flex-col items-start">
         <SectionToolbarGroup<SectionBackground>
           label={words.sectionBackground}
           values={SECTION_BACKGROUNDS}
@@ -186,6 +191,7 @@ function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionTo
           fallback={DEFAULTS.background}
           nameOf={(token) => (token === 'none' ? words.noBackground : words.colors[token])}
           render={(token) => <SectionSwatch background={token} />}
+          wrap
           onChange={(background) => set({ background })}
         />
         <div className="flex flex-wrap items-center">
