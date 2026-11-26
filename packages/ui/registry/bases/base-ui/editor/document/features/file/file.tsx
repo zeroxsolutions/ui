@@ -4,6 +4,7 @@ import { FileTextIcon } from '@/registry/bases/base-ui/icons/lucide/file-text-ic
 import { file as fileBlock, FILE_SIZE_MAX, fileSizeText } from '@zeroxsolutions/editor-core/blocks/library/index';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockFeature, type BlockViewPropsOf } from '../../blocks/block-feature';
+import type { LayoutWords } from '../../layout/layout-words';
 import { BlockAddressField } from '../../blocks/block-address-field';
 import { linkAddress } from '../../blocks/block-address';
 import {
@@ -21,7 +22,12 @@ import {
 export interface FileOptions extends BlockUploadOptions {
   /** The empty file block's field: its name and its placeholder. Default: `File link` and `Paste a file link`. */
   words?: { readonly field?: string; readonly placeholder?: string };
+  /** The words of its layout toolbar, over the English; a getter is read each time it draws. */
+  layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
 }
+
+/** A file's row is drawn at its own width once it is placed off the start of its line, and across the line before. */
+const placedOff = (_attributes: unknown, align: unknown): boolean => align === 'center' || align === 'end';
 
 type FileViewProps = BlockViewPropsOf<typeof fileBlock>;
 
@@ -142,7 +148,11 @@ export function file(options: FileOptions = {}): EditorFeature {
     );
   }
 
-  const feature = blockFeature(fileBlock, { view: FileView, icon: FileTextIcon });
+  const feature = blockFeature(fileBlock, {
+    view: FileView,
+    icon: FileTextIcon,
+    layout: { words: options.layoutWords, fit: placedOff },
+  });
   if (!options.upload) return feature;
   const taker: UploadTaker = {
     accept: '',

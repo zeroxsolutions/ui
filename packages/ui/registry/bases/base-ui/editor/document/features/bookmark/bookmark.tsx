@@ -3,6 +3,7 @@ import { BookmarkIcon } from '@/registry/bases/base-ui/icons/lucide/bookmark-ico
 import { bookmark as bookmarkBlock } from '@zeroxsolutions/editor-core/blocks/library/index';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockFeature, type BlockViewPropsOf } from '../../blocks/block-feature';
+import type { LayoutWords } from '../../layout/layout-words';
 import { BlockAddressField } from '../../blocks/block-address-field';
 import { linkAddress, sourceAddress } from '../../blocks/block-address';
 
@@ -22,7 +23,12 @@ export interface BookmarkOptions {
   readLink?(url: string): Promise<LinkPreview>;
   /** The empty bookmark's field: its name and its placeholder. Default: `Link` and `Paste a link`. */
   words?: { readonly field?: string; readonly placeholder?: string };
+  /** The words of its layout toolbar, over the English; a getter is read each time it draws. */
+  layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
 }
+
+/** A bookmark is drawn at its own width once it is placed off the start of its line, and across the line before. */
+const placedOff = (_attributes: unknown, align: unknown): boolean => align === 'center' || align === 'end';
 
 type BookmarkViewProps = BlockViewPropsOf<typeof bookmarkBlock>;
 
@@ -110,5 +116,9 @@ export function bookmark(options: BookmarkOptions = {}): EditorFeature {
     );
   }
 
-  return blockFeature(bookmarkBlock, { view: BookmarkView, icon: BookmarkIcon });
+  return blockFeature(bookmarkBlock, {
+    view: BookmarkView,
+    icon: BookmarkIcon,
+    layout: { words: options.layoutWords, fit: placedOff },
+  });
 }
