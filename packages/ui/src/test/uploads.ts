@@ -38,13 +38,16 @@ function transferOf(files: readonly File[]): DataTransfer {
 }
 
 /**
- * Pastes `files` into `target`. The browser's input API types and clicks but cannot paste a file, so the paste
- * event the browser would fire is fired here.
+ * Pastes `files` into `target`, with `data` as the clipboard's other types, such as `text/html`. The browser's
+ * input API types and clicks but cannot paste a file, so the paste event the browser would fire is fired here;
+ * the event is answered, so a spec reads whether the editor handled it.
  */
-export function pasteFiles(target: Element, files: readonly File[]): void {
-  target.dispatchEvent(
-    new ClipboardEvent('paste', { clipboardData: transferOf(files), bubbles: true, cancelable: true }),
-  );
+export function pasteFiles(target: Element, files: readonly File[], data: Record<string, string> = {}): ClipboardEvent {
+  const clipboardData = transferOf(files);
+  for (const [type, value] of Object.entries(data)) clipboardData.setData(type, value);
+  const event = new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true });
+  target.dispatchEvent(event);
+  return event;
 }
 
 /** Drops `files` onto the middle of `target`; the input API drags elements, not files from the desktop. */

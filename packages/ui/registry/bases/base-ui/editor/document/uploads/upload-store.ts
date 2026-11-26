@@ -127,6 +127,7 @@ interface UploadRecord {
 interface UploadStoreInternals extends UploadStore {
   takers: UploadTaker[];
   map(tr: TransactionLike, before: ProseMirrorNode, after: ProseMirrorNode): void;
+  /** Whether the editor took a block for any of `files`. */
   take(files: readonly File[], at: number | null): boolean;
   destroy(): void;
 }
@@ -427,10 +428,10 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
       for (const record of [...records.values()]) {
         if (!fresh.includes(record) && fresh.some((made) => made.entry.pos === record.entry.pos)) release(record, true);
       }
-      // The editor refused the blocks, as a locked email does.
+      // The editor refused the blocks, as a locked email does; the paste or the drop is left to whoever is next.
       if (engine.state.doc === before) {
         for (const record of fresh) release(record, false);
-        return true;
+        return false;
       }
       for (const record of fresh) {
         if (record.entry.phase === 'uploading') run(record);
@@ -498,7 +499,10 @@ export function uploadsExtension(id: string, taker: UploadTaker | null): unknown
           },
           props: {
             handlePaste(_view, event) {
-              const files = [...(event.clipboardData?.files ?? [])];
+              const data = event.clipboardData;
+              // Copied content often carries a picture of itself as a file; the content is what the author meant.
+              if (!data || data.getData('text/html') !== '' || data.getData('text/plain') !== '') return false;
+              const files = [...data.files];
               return files.length > 0 && storeFor(engine).take(files, null);
             },
             handleDrop(view, event, _slice, moved) {
@@ -507,7 +511,9 @@ export function uploadsExtension(id: string, taker: UploadTaker | null): unknown
               const files = [...(event.dataTransfer?.files ?? [])];
               if (files.length === 0) return false;
               const at = view.posAtCoords({ left: event.clientX, top: event.clientY });
-              return storeFor(engine).take(files, at?.pos ?? view.state.selection.to);
+              storeFor(engine).take(files, at?.pos ?? view.state.selection.to);
+              // Taken even where the editor refuses the blocks: a file dropped and left would open in place of the page.
+              return true;
             },
           },
         }),

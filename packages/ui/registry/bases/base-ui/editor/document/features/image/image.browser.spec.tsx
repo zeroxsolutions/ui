@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
-import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { Extension, Plugin } from '@zeroxsolutions/editor-core/document/advanced';
+import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
@@ -24,6 +25,19 @@ function handedOut(editor: IEditor, options: ImageOptions): string {
   const registry = createCodecRegistry([standardKit(), image(options)]);
   return JSON.stringify(editor.getJSON()) + serialize(editor.getJSON(), 'html', registry);
 }
+
+/** An editor that refuses every paste, as a locked email refuses a new block. */
+const refusesPastes = defineFeature({
+  id: 'refusesPastes',
+  advanced: {
+    engineExtensions: [
+      Extension.create({
+        name: 'refusesPastes',
+        addProseMirrorPlugins: () => [new Plugin({ filterTransaction: (tr) => tr.getMeta('uiEvent') !== 'paste' })],
+      }),
+    ],
+  },
+});
 
 async function openEdit(): Promise<void> {
   await userEvent.click(page.getByRole('button', { name: 'Edit' }));
@@ -136,6 +150,32 @@ describe('the image block with uploads', () => {
     expect(JSON.stringify(editor.getJSON())).not.toMatch(/blob:/);
     calls[0].answer('https://cdn.test/cat.png');
     await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
+  });
+
+  it('pastes the copied text rather than the file when the clipboard holds both', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })]);
+    await userEvent.click(await findElement('.ProseMirror p'));
+
+    pasteFiles(await findElement('.ProseMirror'), [pngFile()], {
+      'text/html': '<p>Copied words</p>',
+      'text/plain': 'Copied words',
+    });
+
+    await vi.waitFor(() => expect(editor.getText()).toContain('Copied words'));
+    expect(calls).toHaveLength(0);
+    expect(editor.getJSON().content?.filter((node) => node.type === 'image')).toHaveLength(0);
+  });
+
+  it('leaves a pasted file to the browser when the editor refuses its block', async () => {
+    const { upload, calls } = heldUpload();
+    await mountDocumentEditor([standardKit(), image({ upload }), refusesPastes]);
+    await userEvent.click(await findElement('.ProseMirror p'));
+
+    const pasted = pasteFiles(await findElement('.ProseMirror'), [pngFile()]);
+
+    expect(pasted.defaultPrevented).toBe(false);
+    expect(calls).toHaveLength(0);
   });
 
   it('turns a dropped image file into an image block, and takes the block away again on cancel', async () => {
