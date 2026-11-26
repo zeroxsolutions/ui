@@ -15,3 +15,20 @@ test('Ctrl+B collapses the sidebar to its icons and opens it again', async ({ pa
   await page.keyboard.press('Control+b');
   await expect.poll(widthOf).toBe(open);
 });
+
+test.describe('at phone width', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('closing the sidebar sheet gives the focus back to the control that opened it', async ({ page }) => {
+    await openDemo(page, 'sidebar-demo');
+    const toggle = page.getByRole('button', { name: 'Toggle Sidebar' }).filter({ visible: true }).first();
+    await toggle.click(DRAWN);
+    const item = page.getByRole('dialog', { name: 'Sidebar' }).getByRole('button', { name: 'Playground' });
+    await expect(item).toBeVisible();
+
+    await page.keyboard.press('Escape');
+
+    await expect(item).toBeHidden();
+    await expect(toggle).toBeFocused();
+  });
+});

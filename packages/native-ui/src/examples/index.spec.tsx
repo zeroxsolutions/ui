@@ -19,6 +19,12 @@ const isAnimatedIcon = (item: Registry['items'][number]): boolean =>
   item.type === 'registry:ui' && (item.files?.[0]?.path.startsWith('src/registry/icons/') ?? false);
 /** The demos that draw no one item: the icon gallery draws every animated icon for the docs' Icons page. */
 const GALLERY_DEMOS = ['icon-gallery-demo'];
+
+/**
+ * The demos that set up what an item's own demo does not, for native-preview-e2e to drive in a browser: items laid
+ * out right to left, and a questionnaire with a disabled choice and a note of several lines.
+ */
+const BROWSER_CASE_DEMOS = ['direction-controls-demo', 'questionnaire-review-demo'];
 const drawnItems = registry.items
   .filter((item) => DRAWN_TYPES.has(item.type) && !isAnimatedIcon(item))
   .map((item) => item.name);
@@ -26,7 +32,9 @@ const drawnItems = registry.items
 describe('demos', () => {
   it('has a <name>-demo for the theme and every ui, component and block item of the registry, the galleries, and nothing else', () => {
     expect(drawnItems.length).toBeGreaterThan(0);
-    expect(Object.keys(demos).sort()).toEqual([...drawnItems.map((name) => `${name}-demo`), ...GALLERY_DEMOS].sort());
+    expect(Object.keys(demos).sort()).toEqual(
+      [...drawnItems.map((name) => `${name}-demo`), ...GALLERY_DEMOS, ...BROWSER_CASE_DEMOS].sort(),
+    );
   });
 
   it.each(drawnItems)('keeps the %s demo in its own <name>-demo.tsx', (name) => {

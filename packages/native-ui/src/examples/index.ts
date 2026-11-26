@@ -42,6 +42,7 @@ import { CopyButtonDemo } from './copy-button-demo';
 import { DataTableColumnHeaderDemo } from './data-table-column-header-demo';
 import { DataTableDemo } from './data-table-demo';
 import { DialogDemo } from './dialog-demo';
+import { DirectionControlsDemo } from './direction-controls-demo';
 import { DirectionDemo } from './direction-demo';
 import { DrawerDemo } from './drawer-demo';
 import { DropdownMenuDemo } from './dropdown-menu-demo';
@@ -92,6 +93,7 @@ import { PermissionCardDemo } from './permission-card-demo';
 import { PopoverDemo } from './popover-demo';
 import { ProgressDemo } from './progress-demo';
 import { QuestionnaireDemo } from './questionnaire-demo';
+import { QuestionnaireReviewDemo } from './questionnaire-review-demo';
 import { RadioGroupDemo } from './radio-group-demo';
 import { ReasoningCollapsibleDemo } from './reasoning-collapsible-demo';
 import { ResizableDemo } from './resizable-demo';
@@ -161,6 +163,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'data-table-column-header-demo': DataTableColumnHeaderDemo,
   'data-table-demo': DataTableDemo,
   'dialog-demo': DialogDemo,
+  'direction-controls-demo': DirectionControlsDemo,
   'direction-demo': DirectionDemo,
   'drawer-demo': DrawerDemo,
   'dropdown-menu-demo': DropdownMenuDemo,
@@ -211,6 +214,7 @@ const demos: Readonly<Record<string, ComponentType>> = {
   'popover-demo': PopoverDemo,
   'progress-demo': ProgressDemo,
   'questionnaire-demo': QuestionnaireDemo,
+  'questionnaire-review-demo': QuestionnaireReviewDemo,
   'radio-group-demo': RadioGroupDemo,
   'reasoning-collapsible-demo': ReasoningCollapsibleDemo,
   'resizable-demo': ResizableDemo,
