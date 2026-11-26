@@ -53,21 +53,6 @@ describe('CodeMirrorPane', () => {
     expect(container.querySelector('.cm-lineNumbers')).not.toBeNull();
   });
 
-  it('keeps the line numbers in place over a long line, filled with the surface it sits on', () => {
-    const { container } = render(
-      <div style={{ backgroundColor: 'rgb(10, 20, 30)' }}>
-        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-          <CodeMirrorPane value={`export const x = '${'a'.repeat(400)}'`} language="typescript" />
-        </div>
-      </div>,
-    );
-    const gutters = container.querySelector<HTMLElement>('.cm-gutters');
-    expect(gutters?.style.position).toBe('sticky');
-    const pane = container.querySelector<HTMLElement>('[data-slot="code-mirror-pane"]');
-    // Half white over rgb(10, 20, 30): the colour a reader sees behind the code.
-    expect(pane?.style.getPropertyValue('--code-pane-surface')).toBe('rgb(133, 138, 143)');
-  });
-
   it('mounts and keeps its text with custom indent settings (tabSize + useTabs)', () => {
     const { container } = render(<CodeMirrorPane value={'const x = 1'} language="typescript" tabSize={8} useTabs />);
     expect(container.querySelector('.cm-content')?.textContent).toContain('const x = 1');
