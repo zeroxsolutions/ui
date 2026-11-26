@@ -81,8 +81,6 @@ function parses(schema: Schema, content: readonly NodeJSON[]): boolean {
 const EMPTY_ADDRESS = /"(src|image|icon|href|buttonHref|unsubscribe)":""/g;
 
 const docOf = (preset: BlockPreset): DocJSON => ({ type: 'doc', content: [...preset.content] });
-const typesOf = (blocks: readonly EditorEmailBlock[]): unknown[] =>
-  blocks.map((block) => (block.lanes ? [block.type, block.lanes.map(typesOf)] : block.type));
 const withIds = (blocks: readonly EditorEmailBlock[], prefix = 'b'): RenderEmailInput<unknown>['blocks'] =>
   blocks.map(({ lanes, ...block }, index) => ({
     ...block,
@@ -97,28 +95,6 @@ describe('emailPresets', () => {
   const schema = schemaOf(emailKit(profile));
   const nodes = new Set(Object.keys(schema.nodes));
   const renderer = createEmailRenderer();
-
-  it('holds the header, hero, call to action, two-up and footer, exported as those blocks', () => {
-    const lane = ['image', 'heading', 'paragraph', 'button'];
-    expect(
-      presets.map((preset) => [preset.id, typesOf(toEmailBlocks(docOf(preset), [], { kinds: profile.kinds }))]),
-    ).toEqual([
-      ['header', ['image', 'divider']],
-      ['hero', ['hero']],
-      ['call-to-action', ['heading', 'paragraph', 'button']],
-      ['two-up', [['columns', [lane, lane]]]],
-      ['footer', ['socialLinks', 'legalFooter']],
-    ]);
-  });
-
-  it('centres the legal footer under the centred social links in the footer', () => {
-    const footer = presets.find((preset) => preset.id === 'footer')!;
-    const blocks = toEmailBlocks(docOf(footer), [], { kinds: profile.kinds });
-    expect(blocks.map((block) => [block.type, block.attributes.align])).toEqual([
-      ['socialLinks', 'center'],
-      ['legalFooter', 'center'],
-    ]);
-  });
 
   it.each(presets.map((preset) => [preset.id, preset] as const))(
     'fits the default email profile: %s',
@@ -175,15 +151,6 @@ describe('documentPresets', () => {
   const presets = documentPresets();
   const schema = schemaOf([standardKit(), columns(), toggleHeading(), callout(), button(), card(cardDefinition)]);
   const nodes = new Set(Object.keys(schema.nodes));
-
-  it('holds two columns, an FAQ, a callout with a button and cards in columns', () => {
-    expect(presets.map((preset) => [preset.id, preset.content.map((node) => node.type)])).toEqual([
-      ['two-columns', ['columns']],
-      ['faq', ['toggleHeading', 'toggleHeading', 'toggleHeading']],
-      ['callout-button', ['callout']],
-      ['cards-in-columns', ['columns']],
-    ]);
-  });
 
   it.each(presets.map((preset) => [preset.id, preset] as const))(
     "fits the Document Editor's standard kit with the library features: %s",

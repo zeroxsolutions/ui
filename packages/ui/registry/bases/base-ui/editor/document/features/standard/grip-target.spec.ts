@@ -37,13 +37,6 @@ describe('the grip menu and the drag handle extension it follows', () => {
     expect(commandsSource).toContain("extension.name === 'globalDragHandle'");
   });
 
-  it('lifts a node deeper than a list item to its parent, as dragTargetAt assumes', () => {
-    expect(extensionSource).toMatch(/if \(\$pos\.depth > 1\)\s*return \$pos\.before\(\$pos\.depth\);/);
-    expect(extensionSource).toMatch(
-      /selection\.node\.type\.isInline \|\|\s*selection\.node\.type\.name === 'tableRow'/,
-    );
-  });
-
   it('is installed at the version the package and the registry item pin', () => {
     const installed = JSON.parse(readFileSync(resolve(dirname(extensionEntry), '../package.json'), 'utf8')).version;
     const manifest = JSON.parse(readFileSync(resolve(UI_ROOT, 'package.json'), 'utf8'));

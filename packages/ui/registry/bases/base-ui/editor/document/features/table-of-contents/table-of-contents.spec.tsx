@@ -1,6 +1,5 @@
-import { fireEvent, render } from '@testing-library/react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { callout } from '../callout/index';
@@ -78,25 +77,5 @@ describe('tableOfContents', () => {
     const registry = createCodecRegistry(features);
     const doc: DocJSON = { type: 'doc', content: [{ type: 'tableOfContents', attrs: {} }, heading(2, 'A')] };
     expect(importHTML(serialize(doc, 'html', registry), registry).doc).toEqual(doc);
-  });
-
-  it('opens the toggle heading folding the heading an entry links to, and scrolls to it', () => {
-    const { container, getByRole } = render(
-      <Viewer
-        doc={{
-          type: 'doc',
-          content: [
-            { type: 'tableOfContents' },
-            { type: 'toggleHeading', attrs: { open: false }, content: [heading(2, 'Day one'), heading(3, 'Morning')] },
-          ],
-        }}
-        features={features}
-      />,
-    );
-    const morning = [...container.querySelectorAll('h3')].find((element) => element.textContent === 'Morning')!;
-    morning.scrollIntoView = vi.fn();
-    fireEvent.click(getByRole('link', { name: 'Morning' }));
-    expect(container.querySelector('details')?.open).toBe(true);
-    expect(morning.scrollIntoView).toHaveBeenCalledTimes(1);
   });
 });

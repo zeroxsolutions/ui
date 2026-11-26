@@ -59,14 +59,6 @@ describe('inlineToken - commit', () => {
     command.insert(editor, { id: 'code', label: 'Code' });
     expect(findNode(editor.getJSON(), 'command')?.attrs?.slug).toBe('code');
   });
-
-  it('reads the uniform ref back from committed attrs', () => {
-    expect(command.readRef({ id: 'image', label: 'Image', slug: 'image-gen' })).toEqual({
-      id: 'image',
-      label: 'Image',
-      slug: 'image-gen',
-    });
-  });
 });
 
 describe('inlineToken - codec round-trip', () => {

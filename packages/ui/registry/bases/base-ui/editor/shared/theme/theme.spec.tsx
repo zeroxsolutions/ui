@@ -1,37 +1,37 @@
-import { renderHook } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { defaultEditorTheme } from './default-theme';
 import { EditorThemeProvider } from './editor-theme-provider';
 import { useEditorTheme } from './editor-theme-context';
 import { extendTheme } from './extend-theme';
+import type { IEditorTheme } from './types/editor-theme';
+
+/** Draws what a sub-renderer reads from the theme, as `name mode shiki mermaid codeMirror`. */
+function ThemeReader(): ReactNode {
+  const { theme, mode, variant } = useEditorTheme();
+  return `${theme.name} ${mode} ${variant.code.shiki} ${variant.mermaid.theme} ${variant.code.codeMirror}`;
+}
+
+function drawn(provider?: { theme?: IEditorTheme; forcedMode?: 'light' | 'dark' }): string {
+  return renderToStaticMarkup(
+    provider ? (
+      <EditorThemeProvider {...provider}>
+        <ThemeReader />
+      </EditorThemeProvider>
+    ) : (
+      <ThemeReader />
+    ),
+  );
+}
 
 describe('editor theming', () => {
-  it('carries mode-specific sub-renderer themes from one contract', () => {
-    // The whole point of light/dark sync: one toggle changes prose, code,
-    // mermaid, and math together because they all live in one variant.
-    expect(defaultEditorTheme.light.code.shiki).toBe('github-light');
-    expect(defaultEditorTheme.dark.code.shiki).toBe('github-dark');
-    expect(defaultEditorTheme.light.mermaid.theme).toBe('default');
-    expect(defaultEditorTheme.dark.mermaid.theme).toBe('dark');
-  });
-
-  it('is usable with no provider (falls back to the default light theme)', () => {
-    const { result } = renderHook(() => useEditorTheme());
-    expect(result.current.theme.name).toBe('zerox-default');
-    expect(result.current.mode).toBe('light');
-    expect(result.current.variant.code.shiki).toBe('github-light');
+  it('draws the default light theme with no provider', () => {
+    expect(drawn()).toBe('zerox-default light github-light default light');
   });
 
   it('selects every sub-renderer for the resolved mode together', () => {
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <EditorThemeProvider forcedMode="dark">{children}</EditorThemeProvider>
-    );
-    const { result } = renderHook(() => useEditorTheme(), { wrapper });
-    expect(result.current.mode).toBe('dark');
-    expect(result.current.variant.code.shiki).toBe('github-dark');
-    expect(result.current.variant.mermaid.theme).toBe('dark');
-    expect(result.current.variant.code.codeMirror).toBe('dark');
+    expect(drawn({ forcedMode: 'dark' })).toBe('zerox-default dark github-dark dark dark');
   });
 
   it('extends the theme by overriding a subset of tokens', () => {
@@ -44,18 +44,11 @@ describe('editor theming', () => {
     expect(custom.dark.code.shiki).toBe('github-dark');
   });
 
-  it('renders entirely from a full replacement theme', () => {
+  it('draws from a replacement theme the provider is given', () => {
     const replacement = extendTheme(defaultEditorTheme, {
       name: 'brand',
       dark: { mermaid: { theme: 'forest' } },
     });
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <EditorThemeProvider theme={replacement} forcedMode="dark">
-        {children}
-      </EditorThemeProvider>
-    );
-    const { result } = renderHook(() => useEditorTheme(), { wrapper });
-    expect(result.current.theme.name).toBe('brand');
-    expect(result.current.variant.mermaid.theme).toBe('forest');
+    expect(drawn({ theme: replacement, forcedMode: 'dark' })).toBe('brand dark github-dark forest dark');
   });
 });

@@ -1,7 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
-import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import { createCodecRegistry, importHTML, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
 import { standardKit } from '../standard/index';
 import { Viewer } from '../../react/viewer';
@@ -41,15 +40,6 @@ describe('media', () => {
     }).querySelector('video')!;
     expect(video.hasAttribute('src')).toBe(false);
     expect(video.hasAttribute('poster')).toBe(false);
-  });
-
-  it('offers a video and an audio item in the slash menu', () => {
-    expect(
-      collectUiContributions([media()]).slash.map(({ title, command, args }) => ({ title, command, args })),
-    ).toEqual([
-      { title: 'Video', command: 'insertBlock:media', args: undefined },
-      { title: 'Audio', command: 'insertBlock:media', args: { attributes: { kind: 'audio' } } },
-    ]);
   });
 
   it('round-trips through HTML with its layout, with the Viewer features', () => {

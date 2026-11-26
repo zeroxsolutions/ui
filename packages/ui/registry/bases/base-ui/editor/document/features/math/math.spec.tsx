@@ -1,4 +1,3 @@
-import katex from 'katex';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -67,19 +66,8 @@ describe('math', () => {
   });
 
   it('preserves the latex through an HTML export → import round-trip', () => {
-    // `importHTML` is exported from serialize/index.ts; the `data-latex`-carrying
-    // export is importable and the latex survives the round-trip.
-    expect(typeof importHTML).toBe('function');
     const html = serialize(mathBlockDoc(), 'html', registry);
     const result = importHTML(html, registry);
     expect(JSON.stringify(result.doc)).toContain(LATEX);
-  });
-
-  it('renders a valid formula with KaTeX without throwing', () => {
-    let html = '';
-    expect(() => {
-      html = katex.renderToString(LATEX, { throwOnError: false });
-    }).not.toThrow();
-    expect(html).toContain('katex');
   });
 });

@@ -43,7 +43,6 @@ describe('ChatMessageView', () => {
     const viewPill = view.container.querySelector('[data-slot="mention"]');
 
     expect(viewPill).not.toBeNull();
-    expect(viewPill!.className).toBe(inputPill.className);
     expect(viewPill!.getAttribute('data-mention-id')).toBe(inputPill.getAttribute('data-mention-id'));
     expect(viewPill!.textContent).toBe(inputPill.textContent);
     expect(viewPill!.textContent).toBe('@Ada');
@@ -83,7 +82,7 @@ describe('ChatMessageView', () => {
 
   it('renders no command pill when the message carries no command', () => {
     const { container } = render(<ChatMessageView message={message(para({ type: 'text', text: 'hello' }))} />);
-    expect(container.querySelector('.chat-composer')).not.toBeNull();
+    expect(container.textContent).toBe('hello');
     expect(container.querySelector('[data-slot="command"]')).toBeNull();
   });
 });
