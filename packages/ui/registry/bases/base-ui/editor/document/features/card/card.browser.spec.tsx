@@ -5,7 +5,7 @@ import '../../../styles.css';
 import type { DocJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { dragEndHandle, expectViewerMatches, lineWidth, storedLayout } from '../../../../../../../test/block-layout';
 import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
-import { fileInput, heldUpload, pngFile } from '../../../../../../../src/test/uploads';
+import { fileInput, heldUpload, pngFile } from '../../../../../../../test/uploads';
 import { standardKit } from '../standard/index';
 import { card } from './card';
 import { card as cardDefinition } from '@zeroxsolutions/editor-core/blocks/index';
@@ -95,8 +95,6 @@ describe('the card layout', () => {
     content: [
       { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
       { type: 'card', attrs: { heading: 'Bay', ...layout }, content: [{ type: 'text', text: 'Lanterns' }] },
-      // A block the document ends on would take a trailing line on the first press, under the press.
-      { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
     ],
   });
   /** Selects the block, or puts the caret in it, and waits for its layout toolbar. */

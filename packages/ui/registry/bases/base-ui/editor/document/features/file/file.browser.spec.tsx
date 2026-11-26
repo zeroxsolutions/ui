@@ -5,7 +5,7 @@ import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { expectViewerMatches, layoutFrame, storedLayout } from '../../../../../../../test/block-layout';
 import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
-import { dropFiles, fileInput, firePastedFiles, heldUpload, pngFile } from '../../../../../../../src/test/uploads';
+import { dropFiles, fileInput, firePastedFiles, heldUpload, pngFile } from '../../../../../../../test/uploads';
 import { image } from '../image/index';
 import { standardKit } from '../standard/index';
 import { file } from './file';
@@ -92,8 +92,6 @@ describe('the file block layout', () => {
     content: [
       { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
       { type: 'file', attrs: { href: 'https://cdn.test/menu.pdf', name: 'menu.pdf', ...layout } },
-      // A block the document ends on would take a trailing line on the first press, under the press.
-      { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
     ],
   });
 

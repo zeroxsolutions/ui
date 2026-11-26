@@ -1,6 +1,6 @@
 import { cdp, page, server, userEvent, type Locator } from 'vitest/browser';
-import { centreOf } from '../../test/pointer';
-import type { EditorUpload } from '../../registry/bases/base-ui/editor/document/uploads/upload';
+import { centreOf } from './pointer';
+import type { EditorUpload } from '../registry/bases/base-ui/editor/document/uploads/upload';
 
 /** One call of a held upload, which the spec answers by hand. */
 export interface HeldUploadCall {
@@ -67,7 +67,7 @@ export function firePastedFiles(
   return event;
 }
 
-/** A file in `src/test/files`, which a drop carries from the disk. */
+/** A file in `test/files`, which a drop carries from the disk. */
 export type DroppableFile = 'drop.png' | 'plan.pdf' | 'rain.mp3';
 
 /**
@@ -81,7 +81,7 @@ export async function dropFiles(target: Element, files: readonly DroppableFile[]
   const at = { x: (frame?.left ?? 0) + x * scale, y: (frame?.top ?? 0) + y * scale };
   const data = {
     items: [],
-    files: files.map((name) => `${server.config.root}/src/test/files/${name}`),
+    files: files.map((name) => `${server.config.root}/test/files/${name}`),
     dragOperationsMask: 1,
   };
   for (const type of ['dragEnter', 'dragOver', 'drop'] as const) {

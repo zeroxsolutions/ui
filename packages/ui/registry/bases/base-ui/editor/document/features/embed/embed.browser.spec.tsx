@@ -15,8 +15,6 @@ describe('the embed block layout', () => {
     content: [
       { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
       { type: 'embed', attrs: { url: 'about:blank', title: 'Map', ...layout } },
-      // A block the document ends on would take a trailing line on the first press, under the press.
-      { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
     ],
   });
   /** Selects the block, or puts the caret in it, and waits for its layout toolbar. */

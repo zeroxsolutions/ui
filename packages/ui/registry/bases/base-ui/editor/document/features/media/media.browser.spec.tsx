@@ -11,7 +11,7 @@ import {
   storedLayout,
 } from '../../../../../../../test/block-layout';
 import { insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
-import { dropFiles, fileInput, firePastedFiles, heldUpload } from '../../../../../../../src/test/uploads';
+import { dropFiles, fileInput, firePastedFiles, heldUpload } from '../../../../../../../test/uploads';
 import { standardKit } from '../standard/index';
 import { media } from './media';
 
@@ -105,8 +105,6 @@ describe('the media block layout', () => {
     content: [
       { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
       { type: 'media', attrs: { src: 'https://cdn.test/hoi-an.mp4', kind: 'video', ...layout } },
-      // A block the document ends on would take a trailing line on the first press, under the press.
-      { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
     ],
   });
   /** Selects the block, or puts the caret in it, and waits for its layout toolbar. */

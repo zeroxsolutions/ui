@@ -66,8 +66,6 @@ describe('the bookmark layout', () => {
     content: [
       { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
       { type: 'bookmark', attrs: { url: 'https://example.com/hoi-an', title: 'Hoi An', ...layout } },
-      // A block the document ends on would take a trailing line on the first press, under the press.
-      { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
     ],
   });
 

@@ -5,7 +5,7 @@ import { Extension, Plugin, type Editor } from '@zeroxsolutions/editor-core/docu
 import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { findElement, mountDocumentEditor } from '../../../../../../src/test/document-editor';
 import { standardKit } from '../features/standard/index';
-import { heldUpload } from '../../../../../../src/test/uploads';
+import { heldUpload } from '../../../../../../test/uploads';
 import { DEFAULT_UPLOAD_MESSAGES, type EditorUpload } from './upload';
 import { uploadsExtension, uploadStoreOf, type UploadRequest, type UploadStore } from './upload-store';
 
