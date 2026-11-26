@@ -423,8 +423,10 @@
 
 /* MARK: layout - section */
 /* A section's background, from `--section-surface` below, and its padding, its default medium, as the email draws
- * it. Unlayered, to beat the typography plugin's own margins. */
+ * it. Unlayered, to beat the typography plugin's own margins. A full width block in it reaches its padding's edge
+ * and no further, whatever the section's own width, so its gutter bleed is taken away. */
 .document-editor [data-slot='section'] {
+  --layout-bleed: 0px;
   padding: 1rem;
   background-color: var(--section-surface, transparent);
 }

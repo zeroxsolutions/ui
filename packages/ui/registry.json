@@ -3698,6 +3698,7 @@
       ],
       "css": {
         ".document-editor [data-slot='section']": {
+          "--layout-bleed": "0px",
           "padding": "1rem",
           "background-color": "var(--section-surface, transparent)"
         },

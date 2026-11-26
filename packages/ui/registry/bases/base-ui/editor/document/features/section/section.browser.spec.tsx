@@ -12,6 +12,7 @@ import { Viewer } from '../../react/viewer';
 import { SlashMenu } from '../../ui/slash-menu';
 import { callout } from '../callout/index';
 import { columns } from '../columns/index';
+import { image } from '../image/index';
 import { standardKit } from '../standard/index';
 import { table } from '../table/index';
 import { toggle } from '../toggle/index';
@@ -36,6 +37,7 @@ const features: EditorFeature[] = [
   callout(),
   toggle(),
   table(),
+  image(),
   section({ messages: words }),
 ];
 const contributions = collectUiContributions(features);
@@ -268,6 +270,40 @@ describe('the section in the Document Editor', () => {
       expect(slashTitles().some((title) => title.startsWith('Section'))).toBe(false);
       expect(slashTitles().length).toBeGreaterThan(0);
       await userEvent.keyboard('{Escape}');
+    }
+  });
+
+  it.each(['content', 'wide', 'full'])('keeps a full width block within a %s section', async (width) => {
+    const pixel = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    await mount({
+      type: 'doc',
+      content: [
+        {
+          type: 'section',
+          attrs: { width, background: 'muted' },
+          content: [
+            { type: 'image', attrs: { src: pixel, alt: 'Bay', width: 'full' } },
+            {
+              type: 'table',
+              attrs: { width: 'full' },
+              content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [line('cell')] }] }],
+            },
+          ],
+        },
+      ],
+    });
+    const sectionBox = document.querySelector<HTMLElement>('.ProseMirror [data-slot=section]')!.getBoundingClientRect();
+    const drawn = await vi.waitFor(() => {
+      const found = ['[data-slot=block-layout][data-width=full]', '[data-slot=table][data-width=full]'].map(
+        (selector) => document.querySelector<HTMLElement>(`.ProseMirror [data-slot=section] ${selector}`),
+      );
+      if (found.some((element) => element === null)) throw new Error('a full width block is not drawn');
+      return found as HTMLElement[];
+    });
+    for (const element of drawn) {
+      const box = element.getBoundingClientRect();
+      expect(box.left).toBeGreaterThanOrEqual(sectionBox.left);
+      expect(box.right).toBeLessThanOrEqual(sectionBox.right);
     }
   });
 
