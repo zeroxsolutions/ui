@@ -1,4 +1,3 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -7,8 +6,11 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
+import { render } from 'vitest-browser-react';
 
+import { drawingIn, expectPlaying, playMotion, settled } from '../../../../../test/motion';
 import {
   DataTable,
   DataTableEmpty,
@@ -28,24 +30,6 @@ const COLUMNS: ColumnDef<Row>[] = [
   { accessorKey: 'name', header: 'Name' },
   { accessorKey: 'size', header: 'Size' },
 ];
-
-const { gearStart, gearStop } = vi.hoisted(() => ({ gearStart: vi.fn(), gearStop: vi.fn() }));
-
-vi.mock('@/registry/bases/base-ui/icons/lucide/settings-2-icon', async () => {
-  const React = await import('react');
-  return {
-    Settings2Icon: React.forwardRef<unknown, { 'aria-hidden'?: boolean }>((props, ref) => {
-      React.useImperativeHandle(ref, () => ({ startAnimation: gearStart, stopAnimation: gearStop }));
-      return <svg data-testid="settings-2-icon" aria-hidden={props['aria-hidden']} />;
-    }),
-  };
-});
-
-afterEach(() => {
-  cleanup();
-  gearStart.mockClear();
-  gearStop.mockClear();
-});
 
 function useRowsTable(rows: Row[]): TanstackTable<Row> {
   return useReactTable({
@@ -68,21 +52,21 @@ function RowsTable({ rows }: { rows: Row[] }): ReactNode {
 
 describe('DataTableEmpty', () => {
   it('renders one cell spanning every column when there are no rows', async () => {
-    render(<RowsTable rows={[]} />);
+    await render(<RowsTable rows={[]} />);
 
-    expect(screen.getByRole('cell', { name: 'No results.' }).getAttribute('colspan')).toBe('2');
+    await expect.element(page.getByRole('cell', { name: 'No results.' })).toHaveAttribute('colspan', '2');
   });
 
   it('is not rendered while there are rows', async () => {
-    render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
+    await render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
 
-    expect(screen.queryByText('No results.')).toBeNull();
-    expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
+    await expect.element(page.getByRole('cell', { name: 'a', exact: true })).toBeVisible();
+    await expect.element(page.getByText('No results.')).not.toBeInTheDocument();
   });
 });
 
 // Module-level, so the data keeps its identity across renders; a fresh array each render makes the
-// table queue a page reset on every render, and the act() around a click never settles.
+// table queue a page reset on every render.
 const PAGED_ROWS: Row[] = [
   { name: 'a', size: 1 },
   { name: 'b', size: 2 },
@@ -109,23 +93,21 @@ function PagedTable(): ReactNode {
 
 describe('DataTablePagination', () => {
   it('steps to the next page and back', async () => {
-    render(<PagedTable />);
-    const previous = screen.getByRole('button', { name: 'Previous page' });
-    expect(previous.hasAttribute('disabled')).toBe(true);
+    await render(<PagedTable />);
+    const previous = page.getByRole('button', { name: 'Previous page' });
+    await expect.element(previous).toBeDisabled();
 
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
-    });
-    expect(screen.getByRole('cell', { name: 'b' })).toBeTruthy();
+    await userEvent.click(page.getByRole('button', { name: 'Next page' }));
+    await expect.element(page.getByRole('cell', { name: 'b', exact: true })).toBeVisible();
 
-    await act(async () => {
-      fireEvent.click(previous);
-    });
-    expect(screen.getByRole('cell', { name: 'a' })).toBeTruthy();
+    await userEvent.click(previous);
+    await expect.element(page.getByRole('cell', { name: 'a', exact: true })).toBeVisible();
   });
 });
 
-describe('DataTableViewOptions icon', () => {
+describe('DataTableViewOptions', () => {
+  playMotion();
+
   function OptionsTable({ onPointerEnter }: { onPointerEnter?: () => void }): ReactNode {
     const table = useRowsTable([]);
     return (
@@ -135,20 +117,21 @@ describe('DataTableViewOptions icon', () => {
     );
   }
 
-  it('plays the gear once while the pointer and the focus hold the trigger, and stops when both leave', () => {
+  it("plays the gear while the pointer or the focus is on the trigger, still running the caller's handler", async () => {
+    // The pointer rests where the case before left it, which a trigger drawn under it would take as an enter.
+    await userEvent.unhover(document.body);
     const onPointerEnter = vi.fn();
-    render(<OptionsTable onPointerEnter={onPointerEnter} />);
-    const trigger = screen.getByRole('button', { name: 'Toggle columns' });
+    await render(<OptionsTable onPointerEnter={onPointerEnter} />);
+    const trigger = page.getByRole('button', { name: 'Toggle columns' });
 
-    fireEvent.pointerEnter(trigger);
-    fireEvent.focus(trigger);
-    expect(gearStart).toHaveBeenCalledTimes(1);
+    await userEvent.hover(trigger);
+    await expectPlaying(trigger.element(), drawingIn(trigger.element()));
     expect(onPointerEnter).toHaveBeenCalledTimes(1);
+    await userEvent.unhover(trigger);
+    const rest = await settled(trigger.element());
 
-    fireEvent.pointerLeave(trigger);
-    expect(gearStop).not.toHaveBeenCalled();
-    fireEvent.blur(trigger);
-    expect(gearStop).toHaveBeenCalledTimes(1);
-    expect(gearStart).toHaveBeenCalledTimes(1);
+    await userEvent.tab();
+    await expect.element(trigger).toHaveFocus();
+    await expectPlaying(trigger.element(), rest);
   });
 });
