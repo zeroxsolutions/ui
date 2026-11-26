@@ -35,7 +35,7 @@ pnpm dlx shadcn@latest add @zui/document-editor
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button field input utils @zui/block-library @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-link-icon
+pnpm dlx shadcn@latest add button field input utils @zui/block-library @zui/editor-uploads @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-link-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -79,7 +79,8 @@ function NotesEditor({ content }: { content: DocJSON }) {
 definition, `card` from `@zeroxsolutions/editor-core/blocks/index`, which is the email editor's card too, so a
 card reads the same in a document and in an email. Its slash item is "Card". The author pastes the image's link
 into the empty card, then writes the alt text, the title, the text, the button's label and the button's link in
-place. `words` renames those fields.
+place. `words` renames those fields. Give `card` your upload, as `card(cardBlock, { upload })`, and the image's
+popover gets an Upload tab beside the address; see [Editor Uploads](/docs/editor/editor-uploads).
 
 The button is drawn only with both a label and a web or mail link, and the image only from a web address. HTML
 writes the card as a `figure` with its image, a `figcaption` holding the title, the text and the button, and the

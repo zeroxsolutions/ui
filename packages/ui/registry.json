@@ -2377,7 +2377,8 @@
         "@zui/editor-callout",
         "@zui/editor-card",
         "@zui/editor-columns",
-        "@zui/editor-toggle-heading"
+        "@zui/editor-toggle-heading",
+        "@zui/editor-uploads"
       ],
       "files": [
         {
@@ -2394,7 +2395,7 @@
       "description": "An email beside a panel of the library's email presets: a header, a hero, a call to action, a two-up and a footer.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
-      "registryDependencies": ["@zui/block-presets", "@zui/email-editor"],
+      "registryDependencies": ["@zui/block-presets", "@zui/editor-uploads", "@zui/email-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/block-presets-email.tsx",
@@ -2580,12 +2581,37 @@
       "description": "A document with an image and its alt text.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-image"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-image", "@zui/editor-uploads"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-image-demo.tsx",
           "type": "registry:example",
           "target": "@components/editor-image-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-uploads-demo",
+      "type": "registry:example",
+      "title": "Editor Uploads Demo",
+      "description": "The Document Editor uploading into its image, file, media and card blocks through an upload that sends nothing, with a switch that makes the uploads fail.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": [
+        "@shadcn/label",
+        "@shadcn/switch",
+        "@zui/document-editor",
+        "@zui/editor-card",
+        "@zui/editor-file",
+        "@zui/editor-image",
+        "@zui/editor-media",
+        "@zui/editor-uploads"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-uploads-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-uploads-demo.tsx"
         }
       ]
     },
@@ -2997,6 +3023,11 @@
           "path": "registry/bases/base-ui/editor/document/uploads/upload-status.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/uploads/upload-status.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/simulated-upload.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/simulated-upload.ts"
         }
       ],
       "dependencies": ["@zeroxsolutions/editor-core"]
@@ -3153,7 +3184,7 @@
       "description": "A document with a card for a place to visit.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-card"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-card", "@zui/editor-uploads"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-card-demo.tsx",
@@ -3258,7 +3289,7 @@
       "description": "A document with a file attachment.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-file"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-file", "@zui/editor-uploads"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-file-demo.tsx",
@@ -3301,7 +3332,7 @@
       "description": "A document with a video and an audio file.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/editor-core"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-media"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-media", "@zui/editor-uploads"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/editor-media-demo.tsx",
@@ -4088,7 +4119,7 @@
       "title": "Email Editor Demo",
       "description": "A welcome email opening on a hero, with a button and a text link to url variables, a callout, two columns, a card, social links and the legal footer, and its preview.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/email-editor"],
+      "registryDependencies": ["@zui/editor-uploads", "@zui/email-editor"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/email-editor-demo.tsx",

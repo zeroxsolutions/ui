@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/block-library @zui/lucide-file-text-icon
+pnpm dlx shadcn@latest add @zui/block-library @zui/editor-uploads @zui/lucide-file-text-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -88,8 +88,16 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `file` adds the `file` block: a file to download, drawn as a row with its icon, name and size, the whole row a
 link. Its slash item is "File". The author pastes the file's link into the empty block, and its name is read from
-the last part of the address. `size` is the file's size in bytes, from 0 to 2^31, which your upload sets with the
-`insertBlock:file` command, which takes the block's fields and attributes in `attributes`:
+the last part of the address. `size` is the file's size in bytes, from 0 to 2^31. Give `file` your upload and the
+empty block gets an Upload tab beside its link, and a file pasted or dropped into the editor that no other block
+takes becomes a file block; the file's name and size fill the block's once your address lands:
+
+```tsx
+const features = [standardKit(), file({ upload, maxBytes: 50 * 1024 * 1024 })];
+```
+
+[Editor Uploads](/docs/editor/editor-uploads) describes the upload. A file stored by other means is inserted with
+the `insertBlock:file` command, which takes the block's fields and attributes in `attributes`:
 
 ```tsx
 editor.run('insertBlock:file', {

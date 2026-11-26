@@ -6,9 +6,15 @@ import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { emailProfile, type EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
 
 import { emailPresets, EditorPresetsPanel } from '@/registry/bases/base-ui/editor/document/features/presets';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { EmailEditor } from '@/registry/bases/base-ui/editor/profiles/email/email-editor';
 
 const profile = emailProfile();
+
+// Sends nothing: it fills the progress over two seconds, then answers a picture the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/og/docs/editor/email-editor/image.png',
+});
 const presets = emailPresets(profile);
 
 const initial: EditorEmailBlock[] = [
@@ -34,6 +40,7 @@ function BlockPresetsEmailDemo(): ReactNode {
           presets={presets}
           value={blocks}
           onChange={setBlocks}
+          upload={upload}
           onReady={setEditor}
         />
         {editor && <EditorPresetsPanel editor={editor} presets={presets} />}

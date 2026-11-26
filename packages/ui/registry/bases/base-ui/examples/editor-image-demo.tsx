@@ -8,11 +8,17 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 import { image } from '@/registry/bases/base-ui/editor/document/features/image';
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { BubbleMenu } from '@/registry/bases/base-ui/editor/document/ui/bubble-menu';
 import { EditorToolbar } from '@/registry/bases/base-ui/editor/document/ui/editor-toolbar';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
 
-const features = [standardKit(), image()];
+// Sends nothing: it fills the progress over two seconds, then answers a picture the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/og/docs/editor/document-editor/image.png',
+});
+
+const features = [standardKit(), image({ upload })];
 const contributions = collectUiContributions(features);
 
 function paragraph(text: string): NodeJSON {
@@ -28,7 +34,7 @@ const lantern =
 const content: DocJSON = {
   type: 'doc',
   content: [
-    paragraph('Select the image to edit its alt text and width.'),
+    paragraph('Select the image to edit its alt text and width, or upload another on its Upload tab.'),
     { type: 'image', attrs: { src: lantern, alt: 'A red paper lantern on an amber wall', title: '', width: null } },
   ],
 };

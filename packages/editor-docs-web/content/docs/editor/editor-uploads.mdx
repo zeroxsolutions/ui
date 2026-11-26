@@ -1,0 +1,152 @@
+---
+title: Editor Uploads
+description: "Uploads into the editors' blocks through a host's upload callback: the Upload and Link tabs, the progress, cancel and retry drawn in the block, and pasted or dropped files turned into blocks."
+---
+
+<ComponentPreview name="editor-uploads-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/editor-uploads
+```
+
+The features that upload, [Editor Image](/docs/editor/editor-image), [Editor File](/docs/editor/editor-file),
+[Editor Media](/docs/editor/editor-media), [Editor Card](/docs/editor/editor-card) and the
+[Email Editor](/docs/editor/email-editor), install it with them.
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add button field progress tabs utils @zui/lucide-upload-icon @zui/lucide-x-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-uploads" title="components/editor/document/uploads/index.ts" />
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/upload.ts"
+  title="components/editor/document/uploads/upload.ts"
+/>
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/upload-store.ts"
+  title="components/editor/document/uploads/upload-store.ts"
+/>
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/use-block-upload.ts"
+  title="components/editor/document/uploads/use-block-upload.ts"
+/>
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/upload-tabs.tsx"
+  title="components/editor/document/uploads/upload-tabs.tsx"
+/>
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/upload-status.tsx"
+  title="components/editor/document/uploads/upload-status.tsx"
+/>
+
+<ComponentSource
+  name="editor-uploads"
+  file="registry/bases/base-ui/editor/document/uploads/simulated-upload.ts"
+  title="components/editor/document/uploads/simulated-upload.ts"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+The editors store no file. Your app stores it, wherever it keeps files, and answers the web address it is read
+from:
+
+```tsx
+import type { EditorUpload } from '@/components/editor/document/uploads';
+
+// `createUploadTarget` and `sendFile` stand for your storage's own calls.
+const upload: EditorUpload = async (file, { signal, onProgress }) => {
+  const target = await createUploadTarget(file.name, file.type, { signal });
+  await sendFile(target, file, { signal, onProgress });
+  return { url: target.publicUrl };
+};
+```
+
+Hand it to each feature that takes a file, and to the email editor:
+
+```tsx
+const features = [standardKit(), image({ upload }), file({ upload }), media({ upload }), card(cardBlock, { upload })];
+
+<EmailEditor profile={profile} value={blocks} label="Email body" onChange={setBlocks} upload={upload} />;
+```
+
+Where a block asks for an image or a file, it then has two tabs: Upload, which picks a file or takes one dropped
+on it, and Link, the address field it had before. Without `upload` only the address field shows.
+
+A file pasted or dropped into the editor becomes the block of its type and uploads: an image an image block, a
+video or a sound a media block where `media` uploads, and any other file a file block where `file` uploads. The
+email editor takes images only.
+
+## While a file uploads
+
+The block draws the file faint, an image from a local preview and any other file by its name and size, with its
+progress and a cancel. A failed upload says so and offers a retry. A cancel leaves the block as it was before,
+and takes a block a paste or a drop made away again.
+
+Nothing of the file reaches the document while it uploads: `getJSON`, `onChange`, the exports and the email's
+render see the block as it was, and the block's attribute changes once, when your address lands, as one undo
+step. An answer that is not a web address, such as a `blob:` or a `data:` one, fails the upload. The signal your
+upload is handed aborts when the author cancels, when the block is deleted and when the editor unmounts.
+
+## Options
+
+Each feature that uploads takes these beside its own:
+
+| Option     | Type                                                | Default | Description                                                                                                  |
+| ---------- | --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `upload`   | `EditorUpload`                                      | -       | Stores the file and answers `{ url }`. Without it the block takes an address only.                           |
+| `accept`   | `string`                                            | -       | The types taken, as `<input accept>` lists them, within the block's own: `image/*`, `video/*` and `audio/*`. |
+| `maxBytes` | `number`                                            | -       | The largest file, in bytes; a larger one is refused before it is sent.                                       |
+| `messages` | `Partial<UploadMessages> \| (() => UploadMessages)` | English | The words of the tabs, the progress, the cancel, the retry and the refusals.                                 |
+
+The email editor takes `upload` and `uploadLimits`, `{ accept, maxBytes }`, as props, and its words in
+`messages.uploads`. Its answered address is checked as a typed one is, so a hero's `http://` image is refused with
+the error a typed one gets.
+
+`simulatedUpload({ address, fails, duration })` is an upload that sends nothing, for a demo or a prototype: it
+fills the progress over `duration` and answers `address(file)`, which must already serve a file, since nothing
+stores it. The demo above answers pictures and sample media the site already serves.

@@ -8,12 +8,18 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 import { card as cardBlock } from '@zeroxsolutions/editor-core/blocks/index';
 import { card } from '@/registry/bases/base-ui/editor/document/features/card';
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
 import { BubbleMenu } from '@/registry/bases/base-ui/editor/document/ui/bubble-menu';
 import { EditorToolbar } from '@/registry/bases/base-ui/editor/document/ui/editor-toolbar';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
 
-const features = [standardKit(), card(cardBlock)];
+// Sends nothing: it fills the progress over two seconds, then answers a picture the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/og/docs/editor/email-editor/image.png',
+});
+
+const features = [standardKit(), card(cardBlock, { upload })];
 const contributions = collectUiContributions(features);
 
 function paragraph(text: string): NodeJSON {

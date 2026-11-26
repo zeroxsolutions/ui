@@ -27,3 +27,4 @@ export {
 } from './use-block-upload';
 export { UploadTabs, type UploadTabsProps } from './upload-tabs';
 export { UploadStatus, type UploadStatusProps } from './upload-status';
+export { simulatedUpload, type SimulatedUploadOptions } from './simulated-upload';

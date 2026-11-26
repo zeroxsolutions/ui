@@ -35,7 +35,7 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field input popover tabs tooltip utils @zui/block-library @zui/block-presets @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-table @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
+pnpm dlx shadcn@latest add badge button combobox field input popover tabs tooltip utils @zui/block-library @zui/block-presets @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-table @zui/editor-uploads @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -154,6 +154,12 @@ pnpm dlx shadcn@latest add badge button combobox field input popover tabs toolti
   name="email-editor"
   file="registry/bases/base-ui/editor/profiles/email/email-social-links-view.tsx"
   title="components/editor/profiles/email/email-social-links-view.tsx"
+/>
+
+<ComponentSource
+  name="email-editor"
+  file="registry/bases/base-ui/editor/profiles/email/email-uploads.ts"
+  title="components/editor/profiles/email/email-uploads.ts"
 />
 
 <ComponentSource
@@ -572,6 +578,8 @@ text or lanes fields, or a default outside its attribute's values. Run `checkEma
 | `blocks`               | `EmailBlockDefinition[]`                         | -        | Your own blocks, from `defineEmailBlock`. Read once, on mount.                                                |
 | `features`             | `EditorFeature[]`                                | -        | Your own features, each block in them with an email codec. Read once, on mount.                               |
 | `presets`              | `readonly BlockPreset[]`                         | -        | Groups of blocks offered under Presets. See [Block Presets](/docs/editor/block-presets). Read once, on mount. |
+| `upload`               | `EditorUpload`                                   | -        | Stores a file and answers its address, giving every image field an Upload tab. Read once, on mount.           |
+| `uploadLimits`         | `UploadLimits`                                   | -        | The image types an upload takes and the largest file, in bytes. Read once, on mount.                          |
 | `className`            | `string`                                         | -        | Classes for the frame.                                                                                        |
 | `onChange`             | `(blocks: EditorEmailBlock[]) => void`           | -        | Called with the blocks after each edit.                                                                       |
 | `onBlur`               | `() => void`                                     | -        | Called when the focus leaves the editor and the menus it opened.                                              |
@@ -580,7 +588,22 @@ text or lanes fields, or a default outside its attribute's values. Run `checkEma
 | `onReady`              | `(editor: IEditor) => void`                      | -        | Called once with the editor.                                                                                  |
 
 Build `messages` once per locale; a new object rebuilds the toolbar and the menus. Its English defaults are
-`DEFAULT_PROFILE_MESSAGES` in `messages.ts`.
+`DEFAULT_PROFILE_MESSAGES` in `messages.ts`; `messages.uploads` holds the words of the Upload tab and of an image
+uploading.
+
+### Uploads
+
+Given `upload`, the image block, a hero, a card, your blocks' `imageUrl` fields and each social icon get an Upload
+tab beside their Link tab, and an image file pasted or dropped into the email becomes an image block that uploads
+it. The email takes images only. Your answered address is checked as a typed one is: the image block, a hero, a
+card and a social icon load over `https://` only, so an `http://` answer shows the error a typed one gets and the
+block keeps the image it had.
+
+```tsx
+<EmailEditor profile={profile} value={blocks} label="Email body" onChange={setBlocks} upload={upload} />
+```
+
+[Editor Uploads](/docs/editor/editor-uploads) describes `upload`, the progress, the cancel and the retry.
 
 ### emailProfile
 

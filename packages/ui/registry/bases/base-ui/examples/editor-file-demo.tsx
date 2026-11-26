@@ -7,12 +7,18 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 
 import { file } from '@/registry/bases/base-ui/editor/document/features/file';
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
 import { BubbleMenu } from '@/registry/bases/base-ui/editor/document/ui/bubble-menu';
 import { EditorToolbar } from '@/registry/bases/base-ui/editor/document/ui/editor-toolbar';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
 
-const features = [standardKit(), file()];
+// Sends nothing: it fills the progress over two seconds, then answers a file the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/r/styles/base-nova/document-editor.json',
+});
+
+const features = [standardKit(), file({ upload })];
 const contributions = collectUiContributions(features);
 
 function paragraph(text: string): NodeJSON {
@@ -31,6 +37,7 @@ const content: DocJSON = {
         size: 89702,
       },
     },
+    paragraph('Paste or drop a file here to attach it, or type / and pick File to upload one.'),
   ],
 };
 

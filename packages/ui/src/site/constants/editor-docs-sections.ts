@@ -39,6 +39,7 @@ export const editorDocsSections: readonly { title: string; pages: readonly strin
       'editor-table-of-contents',
       'editor-toggle',
       'editor-toggle-heading',
+      'editor-uploads',
       'editor-features',
     ],
   },

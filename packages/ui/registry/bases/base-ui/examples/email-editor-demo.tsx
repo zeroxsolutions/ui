@@ -16,6 +16,7 @@ import {
   type EmailTheme,
 } from '@zeroxsolutions/editor-core/template/email/index';
 
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { EmailEditor, type EmailPreviewInput } from '@/registry/bases/base-ui/editor/profiles/email/email-editor';
 
 const variables: VariableDeclaration[] = [
@@ -82,6 +83,11 @@ const testimonial = defineEmailBlock({
 
 // The testimonial joins the profile, so a server's `validate` reads it as the editor does.
 const profile = emailProfile({ variables, blocks: [testimonial] });
+
+// Sends nothing: it fills the progress over two seconds, then answers a picture the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/og/docs/editor/email-editor/image.png',
+});
 
 // The testimonial's own rules, and the callout's border in the brand's green; a color for dark mode goes in its own
 // query, since the base sheet's dark rules beat an inlined one.
@@ -241,6 +247,7 @@ function EmailEditorDemo(): ReactNode {
       blocks={[testimonial]}
       value={blocks}
       onChange={setBlocks}
+      upload={upload}
       renderer={renderer}
       previewInput={previewInput}
       sender="ZUI"

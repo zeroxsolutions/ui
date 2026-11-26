@@ -7,17 +7,30 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 
 import { media } from '@/registry/bases/base-ui/editor/document/features/media';
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
 import { BubbleMenu } from '@/registry/bases/base-ui/editor/document/ui/bubble-menu';
 import { EditorToolbar } from '@/registry/bases/base-ui/editor/document/ui/editor-toolbar';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
 
-const features = [standardKit(), media()];
+// Sends nothing: it fills the progress over two seconds, then answers a sample of the file's kind.
+const upload = simulatedUpload({
+  address: (picked) =>
+    picked.type.startsWith('audio/')
+      ? 'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3'
+      : 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+});
+
+const features = [standardKit(), media({ upload })];
 const contributions = collectUiContributions(features);
 
 const content: DocJSON = {
   type: 'doc',
   content: [
+    {
+      type: 'paragraph',
+      content: [{ type: 'text', text: 'Paste or drop a video or a sound here, or type / and pick Video or Audio.' }],
+    },
     {
       type: 'media',
       attrs: {

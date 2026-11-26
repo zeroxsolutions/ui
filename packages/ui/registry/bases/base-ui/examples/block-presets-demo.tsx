@@ -18,16 +18,22 @@ import {
 import { standardKit } from '@/registry/bases/base-ui/editor/document/features/standard';
 import { toggleHeading } from '@/registry/bases/base-ui/editor/document/features/toggle-heading';
 import { Editor } from '@/registry/bases/base-ui/editor/document/react';
+import { simulatedUpload } from '@/registry/bases/base-ui/editor/document/uploads';
 import { SlashMenu } from '@/registry/bases/base-ui/editor/document/ui/slash-menu';
 
 const presets = documentPresets();
+
+// Sends nothing: it fills the progress over two seconds, then answers a picture the site already serves.
+const upload = simulatedUpload({
+  address: () => 'https://ui.zeroxsolutions.com/og/docs/editor/document-editor/image.png',
+});
 
 // Each library preset holds one of these blocks; an editor without a preset's block does not offer that preset.
 const features = [
   standardKit(),
   button(),
   callout(),
-  card(cardBlock),
+  card(cardBlock, { upload }),
   columns(),
   toggleHeading(),
   presetsFeature(presets),
