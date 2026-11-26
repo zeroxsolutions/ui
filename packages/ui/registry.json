@@ -3018,9 +3018,9 @@
       "name": "editor-table",
       "type": "registry:component",
       "title": "Editor Table",
-      "description": "A table with header cells, resizable columns and selectable cells.",
+      "description": "A table with header cells and selectable cells, its columns sized as shares of the table by dragging a border, and a full width toggle.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor", "@zui/lucide-table-icon"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-layout", "@zui/lucide-table-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/table/index.ts",
@@ -3031,6 +3031,21 @@
           "path": "registry/bases/base-ui/editor/document/features/table/table.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/features/table/table.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-view.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-view.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-borders.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-borders.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/table/table-widths.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/table/table-widths.ts"
         }
       ],
       "css": {
@@ -3086,9 +3101,15 @@
             "background": "color-mix(in oklab, var(--primary) 12%, transparent)",
             "pointer-events": "none"
           }
+        },
+        ".document-editor [data-slot='table'][data-sized] table": {
+          "table-layout": "fixed"
+        },
+        ".document-editor .ProseMirror[contenteditable='true'] > * > [data-slot='table'][data-width='full']": {
+          "margin-inline": "-3rem"
         }
       },
-      "dependencies": ["@tiptap/extension-table", "@zeroxsolutions/editor-core"]
+      "dependencies": ["@tiptap/extension-table", "@tiptap/react", "@zeroxsolutions/editor-core"]
     },
     {
       "name": "editor-table-demo",

@@ -1101,6 +1101,26 @@ describe('the email kit', () => {
     expect(page.getByRole('menuitemradio', { name: '8 : 4' }).elements()).toEqual([]);
   });
 
+  it("sizes a table's columns from a border and exports them as shares, offering no full width", async () => {
+    const editor = await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })]);
+    const border = await vi.waitFor(() => find('[data-slot=table-border]'));
+    border.focus();
+    await userEvent.keyboard('{ArrowRight}');
+
+    await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ columnWidths: [0.55, 0.45] }));
+    await caretAfter('cellA');
+    expect(page.getByRole('button', { name: 'Full width' }).elements()).toEqual([]);
+    expect(editor.can('setBlockLayout', { layout: { width: 'full' } })).toBe(false);
+  });
+
+  it('draws no table border in locked structure', async () => {
+    await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })], {
+      options: { structure: () => 'locked' },
+    });
+    await caretAfter('cellA');
+    expect(document.querySelector('[data-slot=table-border]')).toBeNull();
+  });
+
   it('includes a stored lane ratio the menu does not offer, checked', async () => {
     await mount([
       block({ type: 'columns', attributes: { ratio: [3, 1] }, lanes: [[paragraph('left')], [paragraph('right')]] }),

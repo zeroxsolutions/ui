@@ -1,7 +1,14 @@
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { DocJSON, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { createCodecRegistry, importMarkdown, serialize } from '@zeroxsolutions/editor-core/document/serialize/index';
+import {
+  createCodecRegistry,
+  importHTML,
+  importMarkdown,
+  serialize,
+} from '@zeroxsolutions/editor-core/document/serialize/index';
+import { Viewer } from '../../react/viewer';
 import { standardKit } from '../standard/index';
 import { table } from './table';
 
@@ -102,5 +109,42 @@ describe('table', () => {
       ],
     };
     expect(importMarkdown(serialize(doc, 'markdown', registry), registry).doc).toEqual(doc);
+  });
+
+  it('carries its column widths, its full width and the space around it through HTML', () => {
+    const laid: DocJSON = {
+      type: 'doc',
+      content: [{ ...tableDoc.content![0], attrs: { columnWidths: [0.3, 0.7], width: 'full', spaceBefore: 'small' } }],
+    };
+    const html = serialize(laid, 'html', registry);
+    expect(html).toMatch(/^<table data-column-widths="0.3,0.7" data-width="full" data-space-before="small">/);
+    expect(importHTML(html, registry).doc.content?.[0].attrs).toEqual(laid.content?.[0].attrs);
+  });
+
+  it('writes no width it cannot read, and reads none back', () => {
+    const laid: DocJSON = {
+      type: 'doc',
+      content: [{ ...tableDoc.content![0], attrs: { columnWidths: ['300px', 1], width: 0.5 } }],
+    };
+    expect(serialize(laid, 'html', registry)).toMatch(/^<table>/);
+    const html =
+      '<table data-column-widths="0.01,0.99" data-width="wide"><tbody><tr><td><p>a</p></td><td><p>b</p></td></tr></tbody></table>';
+    expect(importHTML(html, registry).doc.content?.[0].attrs ?? {}).toEqual({});
+  });
+
+  it("reads a pasted table's pixel column widths as shares of the table", () => {
+    const html =
+      '<table><tbody><tr><td colwidth="100"><p>a</p></td><td colwidth="300"><p>b</p></td></tr></tbody></table>';
+    expect(importHTML(html, registry).doc.content?.[0].attrs).toEqual({ columnWidths: [0.25, 0.75] });
+  });
+
+  it('draws its column widths in the Viewer as a share of the table each', () => {
+    const laid: DocJSON = {
+      type: 'doc',
+      content: [{ ...tableDoc.content![0], attrs: { columnWidths: [0.25, 0.75], width: 'full' } }],
+    };
+    const markup = renderToStaticMarkup(<Viewer doc={laid} features={[standardKit(), table()]} />);
+    expect(markup).toContain('data-slot="table" data-width="full"');
+    expect(markup).toContain('<col style="width:25%"/><col style="width:75%"/>');
   });
 });

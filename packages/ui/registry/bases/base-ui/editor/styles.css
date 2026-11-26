@@ -322,6 +322,17 @@
   justify-content: flex-end;
 }
 
+/* A table that stores its column widths draws each column at its share, whatever its cells hold; one that stores
+ * none is laid out by what its cells hold. */
+.document-editor [data-slot='table'][data-sized] table {
+  table-layout: fixed;
+}
+/* A full-width table reaches across the editable surface's side gutters, the 3rem the drag handle sits in, to the
+ * editor's edges. The Viewer draws no gutter, so its content's edges are already the table's. */
+.document-editor .ProseMirror[contenteditable='true'] > * > [data-slot='table'][data-width='full'] {
+  margin-inline: -3rem;
+}
+
 /* MARK: layout - section */
 
 /* MARK: layout - text */

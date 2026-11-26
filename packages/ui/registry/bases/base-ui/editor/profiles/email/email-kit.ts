@@ -837,6 +837,13 @@ export function emailKit(
     return ratio.length <= profile.bounds.lanes ? { engine: found.engine, columns } : undefined;
   };
 
+  // As the block menu refuses a change of attributes: in locked structure, and on a block the host requires.
+  const changeable = (editor: IEditor, pos: number): boolean => {
+    const found = contextOf(editor);
+    const node = found?.engine.state.doc.nodeAt(pos);
+    return !!found && !!node && refusal(context, { node, pos }, false) === null;
+  };
+
   const blocks = defineFeature({
     id: 'emailBlocks',
     nodes: [emailHtmlNode(), emailUnknownNode()],
@@ -952,12 +959,7 @@ export function emailKit(
         columnContent: laneContent,
         maxLanes: profile.bounds.lanes,
         messages: () => messages().layout,
-        // As the block menu's Lanes refuses them: in locked structure, and on a block the host requires.
-        changeable: (editor, pos) => {
-          const found = contextOf(editor);
-          const node = found?.engine.state.doc.nodeAt(pos);
-          return !!found && !!node && refusal(context, { node, pos }, false) === null;
-        },
+        changeable,
       }),
       slash: [],
       commands: {},
@@ -979,7 +981,7 @@ export function emailKit(
       slash: [],
       commands: {},
     },
-    { ...table(), slash: [], commands: {} },
+    { ...table({ messages: () => messages().layout, changeable }), slash: [], commands: {} },
     ...library,
     blocks,
     defineFeature({
