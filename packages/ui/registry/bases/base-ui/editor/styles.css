@@ -323,6 +323,24 @@
   margin-inline-start: auto;
 }
 
+/* A block drawn across its line with no width reaches no further than `--layout-container`, where a surface sets
+ * one, as the email editor does at the width its email draws the block in. */
+.document-editor [data-slot='block-layout']:not([data-fit], [data-width='full'], [style*='--layout-width']) {
+  max-width: min(100%, var(--layout-container, 100%));
+}
+
+/* A whole pixel width an email stored before widths were shares (`--layout-pixels`): drawn at its pixels, never
+ * wider than its line or its container, as the email draws it, and placed by its alignment. */
+.document-editor [data-slot='block-layout'][style*='--layout-pixels'] {
+  width: var(--layout-pixels);
+}
+.document-editor [data-slot='block-layout'][style*='--layout-pixels'][data-align='center'] {
+  margin-inline: auto;
+}
+.document-editor [data-slot='block-layout'][style*='--layout-pixels'][data-align='end'] {
+  margin-inline-start: auto;
+}
+
 /* An image given a width fills it; at its own width it keeps its own size. */
 .document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image'] {
   display: block;

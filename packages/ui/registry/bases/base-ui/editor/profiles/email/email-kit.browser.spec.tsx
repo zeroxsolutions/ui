@@ -377,19 +377,38 @@ describe('the email kit', () => {
     expect(exportedFor(editor)).toEqual(stored);
   });
 
-  it("draws an image's width as a share of the card's content width, and writes a stored pixel width as one", async () => {
+  it("draws an image's share of the card's content width, and a stored pixel width at its pixels, saved as stored", async () => {
     await page.viewport(900, 700);
     const image = (id: string, width: number) =>
       block({ id, key: id, type: 'image', attributes: { width }, content: { src: PIXEL, alt: id } });
-    const editor = await mount([image('share', 0.5), image('pixels', 283)]);
+    const stored = [image('share', 0.5), image('pixels', 283), image('small', 48)];
+    const editor = await mount(stored);
 
+    const figures = await vi.waitFor(() => {
+      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=image]')];
+      if (found.length < 3) throw new Error('the images are not drawn');
+      return found;
+    });
+    expect(figures.map((figure) => Math.round(figure.getBoundingClientRect().width))).toEqual([283, 283, 48]);
+    expect(exportedFor(editor)).toEqual(stored);
+    await page.viewport(414, 896);
+  });
+
+  it('draws a stored pixel width no wider than the lane it sits in, as the email does', async () => {
+    await page.viewport(900, 700);
+    const image = (id: string, width: number) =>
+      block({ id, key: id, type: 'image', attributes: { width }, content: { src: PIXEL, alt: id } });
+    await mount([
+      block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[image('wide', 400)], [image('narrow', 100)]] }),
+    ]);
     const figures = await vi.waitFor(() => {
       const found = [...document.querySelectorAll<HTMLElement>('[data-slot=image]')];
       if (found.length < 2) throw new Error('the images are not drawn');
       return found;
     });
-    for (const figure of figures) expect(figure.getBoundingClientRect().width).toBeCloseTo(283, 0);
-    expect(exportedFor(editor).map((exported) => exported.attributes.width)).toEqual([0.5, 0.5]);
+    const lane = figures[0].closest<HTMLElement>('[data-slot=column]') as HTMLElement;
+    expect(figures[0].getBoundingClientRect().width).toBeLessThanOrEqual(lane.getBoundingClientRect().width);
+    expect(Math.round(figures[1].getBoundingClientRect().width)).toBe(100);
     await page.viewport(414, 896);
   });
 
@@ -447,12 +466,8 @@ describe('the email kit', () => {
     for (let step = 1; step <= 4; step += 1) await mouse('move', { x: from.x - 150 * step, y: from.y });
     await mouse('release', { x: from.x - 600, y: from.y });
 
-    await vi.waitFor(() =>
-      expect(exported(editor)[1].attributes).toEqual({
-        align: 'right',
-        width: 1,
-      }),
-    );
+    // The whole width is written as no width: a stored 1 is one pixel.
+    await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ align: 'right' }));
     expect(find('[data-slot=block-layout]').getBoundingClientRect().width).toBeCloseTo(566, 0);
     await page.viewport(414, 896);
   });
@@ -1276,6 +1291,30 @@ describe('the email kit', () => {
     await caretAfter('cellA');
     expect(page.getByRole('button', { name: 'Full width' }).elements()).toEqual([]);
     expect(editor.can('setBlockLayout', { layout: { width: 'full' } })).toBe(false);
+  });
+
+  it.each([
+    ['in locked structure', { structure: () => 'locked' as const }],
+    ['on a required block', { required: () => ['kept-image', 'kept-section', 'kept-text'] }],
+  ])('lays out no image, section or text %s, and still colours the text', async (_case, options) => {
+    const editor = await mount(
+      [
+        block({ id: 'kept-image', key: 'kept-image', type: 'image', content: { src: PIXEL, alt: 'A' } }),
+        block({ id: 'kept-section', key: 'kept-section', type: 'section', lanes: [[paragraph('inside')]] }),
+        paragraph('text', 'kept-text'),
+      ],
+      { options },
+    );
+    expect(editor.can('setBlockLayout', { pos: 0, layout: { align: 'center' } })).toBe(false);
+    expect(editor.can('setBlockLayout', { pos: 0, layout: { width: 0.5 } })).toBe(false);
+    expect(editor.can('setSectionLayout', { pos: 1, layout: { background: 'teal' } })).toBe(false);
+    await caretAfter('text');
+    expect(editor.can('setTextAlign', { align: 'center' })).toBe(false);
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}');
+    expect(editor.can('setTextColor', { token: 'red' })).toBe(true);
+    await caretAfter('inside');
+    await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).not.toBeInTheDocument();
+    expect(document.querySelector('[data-slot=resize-handle]')).toBeNull();
   });
 
   it('draws no table border in locked structure', async () => {

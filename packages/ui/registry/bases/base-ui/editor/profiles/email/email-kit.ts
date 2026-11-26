@@ -33,17 +33,18 @@ import {
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import {
+  CARD_INNER_WIDTH,
   CONTENT_WIDTH,
+  DEFAULT_SECTION_PADDING,
   defaultBlocks,
   emailAlignOf,
   layoutAlignOf,
   libraryBlocks,
+  SECTION_PADDING_PX,
   type Align,
   type DefaultBlockType,
   type LibraryBlockType,
 } from '@zeroxsolutions/editor-core/template/email/index';
-import { DEFAULT_SECTION_PADDING, SECTION_PADDING_PX } from '@zeroxsolutions/editor-core/template/email/blocks/section';
-import { CARD_INNER_WIDTH } from '@zeroxsolutions/editor-core/template/email/blocks/shared';
 import {
   ALIGNS as LAYOUT_ALIGNS,
   LAYOUT_NODES,
@@ -986,8 +987,9 @@ export function emailKit(
     ...standardKit({
       placeholder: options.placeholder ?? messages().emptyLine,
       trailingNode: false,
-      // Refuses what an email cannot draw: a full width, justified text, a full section.
-      layout: { email: true },
+      // Refuses what an email cannot draw (a full width, justified text, a full section, more lanes than the
+      // profile's), and every layout change the block menu refuses.
+      layout: { email: true, lanes: profile.bounds.lanes, changeable },
     }),
     blockMenu: [],
   };
@@ -1020,12 +1022,15 @@ export function emailKit(
       slash: [],
       commands: {},
     },
-    emailSection(messages),
+    emailSection(messages, changeable),
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
     {
       ...image({
         words: () => messages().imageBlock,
         layoutWords: () => messages().layout,
+        changeable,
+        // The email draws an image that sets no width across the width it sits in.
+        fit: false,
         ...(options.uploads
           ? {
               upload: options.uploads.upload,

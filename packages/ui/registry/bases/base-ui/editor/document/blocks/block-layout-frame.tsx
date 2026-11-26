@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
   ALIGNS,
@@ -36,6 +36,11 @@ export interface BlockLayoutFrameProps {
   /** The editable editor the block is in; null in the Viewer and in a read-only editor, which draw no controls. */
   readonly place: BlockLayoutPlace | null;
   readonly words: LayoutWords;
+  /**
+   * A whole pixel width an email stored before widths were shares, drawn while `width` is none: at its pixels,
+   * never wider than its line, as the email draws it. The first drag or key writes a share in its place.
+   */
+  readonly pixels?: number | null;
   /** The block's own drawing, which fills the frame. */
   readonly children: ReactNode;
 }
@@ -65,18 +70,32 @@ function drawnShareOf(frame: HTMLElement): number {
  * toolbar, with the alignment and, for a block that takes a width, the Full width toggle where the editor takes
  * a bleed, and a width handle on each side. A drag previews on the frame alone and stores its width once.
  */
-function BlockLayoutFrame({ align, width, resizable, fit, place, words, children }: BlockLayoutFrameProps): ReactNode {
+function BlockLayoutFrame({
+  align,
+  width,
+  resizable,
+  fit,
+  place,
+  words,
+  pixels = null,
+  children,
+}: BlockLayoutFrameProps): ReactNode {
   const [frame, setFrame] = useState<HTMLDivElement | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
   const placed = alignOf(align);
   const stored = widthOf(width);
   const drawn = preview ?? stored;
+  const drawnPixels = drawn === null && typeof pixels === 'number' && pixels >= 1 ? pixels : null;
+  const props = layoutProps({ align: placed, width: drawn });
   return (
     <div
       ref={setFrame}
       data-slot="block-layout"
-      data-fit={(fit && drawn === null) || undefined}
-      {...layoutProps({ align: placed, width: drawn })}
+      data-fit={(fit && drawn === null && drawnPixels === null) || undefined}
+      {...props}
+      {...(drawnPixels === null
+        ? {}
+        : { style: { ...props.style, '--layout-pixels': `${drawnPixels}px` } as CSSProperties })}
       className="relative"
     >
       {children}

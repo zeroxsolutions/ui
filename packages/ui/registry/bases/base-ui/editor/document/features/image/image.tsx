@@ -62,6 +62,15 @@ const openedHref = (href: string | undefined): string | null =>
 type ImageAttrs = z.infer<typeof imageAttrs>;
 
 /**
+ * The whole pixel width an email stored before widths were shares, which the email editor's block layout keeps on
+ * the image as `pixelWidth`; none in a Document.
+ */
+function pixelsOf(attrs: Record<string, unknown>): number | null {
+  const { pixelWidth } = attrs;
+  return typeof pixelWidth === 'number' && Number.isInteger(pixelWidth) && pixelWidth >= 1 ? pixelWidth : null;
+}
+
+/**
  * The image's width as the layout reads it: a fraction or `full`, and a pixel width a document stored before the
  * layout read against the Document's content width, as the editor reads it on load.
  */
@@ -109,6 +118,8 @@ function ImageFigure({
   alt,
   title,
   width,
+  pixels = null,
+  fit = true,
   caption,
   href,
   layout,
@@ -122,8 +133,15 @@ function ImageFigure({
   src: string;
   alt: string;
   title?: string;
-  /** The layout's width; the image fills its frame at one, and is drawn at its own size at none. */
+  /**
+   * The layout's width; the image fills its frame at one, and at none is drawn at its own size, or across its line
+   * where `fit` is false.
+   */
   width: LayoutWidth | null;
+  /** A whole pixel width an email stored, drawn at its pixels while `width` is none. */
+  pixels?: number | null;
+  /** At no width, the image is drawn at its own size; false draws it across its line, as the email does. */
+  fit?: boolean;
   caption?: string;
   /** Where the image links in the Viewer; the editor draws no link, so a click selects it. */
   href?: string | null;
@@ -153,7 +171,15 @@ function ImageFigure({
     />
   );
   return (
-    <BlockLayoutFrame align={layout.align} width={width} resizable fit place={layout.place} words={layout.words}>
+    <BlockLayoutFrame
+      align={layout.align}
+      width={width}
+      pixels={pixels}
+      resizable
+      fit={fit}
+      place={layout.place}
+      words={layout.words}
+    >
       <figure
         data-slot="image"
         data-selected={selected}
@@ -195,6 +221,8 @@ interface ImageUploads {
   readonly layoutWords: LayoutWords;
   /** Whether the image at `pos` may be laid out; every image may when absent. */
   readonly changeable?: (editor: IEditor, pos: number) => boolean;
+  /** At no width, the image is drawn at its own size; false draws it across its line. */
+  readonly fit?: boolean;
 }
 
 const NO_UPLOADS: ImageUploads = {
@@ -230,6 +258,8 @@ function ImageEditView({
       alt={attrs.alt}
       title={attrs.title || undefined}
       width={imageWidthOf(attrs.width)}
+      pixels={pixelsOf(attrs)}
+      fit={uploads.fit}
       caption={attrs.caption}
       layout={{
         align: attrs.align,
@@ -414,6 +444,11 @@ export interface ImageOptions extends BlockUploadOptions {
    * width handle on it. Every image may when absent.
    */
   changeable?(editor: IEditor, pos: number): boolean;
+  /**
+   * Whether an image that sets no width is drawn at its own size; false draws it across its line, as an email
+   * draws it. True when absent.
+   */
+  fit?: boolean;
 }
 
 /**
@@ -445,6 +480,7 @@ export function image(options: ImageOptions = {}): EditorFeature {
         words: wordsOf(),
         layoutWords: layoutWords(),
         changeable: options.changeable,
+        fit: options.fit,
       }}
     />
   );
