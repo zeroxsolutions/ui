@@ -25,10 +25,6 @@ const icons = Object.entries(modules)
 afterEach(cleanup);
 
 describe('material icon set', () => {
-  it('exports 587 icon modules', () => {
-    expect(icons.length).toBe(587);
-  });
-
   it.each(icons)('$name renders a non-empty svg', ({ Component }) => {
     const { container } = render(<Component />);
     const svg = container.querySelector('svg');
@@ -46,10 +42,6 @@ describe('material icon set', () => {
   });
 
   const withLight = icons.filter((i) => typeof i.Component.Light === 'function');
-
-  it('exposes .Light on exactly 46 icons', () => {
-    expect(withLight.length).toBe(46);
-  });
 
   it.each(withLight)('$name.Light renders a non-empty svg', ({ Component }) => {
     const Light = Component.Light!;

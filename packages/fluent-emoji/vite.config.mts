@@ -1,5 +1,6 @@
 /// <reference types='vitest' />
 import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import { cpSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
@@ -55,15 +56,37 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: 'fluent-emoji',
     watch: false,
     globals: true,
-    environment: 'jsdom',
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
+    // A spec named `*.browser.spec.tsx` runs in Chromium; every other spec runs in jsdom.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'fluent-emoji',
+          environment: 'jsdom',
+          include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          exclude: ['**/*.browser.spec.tsx', '**/node_modules/**'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'fluent-emoji:browser',
+          include: ['src/**/*.browser.spec.tsx'],
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+    ],
   },
 }));

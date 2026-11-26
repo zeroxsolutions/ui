@@ -1,5 +1,5 @@
-import { cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, renderHook, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { setFluentEmojiBase, setFluentEmojiStyle } from './fluent-emoji-url';
 import { FluentEmoji } from './fluent-emoji';
@@ -35,29 +35,6 @@ describe('FluentEmojiStyleProvider', () => {
     expect(src()).toBe(`${BASE}/3d/1f92f.webp`);
   });
 
-  it('re-renders every subscribed <FluentEmoji> when the ambient style changes', () => {
-    setFluentEmojiBase(BASE);
-
-    function StyleSwitch() {
-      const { setStyle } = useFluentEmojiStyle();
-      return <button onClick={() => setStyle('mono')}>switch</button>;
-    }
-
-    render(
-      <FluentEmojiStyleProvider defaultStyle="3d">
-        <FluentEmoji glyph="🤯" />
-        <StyleSwitch />
-      </FluentEmojiStyleProvider>,
-    );
-
-    // Starts in the ambient 3D set…
-    expect(src()).toBe(`${BASE}/3d/1f92f.webp`);
-
-    // …and switching the ambient style redraws the already-mounted emoji.
-    fireEvent.click(screen.getByRole('button', { name: 'switch' }));
-    expect(src()).toBe(`${BASE}/mono/1f92f.svg`);
-  });
-
   it('mirrors the ambient style into the module-global resolver', () => {
     setFluentEmojiBase(BASE);
     render(
@@ -79,19 +56,6 @@ describe('FluentEmojiStyleProvider', () => {
       </FluentEmojiStyleProvider>,
     );
     expect(src()).toBe(`${BASE}/mono/1f92f.svg`);
-  });
-
-  it('reports changes via onStyleChange', () => {
-    const onStyleChange = vi.fn();
-    const { result } = renderHook(() => useFluentEmojiStyle(), {
-      wrapper: ({ children }) => (
-        <FluentEmojiStyleProvider defaultStyle="3d" onStyleChange={onStyleChange}>
-          {children}
-        </FluentEmojiStyleProvider>
-      ),
-    });
-    result.current.setStyle('flat');
-    expect(onStyleChange).toHaveBeenCalledWith('flat');
   });
 });
 

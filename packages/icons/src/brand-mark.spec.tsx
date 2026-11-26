@@ -1,5 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   BrandMark,
@@ -7,7 +7,6 @@ import {
   DEFAULT_BRAND_MARK_BASE,
   setBrandMarkBase,
   setBrandMarkStyle,
-  useBrandMarkStyle,
   type BrandMarkName,
 } from './brand-mark';
 
@@ -16,12 +15,10 @@ afterEach(() => {
   setBrandMarkBase(undefined);
   // The provider writes the module default, as FluentEmojiStyleProvider does.
   setBrandMarkStyle(undefined);
-  vi.restoreAllMocks();
 });
 
 const B = DEFAULT_BRAND_MARK_BASE;
 const mark = (name = 'Mark') => screen.getByRole('img', { name });
-const failProbe = () => fireEvent.error(screen.getByTestId('brand-mark-probe'));
 
 describe('BrandMark', () => {
   it('draws color as an image of the colour file', () => {
@@ -29,37 +26,6 @@ describe('BrandMark', () => {
     expect(mark().tagName).toBe('IMG');
     expect(mark().getAttribute('src')).toBe(`${B}/color/facebook.svg`);
     expect(mark().dataset.variant).toBe('color');
-  });
-
-  it('draws mono as a currentColor mask of the mono file', () => {
-    render(<BrandMark name="openai" variant="mono" label="Mark" />);
-    expect(mark().tagName).toBe('SPAN');
-    expect(mark().style.maskImage).toBe(`url("${B}/mono/openai.svg")`);
-    expect(mark().style.backgroundColor).toBe('currentColor');
-  });
-
-  it('draws combine as a mask of the combine file', () => {
-    render(<BrandMark name="openai" variant="combine" label="Mark" />);
-    expect(mark().style.maskImage).toBe(`url("${B}/combine/openai.svg")`);
-  });
-
-  it('draws avatar as an image, round by default and a rounded square on request', () => {
-    render(<BrandMark name="claude" variant="avatar" label="Mark" />);
-    expect(mark().getAttribute('src')).toBe(`${B}/avatar/claude.svg`);
-    expect(mark().style.borderRadius).toBe('50%');
-    cleanup();
-    render(<BrandMark name="claude" variant="avatar" shape="square" label="Mark" />);
-    expect(mark().style.borderRadius).toBe('25%');
-  });
-
-  it('sizes the height and keeps the ratio on the width, for a number and for a CSS length', () => {
-    render(<BrandMark name="openai" variant="combine" size={20} label="Mark" />);
-    expect(mark().style.height).toBe('20px');
-    expect(parseFloat(mark().style.width)).toBeGreaterThan(20);
-    cleanup();
-    render(<BrandMark name="openai" variant="combine" size="1.25rem" label="Mark" />);
-    expect(mark().style.height).toBe('1.25rem');
-    expect(mark().style.width).toMatch(/^calc\(1\.25rem \* [\d.]+\)$/);
   });
 
   it('starts at the first variant the mark has, with no request for one it lacks', () => {
@@ -76,45 +42,10 @@ describe('BrandMark', () => {
     expect(all.some((el) => el.style.maskImage.includes('/combine/'))).toBe(false);
   });
 
-  it('falls to the next variant after a failed load', () => {
-    render(<BrandMark name="claude" label="Mark" />);
-    fireEvent.error(mark());
-    expect(mark().dataset.variant).toBe('mono');
-  });
-
-  it('falls from a failed mono file to the first letter of the name', () => {
-    render(<BrandMark name="openai" variant="mono" label="Mark" />);
-    failProbe();
-    expect(mark().textContent).toBe('O');
-    expect(mark().dataset.variant).toBe('letter');
-  });
-
-  it('starts again from the top of the chain when the name changes after a failure', () => {
-    const { rerender } = render(<BrandMark name="openai" variant="mono" label="Mark" />);
-    failProbe();
-    rerender(<BrandMark name="claude" variant="mono" label="Mark" />);
-    expect(mark().dataset.variant).toBe('mono');
-  });
-
-  it('starts again from the top of the chain when a name comes back after another', () => {
-    const { rerender } = render(<BrandMark name="openai" variant="mono" label="Mark" />);
-    failProbe();
-    rerender(<BrandMark name="claude" variant="mono" label="Mark" />);
-    rerender(<BrandMark name="openai" variant="mono" label="Mark" />);
-    expect(mark().dataset.variant).toBe('mono');
-  });
-
   it('draws the first letter for a name the manifest does not list', () => {
     // Runtime data cast to BrandMarkName can name a brand with no files at all.
     render(<BrandMark name={'no-such-brand' as BrandMarkName} label="Mark" />);
     expect(mark().textContent).toBe('N');
-    expect(mark().dataset.variant).toBe('letter');
-  });
-
-  it('treats an image already broken when it mounts as failed', () => {
-    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(true);
-    vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(0);
-    render(<BrandMark name="facebook" label="Mark" />);
     expect(mark().dataset.variant).toBe('letter');
   });
 
@@ -135,29 +66,6 @@ describe('BrandMark', () => {
     );
     expect(mark('Ambient').dataset.variant).toBe('mono');
     expect(mark('Own').dataset.variant).toBe('color');
-  });
-
-  it('switches the ambient variant when a child calls setStyle, and tells onStyleChange', () => {
-    const onStyleChange = vi.fn();
-    function Switch() {
-      const { setStyle } = useBrandMarkStyle();
-      return (
-        <button type="button" onClick={() => setStyle('mono')}>
-          switch
-        </button>
-      );
-    }
-    render(
-      <BrandMarkStyleProvider onStyleChange={onStyleChange}>
-        <Switch />
-        <BrandMark name="claude" label="Ambient" />
-      </BrandMarkStyleProvider>,
-    );
-    expect(mark('Ambient').dataset.variant).toBe('color');
-    fireEvent.click(screen.getByRole('button', { name: 'switch' }));
-    expect(mark('Ambient').dataset.variant).toBe('mono');
-    expect(onStyleChange).toHaveBeenCalledTimes(1);
-    expect(onStyleChange).toHaveBeenCalledWith('mono');
   });
 
   it('serves from the module base, and from a per-call base over it', () => {

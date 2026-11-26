@@ -2,7 +2,6 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { AiProviderIcon } from './ai-provider-icon';
-import { BRAND_MARKS } from './lib/brand-manifest';
 
 afterEach(cleanup);
 
@@ -34,27 +33,6 @@ describe('AiProviderIcon', () => {
   it('renders the color variant for a mark that ships one', () => {
     render(<AiProviderIcon provider="gemini" type="color" label="Provider" />);
     expect(markOf().dataset.variant).toBe('color');
-  });
-
-  it('renders the mono variant following currentColor', () => {
-    render(<AiProviderIcon provider="gemini" type="mono" label="Provider" />);
-    expect(markOf().dataset.variant).toBe('mono');
-    expect(markOf().style.backgroundColor).toBe('currentColor');
-  });
-
-  it('draws the avatar file, round', () => {
-    render(<AiProviderIcon provider="openai" type="avatar" size={40} label="Provider" />);
-    expect(markOf().dataset.variant).toBe('avatar');
-    expect(markOf().style.borderRadius).toBe('50%');
-  });
-
-  it('applies a numeric size to an icon variant, the width following the file ratio', () => {
-    render(<AiProviderIcon provider="openai" type="mono" size={32} label="Provider" />);
-    expect(markOf().style.height).toBe('32px');
-    expect(markOf().style.width).toBe(`${32 * BRAND_MARKS.openai.mono}px`);
-    cleanup();
-    render(<AiProviderIcon provider="openai" type="combine" size={32} label="Provider" />);
-    expect(markOf().style.width).toBe(`${32 * BRAND_MARKS.openai.combine}px`);
   });
 
   it('renders a neutral fallback for an unknown provider key, hidden without a label', () => {

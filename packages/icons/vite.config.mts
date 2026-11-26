@@ -1,5 +1,6 @@
 /// <reference types='vitest' />
 import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import { glob } from 'glob';
 import { cpSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -78,15 +79,37 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@zeroxsolutions/icons',
     watch: false,
     globals: true,
-    environment: 'jsdom',
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
+    // A spec named `*.browser.spec.tsx` runs in Chromium; every other spec runs in jsdom.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: '@zeroxsolutions/icons',
+          environment: 'jsdom',
+          include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          exclude: ['**/*.browser.spec.tsx', '**/node_modules/**'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: '@zeroxsolutions/icons:browser',
+          include: ['src/**/*.browser.spec.tsx'],
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+    ],
   },
 }));

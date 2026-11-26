@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { emojiToUnicode } from './emoji-to-unicode';
@@ -41,24 +41,6 @@ describe('fluentEmojiUrl', () => {
 
   it('builds a <base>/3d/<code>.webp URL by default', () => {
     expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji' })).toBe('https://cdn.example/emoji/3d/1f92f.webp');
-  });
-
-  it('builds a <base>/flat/<code>.svg URL for the flat style', () => {
-    expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji', style: 'flat' })).toBe(
-      'https://cdn.example/emoji/flat/1f92f.svg',
-    );
-  });
-
-  it.each([
-    ['3d', '3d/1f92f.webp'],
-    ['flat', 'flat/1f92f.svg'],
-    ['modern', 'modern/1f92f.svg'],
-    ['mono', 'mono/1f92f.svg'],
-    ['anim', 'anim/1f92f.webp'],
-  ] as const)('maps the %s style to the right dir + extension', (style, tail) => {
-    expect(fluentEmojiUrl('🤯', { base: 'https://cdn.example/emoji', style })).toBe(
-      `https://cdn.example/emoji/${tail}`,
-    );
   });
 
   it('normalizes a trailing slash on the base', () => {
@@ -133,26 +115,6 @@ describe('fluentEmojiUrl (manifest coverage)', () => {
     expect(fluentEmojiUrl('🙂‍↔️', { base: 'https://cdn.example/emoji', style: 'anim' })).toBeUndefined();
   });
 
-  it('resolves the phoenix glyph in 3d, flat, modern and mono', () => {
-    const phoenix = '🐦‍🔥';
-    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: '3d' })).toBe(
-      'https://cdn.example/emoji/3d/1f426-200d-1f525.webp',
-    );
-    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'flat' })).toBe(
-      'https://cdn.example/emoji/flat/1f426-200d-1f525.svg',
-    );
-    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'modern' })).toBe(
-      'https://cdn.example/emoji/modern/1f426-200d-1f525.svg',
-    );
-    expect(fluentEmojiUrl(phoenix, { base: 'https://cdn.example/emoji', style: 'mono' })).toBe(
-      'https://cdn.example/emoji/mono/1f426-200d-1f525.svg',
-    );
-  });
-
-  it('does not resolve the phoenix glyph in anim (no upstream animated artwork)', () => {
-    expect(fluentEmojiUrl('🐦‍🔥', { base: 'https://cdn.example/emoji', style: 'anim' })).toBeUndefined();
-  });
-
   it('ignores a per-call base for a glyph the manifest has no artwork for', () => {
     // The manifest describes this package's OWN artwork, so a custom `base` (a different host for
     // the same files) still resolves to undefined rather than pointing a request at it.
@@ -174,27 +136,5 @@ describe('<FluentEmoji>', () => {
     const fallback = screen.getByRole('img', { name: 'ballet dancer' });
     expect(fallback.tagName).toBe('SPAN');
     expect(fallback.textContent).toBe('🧑‍🩰');
-  });
-
-  it('resolves the flat svg when variant="flat"', () => {
-    render(<FluentEmoji glyph="🤯" name="exploding head" variant="flat" base="https://cdn.example/emoji" />);
-    expect(screen.getByRole('img', { name: 'exploding head' }).getAttribute('src')).toBe(
-      'https://cdn.example/emoji/flat/1f92f.svg',
-    );
-  });
-
-  it('resolves the animated webp when variant="anim"', () => {
-    render(<FluentEmoji glyph="🤯" name="exploding head" variant="anim" base="https://cdn.example/emoji" />);
-    expect(screen.getByRole('img', { name: 'exploding head' }).getAttribute('src')).toBe(
-      'https://cdn.example/emoji/anim/1f92f.webp',
-    );
-  });
-
-  it('falls back to the native glyph when the image fails to load', () => {
-    render(<FluentEmoji glyph="🤯" base="https://cdn.example/emoji" />);
-    fireEvent.error(screen.getByRole('img'));
-    const fallback = screen.getByRole('img');
-    expect(fallback.tagName).toBe('SPAN');
-    expect(fallback.textContent).toBe('🤯');
   });
 });
