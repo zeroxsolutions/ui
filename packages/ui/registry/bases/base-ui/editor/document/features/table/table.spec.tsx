@@ -132,6 +132,27 @@ describe('table', () => {
     expect(importHTML(html, registry).doc.content?.[0].attrs ?? {}).toEqual({});
   });
 
+  it('imports its own HTML back with one paragraph in each cell', () => {
+    expect(importHTML(serialize(tableDoc, 'html', registry), registry).doc).toEqual(tableDoc);
+  });
+
+  it("wraps a cell's bare text in a paragraph and keeps its blocks as they are", () => {
+    const html =
+      '<table><tbody><tr><td>plain <strong>bold</strong></td><td>lead<p>own</p><ul><li><p>item</p></li></ul></td></tr></tbody></table>';
+    const [first, second] = importHTML(html, registry).doc.content?.[0].content?.[0].content ?? [];
+    expect(first?.content).toEqual([
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'plain ' },
+          { type: 'text', text: 'bold', marks: [{ type: 'bold' }] },
+        ],
+      },
+    ]);
+    expect(second?.content?.map((node) => node.type)).toEqual(['paragraph', 'paragraph', 'bulletList']);
+    expect(second?.content?.[0]?.content).toEqual([{ type: 'text', text: 'lead' }]);
+  });
+
   it("reads a pasted table's pixel column widths as shares of the table", () => {
     const html =
       '<table><tbody><tr><td colwidth="100"><p>a</p></td><td colwidth="300"><p>b</p></td></tr></tbody></table>';

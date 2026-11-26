@@ -98,6 +98,48 @@ const cellText = (cell: NodeJSON, serialize: (n: NodeJSON) => string): string =>
     .replace(/(\\*)\|/g, (pipe, slashes: string) => (slashes.length % 2 === 0 ? `${slashes}\\|` : pipe))
     .trim();
 
+/** The elements a cell holds as blocks of its own; any other content is a line's text. */
+const BLOCK_TAGS: ReadonlySet<string> = new Set([
+  'P',
+  'DIV',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'UL',
+  'OL',
+  'BLOCKQUOTE',
+  'PRE',
+  'TABLE',
+  'HR',
+  'FIGURE',
+  'SECTION',
+  'ASIDE',
+  'DETAILS',
+]);
+
+/**
+ * A copy of `cell` whose blocks are its own and whose every run of text and inline elements between them is a `<p>`,
+ * so the cell's content is blocks: what the editor's export writes (`<td><p>`) and a bare `<td>text</td>` alike.
+ */
+function cellBlocks(cell: HTMLElement): HTMLElement {
+  const blocks = cell.ownerDocument.createElement('div');
+  let line: HTMLElement | null = null;
+  for (const child of [...cell.childNodes]) {
+    if (child instanceof HTMLElement && BLOCK_TAGS.has(child.tagName)) {
+      blocks.append(child.cloneNode(true));
+      line = null;
+    } else if (line !== null || child.nodeType !== Node.TEXT_NODE || child.textContent?.trim()) {
+      line ??= blocks.appendChild(cell.ownerDocument.createElement('p'));
+      line.append(child.cloneNode(true));
+    }
+  }
+  if (blocks.childNodes.length === 0) blocks.append(cell.ownerDocument.createElement('p'));
+  return blocks;
+}
+
 const tableCodec: ReactNodeCodec = {
   node: 'table',
   toMarkdown: (node, ctx) => {
@@ -156,12 +198,7 @@ const tableCodec: ReactNodeCodec = {
             type: 'tableRow',
             content: [...tr.children].map((cell) => ({
               type: cell.tagName === 'TH' ? 'tableHeader' : 'tableCell',
-              content: [
-                {
-                  type: 'paragraph',
-                  content: ctx.fromHTMLChildren(cell as HTMLElement),
-                },
-              ],
+              content: ctx.fromHTMLChildren(cellBlocks(cell as HTMLElement)),
             })),
           })),
         }
