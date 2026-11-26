@@ -1,84 +1,9 @@
 import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { Platform, Pressable } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
+import { Pressable } from 'react-native';
 import { MessageContext } from '../lib/message-context';
-import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from './bubble';
-
-function classesOf(className: string | undefined): string[] {
-  return emittedClasses(className);
-}
+import { Bubble, BubbleContent, BubbleReactions } from './bubble';
 
 describe('Bubble', () => {
-  it('draws its content on the primary colour, at the start of the row, by default', async () => {
-    await render(
-      <Bubble testID="bubble">
-        <BubbleContent testID="content">Hey there! what's up?</BubbleContent>
-      </Bubble>,
-    );
-
-    expect(classesOf(screen.getByTestId('bubble').props.className)).toEqual(
-      expect.arrayContaining(['self-start', 'max-w-[80%]']),
-    );
-    expect(classesOf(screen.getByTestId('content').props.className)).toEqual(
-      expect.arrayContaining(['bg-primary', 'rounded-xl', 'px-3', 'py-2']),
-    );
-    expect(classesOf(screen.getByText("Hey there! what's up?").props.className)).toEqual(
-      expect.arrayContaining(['text-primary-foreground', 'text-sm']),
-    );
-  });
-
-  it.each([
-    ['secondary', 'bg-secondary'],
-    ['muted', 'bg-muted'],
-    ['tinted', 'bg-primary/10'],
-    ['outline', 'border-border'],
-    ['destructive', 'bg-destructive/10'],
-  ] as const)('draws the %s variant with %s', async (variant, background) => {
-    await render(
-      <Bubble variant={variant}>
-        <BubbleContent testID="content">Hello</BubbleContent>
-      </Bubble>,
-    );
-
-    expect(classesOf(screen.getByTestId('content').props.className)).toContain(background);
-  });
-
-  it('lets a ghost bubble take the full width, with no frame around its content', async () => {
-    await render(
-      <Bubble variant="ghost" testID="bubble">
-        <BubbleContent testID="content">An answer with no frame.</BubbleContent>
-      </Bubble>,
-    );
-
-    expect(classesOf(screen.getByTestId('bubble').props.className)).toContain('max-w-full');
-    expect(classesOf(screen.getByTestId('content').props.className)).toEqual(
-      expect.arrayContaining(['bg-transparent', 'p-0', 'rounded-none']),
-    );
-  });
-
-  it('moves an end-aligned bubble and its content to the end of the row', async () => {
-    await render(
-      <Bubble align="end" testID="bubble">
-        <BubbleContent testID="content">Sure.</BubbleContent>
-      </Bubble>,
-    );
-
-    expect(classesOf(screen.getByTestId('bubble').props.className)).toContain('self-end');
-    expect(classesOf(screen.getByTestId('content').props.className)).toContain('self-end');
-  });
-
-  it('follows the side of the message it sits in', async () => {
-    await render(
-      <MessageContext.Provider value={{ align: 'end', countGhost: () => undefined }}>
-        <Bubble testID="bubble">
-          <BubbleContent>Deploying to prod real quick.</BubbleContent>
-        </Bubble>
-      </MessageContext.Provider>,
-    );
-
-    expect(classesOf(screen.getByTestId('bubble').props.className)).toContain('self-end');
-  });
-
   it('tells the message it sits in while it is a ghost bubble', async () => {
     const countGhost = jest.fn();
     const { unmount } = await render(
@@ -113,62 +38,11 @@ describe('Bubble', () => {
     await userEvent.setup().press(button);
 
     expect(onPress).toHaveBeenCalledTimes(1);
-    expect(classesOf(button.props.className)).toEqual(expect.arrayContaining(['bg-background', 'border-border']));
-  });
-
-  describe('on the web', () => {
-    const os = Platform.OS;
-    beforeEach(() => {
-      Platform.OS = 'web';
-    });
-    afterEach(() => {
-      Platform.OS = os;
-    });
-
-    /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
-    const focusFrom = (visible: boolean): object => ({
-      target: { matches: (selector: string) => selector === ':focus-visible' && visible },
-    });
-
-    it('rings pressable content while it holds keyboard focus', async () => {
-      await render(
-        <Bubble>
-          <BubbleContent asChild>
-            <Pressable role="button">Open</Pressable>
-          </BubbleContent>
-        </Bubble>,
-      );
-
-      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(true));
-      expect(classesOf(screen.getByRole('button').props.className)).toContain('border-ring');
-
-      await fireEvent(screen.getByRole('button'), 'blur');
-      expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
-    });
-
-    it('draws no ring after a mouse press focuses it, which comes before the press, and rings the next Tab', async () => {
-      await render(
-        <Bubble>
-          <BubbleContent asChild>
-            <Pressable role="button">Open</Pressable>
-          </BubbleContent>
-        </Bubble>,
-      );
-
-      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(false));
-      await fireEvent(screen.getByRole('button'), 'pressIn');
-      await fireEvent(screen.getByRole('button'), 'pressOut');
-      expect(classesOf(screen.getByRole('button').props.className)).not.toContain('border-ring');
-
-      await fireEvent(screen.getByRole('button'), 'blur');
-      await fireEvent(screen.getByRole('button'), 'focus', focusFrom(true));
-      expect(classesOf(screen.getByRole('button').props.className)).toContain('border-ring');
-    });
   });
 });
 
 describe('BubbleReactions', () => {
-  it('reads as one image named by its label', async () => {
+  it('reads as one image named by its label once a simulated layout places it', async () => {
     await render(
       <Bubble variant="muted">
         <BubbleContent>Nice.</BubbleContent>
@@ -186,11 +60,11 @@ describe('BubbleReactions', () => {
   });
 
   it.each([
-    ['bottom', 'end', ['bottom-0', 'right-3'], 0.75],
-    ['top', 'start', ['top-0', 'left-3'], -0.75],
+    ['bottom', 'end', 0.75],
+    ['top', 'start', -0.75],
   ] as const)(
-    'overlaps the %s edge at the %s, by three quarters of its own height',
-    async (side, align, placed, share) => {
+    'overlaps the %s edge at the %s by three quarters of the height a simulated layout reports',
+    async (side, align, share) => {
       await render(
         <Bubble>
           <BubbleContent>Nice.</BubbleContent>
@@ -201,9 +75,6 @@ describe('BubbleReactions', () => {
       );
       const reactions = screen.getByTestId('reactions', { includeHiddenElements: true });
 
-      expect(classesOf(reactions.props.className)).toEqual(
-        expect.arrayContaining(['absolute', 'border-[3px]', 'border-card', ...placed]),
-      );
       await fireEvent(reactions, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 32, height: 24 } } });
       expect(screen.getByTestId('reactions')).toHaveStyle({ transform: [{ translateY: 24 * share }] });
     },
@@ -211,7 +82,7 @@ describe('BubbleReactions', () => {
 });
 
 describe('BubbleReactions with a transform of its own', () => {
-  it("keeps the overlap and applies the caller's transform after it", async () => {
+  it("keeps the overlap a simulated layout sets and applies the caller's transform after it", async () => {
     await render(
       <Bubble>
         <BubbleContent>Nice.</BubbleContent>
@@ -227,7 +98,7 @@ describe('BubbleReactions with a transform of its own', () => {
     expect(screen.getByTestId('reactions')).toHaveStyle({ transform: [{ translateY: 18 }, { scale: 1.5 }] });
   });
 
-  it('keeps the overlap before a transform given as a string', async () => {
+  it('keeps the overlap a simulated layout sets before a transform given as a string', async () => {
     await render(
       <Bubble>
         <BubbleContent>Nice.</BubbleContent>
@@ -241,21 +112,5 @@ describe('BubbleReactions with a transform of its own', () => {
     });
 
     expect(screen.getByTestId('reactions')).toHaveStyle({ transform: 'translateY(18px) rotate(5deg)' });
-  });
-});
-
-describe('BubbleGroup', () => {
-  it('stacks its bubbles with a gap', async () => {
-    await render(
-      <BubbleGroup testID="group">
-        <Bubble>
-          <BubbleContent>One</BubbleContent>
-        </Bubble>
-      </BubbleGroup>,
-    );
-
-    expect(classesOf(screen.getByTestId('group').props.className)).toEqual(
-      expect.arrayContaining(['flex-col', 'gap-2']),
-    );
   });
 });

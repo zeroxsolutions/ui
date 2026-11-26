@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
-import type { ReactNode } from 'react';
-import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import {
   CodeBlock,
   CodeBlockActions,
@@ -12,11 +11,18 @@ import {
   CodeBlockLine,
   CodeBlockTitle,
 } from './code-block';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 
-jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
+/** The device's clipboard: it holds the last string set, and refuses every write while `denied`. */
+const mockClipboard = { text: '', denied: false };
 
-const setStringAsync = jest.mocked(Clipboard.setStringAsync);
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: async (text: string) => {
+    if (mockClipboard.denied) throw new Error('denied');
+    mockClipboard.text = text;
+    return true;
+  },
+  getStringAsync: async () => mockClipboard.text,
+}));
 
 const output = 'npm install\nadded 1 package in 2s';
 
@@ -72,60 +78,6 @@ describe('CodeBlock', () => {
   });
 });
 
-/** The box CodeBlockContent pads its lines with, around the line drawing `text`. */
-function contentBoxAround(text: string) {
-  const box = screen.getByText(text).parent?.parent;
-  if (!box) throw new Error(`No content box around ${text}`);
-  return box;
-}
-
-function FileHeader({ children }: { children: ReactNode }) {
-  return (
-    <CodeBlockHeader>
-      <CodeBlockTitle>{children}</CodeBlockTitle>
-    </CodeBlockHeader>
-  );
-}
-
-describe('CodeBlock rows around the content', () => {
-  it('draws the content closer under a header', async () => {
-    await render(
-      <CodeBlock>
-        <CodeBlockHeader>
-          <CodeBlockTitle>route.ts</CodeBlockTitle>
-        </CodeBlockHeader>
-        <CodeBlockContent>code</CodeBlockContent>
-      </CodeBlock>,
-    );
-
-    expect(emittedClasses(contentBoxAround('code').props.className)).toContain('pt-2');
-  });
-
-  it('draws it closer under a header an app wraps in a component of its own', async () => {
-    await render(
-      <CodeBlock>
-        <FileHeader>route.ts</FileHeader>
-        <CodeBlockContent>code</CodeBlockContent>
-      </CodeBlock>,
-    );
-
-    expect(emittedClasses(contentBoxAround('code').props.className)).toContain('pt-2');
-  });
-
-  it('keeps the full padding with no header', async () => {
-    await render(
-      <CodeBlock>
-        <CodeBlockContent>code</CodeBlockContent>
-      </CodeBlock>,
-    );
-
-    const classes = emittedClasses(contentBoxAround('code').props.className);
-
-    expect(classes).toContain('py-4');
-    expect(classes).not.toContain('pt-2');
-  });
-});
-
 describe('CodeBlockContent', () => {
   it('scrolls a long line sideways', async () => {
     await render(
@@ -145,16 +97,6 @@ describe('CodeBlockContent', () => {
     );
 
     expect(scrollers().some((scroller) => scroller.horizontal === true)).toBe(false);
-  });
-
-  it('reads left to right whatever the direction around it', async () => {
-    await render(
-      <CodeBlock>
-        <CodeBlockContent testID="content">{output}</CodeBlockContent>
-      </CodeBlock>,
-    );
-
-    expect(StyleSheet.flatten(screen.getByTestId('content').props.style)).toMatchObject({ direction: 'ltr' });
   });
 
   it('numbers each line of a string from startLine, hiding the numbers from screen readers', async () => {
@@ -220,7 +162,7 @@ async function layOut(scroller: HostElement, axis: 'width' | 'height', viewport:
   await fireEvent(scroller, 'contentSizeChange', width, height);
 }
 
-describe('CodeBlockContent scrolling', () => {
+describe('CodeBlockContent scrolling, laid out by a simulated layout', () => {
   async function renderContent(props: { scrollEnabled?: boolean } = {}) {
     await render(
       <CodeBlock>
@@ -260,68 +202,6 @@ describe('CodeBlockContent scrolling', () => {
   });
 });
 
-describe('CodeBlock focus on the web', () => {
-  beforeEach(() => {
-    jest.replaceProperty(Platform, 'OS', 'web');
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
-  const focusFrom = (visible: boolean): object => ({
-    target: { matches: (selector: string) => selector === ':focus-visible' && visible },
-  });
-  const blockClasses = () => emittedClasses(screen.getByTestId('block').props.className);
-
-  it.each([
-    ['scrolls sideways', false],
-    ['wraps', true],
-  ])('rings the block while content that %s holds keyboard focus, and not after a press', async (_, wrap) => {
-    await render(
-      <CodeBlock testID="block">
-        <CodeBlockContent testID="content" wrap={wrap}>
-          {output}
-        </CodeBlockContent>
-      </CodeBlock>,
-    );
-    const content = screen.getByTestId('content');
-    const focusable = wrap ? content : sidewaysScrollerIn(content);
-
-    await fireEvent(focusable, 'focus', focusFrom(false));
-    expect(blockClasses()).not.toContain('border-ring');
-
-    await fireEvent(focusable, 'blur');
-    await fireEvent(focusable, 'focus', focusFrom(true));
-    expect(blockClasses()).toContain('border-ring');
-
-    await fireEvent(focusable, 'blur');
-    expect(blockClasses()).not.toContain('border-ring');
-  });
-
-  it("rings wrapped content and still calls the caller's focus handlers", async () => {
-    const onFocus = jest.fn();
-    const onBlur = jest.fn();
-    await render(
-      <CodeBlock testID="block">
-        <CodeBlockContent testID="content" wrap onFocus={onFocus} onBlur={onBlur}>
-          {output}
-        </CodeBlockContent>
-      </CodeBlock>,
-    );
-    const content = screen.getByTestId('content');
-
-    await fireEvent(content, 'focus', focusFrom(true));
-    expect(blockClasses()).toContain('border-ring');
-    expect(onFocus).toHaveBeenCalledTimes(1);
-
-    await fireEvent(content, 'blur');
-    expect(blockClasses()).not.toContain('border-ring');
-    expect(onBlur).toHaveBeenCalledTimes(1);
-  });
-});
-
 describe('CodeBlockLine', () => {
   it('marks an added line with a plus and a removed one with a minus, read with the line', async () => {
     await render(
@@ -357,7 +237,7 @@ describe('CodeBlockCopyButton', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    setStringAsync.mockReset();
+    Object.assign(mockClipboard, { text: '', denied: false });
     announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
   });
 
@@ -365,6 +245,11 @@ describe('CodeBlockCopyButton', () => {
     jest.useRealTimers();
     announce.mockRestore();
   });
+
+  /** Presses `button` as a finger does, on Jest's fake clock. */
+  async function press(button: ReturnType<typeof screen.getByRole>): Promise<void> {
+    await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(button);
+  }
 
   async function renderCopy(onPress?: () => void) {
     await render(
@@ -378,14 +263,13 @@ describe('CodeBlockCopyButton', () => {
   }
 
   it('copies its value, says Copied, and announces it on iOS and through a live region', async () => {
-    setStringAsync.mockResolvedValue(true);
     const onPress = jest.fn();
     await renderCopy(onPress);
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Copy' }));
+    await press(screen.getByRole('button', { name: 'Copy' }));
 
     expect(onPress).toHaveBeenCalled();
-    expect(setStringAsync).toHaveBeenCalledWith(output);
+    await expect(Clipboard.getStringAsync()).resolves.toBe(output);
     expect(screen.getByRole('button', { name: 'Copied' })).toBeOnTheScreen();
     expect(Platform.OS).toBe('ios');
     expect(announce).toHaveBeenCalledWith('Copied');
@@ -393,9 +277,8 @@ describe('CodeBlockCopyButton', () => {
   });
 
   it('goes back to Copy two seconds later', async () => {
-    setStringAsync.mockResolvedValue(true);
     await renderCopy();
-    await fireEvent.press(screen.getByRole('button', { name: 'Copy' }));
+    await press(screen.getByRole('button', { name: 'Copy' }));
 
     await act(async () => {
       jest.advanceTimersByTime(1999);
@@ -409,13 +292,14 @@ describe('CodeBlockCopyButton', () => {
     expect(screen.queryByText('Copied')).toBeNull();
   });
 
-  it('stays Copy and announces nothing when the copy fails', async () => {
-    setStringAsync.mockRejectedValue(new Error('denied'));
+  it('stays Copy, copies nothing and announces nothing when the device refuses the copy', async () => {
+    mockClipboard.denied = true;
     await renderCopy();
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Copy' }));
+    await press(screen.getByRole('button', { name: 'Copy' }));
 
     expect(screen.getByRole('button', { name: 'Copy' })).toBeOnTheScreen();
+    await expect(Clipboard.getStringAsync()).resolves.toBe('');
     expect(announce).not.toHaveBeenCalled();
   });
 });

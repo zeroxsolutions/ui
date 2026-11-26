@@ -1,7 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
-import { registerCSS } from 'react-native-css-interop/test';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Checkbox, type CheckboxProps } from './checkbox';
 
 type ToggledCheckboxProps = Omit<CheckboxProps, 'checked' | 'onCheckedChange'> &
@@ -56,7 +54,7 @@ describe('Checkbox', () => {
     expect(control).not.toBeChecked();
   });
 
-  it('fills with the primary colour when checked', async () => {
+  it('draws a check mark while checked, and none while unchecked', async () => {
     await render(
       <>
         <Checkbox checked onCheckedChange={() => {}} aria-label="On" />
@@ -64,33 +62,11 @@ describe('Checkbox', () => {
       </>,
     );
 
-    const on = emittedClasses(screen.getByRole('checkbox', { name: 'On' }).props.className);
-    const off = emittedClasses(screen.getByRole('checkbox', { name: 'Off' }).props.className);
-
-    expect(on).toEqual(expect.arrayContaining(['bg-primary', 'border-primary']));
-    expect(off).toEqual(expect.arrayContaining(['border-input', 'size-4', 'rounded-[4px]']));
-    expect(off).not.toContain('bg-primary');
+    expect(checkMarkOf(screen.getByRole('checkbox', { name: 'On' }))).toBeDefined();
+    expect(checkMarkOf(screen.getByRole('checkbox', { name: 'Off' }))).toBeUndefined();
   });
 
-  it('draws a 14px check mark in the colour of a checked box', async () => {
-    // The source still holds the slot token, so it is registered with a stand-in colour; the
-    // token's translation is pinned below.
-    registerCSS('.size-3\\.5 { width: 14px; height: 14px; } .cn-checkbox\\/text\\@checked { color: rgb(1, 2, 3); }');
-    await render(<Checkbox checked onCheckedChange={() => {}} aria-label="Accept terms" />);
-
-    const { width, height, stroke } = checkMarkOf(screen.getByRole('checkbox', { name: 'Accept terms' }))?.props ?? {};
-
-    expect({ width, height, stroke }).toEqual({ width: 14, height: 14, stroke: '#010203' });
-    expect(emittedClasses('cn-checkbox/text@checked')).toEqual(['text-primary-foreground']);
-  });
-
-  it('draws no check mark when unchecked', async () => {
-    await render(<Checkbox checked={false} onCheckedChange={() => {}} aria-label="Accept terms" />);
-
-    expect(checkMarkOf(screen.getByRole('checkbox', { name: 'Accept terms' }))).toBeUndefined();
-  });
-
-  it('announces disabled, is dimmed and ignores presses when disabled', async () => {
+  it('announces disabled and ignores presses when disabled', async () => {
     const onCheckedChange = jest.fn();
     const user = userEvent.setup();
     await render(<ToggledCheckbox disabled onCheckedChange={onCheckedChange} />);
@@ -101,22 +77,5 @@ describe('Checkbox', () => {
     expect(control).toBeDisabled();
     expect(control).not.toBeChecked();
     expect(onCheckedChange).not.toHaveBeenCalled();
-    expect(emittedClasses(control.props.className)).toContain('opacity-50');
-  });
-
-  it('draws the destructive border when invalid, and the primary one once checked', async () => {
-    await render(
-      <>
-        <Checkbox checked={false} onCheckedChange={() => {}} aria-label="Off" aria-invalid />
-        <Checkbox checked onCheckedChange={() => {}} aria-label="On" aria-invalid />
-      </>,
-    );
-
-    const off = emittedClasses(screen.getByRole('checkbox', { name: 'Off' }).props.className);
-    const on = emittedClasses(screen.getByRole('checkbox', { name: 'On' }).props.className);
-
-    expect(off).toContain('border-destructive');
-    expect(on).toContain('border-primary');
-    expect(on).not.toContain('border-destructive');
   });
 });

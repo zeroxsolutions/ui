@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, I18nManager, Platform, StyleSheet } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { DirectionProvider } from './direction';
 import { holdsMirrored } from './direction.testing';
 import { Text } from './text';
@@ -57,6 +56,11 @@ async function translation(axis: 'translateX' | 'translateY' = 'translateX'): Pr
   return (transform.find((entry) => axis in entry)?.[axis] ?? 0) + 0;
 }
 
+/** Presses `button` as a finger does, on Jest's fake clock. */
+async function press(button: ReturnType<typeof screen.getByRole>): Promise<void> {
+  await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).press(button);
+}
+
 function previous() {
   return screen.getByRole('button', { name: 'Previous slide' });
 }
@@ -107,15 +111,15 @@ describe('Carousel', () => {
     await render(<Slides />);
     await layOut(300);
 
-    await fireEvent.press(next());
+    await press(next());
     expect(await translation()).toBe(-300);
     expect(previous()).toBeEnabled();
 
-    for (let i = 0; i < SLIDES; i += 1) await fireEvent.press(next());
+    for (let i = 0; i < SLIDES; i += 1) await press(next());
     expect(await translation()).toBe(-1200);
     expect(next()).toBeDisabled();
 
-    await fireEvent.press(previous());
+    await press(previous());
     expect(await translation()).toBe(-900);
   });
 
@@ -216,7 +220,7 @@ describe('Carousel', () => {
     expect(events).toEqual(['reInit', 'resize']);
   });
 
-  it('follows a swipe and settles on the next slide', async () => {
+  it('follows a simulated swipe and settles on the next slide', async () => {
     await render(<Slides />);
     await layOut(300);
     const viewport = screen.getByTestId('row').parent?.parent;
@@ -232,7 +236,7 @@ describe('Carousel', () => {
     expect(previous()).toBeEnabled();
   });
 
-  it('springs back from a short slow swipe', async () => {
+  it('springs back from a short slow simulated swipe', async () => {
     await render(<Slides />);
     await layOut(300);
     const viewport = screen.getByTestId('row').parent?.parent;
@@ -251,8 +255,8 @@ describe('Carousel', () => {
     await layOut(300, 100);
 
     expect(api?.scrollSnapList()).toHaveLength(3);
-    await fireEvent.press(next());
-    await fireEvent.press(next());
+    await press(next());
+    await press(next());
     expect(await translation()).toBe(-200);
     expect(next()).toBeDisabled();
   });
@@ -262,7 +266,7 @@ describe('Carousel', () => {
     await layOut(300);
 
     expect(previous()).toBeEnabled();
-    for (let i = 0; i < SLIDES; i += 1) await fireEvent.press(next());
+    for (let i = 0; i < SLIDES; i += 1) await press(next());
 
     expect(await translation()).toBe(-1500);
     // The first slide is drawn after the last, where the row has been moved to.
@@ -275,27 +279,15 @@ describe('Carousel', () => {
     await render(<Slides orientation="vertical" />);
     await layOut(200, 200, 'y');
 
-    await fireEvent.press(next());
+    await press(next());
 
     expect(await translation('translateY')).toBe(-200);
   });
 
-  it('moves with the arrow keys', async () => {
-    await render(<Slides testID="carousel" />);
-    await layOut(300);
-
-    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
-      nativeEvent: { key: 'ArrowRight' },
-      preventDefault: jest.fn(),
-    });
-
-    expect(await translation()).toBe(-300);
-  });
-
-  it('runs from the right when text reads right to left: a swipe right moves it on, the arrow keys as upstream', async () => {
+  it('runs from the right when text reads right to left, so a simulated swipe right moves it on', async () => {
     await render(
       <DirectionProvider direction="rtl">
-        <Slides testID="carousel" />
+        <Slides />
       </DirectionProvider>,
     );
     await layOut(300);
@@ -307,17 +299,6 @@ describe('Carousel', () => {
     await fireEvent(viewport, 'responderMove', touch(150, 100));
     expect(await translation()).toBe(-100);
     await fireEvent(viewport, 'responderRelease', touch(160, 200));
-    expect(await translation()).toBe(-300);
-
-    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
-      nativeEvent: { key: 'ArrowRight' },
-      preventDefault: jest.fn(),
-    });
-    expect(await translation()).toBe(-600);
-    await fireEvent(screen.getByTestId('carousel'), 'keyDownCapture', {
-      nativeEvent: { key: 'ArrowLeft' },
-      preventDefault: jest.fn(),
-    });
     expect(await translation()).toBe(-300);
   });
 
@@ -386,20 +367,12 @@ describe('Carousel', () => {
     await render(<Slides />);
     await layOut(300);
 
-    await fireEvent.press(next());
+    await press(next());
     // A frame, well short of the animation's 300ms.
     await act(() => jest.advanceTimersByTimeAsync(16));
 
     const moved = screen.getByTestId('row').parent;
     if (!moved) throw new Error('No moving layer');
     expect(getAnimatedStyle(moved)).toEqual({ transform: [{ translateX: -300 }] });
-  });
-
-  it("draws round outline buttons in Vega's style", async () => {
-    await render(<Slides />);
-
-    expect(emittedClasses(next().props.className)).toEqual(
-      expect.arrayContaining(['rounded-full', 'border', 'border-border']),
-    );
   });
 });

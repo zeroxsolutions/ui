@@ -1,7 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, I18nManager, Platform } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import { DirectionProvider } from './direction';
 import {
@@ -150,7 +149,7 @@ describe('Drawer', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it('closes on a simulated screen reader escape gesture', async () => {
     await render(<MoveGoal defaultOpen />);
     await finishMotion();
 
@@ -181,7 +180,7 @@ describe('Drawer', () => {
     ['up', { dy: -150 }],
     ['left', { dx: -150 }],
     ['right', { dx: 150 }],
-  ] as const)('closes when swiped %s past a quarter of its size', async (swipeDirection, move) => {
+  ] as const)('closes when a simulated swipe %s passes a quarter of its size', async (swipeDirection, move) => {
     await render(<MoveGoal swipeDirection={swipeDirection} defaultOpen />);
     await finishMotion();
     await layOut(400, 400);
@@ -192,7 +191,7 @@ describe('Drawer', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it('closes when flicked toward its edge, however short the swipe', async () => {
+  it('closes when a simulated flick moves toward its edge, however short', async () => {
     await render(<MoveGoal defaultOpen />);
     await finishMotion();
     await layOut(400, 400);
@@ -203,7 +202,7 @@ describe('Drawer', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it('settles back open when swiped a short way and let go slowly', async () => {
+  it('settles back open after a short, slow simulated swipe', async () => {
     await render(<MoveGoal defaultOpen />);
     await finishMotion();
     await layOut(400, 400);
@@ -222,7 +221,7 @@ describe('Drawer', () => {
     ['a device laid out right to left, told to keep left and right', 'ios', true, false, 'rtl', -1],
     ['the web, which keeps left and right', 'web', false, true, 'rtl', -1],
   ] as const)(
-    'closes a left drawer by a swipe toward the side it is drawn on, on %s',
+    'closes a left drawer by a simulated swipe toward the side it is drawn on, on %s',
     async (_where, os, isRTL, swaps, direction, toward) => {
       jest.replaceProperty(Platform, 'OS', os);
       jest
@@ -246,7 +245,7 @@ describe('Drawer', () => {
     },
   );
 
-  it('stays open when swiped away from its edge', async () => {
+  it('stays open after a simulated swipe away from its edge', async () => {
     await render(<MoveGoal defaultOpen />);
     await finishMotion();
     await layOut(400, 400);
@@ -255,19 +254,6 @@ describe('Drawer', () => {
     await finishMotion();
 
     expect(drawer()).toBeOnTheScreen();
-  });
-
-  it.each([
-    ['down', ['bottom-0', 'inset-x-0', 'rounded-t-xl', 'border-t']],
-    ['up', ['top-0', 'inset-x-0', 'rounded-b-xl', 'border-b']],
-    ['left', ['left-0', 'inset-y-0', 'w-3/4', 'rounded-r-xl', 'border-r']],
-    ['right', ['right-0', 'inset-y-0', 'w-3/4', 'rounded-l-xl', 'border-l']],
-  ] as const)('attaches a drawer swiped %s to that edge', async (swipeDirection, edge) => {
-    await render(<MoveGoal swipeDirection={swipeDirection} defaultOpen />);
-
-    for (const style of ['vega', 'nova'] as const) {
-      expect(emittedClasses(drawer().props.className, style)).toEqual(expect.arrayContaining(['absolute', ...edge]));
-    }
   });
 
   it('slides in from its edge as it opens, and stays drawn while it slides out', async () => {

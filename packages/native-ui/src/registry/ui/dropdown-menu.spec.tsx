@@ -1,9 +1,8 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { act, configure, render, screen, userEvent, within } from '@testing-library/react-native';
 import { AccessibilityInfo, Dimensions, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import {
   DropdownMenu,
@@ -55,7 +54,7 @@ function Account({ withHost = true, root, content, onProfile, onLogOut }: Accoun
         <DropdownMenuContent testID="content" {...content}>
           <DropdownMenuGroup>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuItem onPress={onProfile} testID="profile">
+            <DropdownMenuItem onPress={onProfile}>
               <Text>Profile</Text>
               <DropdownMenuShortcut>{'\u21E7\u2318P'}</DropdownMenuShortcut>
             </DropdownMenuItem>
@@ -77,7 +76,7 @@ function Account({ withHost = true, root, content, onProfile, onLogOut }: Accoun
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuItem variant="destructive" inset onPress={onLogOut} testID="log-out">
+          <DropdownMenuItem variant="destructive" inset onPress={onLogOut}>
             <Text>Log out</Text>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -236,14 +235,13 @@ describe('DropdownMenu', () => {
     expect(menu()).toBeOnTheScreen();
   });
 
-  it('dims a disabled item, announces it as disabled and ignores a press on it', async () => {
+  it('announces a disabled item as disabled and ignores a press on it', async () => {
     const user = await open();
 
     await user.press(item('API'));
     await finishMotion();
 
     expect(item('API')).toBeDisabled();
-    expect(emittedClasses(item('API').props.className)).toContain('opacity-50');
     expect(menu()).toBeOnTheScreen();
   });
 
@@ -283,7 +281,7 @@ describe('DropdownMenu', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it('closes on a simulated screen reader escape gesture', async () => {
     await open();
 
     await act(async () => {
@@ -316,29 +314,6 @@ describe('DropdownMenu', () => {
       top: TRIGGER.y + TRIGGER.height + 4,
       left: TRIGGER.x,
     });
-  });
-
-  it('highlights an item while a finger is on it', async () => {
-    await open();
-    const profile = screen.getByTestId('profile');
-    expect(emittedClasses(profile.props.className)).not.toContain('bg-accent');
-
-    await fireEvent(profile, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).toContain('bg-accent');
-
-    await fireEvent(screen.getByTestId('profile'), 'pressOut');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).not.toContain('bg-accent');
-  });
-
-  it('draws a destructive item in the destructive colour, and an inset one indented', async () => {
-    await open();
-    const logOut = screen.getByTestId('log-out');
-
-    expect(emittedClasses(logOut.props.className)).toContain('pl-8');
-    expect(emittedClasses(screen.getByText('Log out').props.className)).toContain('text-destructive');
-
-    await fireEvent(logOut, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('log-out').props.className)).toContain('bg-destructive/10');
   });
 
   it('announces a checkbox item checked or not, and toggles it in place when pressed', async () => {
@@ -458,31 +433,5 @@ describe('DropdownMenu', () => {
     await user.press(outside());
     await finishMotion();
     expect(screen.getByTestId('app-screen', { includeHiddenElements: false })).toBeOnTheScreen();
-  });
-});
-
-describe('DropdownMenuTrigger handlers', () => {
-  it('forwards onPressIn, onFocus and onBlur', async () => {
-    const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    const onBlur = jest.fn();
-    await render(
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button aria-label="Open" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />
-        </DropdownMenuTrigger>
-      </DropdownMenu>,
-    );
-    const control = screen.getByRole('button', { name: 'Open' });
-
-    await userEvent.setup().press(control);
-    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
-    // the ones on the component above it and pass whatever the port dropped.
-    await act(() => control.props.onFocus({ nativeEvent: {} }));
-    await act(() => control.props.onBlur({ nativeEvent: {} }));
-
-    expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

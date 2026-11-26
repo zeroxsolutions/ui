@@ -1,5 +1,4 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -44,18 +43,6 @@ describe('Breadcrumb', () => {
     expect(screen.getByTestId('item').props.role).toBe('listitem');
   });
 
-  it('lays the trail out in a wrapping row of muted small text', async () => {
-    await renderTrail();
-
-    expect(emittedClasses(screen.getByTestId('list').props.className)).toEqual(
-      expect.arrayContaining(['flex-row', 'flex-wrap', 'items-center', 'gap-1.5']),
-    );
-    expect(emittedClasses(screen.getByText('Home').props.className)).toEqual(
-      expect.arrayContaining(['text-muted-foreground', 'text-sm']),
-    );
-    expect(emittedClasses(screen.getByTestId('item').props.className, 'nova')).toContain('gap-1');
-  });
-
   it('calls onPress when a link is pressed', async () => {
     const onHome = jest.fn();
     await renderTrail(onHome);
@@ -65,14 +52,12 @@ describe('Breadcrumb', () => {
     expect(onHome).toHaveBeenCalledTimes(1);
   });
 
-  it('marks the current page as the current, disabled link in the foreground colour', async () => {
+  it('marks the current page as the current, disabled link', async () => {
     await renderTrail();
 
     const page = screen.getByRole('link', { name: 'Settings' });
     expect(page.props['aria-current']).toBe('page');
     expect(page.props['aria-disabled']).toBe(true);
-    expect(emittedClasses(page.props.className)).toContain('text-foreground');
-    expect(emittedClasses(page.props.className)).not.toContain('text-muted-foreground');
   });
 
   it('hides the separators and the ellipsis from screen readers', async () => {

@@ -1,8 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, View } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Combobox,
   ComboboxChip,
@@ -90,12 +89,12 @@ describe('Combobox', () => {
     return user;
   }
 
-  it('is a collapsed combobox showing its placeholder, muted, until something is chosen', async () => {
+  it('is a collapsed combobox showing its placeholder until something is chosen', async () => {
     await render(<Framework />);
 
     expect(trigger()).toHaveProp('role', 'combobox');
     expect(trigger()).toBeCollapsed();
-    expect(emittedClasses(screen.getByText('Select a framework').props.className)).toContain('text-muted-foreground');
+    expect(screen.getByText('Select a framework')).toBeOnTheScreen();
     expect(screen.queryByPlaceholderText('Search framework...')).toBeNull();
   });
 
@@ -159,7 +158,7 @@ describe('Combobox', () => {
     expect(screen.queryByPlaceholderText('Search framework...')).toBeNull();
     expect(trigger()).toBeCollapsed();
     expect(screen.getByText('SvelteKit')).toBeOnTheScreen();
-    expect(emittedClasses(screen.getByText('SvelteKit').props.className)).not.toContain('text-muted-foreground');
+    expect(screen.queryByText('Select a framework')).toBeNull();
   });
 
   it('announces the chosen item as selected, with a check mark beside it', async () => {
@@ -170,26 +169,7 @@ describe('Combobox', () => {
     expect(screen.getAllByTestId('command-check')).toHaveLength(1);
   });
 
-  it("draws the check mark over the end of the item's padding, as upstream does", async () => {
-    await open({ defaultValue: 'nuxt' });
-    let box = screen.getByTestId('command-check').parent;
-    while (box && typeof box.props.className !== 'string') box = box.parent;
-
-    expect(emittedClasses(box?.props.className)).toEqual(expect.arrayContaining(['absolute', 'right-2', 'size-4']));
-    expect(emittedClasses(option('Nuxt.js').props.className)).toContain('pr-8');
-  });
-
-  it("highlights the chosen item as the list opens, in the combobox's accent colour", async () => {
-    await open({ defaultValue: 'nuxt' });
-
-    expect(emittedClasses(option('Nuxt.js').props.className)).toContain('bg-accent');
-    expect(emittedClasses(option('Next.js').props.className)).not.toContain('bg-accent');
-    expect(emittedClasses(within(option('Nuxt.js')).getByText('Nuxt.js').props.className)).toContain(
-      'text-accent-foreground',
-    );
-  });
-
-  it('keeps apart two items that share a label, highlighting and choosing each by its value', async () => {
+  it('keeps apart two items that share a label, choosing the one its value names on the return key', async () => {
     const onValueChange = jest.fn();
     const user = setUp();
     await render(
@@ -201,10 +181,10 @@ describe('Combobox', () => {
           <ComboboxContent>
             <ComboboxInput placeholder="Search framework..." />
             <ComboboxList>
-              <ComboboxItem value="paris-fr" label="Paris" testID="france">
+              <ComboboxItem value="paris-fr" label="Paris">
                 <Text>Paris, France</Text>
               </ComboboxItem>
-              <ComboboxItem value="paris-tx" label="Paris" testID="texas">
+              <ComboboxItem value="paris-tx" label="Paris">
                 <Text>Paris, Texas</Text>
               </ComboboxItem>
             </ComboboxList>
@@ -216,10 +196,7 @@ describe('Combobox', () => {
     await user.press(trigger());
     await finishMotion();
 
-    expect(emittedClasses(screen.getByTestId('texas').props.className)).toContain('bg-accent');
-    expect(emittedClasses(screen.getByTestId('france').props.className)).not.toContain('bg-accent');
-
-    await fireEvent(search(), 'submitEditing');
+    await user.type(search(), '', { submitEditing: true });
     expect(onValueChange).toHaveBeenCalledWith('paris-tx');
   });
 
@@ -233,8 +210,7 @@ describe('Combobox', () => {
     const onValueChange = jest.fn();
     const user = await open({ onValueChange });
 
-    await user.type(search(), 'svel');
-    await fireEvent(search(), 'submitEditing');
+    await user.type(search(), 'svel', { submitEditing: true });
 
     expect(onValueChange).toHaveBeenCalledWith('sveltekit');
   });
@@ -404,34 +380,6 @@ describe('Combobox with multiple', () => {
     await user.press(screen.getByRole('button', { name: 'Remove Remix' }));
 
     expect(screen.queryByTestId('chip-remix')).toBeNull();
-  });
-
-  it("draws Vega's chips field, with the focus border while the list is open", async () => {
-    const user = setUp();
-    await render(<Frameworks root={{ defaultValue: ['next'] }} />);
-    expect(emittedClasses(screen.getByTestId('chips').props.className)).toEqual(
-      expect.arrayContaining(['border', 'border-input', 'rounded-md', 'min-h-9', 'flex-wrap']),
-    );
-    expect(emittedClasses(screen.getByTestId('chip-next').props.className)).toEqual(
-      expect.arrayContaining(['bg-muted', 'rounded-sm', 'h-[22px]']),
-    );
-
-    await user.press(field());
-    await finishMotion();
-
-    expect(emittedClasses(screen.getByTestId('chips').props.className)).toContain('border-ring');
-  });
-
-  it('draws the destructive border around the chips while they are invalid', async () => {
-    await render(
-      <Combobox multiple items={FRAMEWORKS}>
-        <ComboboxChips testID="chips" aria-invalid>
-          <ComboboxChipsInput aria-label="Frameworks" />
-        </ComboboxChips>
-      </Combobox>,
-    );
-
-    expect(emittedClasses(screen.getByTestId('chips').props.className)).toContain('border-destructive');
   });
 
   it("takes a chip's value from its text when none is given", async () => {

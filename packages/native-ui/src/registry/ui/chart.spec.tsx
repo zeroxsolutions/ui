@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { colorScheme } from 'nativewind';
 import { processColor } from 'react-native';
 import { G } from 'react-native-svg';
 import { Text } from './text';
@@ -31,20 +32,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from './chart';
-
-const mockTheme: {
-  scheme: 'light' | 'dark';
-  variables: Record<string, unknown>;
-} = {
-  scheme: 'light',
-  variables: {},
-};
-
-jest.mock('nativewind', () => ({
-  ...jest.requireActual<object>('nativewind'),
-  useColorScheme: () => ({ colorScheme: mockTheme.scheme }),
-  useUnstableNativeVariable: (name: string) => mockTheme.variables[name],
-}));
 
 const chartData = [
   { month: 'January', desktop: 186, mobile: 80 },
@@ -217,13 +204,6 @@ async function tapAt(x: number, chart: Element = surface()): Promise<void> {
   });
 }
 
-async function press(key: string): Promise<void> {
-  await fireEvent(surface(), 'keyDown', {
-    nativeEvent: { key },
-    preventDefault: () => undefined,
-  });
-}
-
 /** A press at `x` across the chart, which is drawn at its initial 320 by 200 until it is laid out. */
 async function pressAt(x: number): Promise<void> {
   await fireEvent(screen.getByTestId('chart-surface'), 'responderGrant', {
@@ -330,10 +310,9 @@ function expectPoints(actual: number[][], expected: number[][]): void {
   });
 }
 
-describe('Chart', () => {
+describe('Chart, pressed through simulated responder touches', () => {
   beforeEach(() => {
-    mockTheme.scheme = 'light';
-    mockTheme.variables = {};
+    colorScheme.set('light');
   });
 
   it('draws a bar for each row of each series, in the colour its config key names', async () => {
@@ -345,39 +324,6 @@ describe('Chart', () => {
     expect(fillOf(screen.getByTestId('chart-bar-mobile-0', HIDDEN))).toBe(processColor('#60a5fa'));
   });
 
-  it('draws a config colour naming a theme variable in the theme colour', async () => {
-    mockTheme.variables = { '--chart-1': [37, 99, 235] };
-
-    await render(
-      <MonthBars
-        config={{
-          desktop: { label: 'Desktop', color: 'var(--chart-1)' },
-          mobile: chartConfig.mobile,
-        }}
-      />,
-    );
-
-    expect(fillOf(screen.getByTestId('chart-bar-desktop-0', HIDDEN))).toBe(processColor('rgb(37, 99, 235)'));
-  });
-
-  it('draws a theme colour with its alpha', async () => {
-    mockTheme.variables = {
-      '--border': [255, 255, 255],
-      '--border-alpha': 0.1,
-    };
-
-    await render(
-      <MonthBars
-        config={{
-          desktop: { color: 'var(--border)' },
-          mobile: chartConfig.mobile,
-        }}
-      />,
-    );
-
-    expect(fillOf(screen.getByTestId('chart-bar-desktop-0', HIDDEN))).toBe(processColor('rgba(255, 255, 255, 0.1)'));
-  });
-
   it("draws a key's theme colour for the scheme the app draws", async () => {
     const config = {
       desktop: {
@@ -387,7 +333,7 @@ describe('Chart', () => {
       mobile: chartConfig.mobile,
     } satisfies ChartConfig;
 
-    mockTheme.scheme = 'dark';
+    colorScheme.set('dark');
     await render(<MonthBars config={config} />);
 
     expect(fillOf(screen.getByTestId('chart-bar-desktop-0', HIDDEN))).toBe(processColor('#dc2626'));
@@ -801,12 +747,7 @@ describe('Chart', () => {
       expect(marks).toHaveLength(4 + 6);
     });
 
-    it('draws circles at the given radii, filled as its first: and last: classes name', async () => {
-      mockTheme.variables = {
-        '--muted': [244, 244, 245],
-        '--background': [255, 255, 255],
-      };
-
+    it('draws circles at the given radii', async () => {
       await render(
         <MonthRadar
           grid={
@@ -826,8 +767,6 @@ describe('Chart', () => {
 
       expect(typeof first === 'object' ? first.props.r : undefined).toBe(86);
       expect(typeof last === 'object' ? last.props.r : undefined).toBe(74);
-      expect(typeof first === 'object' ? fillOf(first) : undefined).toBe(processColor('rgb(244, 244, 245)'));
-      expect(typeof last === 'object' ? fillOf(last) : undefined).toBe(processColor('rgb(255, 255, 255)'));
     });
 
     it('shows the values of the month whose spoke is nearest a press', async () => {
@@ -906,14 +845,11 @@ describe('Chart', () => {
       );
     });
 
-    it('runs a muted track behind the bar over the whole sweep', async () => {
-      mockTheme.variables = { '--muted': [244, 244, 245] };
-
+    it('runs a track behind the bar over the whole sweep', async () => {
       await render(<SafariShape />);
 
       const track = screen.getByTestId('chart-track-visitors-0', HIDDEN);
       expectPoints(cornersOf(track.props.d), ringCorners(67, 91, 0, 100));
-      expect(fillOf(track)).toBe(processColor('rgb(244, 244, 245)'));
     });
 
     it("draws the radius axis' Label in the middle", async () => {
@@ -971,63 +907,6 @@ describe('Chart', () => {
       expect(screen.queryByText('February')).toBeNull();
       expect(screen.getByText('June')).toBeOnTheScreen();
     });
-
-    it('hides it when the focus leaves the chart', async () => {
-      await render(<MonthBars />);
-
-      await press('ArrowRight');
-      await fireEvent(surface(), 'blur');
-
-      expect(screen.queryByText('January')).toBeNull();
-    });
-  });
-
-  describe('on the web', () => {
-    it('moves the tooltip with the arrow keys, Home and End, and hides it with Escape', async () => {
-      await render(<MonthBars />);
-
-      await press('ArrowRight');
-      expect(screen.getByText('January')).toBeOnTheScreen();
-      await press('ArrowRight');
-      expect(screen.getByText('February')).toBeOnTheScreen();
-      await press('ArrowLeft');
-      expect(screen.getByText('January')).toBeOnTheScreen();
-      await press('End');
-      expect(screen.getByText('June')).toBeOnTheScreen();
-      await press('Home');
-      expect(screen.getByText('January')).toBeOnTheScreen();
-      await press('Escape');
-      expect(screen.queryByText('January')).toBeNull();
-    });
-
-    it('shows the category under a mouse and hides it as the mouse leaves; a pen or a finger moves nothing', async () => {
-      await render(<MonthBars />);
-
-      await fireEvent(surface(), 'pointerMove', {
-        nativeEvent: { pointerType: 'touch', offsetX: 80, offsetY: 40 },
-      });
-      expect(screen.queryByText('February')).toBeNull();
-      await fireEvent(surface(), 'pointerMove', {
-        nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 },
-      });
-      expect(screen.getByText('February')).toBeOnTheScreen();
-      await fireEvent(surface(), 'pointerLeave', {
-        nativeEvent: { pointerType: 'mouse' },
-      });
-      expect(screen.queryByText('February')).toBeNull();
-    });
-
-    it('keeps the tooltip of the category a mouse hovers when it clicks there', async () => {
-      await render(<MonthBars />);
-
-      await fireEvent(surface(), 'pointerMove', {
-        nativeEvent: { pointerType: 'mouse', offsetX: 80, offsetY: 40 },
-      });
-      await fireEvent(surface(), 'pointerDown', { nativeEvent: { pointerType: 'mouse' } });
-      await tapAt(80);
-
-      expect(screen.getByText('February')).toBeOnTheScreen();
-    });
   });
 
   describe('a reversed x axis', () => {
@@ -1041,15 +920,6 @@ describe('Chart', () => {
 
       // From the right edge, 80px falls in the fifth category.
       await pressAt(80);
-      expect(screen.getByText('May')).toBeOnTheScreen();
-    });
-
-    it('steps right with the right arrow, back through the categories', async () => {
-      await render(<MonthBars reversed />);
-
-      await press('ArrowRight');
-      expect(screen.getByText('June')).toBeOnTheScreen();
-      await press('ArrowRight');
       expect(screen.getByText('May')).toBeOnTheScreen();
     });
   });

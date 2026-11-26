@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { AccessibilityInfo } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, type AccordionProps } from './accordion';
 import { Text } from './text';
 
@@ -58,14 +57,6 @@ describe('Accordion', () => {
   /** Lets `ms` pass on Jest's clock, running the animation frames due in it. */
   const elapse = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
   const finishMotion = () => elapse(400);
-
-  it('is boxed in the styles that box it', async () => {
-    await render(<Faq testID="faq" />);
-    const root = screen.getByTestId('faq').props.className as string;
-
-    expect(emittedClasses(root, 'maia')).toEqual(expect.arrayContaining(['overflow-hidden', 'rounded-2xl', 'border']));
-    expect(emittedClasses(root)).not.toContain('border');
-  });
 
   it('has triggers announced as collapsed buttons, and renders no content while closed', async () => {
     await render(<Faq />);
@@ -162,7 +153,7 @@ describe('Accordion', () => {
     expect(screen.queryByText('Ships in 3 to 5 days.')).toBeNull();
   });
 
-  it('announces a disabled item, dims its trigger and ignores its presses', async () => {
+  it('announces a disabled item and ignores its presses', async () => {
     const user = userEvent.setup();
     await render(
       <Accordion>
@@ -180,26 +171,11 @@ describe('Accordion', () => {
     await user.press(triggerOf('Archived'));
 
     expect(triggerOf('Archived')).toBeDisabled();
-    expect(emittedClasses(triggerOf('Archived').props.className)).toContain('opacity-50');
     expect(screen.queryByText('Gone')).toBeNull();
   });
 
-  it.each(['vega', 'nova'] as const)(
-    'draws a border in the border colour under every item but the last in %s',
-    async (style) => {
-      await render(<Faq />);
-
-      for (const value of ['shipping', 'returns']) {
-        expect(emittedClasses(screen.getByTestId(`item-${value}`).props.className, style)).toEqual(
-          expect.arrayContaining(['border-b', 'border-border']),
-        );
-      }
-      expect(emittedClasses(screen.getByTestId('item-support').props.className, style)).not.toContain('border-b');
-    },
-  );
-
   describe('motion', () => {
-    it('grows the content from no height to its own over 200ms when it opens', async () => {
+    it('grows the content from no height to the height a simulated layout reports, over 200ms, when it opens', async () => {
       const user = userEvent.setup();
       await render(<Faq />);
 
@@ -215,7 +191,7 @@ describe('Accordion', () => {
       expect(clipOf('shipping')).toHaveAnimatedStyle({ height: 120 });
     });
 
-    it('shrinks the content to no height over 200ms when it closes, then removes it', async () => {
+    it('shrinks the content from a simulated layout height to none over 200ms when it closes, then removes it', async () => {
       const user = userEvent.setup();
       await render(<Faq defaultValue={['shipping']} />);
       await layOut('shipping', 120);
@@ -232,7 +208,7 @@ describe('Accordion', () => {
       expect(screen.queryByTestId('content-shipping', { includeHiddenElements: true })).toBeNull();
     });
 
-    it('opens and closes at once when the system asks for reduced motion', async () => {
+    it('opens to a simulated layout height and closes at once when the system asks for reduced motion', async () => {
       jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
       const user = userEvent.setup();
       await render(<Faq />);

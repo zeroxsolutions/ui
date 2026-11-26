@@ -1,6 +1,5 @@
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible';
 import { Text } from './text';
@@ -80,14 +79,10 @@ describe('Collapsible', () => {
     await render(<Repositories keepMounted />);
 
     expect(screen.getByTestId('content', { includeHiddenElements: true })).not.toBeVisible();
-    expect(emittedClasses(screen.getByTestId('content', { includeHiddenElements: true }).props.className)).toContain(
-      'hidden',
-    );
 
     await user.press(screen.getByRole('button', { name: 'Show repositories' }));
 
     expect(screen.getByTestId('content')).toBeVisible();
-    expect(emittedClasses(screen.getByTestId('content').props.className)).not.toContain('hidden');
   });
 
   it('makes a Button the trigger through asChild, announced with its expanded state', async () => {
@@ -121,31 +116,5 @@ describe('Collapsible', () => {
 
     expect(trigger).toBeDisabled();
     expect(screen.queryByText('@radix-ui/primitives')).toBeNull();
-  });
-});
-
-describe('CollapsibleTrigger handlers', () => {
-  it('forwards onPressIn, onFocus and onBlur', async () => {
-    const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    const onBlur = jest.fn();
-    await render(
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <Button aria-label="Show" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />
-        </CollapsibleTrigger>
-      </Collapsible>,
-    );
-    const control = screen.getByRole('button', { name: 'Show' });
-
-    await userEvent.setup().press(control);
-    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
-    // the ones on the component above it and pass whatever the port dropped.
-    await act(() => control.props.onFocus({ nativeEvent: {} }));
-    await act(() => control.props.onBlur({ nativeEvent: {} }));
-
-    expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

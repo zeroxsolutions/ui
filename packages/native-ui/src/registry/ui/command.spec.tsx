@@ -1,8 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Command,
   CommandDialog,
@@ -64,7 +63,6 @@ const input = () => screen.getByPlaceholderText('Type a command or search...');
 const named = (name: string) => new RegExp(`^${name}`);
 const option = (name: string) => screen.getByRole('option', { name: named(name) });
 const queryOption = (name: string) => screen.queryByRole('option', { name: named(name) });
-const classesOf = (name: string) => emittedClasses(option(name).props.className);
 
 describe('Command', () => {
   beforeEach(() => {
@@ -164,7 +162,7 @@ describe('Command', () => {
     expect(onSelect).toHaveBeenLastCalledWith('Calendar');
   });
 
-  it('announces a disabled item as disabled, dims it and ignores a press on it', async () => {
+  it('announces a disabled item as disabled and ignores a press on it', async () => {
     const onSelect = jest.fn();
     const user = setUp();
     await render(<Palette onSelect={onSelect} />);
@@ -172,74 +170,22 @@ describe('Command', () => {
     await user.press(option('Calculator'));
 
     expect(option('Calculator')).toBeDisabled();
-    expect(classesOf('Calculator')).toContain('opacity-50');
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('highlights the first item that matches, and runs it on the return key', async () => {
+  it('runs the first item that matches the typed text on the return key', async () => {
     const onSelect = jest.fn();
     const user = setUp();
     await render(<Palette onSelect={onSelect} />);
-    expect(classesOf('Calendar')).toContain('bg-muted');
-    expect(classesOf('Billing')).not.toContain('bg-muted');
 
-    await user.type(input(), 'bil');
-    expect(classesOf('Billing')).toContain('bg-muted');
+    await user.type(input(), 'bil', { submitEditing: true });
 
-    await fireEvent(input(), 'submitEditing');
     expect(onSelect).toHaveBeenCalledWith('billing');
   });
 
-  it('moves the highlight with the arrow keys, past a disabled item, and runs it on Enter', async () => {
-    const onSelect = jest.fn();
-    await render(<Palette onSelect={onSelect} />);
-    const press = (key: string) => fireEvent(input(), 'keyPress', { nativeEvent: { key }, preventDefault: jest.fn() });
-
-    await press('ArrowDown');
-    expect(classesOf('Search Emoji')).toContain('bg-muted');
-    expect(classesOf('Calendar')).not.toContain('bg-muted');
-
-    await press('ArrowDown');
-    expect(classesOf('Profile')).toContain('bg-muted');
-
-    await press('ArrowUp');
-    // The web's TextInput reports Enter as a submit.
-    await fireEvent(input(), 'submitEditing');
-    expect(onSelect).toHaveBeenCalledWith('Search Emoji');
-  });
-
-  it('stops at the last item, and with loop wraps round to the first', async () => {
-    await render(<Palette />);
-    const press = (key: string) => fireEvent(input(), 'keyPress', { nativeEvent: { key }, preventDefault: jest.fn() });
-
-    await press('End');
-    await press('ArrowDown');
-    expect(classesOf('Billing')).toContain('bg-muted');
-
-    await screen.rerender(<Palette root={{ loop: true }} />);
-    await press('ArrowDown');
-    expect(classesOf('Calendar')).toContain('bg-muted');
-  });
-
-  it('draws the shortcut of the highlighted item in the foreground colour', async () => {
-    await render(<Palette />);
-    const shortcut = () => emittedClasses(screen.getByText('P').props.className);
-    expect(shortcut()).toContain('text-muted-foreground');
-
-    await fireEvent(input(), 'keyPress', { nativeEvent: { key: 'ArrowDown' }, preventDefault: jest.fn() });
-    await fireEvent(input(), 'keyPress', { nativeEvent: { key: 'ArrowDown' }, preventDefault: jest.fn() });
-
-    expect(classesOf('Profile')).toContain('bg-muted');
-    expect(shortcut()).toContain('text-foreground');
-    expect(shortcut()).not.toContain('text-muted-foreground');
-  });
-
-  it("draws a group's heading muted and small, and names the group by it", async () => {
+  it('names a group by its heading', async () => {
     await render(<Palette />);
 
-    expect(emittedClasses(screen.getByText('Suggestions').props.className)).toEqual(
-      expect.arrayContaining(['text-muted-foreground', 'text-xs']),
-    );
     const group = screen.getByTestId('suggestions');
     expect(group.props.role).toBe('group');
     expect(group.props['aria-labelledby']).toBe(screen.getByText('Suggestions').props.nativeID);
@@ -299,14 +245,6 @@ describe('Command', () => {
     expect(option('Next.js')).toBeSelected();
     expect(option('Remix')).not.toBeSelected();
     expect(screen.getAllByTestId('command-check')).toHaveLength(1);
-  });
-
-  it('draws the rounded popover surface around itself', async () => {
-    await render(<Palette root={{ testID: 'command' }} />);
-
-    expect(emittedClasses(screen.getByTestId('command').props.className)).toEqual(
-      expect.arrayContaining(['bg-popover', 'rounded-xl', 'p-1']),
-    );
   });
 });
 

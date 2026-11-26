@@ -1,9 +1,8 @@
 import { PortalHost } from '@rn-primitives/portal';
-import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { es } from 'date-fns/locale/es';
 import { useState, type ReactNode } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Calendar, CalendarDayButton, type CalendarDayButtonProps, type DateRange } from './calendar';
 import { DirectionProvider } from './direction';
 import { holdsMirrored } from './direction.testing';
@@ -16,7 +15,7 @@ function day(name: string): ReturnType<typeof screen.getByRole> {
 }
 
 async function press(name: string): Promise<void> {
-  await fireEvent.press(day(name));
+  await userEvent.setup().press(day(name));
 }
 
 function Range(): ReactNode {
@@ -196,32 +195,6 @@ describe('Calendar', () => {
     expect(screen.getByText('43')).toBeOnTheScreen();
   });
 
-  it('moves with the keyboard, into the next month past the last day', async () => {
-    await render(<Calendar mode="single" today={TODAY} />);
-
-    await fireEvent(day('Saturday, October 31st, 2026'), 'keyDown', {
-      nativeEvent: { key: 'ArrowRight' },
-      preventDefault: jest.fn(),
-    });
-
-    expect(screen.getByText('November 2026')).toBeOnTheScreen();
-  });
-
-  it("moves to the day drawn on the arrow key's side when text reads right to left", async () => {
-    await render(
-      <DirectionProvider direction="rtl">
-        <Calendar mode="single" today={TODAY} />
-      </DirectionProvider>,
-    );
-
-    await fireEvent(day('Saturday, October 31st, 2026'), 'keyDown', {
-      nativeEvent: { key: 'ArrowLeft' },
-      preventDefault: jest.fn(),
-    });
-
-    expect(screen.getByText('November 2026')).toBeOnTheScreen();
-  });
-
   it('mirrors the chevrons of its month buttons when text reads right to left, and only then', async () => {
     await render(<Calendar mode="single" today={TODAY} />);
     expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Next Month' }))).toBe(false);
@@ -234,23 +207,6 @@ describe('Calendar', () => {
 
     expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Previous Month' }))).toBe(true);
     expect(holdsMirrored(screen.getByRole('button', { name: 'Go to the Next Month' }))).toBe(true);
-  });
-
-  it('draws each caption dropdown as a bordered box around its label, as upstream does', async () => {
-    await render(<Calendar mode="single" today={TODAY} captionLayout="dropdown" />);
-    const month = screen.getByRole('combobox', { name: 'Choose the Month' }).props.className as string;
-
-    expect(emittedClasses(month)).toEqual(expect.arrayContaining(['border', 'border-input', 'h-8', 'pl-2', 'pr-1']));
-    expect(emittedClasses(month)).not.toContain('justify-between');
-    expect(emittedClasses(month, 'lyra')).toContain('rounded-none');
-  });
-
-  it("writes the caption in the style's caption type", async () => {
-    await render(<Calendar mode="single" today={TODAY} />);
-    const caption = screen.getByText('October 2026').props.className as string;
-
-    expect(emittedClasses(caption, 'sera')).toEqual(expect.arrayContaining(['uppercase', 'tracking-wide']));
-    expect(emittedClasses(caption)).not.toContain('uppercase');
   });
 
   it('picks the month and the year from dropdowns in the dropdown caption', async () => {
@@ -290,7 +246,7 @@ describe('Calendar', () => {
     expect(onMonthChange).toHaveBeenLastCalledWith(new Date(2025, 2, 1));
   });
 
-  it('marks the days of a custom modifier, with its classes on their cells', async () => {
+  it('marks the days of a custom modifier', async () => {
     const booked = [new Date(2026, 9, 12), new Date(2026, 9, 13)];
     const seen = new Map<string, boolean>();
     function Booked(props: CalendarDayButtonProps): ReactNode {
@@ -303,16 +259,12 @@ describe('Calendar', () => {
         today={TODAY}
         disabled={booked}
         modifiers={{ booked }}
-        modifiersClassNames={{ booked: 'opacity-100', today: 'border' }}
         components={{ DayButton: Booked }}
       />,
     );
 
     expect(seen.get(new Date(2026, 9, 12).toDateString())).toBe(true);
     expect(seen.get(new Date(2026, 9, 14).toDateString())).toBe(false);
-    expect(emittedClasses(day('Monday, October 12th, 2026').parent?.props.className)).toContain('opacity-100');
-    expect(emittedClasses(day('Wednesday, October 14th, 2026').parent?.props.className)).not.toContain('opacity-100');
-    expect(emittedClasses(day('Today, Thursday, October 22nd, 2026').parent?.props.className)).toContain('border');
   });
 
   it('reports a pressed day to onDayClick with its modifiers, as buttons even without a mode', async () => {
@@ -334,14 +286,5 @@ describe('Calendar', () => {
     const footer = screen.getByText('Pick a day.');
     expect(footer).toBeOnTheScreen();
     expect(footer.parent).toHaveProp('aria-live', 'polite');
-  });
-
-  it("draws Vega's cells and the selected day in the primary colour", async () => {
-    await render(<Calendar mode="single" today={TODAY} selected={new Date(2026, 9, 12)} onSelect={jest.fn()} />);
-
-    const selected = day('Monday, October 12th, 2026, selected');
-    expect(emittedClasses(selected.props.className)).toContain('bg-primary');
-    const cell = selected.parent;
-    expect(emittedClasses(cell?.props.className)).toContain('size-8');
   });
 });

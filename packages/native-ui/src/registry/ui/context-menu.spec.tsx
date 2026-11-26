@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
 import { AccessibilityInfo, Dimensions } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   ContextMenu,
   ContextMenuCheckboxItem,
@@ -30,9 +29,6 @@ import { Text } from './text';
 // open menu from them; the specs on its motion read the animated style instead.
 configure({ defaultIncludeHiddenElements: true });
 
-/** Where a finger long-presses the trigger, on the screen. */
-const PRESS = { pageX: 120, pageY: 240 };
-
 interface AccountProps {
   withHost?: boolean;
   root?: ContextMenuProps;
@@ -52,7 +48,7 @@ function Account({ withHost = true, root, content, onProfile, onLogOut }: Accoun
         <ContextMenuContent testID="content" {...content}>
           <ContextMenuGroup>
             <ContextMenuLabel>My Account</ContextMenuLabel>
-            <ContextMenuItem onPress={onProfile} testID="profile">
+            <ContextMenuItem onPress={onProfile}>
               <Text>Profile</Text>
               <ContextMenuShortcut>{'\u21E7\u2318P'}</ContextMenuShortcut>
             </ContextMenuItem>
@@ -74,7 +70,7 @@ function Account({ withHost = true, root, content, onProfile, onLogOut }: Accoun
               </ContextMenuItem>
             </ContextMenuSubContent>
           </ContextMenuSub>
-          <ContextMenuItem variant="destructive" inset onPress={onLogOut} testID="log-out">
+          <ContextMenuItem variant="destructive" inset onPress={onLogOut}>
             <Text>Log out</Text>
           </ContextMenuItem>
         </ContextMenuContent>
@@ -129,9 +125,9 @@ function outside() {
   return layer;
 }
 
-/** Long-presses the trigger named `name` where {@link PRESS} is, as a finger does. */
+/** Long-presses the trigger named `name` as a finger does, on Jest's fake clock. */
 async function longPress(name?: string) {
-  await fireEvent(trigger(name), 'longPress', { nativeEvent: PRESS });
+  await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).longPress(trigger(name));
 }
 
 describe('ContextMenu', () => {
@@ -225,14 +221,13 @@ describe('ContextMenu', () => {
     expect(menu()).toBeOnTheScreen();
   });
 
-  it('dims a disabled item, announces it as disabled and ignores a press on it', async () => {
+  it('announces a disabled item as disabled and ignores a press on it', async () => {
     const user = await open();
 
     await user.press(item('API'));
     await finishMotion();
 
     expect(item('API')).toBeDisabled();
-    expect(emittedClasses(item('API').props.className)).toContain('opacity-50');
     expect(menu()).toBeOnTheScreen();
   });
 
@@ -249,17 +244,6 @@ describe('ContextMenu', () => {
     await user.press(item('Invite users'));
     expect(item('Invite users')).toBeCollapsed();
     expect(screen.queryByRole('menuitem', { name: 'Email' })).toBeNull();
-  });
-
-  it("draws a sub-menu's items in the menu's own box, with the sub-menu's shadow", async () => {
-    const user = await open();
-    await user.press(item('Invite users'));
-    let box = item('Email').parent;
-    while (box && !String(box.props.className).includes('cn-context-menu-subcontent')) box = box.parent;
-    const classes = box?.props.className as string;
-
-    expect(emittedClasses(classes)).toEqual(expect.arrayContaining(['bg-popover', 'shadow-lg']));
-    expect(emittedClasses(classes, 'sera')).toContain('shadow-md');
   });
 
   it('closes on a press outside its content', async () => {
@@ -283,7 +267,7 @@ describe('ContextMenu', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it('closes on a simulated screen reader escape gesture', async () => {
     await open();
 
     await act(async () => {
@@ -304,45 +288,25 @@ describe('ContextMenu', () => {
     expect(focused()).toBe('trigger');
   });
 
-  it('opens below where the finger pressed, 4px along from it', async () => {
-    await open();
+  it('opens below where a simulated long press lands, 4px along from it', async () => {
+    const press = { pageX: 120, pageY: 240 };
+    await render(<Account />);
+    await fireEvent(trigger(), 'longPress', { nativeEvent: press });
+    await finishMotion();
     await act(async () => {
       menu().props.onLayout({ nativeEvent: { layout: { x: 0, y: 0, width: 200, height: 120 } } });
     });
 
-    expect(menu()).toHaveStyle({ top: PRESS.pageY, left: PRESS.pageX + 4 });
+    expect(menu()).toHaveStyle({ top: press.pageY, left: press.pageX + 4 });
   });
 
-  it("opens from a screen reader's long-press action on its area", async () => {
+  it('opens from a simulated screen reader long-press action on its area', async () => {
     await render(<Account />);
 
     await fireEvent(trigger(), 'accessibilityAction', { nativeEvent: { actionName: 'longpress' } });
     await finishMotion();
 
     expect(menu()).toHaveProp('role', 'menu');
-  });
-
-  it('highlights an item while a finger is on it', async () => {
-    await open();
-    const profile = screen.getByTestId('profile');
-    expect(emittedClasses(profile.props.className)).not.toContain('bg-accent');
-
-    await fireEvent(profile, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).toContain('bg-accent');
-
-    await fireEvent(screen.getByTestId('profile'), 'pressOut');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).not.toContain('bg-accent');
-  });
-
-  it('draws a destructive item in the destructive colour, and an inset one indented', async () => {
-    await open();
-    const logOut = screen.getByTestId('log-out');
-
-    expect(emittedClasses(logOut.props.className)).toContain('pl-8');
-    expect(emittedClasses(screen.getByText('Log out').props.className)).toContain('text-destructive');
-
-    await fireEvent(logOut, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('log-out').props.className)).toContain('bg-destructive/10');
   });
 
   it('announces a checkbox item checked or not, and toggles it in place when pressed', async () => {

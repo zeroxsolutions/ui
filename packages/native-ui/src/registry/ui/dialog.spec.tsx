@@ -141,7 +141,7 @@ describe('Dialog', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it('closes on a simulated screen reader escape gesture', async () => {
     await render(<EditProfile defaultOpen />);
     await finishMotion();
 
