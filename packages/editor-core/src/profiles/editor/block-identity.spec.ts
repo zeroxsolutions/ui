@@ -1,95 +1,21 @@
-import { history, undo } from '@tiptap/pm/history';
-import { z } from 'zod';
+import { undo } from '@tiptap/pm/history';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Editor } from '../../document/advanced.js';
-import { createDocumentEditor } from '../../document/core/create-document-editor.js';
-import type { EditorFeature, IEditor, NodeJSON, NodeSpec } from '../../document/core/types/index.js';
-import { blockIdentity, type BlockIdentityOptions } from './block-identity.js';
-import { buttonNodeSpec, columnsNodeSpecs, emailNodeSpecs, sectionNodeSpecs } from '../core/email-nodes.js';
+import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
+import {
+  type Attrs,
+  blocks,
+  button,
+  callout,
+  copyBlocks,
+  destroyMounted,
+  keysAreUnique,
+  mount,
+  paragraph,
+  undoable,
+} from './block-identity.fixture.js';
 
-// Stand-ins for the document's own callout and rule, which live outside editor-core; the callout holds
-// inline text here so a caret in it sits in the block itself.
-const documentNodes: NodeSpec[] = [
-  {
-    name: 'callout',
-    group: 'block',
-    content: 'inline*',
-    defining: true,
-    attrs: z.object({ variant: z.string().optional(), align: z.string().optional() }),
-  },
-  { name: 'horizontalRule', group: 'block', atom: true },
-];
-
-const email: EditorFeature = {
-  id: 'email',
-  nodes: [...documentNodes, buttonNodeSpec, ...columnsNodeSpecs(), ...sectionNodeSpecs(), ...emailNodeSpecs.nodes],
-  marks: [{ name: 'bold', htmlTag: 'strong' }, ...emailNodeSpecs.marks],
-};
-const undoable: EditorFeature = { id: 'history', advanced: { prosePlugins: [history()] } };
-
-type Attrs = Record<string, unknown> & { id?: string | null; key?: string | null };
-
-function paragraph(text: string, attrs: Attrs = {}): NodeJSON {
-  return { type: 'paragraph', attrs, content: text ? [{ type: 'text', text }] : [] };
-}
-
-function callout(text: string, attrs: Attrs = {}): NodeJSON {
-  return { type: 'callout', attrs, content: [{ type: 'text', text }] };
-}
-
-function button(attrs: Attrs): NodeJSON {
-  return { type: 'button', attrs };
-}
-
-const mounted: IEditor[] = [];
-afterEach(() => {
-  for (const editor of mounted.splice(0)) editor.destroy();
-});
-
-function mount(content: NodeJSON[], options: BlockIdentityOptions = {}, extra: EditorFeature[] = []) {
-  let engine: Editor | undefined;
-  const element = document.createElement('div');
-  document.body.append(element);
-  const editor = createDocumentEditor({
-    features: [email, blockIdentity(options), ...extra],
-    content: { type: 'doc', content },
-    element,
-    onEngine: (raw) => {
-      engine = raw as Editor;
-    },
-  });
-  mounted.push(editor);
-  return { editor, engine: engine as Editor };
-}
-
-function blocks(editor: IEditor): Array<{ type: string; id: unknown; key: unknown }> {
-  return (editor.getJSON().content ?? []).map((block) => ({
-    type: block.type,
-    id: (block.attrs as Attrs | undefined)?.id ?? null,
-    key: (block.attrs as Attrs | undefined)?.key ?? null,
-  }));
-}
-
-function keysAreUnique(editor: IEditor): boolean {
-  const keys = blocks(editor).map((block) => block.key);
-  return keys.every((key) => typeof key === 'string' && key.length > 0) && new Set(keys).size === keys.length;
-}
-
-function press(engine: Editor, key: string): void {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
-  engine.view.someProp('handleKeyDown', (handle) => handle(engine.view, event));
-}
-
-/** Copies the document's first `count` top-level blocks as the clipboard would carry them. */
-function copyBlocks(engine: Editor, count = 1): string {
-  let size = 0;
-  for (let index = 0; index < count; index += 1) size += engine.state.doc.child(index).nodeSize;
-  return engine.view.serializeForClipboard(engine.state.doc.slice(0, size)).dom.innerHTML;
-}
-
-function paste(engine: Editor, html: string): void {
-  engine.view.pasteHTML(html, new Event('paste') as ClipboardEvent);
-}
+afterEach(destroyMounted);
 
 describe('blockIdentity', () => {
   it('keys every block the document opens with, keeping its ids', () => {
@@ -137,38 +63,6 @@ describe('blockIdentity', () => {
     expect(new Set(keys).size).toBe(3);
   });
 
-  it('keeps the id on the half that keeps the text when Enter splits a block', () => {
-    const atStart = mount([callout('note', { id: 'b', key: 'kb' })]);
-    atStart.engine.commands.setTextSelection(1);
-    press(atStart.engine, 'Enter');
-    const [empty, kept] = blocks(atStart.editor);
-    expect(atStart.engine.state.doc.child(0).textContent).toBe('');
-    expect(empty.id).toBeNull();
-    expect(empty.key).not.toBe('kb');
-    expect(kept).toEqual({ type: 'callout', id: 'b', key: 'kb' });
-
-    const plain = mount([paragraph('one', { id: 'a', key: 'ka' })]);
-    plain.engine.commands.setTextSelection(1);
-    press(plain.engine, 'Enter');
-    expect(blocks(plain.editor)[0].id).toBeNull();
-    expect(blocks(plain.editor)[1]).toEqual({ type: 'paragraph', id: 'a', key: 'ka' });
-    expect(keysAreUnique(plain.editor)).toBe(true);
-
-    const command = mount([callout('note', { id: 'b', key: 'kb' })]);
-    command.engine.commands.setTextSelection(1);
-    command.engine.commands.splitBlock();
-    expect(blocks(command.editor)[0].id).toBeNull();
-    expect(blocks(command.editor)[1]).toEqual({ type: 'callout', id: 'b', key: 'kb' });
-
-    const inside = mount([callout('note', { id: 'b', key: 'kb' })]);
-    inside.engine.commands.setTextSelection(3);
-    press(inside.engine, 'Enter');
-    const [first, second] = blocks(inside.editor);
-    expect(first).toEqual({ type: 'callout', id: 'b', key: 'kb' });
-    expect(second.id).toBeNull();
-    expect(keysAreUnique(inside.editor)).toBe(true);
-  });
-
   it('keeps id and key across a text edit, a move and a retype', () => {
     const { editor, engine } = mount([
       paragraph('one', { id: 'a', key: 'ka' }),
@@ -196,22 +90,6 @@ describe('blockIdentity', () => {
     const copied = copyBlocks(engine, 2);
     expect(copied).not.toMatch(/\b(id|key)=/);
     expect(engine.getHTML()).not.toMatch(/\b(id|key)=/);
-  });
-
-  it('gives a pasted copy of a block a null id and a new key, in a document opened with ids and no keys', () => {
-    const { editor, engine } = mount([callout('note', { id: 'b' }), paragraph('')]);
-    const original = blocks(editor)[0];
-
-    engine.commands.setTextSelection(engine.state.doc.content.size - 1);
-    paste(engine, copyBlocks(engine));
-
-    const callouts = blocks(editor).filter((block) => block.type === 'callout');
-    expect(callouts).toHaveLength(2);
-    expect(callouts[0]).toEqual(original);
-    expect(callouts[0].id).toBe('b');
-    expect(callouts[1].id).toBeNull();
-    expect(callouts[1].key).not.toBe(original.key);
-    expect(keysAreUnique(editor)).toBe(true);
   });
 
   it('gives a duplicated block a null id and a new key, wherever the copy lands', () => {
@@ -333,23 +211,6 @@ describe('blockIdentity', () => {
     expect(editor.can('deleteBlock')).toBe(true);
   });
 
-  it('refuses a paste over a required block that would drop its id', () => {
-    const elsewhere = mount([paragraph('other')]);
-    const copied = copyBlocks(elsewhere.engine);
-    const content = [paragraph('one', { id: 'a', key: 'ka' }), paragraph('two', { id: 'b', key: 'kb' })];
-
-    const unguarded = mount(content, { structure: () => 'locked' });
-    unguarded.engine.commands.setNodeSelection(0);
-    paste(unguarded.engine, copied);
-    expect(unguarded.editor.getText()).toContain('other');
-
-    const { editor, engine } = mount(content, { structure: () => 'locked', required: () => ['a'] });
-    const before = editor.getJSON();
-    engine.commands.setNodeSelection(0);
-    paste(engine, copied);
-    expect(editor.getJSON()).toEqual(before);
-  });
-
   describe('locked structure', () => {
     const content = [
       paragraph('one', { id: 'a', key: 'ka' }),
@@ -384,14 +245,6 @@ describe('blockIdentity', () => {
         },
       ],
       ['split', (_, engine) => engine.commands.splitBlock()],
-      ['enter', (_, engine) => press(engine, 'Enter')],
-      [
-        'join',
-        (_, engine) => {
-          engine.commands.setTextSelection(engine.state.doc.content.size - 4);
-          press(engine, 'Backspace');
-        },
-      ],
     ];
 
     it.each(attempts)('refuses %s, which a free structure allows', (_, attempt) => {

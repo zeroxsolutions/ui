@@ -1,5 +1,6 @@
 /// <reference types='vitest' />
 import react from '@vitejs/plugin-react';
+import { playwright } from '@vitest/browser-playwright';
 import { glob } from 'glob';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -87,15 +88,42 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@zeroxsolutions/editor-core',
     watch: false,
     globals: true,
-    environment: 'jsdom',
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
+    // A spec named `*.browser.spec.ts(x)` runs in Chromium, where a key press or a paste is the browser's own.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: '@zeroxsolutions/editor-core',
+          environment: 'jsdom',
+          include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+          exclude: ['**/*.browser.spec.{ts,tsx}', '**/node_modules/**'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: '@zeroxsolutions/editor-core:browser',
+          include: ['src/**/*.browser.spec.{ts,tsx}'],
+          // Every page in the browser shares one clipboard, so two files copying at once paste each other's copy.
+          fileParallelism: false,
+          browser: {
+            enabled: true,
+            headless: true,
+            // The clipboard grant is a reader's own browser setting, so a paste case can arrange what another app copied.
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce', permissions: ['clipboard-read', 'clipboard-write'] },
+            }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+    ],
   },
 }));
