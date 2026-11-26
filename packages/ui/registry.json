@@ -3480,7 +3480,21 @@
       "title": "Editor Columns",
       "description": "Columns of blocks side by side, weighed by a ratio, which stack on a narrow screen.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor", "@zui/editor-button", "@zui/lucide-layout-grid-icon"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/separator",
+        "@shadcn/toggle-group",
+        "@shadcn/tooltip",
+        "@zui/document-editor",
+        "@zui/editor-button",
+        "@zui/editor-layout",
+        "@zui/lucide-arrow-down-icon",
+        "@zui/lucide-arrow-up-icon",
+        "@zui/lucide-chevrons-down-up-icon",
+        "@zui/lucide-layout-grid-icon",
+        "@zui/lucide-minus-icon",
+        "@zui/lucide-plus-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/columns/index.ts",
@@ -3491,6 +3505,16 @@
           "path": "registry/bases/base-ui/editor/document/features/columns/columns.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/features/columns/columns.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/columns-divider.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/columns-divider.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/columns/columns-toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/columns/columns-toolbar.tsx"
         }
       ],
       "css": {
@@ -3512,6 +3536,16 @@
         },
         ".document-editor :where( [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
+        },
+        ".document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+          "display": "flex",
+          "flex-direction": "column"
+        },
+        ".document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+          "justify-content": "center"
+        },
+        ".document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+          "justify-content": "flex-end"
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "zod"]

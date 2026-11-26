@@ -24,6 +24,22 @@ describe('columns', () => {
     expect(importHTML(html, registry).doc).toEqual(doc);
   });
 
+  it('round-trips its vertical alignment and the space before it through HTML, and draws both in the Viewer', () => {
+    const doc = docOf({ ratio: [8, 4], valign: 'bottom', spaceBefore: 'none' }, [line('left')], [line('right')]);
+    const html = serialize(doc, 'html', registry);
+    expect(html).toMatch(/^<div data-columns data-ratio="8,4" data-valign="bottom" data-space-before="none">/);
+    expect(importHTML(html, registry).doc).toEqual(doc);
+    const markup = renderToStaticMarkup(<Viewer doc={doc} features={[columns(), standardKit()]} />);
+    expect(markup).toContain('data-valign="bottom"');
+    expect(markup).toContain('data-space-before="none"');
+  });
+
+  it('reads no vertical alignment outside its set', () => {
+    const html =
+      '<div data-columns data-valign="middle"><div data-column><p>a</p></div><div data-column><p>b</p></div></div>';
+    expect(importHTML(html, registry).doc.content?.[0].attrs).toEqual({});
+  });
+
   it("writes Markdown as each column's blocks in order, a blank line between columns", () => {
     const doc = docOf({ ratio: [1, 1] }, [line('left')], [line('right')]);
     expect(serialize(doc, 'markdown', registry).trim()).toBe('left\n\nright');

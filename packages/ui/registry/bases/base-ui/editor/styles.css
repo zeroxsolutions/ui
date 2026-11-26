@@ -297,6 +297,30 @@
 /* MARK: layout - media */
 
 /* MARK: layout - columns */
+/* Where a columns block's lanes hold their blocks against the tallest lane, which every lane stretches to: the
+ * editor's lanes are its column views' hosts, the Viewer's the columns themselves. */
+.document-editor
+  [data-slot='columns']:is([data-valign='center'], [data-valign='bottom'])
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > :is([data-slot='column'], * > [data-slot='column']) {
+  display: flex;
+  flex-direction: column;
+}
+.document-editor
+  [data-slot='columns'][data-valign='center']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > :is([data-slot='column'], * > [data-slot='column']) {
+  justify-content: center;
+}
+.document-editor
+  [data-slot='columns'][data-valign='bottom']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > :is([data-slot='column'], * > [data-slot='column']) {
+  justify-content: flex-end;
+}
 
 /* MARK: layout - section */
 
