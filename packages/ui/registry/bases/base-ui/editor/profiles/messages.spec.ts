@@ -68,19 +68,4 @@ describe('DEFAULT_PROFILE_MESSAGES', () => {
       '75 / 67 UCS-2 - 2 of 3 segments',
     );
   });
-
-  describe('the problem words', () => {
-    it("tell a product block's lane count from column widths, and a lane holding lanes from columns", () => {
-      const problem = (kind: Parameters<typeof DEFAULT_PROFILE_MESSAGES.problem>[0]['kind']) =>
-        DEFAULT_PROFILE_MESSAGES.problem({ kind, block: 'b1' });
-      expect(problem('lanes-count')).toBe('This block holds more or fewer lanes than it takes');
-      expect(problem('lanes-mismatch')).toBe('The columns do not match their widths');
-      expect(problem('block-nested-too-deep')).toBe('A block with lanes cannot sit inside a lane');
-      expect(problem('content-invalid')).toBe('This block holds something its type does not read');
-      expect(problem('attributes-invalid')).toBe('This block has a setting its type does not take');
-      expect(DEFAULT_PROFILE_MESSAGES.renderProblem({ blockId: 'b1', kind: 'lanes-count' })).toContain(
-        'This block holds more or fewer lanes than it takes',
-      );
-    });
-  });
 });

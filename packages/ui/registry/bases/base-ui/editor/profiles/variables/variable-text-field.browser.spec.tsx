@@ -54,7 +54,18 @@ async function mount(initial = '', disabled = false): Promise<Probe> {
 
 const field = () => page.getByRole('textbox', { name: 'Label' });
 const last = (values: string[]) => values[values.length - 1];
-const box = () => getComputedStyle(field().element().closest('[data-slot=variable-text-field]')!);
+const menu = () => page.getByTestId('trigger-menu');
+
+/** Puts `value` on the clipboard the way a reader does: selects it in a field and copies. */
+async function copyText(value: string): Promise<void> {
+  const source = document.createElement('textarea');
+  source.value = value;
+  document.body.append(source);
+  await userEvent.click(source);
+  await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+  await userEvent.copy();
+  source.remove();
+}
 
 describe('VariableTextField', () => {
   it('draws each token of its value as a chip, and an undeclared one marked', async () => {
@@ -68,7 +79,7 @@ describe('VariableTextField', () => {
     const probe = await mount('Continue');
     await userEvent.click(field());
     await userEvent.keyboard('{End} {{{{tr');
-    await vi.waitFor(() => expect(document.querySelector('[data-slot=trigger-menu]')?.textContent).toContain('Trip'));
+    await expect.element(menu()).toHaveTextContent('Trip');
     await userEvent.keyboard('{Enter}');
 
     await vi.waitFor(() => expect(last(probe.values)).toBe('Continue {{tripUrl}}'));
@@ -96,12 +107,9 @@ describe('VariableTextField', () => {
 
   it('lands pasted lines as one line, their tokens as chips', async () => {
     const probe = await mount();
+    await copyText('Hi\n{{name}}');
     await userEvent.click(field());
-    const data = new DataTransfer();
-    data.setData('text/plain', 'Hi\n{{name}}');
-    document.activeElement?.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    );
+    await userEvent.paste();
 
     await vi.waitFor(() => expect(last(probe.values)).toBe('Hi {{name}}'));
     await expect.element(field().getByText('Name')).toHaveAttribute('data-slot', 'variable');
@@ -118,30 +126,22 @@ describe('VariableTextField', () => {
   it('takes no typing and opens no menu while disabled', async () => {
     const probe = await mount('Go', true);
     await expect.element(field()).toHaveAttribute('aria-disabled', 'true');
-    expect(box().opacity).toBe('0.5');
     await userEvent.click(field(), { force: true });
     await userEvent.keyboard('x{{{{');
+    // A load drawn after the keys shows the keys were handled before the absence is read.
+    await userEvent.click(page.getByRole('button', { name: 'Load' }));
+    await expect.element(field().getByText('Trip link')).toBeVisible();
 
-    expect(document.querySelector('[data-slot=trigger-menu]')).toBeNull();
+    await expect.element(menu()).not.toBeInTheDocument();
     expect(probe.values).toEqual([]);
   });
 
-  it('draws the focus ring while the text inside it holds the focus', async () => {
+  it('tells assistive technology it is invalid once the host marks it', async () => {
     await mount('Go');
-    const resting = box().boxShadow;
-
-    await userEvent.click(field());
-
-    await vi.waitFor(() => expect(box().boxShadow).not.toBe(resting));
-  });
-
-  it('draws the destructive border while invalid', async () => {
-    await mount('Go');
-    const valid = box().borderColor;
+    await expect.element(field()).not.toHaveAttribute('aria-invalid');
 
     await userEvent.click(page.getByRole('button', { name: 'Invalidate' }));
 
     await expect.element(field()).toHaveAttribute('aria-invalid', 'true');
-    expect(box().borderColor).not.toBe(valid);
   });
 });

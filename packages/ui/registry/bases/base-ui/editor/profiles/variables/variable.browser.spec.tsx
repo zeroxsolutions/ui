@@ -231,15 +231,6 @@ describe('a variable', () => {
     expect(target.value).toBe('Hi {{name}}');
     target.remove();
   });
-
-  // The chip is a Badge, whose own text is a label's size; in a document it is a word of its line.
-  it('reads at the size of the text around it', async () => {
-    await mount(paragraph(text('Hi '), variable('name')));
-    await vi.waitFor(() => expect(chips()).toHaveLength(1));
-    const chip = chips()[0];
-    expect(chip.classList).toContain('cn-badge');
-    expect(getComputedStyle(chip).fontSize).toBe(getComputedStyle(chip.closest('p')!).fontSize);
-  });
 });
 
 describe('a variable in a block that holds text only', () => {

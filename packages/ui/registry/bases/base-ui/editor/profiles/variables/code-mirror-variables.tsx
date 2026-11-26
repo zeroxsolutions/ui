@@ -31,11 +31,6 @@ export interface CodeMirrorVariablesOptions {
   subscribe?: (listener: () => void) => () => void;
   /** The glyph a declaration shows in the `{{` list, such as its type's icon. None when absent. */
   icon?: (declaration: VariableDeclaration) => ReactNode;
-  /**
-   * Milliseconds the `{{` list ignores keys after it opens, so a key pressed before the author sees it types as
-   * text. The library's default when absent.
-   */
-  interactionDelay?: number;
 }
 
 const redraw = StateEffect.define<null>();
@@ -117,12 +112,7 @@ export function insertPaneVariable(view: EditorView, name: string): void {
  * marked as undeclared (`data-problem="variable-undeclared"`), and typing `{{` lists the declarations, filtered
  * by what follows; a pick writes `{{name}}` as text. Build one per pane.
  */
-export function codeMirrorVariables({
-  declarations,
-  subscribe,
-  icon,
-  interactionDelay,
-}: CodeMirrorVariablesOptions): Extension {
+export function codeMirrorVariables({ declarations, subscribe, icon }: CodeMirrorVariablesOptions): Extension {
   const declarationOf = new WeakMap<Completion, VariableDeclaration>();
 
   const source = (context: CompletionContext): CompletionResult | null => {
@@ -187,7 +177,6 @@ export function codeMirrorVariables({
     autocompletion({
       override: [source],
       icons: false,
-      ...(interactionDelay === undefined ? {} : { interactionDelay }),
       tooltipClass: () => listVariants(),
       optionClass: () => optionVariants(),
       addToOptions: icon
