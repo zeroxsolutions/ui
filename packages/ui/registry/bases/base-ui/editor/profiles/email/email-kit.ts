@@ -44,6 +44,7 @@ import {
   ALIGNS as LAYOUT_ALIGNS,
   LAYOUT_NODES,
   ratioFractions,
+  PARAGRAPH_SIZES,
   TEXT_ALIGN_NODES,
   type LayoutAlign,
 } from '@zeroxsolutions/editor-core/template/layout/index';
@@ -63,6 +64,11 @@ import {
   standardSlashItems,
   standardToolbarItems,
 } from '../../document/features/standard/index';
+import {
+  TEXT_ALIGN_ITEM_ID,
+  TEXT_COLOR_ITEM_ID,
+  textStyleBubbleItems,
+} from '../../document/features/standard/standard-ui';
 import { table } from '../../document/features/table/index';
 import {
   DEFAULT_PROFILE_MESSAGES,
@@ -281,19 +287,30 @@ const LIBRARY_VIEWS: Readonly<Record<LibraryBlockType, (props: EmailBlockViewPro
   legalFooter: EmailLegalFooterView,
 };
 
-/** The toolbar and bubble items of the marks an email stores, by the words each is drawn in. */
-const MARK_ITEMS: Readonly<Record<string, 'bold' | 'italic' | 'link' | 'removeLink'>> = {
-  bold: 'bold',
-  italic: 'italic',
-  [LINK_ITEM_ID]: 'link',
-  [UNLINK_ITEM_ID]: 'removeLink',
+/** The item `id` of `items`, which `textStyleBubbleItems` builds in the words it is given. */
+const textStyleItem = (items: readonly ToolbarItem[], id: string): ToolbarItem =>
+  items.find((item) => item.id === id) as ToolbarItem;
+
+/**
+ * The toolbar and bubble items of what an email stores, each as it is drawn in `messages`' words: the marks, the
+ * text's alignment and its colours.
+ */
+const MARK_ITEMS: Readonly<Record<string, (messages: ProfileEditorMessages) => Partial<ToolbarItem>>> = {
+  bold: (messages) => ({ title: messages.bold }),
+  italic: (messages) => ({ title: messages.italic }),
+  [LINK_ITEM_ID]: (messages) => ({ title: messages.link }),
+  [UNLINK_ITEM_ID]: (messages) => ({ title: messages.removeLink }),
+  [TEXT_ALIGN_ITEM_ID]: (messages) => textStyleItem(textStyleBubbleItems(messages.layout), TEXT_ALIGN_ITEM_ID),
+  [TEXT_COLOR_ITEM_ID]: (messages) => textStyleItem(textStyleBubbleItems(messages.layout), TEXT_COLOR_ITEM_ID),
 };
 
 /** The document's own items; the ones above aside, each offers what an email cannot store. */
-const DOCUMENT_ITEMS = new Set([...standardSlashItems, ...standardToolbarItems].map((item) => item.id));
+const DOCUMENT_ITEMS = new Set(
+  [...standardSlashItems, ...standardToolbarItems, ...textStyleBubbleItems()].map((item) => item.id),
+);
 
 /** The marks the email's inline markup stores. */
-const EMAIL_MARKS = new Set(['bold', 'italic', 'emailLink']);
+const EMAIL_MARKS = new Set(['bold', 'italic', 'emailLink', 'textColor', 'textBackground']);
 
 const paragraphSlashItem: SlashItem = {
   id: 'email-paragraph',
@@ -357,8 +374,8 @@ export function emailUi(
   const hosted = contributions.slash.filter((item) => !kindItems.has(item.id) && !DOCUMENT_ITEMS.has(item.id));
   const marks = (items: readonly ToolbarItem[]) =>
     items.flatMap((item) => {
-      const words = MARK_ITEMS[item.id];
-      if (words) return [{ ...item, title: messages[words] }];
+      const reword = MARK_ITEMS[item.id];
+      if (reword) return [{ ...item, ...reword(messages) }];
       return DOCUMENT_ITEMS.has(item.id) ? [] : [item];
     });
   return { slash: [...offered, ...hosted], toolbar: marks(contributions.toolbar), bubble: marks(contributions.bubble) };
@@ -1056,18 +1073,33 @@ function emailBlockMenuItems(
   const own = () => refusal(context, block, false);
   const whole = () => refusal(context, block, true);
 
+  const size = block.node.attrs.size as string | null | undefined;
   const turnInto = TURNABLE_BLOCKS.has(type)
     ? (['paragraph', 'list'] as const)
         .filter((kind) => kinds.includes(kind))
-        .map((kind): BlockMenuItem => ({
-          id: `email-turn-into-${kind}`,
-          title: words.blocks[kind].title,
-          group: words.turnInto,
-          command: 'turnBlockInto',
-          args: { name: EMAIL_KIND_NODES[kind] },
-          active: () => type === EMAIL_KIND_NODES[kind],
-          disabledReason: whole,
-        }))
+        .flatMap((kind): BlockMenuItem[] => [
+          {
+            id: `email-turn-into-${kind}`,
+            title: words.blocks[kind].title,
+            group: words.turnInto,
+            command: 'turnBlockInto',
+            // A lead or a small line turned into a plain one loses its size, which turning would otherwise keep.
+            args: { name: EMAIL_KIND_NODES[kind], ...(kind === 'paragraph' ? { attrs: { size: null } } : {}) },
+            active: () => type === EMAIL_KIND_NODES[kind] && size == null,
+            disabledReason: whole,
+          },
+          ...(kind === 'paragraph'
+            ? PARAGRAPH_SIZES.map((style): BlockMenuItem => ({
+                id: `email-turn-into-${style}`,
+                title: words.layout.paragraphSizes[style],
+                group: words.turnInto,
+                command: 'turnBlockInto',
+                args: { name: 'paragraph', attrs: { size: style } },
+                active: () => type === 'paragraph' && size === style,
+                disabledReason: whole,
+              }))
+            : []),
+        ])
     : [];
 
   const attributes = (BLOCK_ATTRIBUTES[type] ?? []).flatMap((attribute) =>

@@ -13,13 +13,18 @@ import { StrikethroughIcon } from '@/registry/bases/base-ui/icons/lucide/striket
 import { TextQuoteIcon } from '@/registry/bases/base-ui/icons/lucide/text-quote-icon';
 import { UnderlineIcon } from '@/registry/bases/base-ui/icons/lucide/underline-icon';
 import { CopyIcon } from '@/registry/bases/base-ui/icons/lucide/copy-icon';
+import { PaletteIcon } from '@/registry/bases/base-ui/icons/lucide/palette-icon';
 import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
 import type {
   BlockMenuItem,
   BubbleItem,
+  IEditor,
   SlashItem,
   ToolbarItem,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import { PARAGRAPH_SIZES } from '@zeroxsolutions/editor-core/template/layout/index';
+import { DEFAULT_LAYOUT_WORDS, type LayoutWords } from '../../layout/layout-words';
+import type { BubbleMenuControlArgs } from '../../ui/bubble-menu';
 
 /** Slash-menu insert items for the standard blocks. */
 export const standardSlashItems: SlashItem[] = [
@@ -144,7 +149,25 @@ export const standardToolbarItems: ToolbarItem[] = [
   },
 ];
 
-export const standardBubbleItems: BubbleItem[] = standardToolbarItems;
+/** The id of the bubble's text alignment group. */
+export const TEXT_ALIGN_ITEM_ID = 'text-align';
+
+/** The id of the bubble's item that opens the text and background colour menu. */
+export const TEXT_COLOR_ITEM_ID = 'text-color';
+
+/**
+ * The bubble's text styling in `words`: the alignment group and the colour menu, which `BubbleMenu` draws from
+ * their commands (`BubbleMenuControlArgs`).
+ */
+export function textStyleBubbleItems(words: LayoutWords = DEFAULT_LAYOUT_WORDS): BubbleItem[] {
+  const args: BubbleMenuControlArgs = { words };
+  return [
+    { id: TEXT_ALIGN_ITEM_ID, title: words.textAlign, command: 'setTextAlign', args },
+    { id: TEXT_COLOR_ITEM_ID, title: words.textColor, icon: PaletteIcon, command: 'setTextColor', args },
+  ];
+}
+
+export const standardBubbleItems: BubbleItem[] = [...standardToolbarItems, ...textStyleBubbleItems()];
 
 const turnInto = (id: string, title: string, node: string, attrs?: Record<string, unknown>): BlockMenuItem => ({
   id: `turn-into-${id}`,
@@ -157,9 +180,18 @@ const turnInto = (id: string, title: string, node: string, attrs?: Record<string
   active: (editor) => editor.isActive(node, attrs),
 });
 
+const isSized = (editor: IEditor) => PARAGRAPH_SIZES.some((size) => editor.isActive('paragraph', { size }));
+
+/** The plain line: a lead or a small one turned into it loses its size, which turning would otherwise keep. */
+const turnIntoText: BlockMenuItem = {
+  ...turnInto('text', 'Text', 'paragraph', { size: null }),
+  active: (editor) => editor.isActive('paragraph') && !isSized(editor),
+};
+
 /** The grip menu of the standard blocks: turn the block into another, copy it, remove it. */
 export const standardBlockMenuItems: BlockMenuItem[] = [
-  turnInto('text', 'Text', 'paragraph'),
+  turnIntoText,
+  ...PARAGRAPH_SIZES.map((size) => turnInto(size, DEFAULT_LAYOUT_WORDS.paragraphSizes[size], 'paragraph', { size })),
   turnInto('heading-1', 'Heading 1', 'heading', { level: 1 }),
   turnInto('heading-2', 'Heading 2', 'heading', { level: 2 }),
   turnInto('heading-3', 'Heading 3', 'heading', { level: 3 }),
