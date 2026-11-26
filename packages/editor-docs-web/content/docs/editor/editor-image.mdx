@@ -99,6 +99,14 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `image` adds the `image` block, with the attributes `src`, `alt`, `title` and `width`. Selecting it opens an Edit popover for the alt text and the width. Its slash item is "Image" and its command `insertImage` takes a `src` and an optional `alt` and `title`.
 
+`words` sets the popover's button and fields and what an image with no address shows, over the English of
+`DEFAULT_IMAGE_WORDS`. Pass a function to read them each time the block draws, so a change of language shows
+without rebuilding the editor:
+
+```tsx
+const features = [standardKit(), image({ words: { edit: 'Bearbeiten', empty: 'Leeres Bild' } })];
+```
+
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx

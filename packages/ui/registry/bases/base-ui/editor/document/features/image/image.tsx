@@ -45,6 +45,37 @@ const openedHref = (href: string | undefined): string | null =>
   href !== undefined && OPENED.test(href.trim()) ? href.trim() : null;
 type ImageAttrs = z.infer<typeof imageAttrs>;
 
+/** The words the image block draws: its popover's button and fields, and an image with no address. */
+export interface ImageWords {
+  readonly edit: string;
+  readonly address: string;
+  readonly alt: string;
+  readonly altPlaceholder: string;
+  readonly caption: string;
+  readonly link: string;
+  readonly width: string;
+  readonly widthPlaceholder: string;
+  readonly empty: string;
+}
+
+export const DEFAULT_IMAGE_WORDS: ImageWords = {
+  edit: 'Edit',
+  address: 'Image address',
+  alt: 'Alt text',
+  altPlaceholder: 'Describe the image',
+  caption: 'Caption',
+  link: 'Link',
+  width: 'Width (px)',
+  widthPlaceholder: 'Auto',
+  empty: 'Empty image',
+};
+
+/** `words` over the English; a getter is read each time the block draws, so a host's language change shows. */
+function imageWordsOf(words: Partial<ImageWords> | (() => ImageWords) | undefined): ImageWords {
+  if (typeof words === 'function') return words();
+  return words ? { ...DEFAULT_IMAGE_WORDS, ...words } : DEFAULT_IMAGE_WORDS;
+}
+
 /**
  * Presentational figure shared by the editable node view and the static
  * `toReact` codec, so both surfaces render the image identically. Layout and
@@ -63,6 +94,7 @@ function ImageFigure({
   contentEditable,
   dimmed,
   status,
+  empty,
   children,
 }: {
   src: string;
@@ -78,6 +110,8 @@ function ImageFigure({
   dimmed?: boolean;
   /** How an upload into the image stands, under it. */
   status?: ReactNode;
+  /** What an image with no address shows. */
+  empty: string;
   children?: ReactNode;
 }): ReactNode {
   const drawn = (
@@ -94,8 +128,10 @@ function ImageFigure({
     <figure
       data-slot="image"
       data-selected={selected}
+      data-empty={!src || undefined}
       contentEditable={contentEditable}
-      className="relative my-4 inline-block max-w-full"
+      // An image with no address takes the line, tall enough that its Edit button sits clear of what it shows.
+      className="relative my-4 inline-block max-w-full data-empty:block"
     >
       {src ? (
         href ? (
@@ -104,7 +140,13 @@ function ImageFigure({
           drawn
         )
       ) : (
-        <span className="text-muted-foreground text-sm">Empty image</span>
+        <span
+          data-slot="image-empty"
+          className="cn-editor-block text-muted-foreground flex aspect-[3/1] min-h-28 w-full items-center justify-center gap-2 border border-dashed text-sm"
+        >
+          <ImageIcon size={16} aria-hidden />
+          <span>{empty}</span>
+        </span>
       )}
       {status}
       {caption || alt ? <figcaption className="text-muted-foreground mt-1 text-sm">{caption || alt}</figcaption> : null}
@@ -117,9 +159,10 @@ function ImageFigure({
 interface ImageUploads {
   readonly request: UploadRequest | null;
   readonly messages: UploadMessages;
+  readonly words: ImageWords;
 }
 
-const NO_UPLOADS: ImageUploads = { request: null, messages: uploadMessagesOf(undefined) };
+const NO_UPLOADS: ImageUploads = { request: null, messages: uploadMessagesOf(undefined), words: DEFAULT_IMAGE_WORDS };
 
 function ImageEditView({
   attrs,
@@ -138,8 +181,10 @@ function ImageEditView({
   const [open, setOpen] = useState(false);
   const upload = useBlockUpload({ editor, getPos }, IMAGE_SLOT, uploads.request);
   const entry = upload?.entry ?? null;
+  const { words } = uploads;
   return (
     <ImageFigure
+      empty={words.empty}
       src={entry?.preview ?? attrs.src}
       alt={attrs.alt}
       title={attrs.title || undefined}
@@ -177,7 +222,7 @@ function ImageEditView({
             <PopoverTrigger
               render={
                 <Button type="button" variant="outline" size="sm">
-                  Edit
+                  {words.edit}
                 </Button>
               }
             />
@@ -189,7 +234,7 @@ function ImageEditView({
                 onStart={() => setOpen(false)}
               >
                 <Field>
-                  <FieldLabel htmlFor={srcId}>Image address</FieldLabel>
+                  <FieldLabel htmlFor={srcId}>{words.address}</FieldLabel>
                   <Input
                     id={srcId}
                     placeholder="https://"
@@ -205,16 +250,16 @@ function ImageEditView({
                 </Field>
               </UploadTabs>
               <Field>
-                <FieldLabel htmlFor={altId}>Alt text</FieldLabel>
+                <FieldLabel htmlFor={altId}>{words.alt}</FieldLabel>
                 <Input
                   id={altId}
-                  placeholder="Describe the image"
+                  placeholder={words.altPlaceholder}
                   defaultValue={attrs.alt}
                   onBlur={(event) => updateAttrs({ alt: event.target.value })}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor={captionId}>Caption</FieldLabel>
+                <FieldLabel htmlFor={captionId}>{words.caption}</FieldLabel>
                 <Input
                   id={captionId}
                   defaultValue={attrs.caption}
@@ -222,7 +267,7 @@ function ImageEditView({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor={hrefId}>Link</FieldLabel>
+                <FieldLabel htmlFor={hrefId}>{words.link}</FieldLabel>
                 <Input
                   id={hrefId}
                   placeholder="https://"
@@ -231,11 +276,11 @@ function ImageEditView({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor={widthId}>Width (px)</FieldLabel>
+                <FieldLabel htmlFor={widthId}>{words.width}</FieldLabel>
                 <Input
                   id={widthId}
                   type="number"
-                  placeholder="Auto"
+                  placeholder={words.widthPlaceholder}
                   defaultValue={attrs.width ?? ''}
                   onBlur={(event) =>
                     updateAttrs({
@@ -259,7 +304,7 @@ export function ImageView(props: NodeViewProps<ImageAttrs>): ReactNode {
 
 const attr = (value: string): string => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
-const imageCodec: NodeCodec<ImageAttrs> = {
+const imageCodecOf = (wordsOf: () => ImageWords): NodeCodec<ImageAttrs> => ({
   node: 'image',
   toMarkdown: (node) => {
     const { src = '', alt = '', title = '' } = node.attrs ?? {};
@@ -284,6 +329,7 @@ const imageCodec: NodeCodec<ImageAttrs> = {
         width={width ?? null}
         caption={caption}
         href={openedHref(href)}
+        empty={wordsOf().empty}
       />
     );
   },
@@ -303,7 +349,7 @@ const imageCodec: NodeCodec<ImageAttrs> = {
       : null,
   // Markdown import: standalone images arrive as inline tokens the walker drops
   // with a warning; HTML is image's two-way path in Phase 1.
-};
+});
 
 /** The address of an image an upload fills. */
 const IMAGE_SLOT = 'src';
@@ -314,6 +360,8 @@ export interface ImageOptions extends BlockUploadOptions {
    * upload fails with the first and the image keeps the address it had. Any web address is taken when absent.
    */
   problems?(url: string): readonly string[];
+  /** The words the block draws, over the English; a getter is read each time it draws. */
+  words?: Partial<ImageWords> | (() => ImageWords);
 }
 
 /**
@@ -334,11 +382,13 @@ export function image(options: ImageOptions = {}): EditorFeature {
     node: (engine) => engine.schema.nodes.image?.create({ src: '' }) ?? null,
     request: () => requestOf() as UploadRequest,
   };
-  const render = options.upload
-    ? (props: NodeViewProps<ImageAttrs>) => (
-        <ImageEditView {...props} uploads={{ request: requestOf(), messages: uploadMessagesOf(options.messages) }} />
-      )
-    : ImageView;
+  const wordsOf = (): ImageWords => imageWordsOf(options.words);
+  const render = (props: NodeViewProps<ImageAttrs>) => (
+    <ImageEditView
+      {...props}
+      uploads={{ request: requestOf(), messages: uploadMessagesOf(options.messages), words: wordsOf() }}
+    />
+  );
   return defineFeature({
     id: 'image',
     nodes: [
@@ -352,7 +402,7 @@ export function image(options: ImageOptions = {}): EditorFeature {
         render,
       },
     ],
-    codecs: [imageCodec as NodeCodec],
+    codecs: [imageCodecOf(wordsOf) as NodeCodec],
     commands: {
       insertImage: {
         args: z.object({

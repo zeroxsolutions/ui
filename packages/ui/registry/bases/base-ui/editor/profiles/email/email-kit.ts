@@ -858,17 +858,18 @@ export function emailKit(
     { ...columns({ columnContent: laneContent }), slash: [], commands: {} },
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
     {
-      ...image(
-        options.uploads
+      ...image({
+        words: () => messages().imageBlock,
+        ...(options.uploads
           ? {
               upload: options.uploads.upload,
               ...options.uploads.limits,
               messages: () => messages().uploads,
               // The image block loads over https only; an answer is checked as a typed address is.
-              problems: (url) => emailAddressProblems(url, 'image', true, declarations(), messages()),
+              problems: (url: string) => emailAddressProblems(url, 'image', true, declarations(), messages()),
             }
-          : {},
-      ),
+          : {}),
+      }),
       slash: [],
       commands: {},
     },

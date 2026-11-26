@@ -24,6 +24,7 @@ import {
   type HeldUploadCall,
 } from '../../../../../../src/test/uploads';
 import type { EditorUpload } from '../../document/uploads/upload';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { EmailEditor } from './email-editor';
 
 const banner = defineEmailBlock({
@@ -76,7 +77,17 @@ interface Probe {
   reported: EditorEmailBlock[][];
 }
 
-function Host({ initial, probe, upload }: { initial: EditorEmailBlock[]; probe: Probe; upload?: EditorUpload }) {
+function Host({
+  initial,
+  probe,
+  upload,
+  messages,
+}: {
+  initial: EditorEmailBlock[];
+  probe: Probe;
+  upload?: EditorUpload;
+  messages?: Partial<ProfileEditorMessages>;
+}) {
   const [value, setValue] = useState(initial);
   return (
     <div className="style-nova p-12">
@@ -86,6 +97,7 @@ function Host({ initial, probe, upload }: { initial: EditorEmailBlock[]; probe: 
         blocks={[banner]}
         value={value}
         upload={upload}
+        messages={messages}
         onChange={(blocks) => {
           probe.reported.push(blocks);
           setValue(blocks);
@@ -96,9 +108,13 @@ function Host({ initial, probe, upload }: { initial: EditorEmailBlock[]; probe: 
   );
 }
 
-async function mount(initial: EditorEmailBlock[], upload?: EditorUpload): Promise<Probe> {
+async function mount(
+  initial: EditorEmailBlock[],
+  upload?: EditorUpload,
+  messages?: Partial<ProfileEditorMessages>,
+): Promise<Probe> {
   const probe: Probe = { editor: null, reported: [] };
-  await render(<Host initial={initial} probe={probe} upload={upload} />);
+  await render(<Host initial={initial} probe={probe} upload={upload} messages={messages} />);
   await vi.waitFor(() => {
     if (!probe.editor) throw new Error('the editor is not ready');
   });
@@ -137,6 +153,17 @@ async function waitForCalls(calls: HeldUploadCall[], count: number): Promise<voi
 }
 
 describe('uploads in the email editor', () => {
+  it("names the image block's controls in the editor's words", async () => {
+    const { upload } = heldUpload();
+    await mount([imageBlock], upload, {
+      imageBlock: { ...DEFAULT_PROFILE_MESSAGES.imageBlock, edit: 'Bearbeiten', address: 'Bildadresse' },
+    });
+
+    await userEvent.click(page.getByRole('button', { name: 'Bearbeiten' }));
+
+    await expect.element(page.getByRole('textbox', { name: 'Bildadresse' })).toBeVisible();
+  });
+
   it('takes an address only when the host gives no upload', async () => {
     await mount([hero]);
 

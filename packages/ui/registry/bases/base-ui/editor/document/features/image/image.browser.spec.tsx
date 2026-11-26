@@ -60,6 +60,45 @@ async function openUpload(): Promise<void> {
   await userEvent.click(page.getByRole('tab', { name: 'Upload' }));
 }
 
+const empty: DocJSON = { type: 'doc', content: [{ type: 'image', attrs: { src: '' } }] };
+
+const overlap = (a: DOMRect, b: DOMRect): boolean =>
+  a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+
+describe('the image block', () => {
+  it("names its controls and an empty image in the host's words", async () => {
+    const { upload } = heldUpload();
+    await mountDocumentEditor(
+      [
+        standardKit(),
+        image({
+          upload,
+          words: { edit: 'Bearbeiten', address: 'Bildadresse', alt: 'Alternativtext', empty: 'Leeres Bild' },
+        }),
+      ],
+      empty,
+    );
+
+    await expect.element(page.getByText('Leeres Bild')).toBeVisible();
+    await userEvent.click(page.getByRole('button', { name: 'Bearbeiten' }));
+    await userEvent.click(page.getByRole('tab', { name: 'Link' }));
+    await expect.element(page.getByRole('textbox', { name: 'Bildadresse' })).toBeVisible();
+    await expect.element(page.getByRole('textbox', { name: 'Alternativtext' })).toBeVisible();
+    await expect.element(page.getByRole('textbox', { name: 'Caption' })).toBeVisible();
+  });
+
+  it('draws an empty image where its Edit button does not cover it', async () => {
+    await mountDocumentEditor([standardKit(), image()], empty);
+
+    const placeholder = (await findElement('[data-slot=image-empty]')).getBoundingClientRect();
+    const edit = (await findElement('[data-slot=image] button', 'Edit')).getBoundingClientRect();
+
+    expect(placeholder.width).toBeGreaterThan(edit.width * 2);
+    const label = (await findElement('[data-slot=image-empty] span', 'Empty image')).getBoundingClientRect();
+    expect(overlap(label, edit)).toBe(false);
+  });
+});
+
 describe('the image block with uploads', () => {
   it('takes an address only when the host gives no upload', async () => {
     await mountDocumentEditor([standardKit(), image()], withImage);
