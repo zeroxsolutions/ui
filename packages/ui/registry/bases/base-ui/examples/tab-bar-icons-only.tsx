@@ -8,6 +8,7 @@ import {
   TabBarItem,
   TabBarLabel,
 } from '@/registry/bases/base-ui/components/navigation/tab-bar';
+import { Card } from '@/registry/bases/base-ui/ui/card';
 
 const DESTINATIONS = [
   { id: 'home', label: 'Home', icon: <House /> },
@@ -18,7 +19,7 @@ const DESTINATIONS = [
 /** A tab bar with `labels="none"`: only the icons show, and each label still names its link. */
 function TabBarIconsOnlyDemo(): ReactNode {
   return (
-    <div className="bg-muted relative h-40 w-full max-w-sm overflow-hidden rounded-xl contain-layout">
+    <Card className="relative h-40 w-full max-w-sm contain-layout">
       <TabBar aria-label="Sections" labels="none">
         {DESTINATIONS.map((destination, index) => (
           <TabBarItem key={destination.id} href={`#${destination.id}`} active={index === 0}>
@@ -29,7 +30,7 @@ function TabBarIconsOnlyDemo(): ReactNode {
           </TabBarItem>
         ))}
       </TabBar>
-    </div>
+    </Card>
   );
 }
 

@@ -6,8 +6,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/registry/bases/b
 /** A small, centered content column inside a wider surface. */
 function PageContainerDemo(): ReactNode {
   return (
-    <div className="bg-muted w-full rounded-lg p-4">
-      <PageContainer size="sm">
+    <div className="bg-muted w-full">
+      <PageContainer size="sm" className="py-4">
         <Card>
           <CardHeader>
             <CardTitle>Account settings</CardTitle>

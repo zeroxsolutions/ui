@@ -2190,9 +2190,9 @@
       "name": "center-demo",
       "type": "registry:example",
       "title": "Center Demo",
-      "description": "A dashed frame with its content centered on both axes.",
+      "description": "A card with its content centered on both axes.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/center"],
+      "registryDependencies": ["@shadcn/card", "@zui/center"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/center-demo.tsx",
@@ -2442,7 +2442,7 @@
       "description": "A phone-sized screen with five destinations at the bottom, the active label shown and an unread count on Inbox.",
       "categories": ["examples"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@zui/tab-bar"],
+      "registryDependencies": ["@shadcn/card", "@shadcn/skeleton", "@zui/tab-bar"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tab-bar-demo.tsx",
@@ -2458,7 +2458,7 @@
       "description": "A tab bar with labels set to none: only the icons show, and each hidden label still names its link.",
       "categories": ["examples"],
       "dependencies": ["lucide-react"],
-      "registryDependencies": ["@zui/tab-bar"],
+      "registryDependencies": ["@shadcn/card", "@zui/tab-bar"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/tab-bar-icons-only.tsx",

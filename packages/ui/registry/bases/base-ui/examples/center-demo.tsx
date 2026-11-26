@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
 
 import { Center } from '@/registry/bases/base-ui/components/layout/center';
+import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 
-/** A dashed frame with its content centred on both axes. */
+/** A card with its content centred on both axes. */
 function CenterDemo(): ReactNode {
   return (
-    <Center className="border-border text-muted-foreground h-32 w-full rounded-md border border-dashed text-sm">
-      Centered content
-    </Center>
+    <Card className="w-full">
+      <CardContent>
+        <Center className="text-muted-foreground h-24">Centered content</Center>
+      </CardContent>
+    </Card>
   );
 }
 

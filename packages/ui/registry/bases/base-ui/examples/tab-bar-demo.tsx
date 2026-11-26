@@ -11,6 +11,8 @@ import {
   TabBarItem,
   TabBarLabel,
 } from '@/registry/bases/base-ui/components/navigation/tab-bar';
+import { Card } from '@/registry/bases/base-ui/ui/card';
+import { Skeleton } from '@/registry/bases/base-ui/ui/skeleton';
 
 const DESTINATIONS = [
   { id: 'home', label: 'Home', icon: <House /> },
@@ -29,10 +31,10 @@ const DESTINATIONS = [
 function TabBarDemo(): ReactNode {
   const [active, setActive] = useState('home');
   return (
-    <div className="bg-muted relative h-96 w-full max-w-sm overflow-hidden rounded-xl contain-layout">
-      <div className="flex h-full flex-col gap-3 overflow-y-auto p-4 pb-24">
+    <Card className="relative h-96 w-full max-w-sm contain-layout">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-24">
         {Array.from({ length: 8 }, (_, index) => (
-          <div key={index} className="bg-background h-16 shrink-0 rounded-lg" />
+          <Skeleton key={index} className="h-16 shrink-0" />
         ))}
       </div>
       <TabBar aria-label="Main" labels="selected">
@@ -51,7 +53,7 @@ function TabBarDemo(): ReactNode {
           </TabBarItem>
         ))}
       </TabBar>
-    </div>
+    </Card>
   );
 }
 
