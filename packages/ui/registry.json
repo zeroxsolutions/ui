@@ -3213,7 +3213,45 @@
           "target": "@components/editor/document/blocks/block-address-popover.tsx"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core", "zod"]
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"],
+      "css": {
+        ".document-editor [data-slot='block-layout'], .document-editor .ProseMirror [data-slot='block-layout'][data-align]": {
+          "text-align": "start"
+        },
+        ".document-editor [data-slot='block-layout'][data-fit]": {
+          "width": "fit-content",
+          "max-width": "100%"
+        },
+        ".document-editor [data-slot='block-layout'][data-fit][data-align='center']": {
+          "margin-inline": "auto"
+        },
+        ".document-editor [data-slot='block-layout'][data-fit][data-align='end']": {
+          "margin-inline-start": "auto"
+        },
+        ".document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image']": {
+          "display": "block",
+          "width": "100%"
+        },
+        ".document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image'] img": {
+          "width": "100%"
+        },
+        ".document-editor .ProseMirror[contenteditable='true']": {
+          "--layout-bleed": "3rem"
+        },
+        ".document-editor [data-slot='block-layout'][data-width='full']": {
+          "margin-inline": "calc(-1 * var(--layout-bleed, 0px))"
+        },
+        ".document-editor [data-slot='column'] [data-slot='block-layout'][data-width='full']": {
+          "margin-inline": "0"
+        },
+        ".document-editor [data-slot='block-layout'] > [data-slot='resize-handle']": {
+          "opacity": "0",
+          "transition": "opacity 150ms"
+        },
+        ".document-editor [data-slot='block-layout']:hover > [data-slot='resize-handle'], .document-editor [data-slot='block-layout']:focus-within > [data-slot='resize-handle'], .document-editor .ProseMirror-selectednode [data-slot='block-layout'] > [data-slot='resize-handle'], .document-editor [data-slot='block-layout'] > [data-slot='resize-handle'][data-dragging]": {
+          "opacity": "1"
+        }
+      }
     },
     {
       "name": "editor-uploads",
@@ -3357,7 +3395,12 @@
       "title": "Editor Bookmark",
       "description": "A link drawn as a card with the page's title, description and image, which the host reads when the author pastes the address.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/block-library", "@zui/document-editor", "@zui/lucide-bookmark-icon"],
+      "registryDependencies": [
+        "@zui/block-library",
+        "@zui/document-editor",
+        "@zui/editor-layout",
+        "@zui/lucide-bookmark-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/bookmark/index.ts",
@@ -3457,6 +3500,7 @@
         "@shadcn/utils",
         "@zui/block-library",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-id-card-icon",
         "@zui/lucide-image-icon",
@@ -3559,6 +3603,7 @@
       "registryDependencies": [
         "@zui/block-library",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-file-text-icon"
       ],
@@ -3606,6 +3651,7 @@
       "registryDependencies": [
         "@zui/block-library",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-audio-lines-icon",
         "@zui/lucide-clapperboard-icon"

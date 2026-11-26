@@ -329,11 +329,11 @@
 .document-editor .ProseMirror[contenteditable='true'] {
   --layout-bleed: 3rem;
 }
-.document-editor [data-slot='column'] {
-  --layout-bleed: 0px;
-}
 .document-editor [data-slot='block-layout'][data-width='full'] {
   margin-inline: calc(-1 * var(--layout-bleed, 0px));
+}
+.document-editor [data-slot='column'] [data-slot='block-layout'][data-width='full'] {
+  margin-inline: 0;
 }
 
 /* The width handles show while the block is pointed at, selected, focused or dragged. */
