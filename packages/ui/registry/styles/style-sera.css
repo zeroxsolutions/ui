@@ -1,5 +1,5 @@
-/* zui's own slots in sera. Each holds only what differs between styles, and follows the upstream slot
- * its comment names, as sera's sheet draws it. */
+/* zui's own slots in sera. Each holds only what a style decides, never a layout, and follows the upstream
+ * slot its comment names, as sera's sheet draws it. */
 .style-sera {
   /* MARK: Collapsible Card */
   /* cn-card's text size */
@@ -19,7 +19,7 @@
 
   /* cn-card's --card-spacing, one step in */
   .cn-collapsible-card-header {
-    @apply px-7 py-1.5;
+    @apply px-7 py-1.5 group-data-[variant=plain]/collapsible-card:px-2.5;
   }
 
   /* cn-button-size-icon's height, the actions' button */
@@ -162,6 +162,42 @@
     @apply h-11;
   }
 
+  /* MARK: Collapsible Card Content */
+  /* cn-card-footer's border, the rule between a card's header and its body */
+  .cn-collapsible-card-content {
+    @apply group-data-[variant=default]/collapsible-card:border-t group-data-[variant=muted]/collapsible-card:border-t;
+  }
+
+  /* MARK: Avatar Picker */
+  /* cn-empty's border, drawn at a width as a drop target lit while a file is dragged over it */
+  .cn-avatar-picker-drop {
+    @apply group-data-dragging/avatar-picker-upload:border-primary group-data-dragging/avatar-picker-upload:bg-muted/50 border border-transparent;
+  }
+
+  /* MARK: Chat Suggestion Item */
+  /* cn-item's hover on a link, a suggestion that is a button, and its press */
+  .cn-chat-suggestion-item {
+    @apply enabled:hover:bg-muted active:bg-muted;
+  }
+
+  /* MARK: Code Input */
+  /* cn-input-otp-slot a size up, its active slot drawing all four borders */
+  .cn-code-input-slot {
+    @apply h-12 text-lg font-semibold data-[active=true]:border-l [&:has(+[data-active=true])]:border-r-0;
+  }
+
+  /* MARK: Permission Card */
+  /* cn-card's padding at a footer, kept under the decision row as under a card-footer, which pads only its sides */
+  .cn-permission-card {
+    @apply has-data-[slot=permission-card-actions]:pb-(--card-spacing) has-data-[slot=permission-card-resolved]:pb-(--card-spacing);
+  }
+
+  /* MARK: Editor Tab */
+  /* cn-tabs-trigger's colour, a document's name muted until its tab is active */
+  .cn-editor-tab-title {
+    @apply text-muted-foreground group-data-active/editor-tab:text-foreground;
+  }
+
   /* MARK: Editor */
   /* cn-kbd's radius on the trigger highlight and the highlight mark the engine paints, and cn-alert's on the
    * block it selects and on a table */
@@ -186,12 +222,12 @@
 
   /* cn-dropdown-menu-content's ring, radius, padding and shadow */
   .cn-editor-toolbar {
-    @apply ring-foreground/10 rounded-none p-1.5 shadow-md ring-1;
+    @apply ring-foreground/10 gap-0.5 rounded-none p-1.5 shadow-md ring-1;
   }
 
   /* cn-combobox-item's radius, a row of a menu filtered by what is typed */
   .cn-editor-menu-item {
-    @apply rounded-none;
+    @apply data-highlighted:bg-accent data-highlighted:text-accent-foreground rounded-none;
   }
 
   /* cn-item-media-variant-image's radius, the tile a menu row's icon sits on */
@@ -222,5 +258,85 @@
   /* cn-badge's type, a short label the editor sets on a block, as a spacer's size */
   .cn-editor-caption {
     @apply text-[0.625rem] font-semibold tracking-widest uppercase;
+  }
+
+  /* cn-badge in running text: a token at the size of its line, tinted as a reference, struck as a problem */
+  .cn-editor-token {
+    @apply bg-primary/10 text-primary data-problem:border-destructive data-problem:text-destructive h-auto py-0 text-[length:inherit] data-problem:bg-transparent;
+  }
+
+  /* cn-combobox-content's padding, which a menu's list draws inside it */
+  .cn-editor-menu {
+    @apply gap-0 p-0;
+  }
+
+  /* cn-empty's spacing, a menu's empty state, framed by the menu */
+  .cn-editor-menu-empty {
+    @apply gap-1 border-0 p-6;
+  }
+
+  /* cn-item-content's spacing, a menu row's title over its description */
+  .cn-editor-menu-content {
+    @apply gap-0.5;
+  }
+
+  /* cn-item-media-variant-image's tile, the icon of a menu row set on one */
+  .cn-editor-menu-tile {
+    @apply bg-secondary size-8 border text-base;
+  }
+
+  /* cn-combobox-item's icon colour, the icon of a menu row set on no tile */
+  .cn-editor-menu-glyph {
+    @apply text-muted-foreground;
+  }
+
+  /* cn-item's hover on a link, a preset dragged in rather than followed */
+  .cn-editor-preset-item {
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+
+  /* cn-alert's spacing and type, a callout whose emoji sits beside the document's own text */
+  .cn-editor-callout {
+    @apply gap-3 text-[length:inherit];
+  }
+
+  /* cn-input-group's height as the least, a composer that grows with what is typed */
+  .cn-editor-composer {
+    @apply h-auto min-h-10 gap-1.5 px-2 py-1.5;
+  }
+
+  /* cn-input-group-addon's padding, the send control seated at the composer's own */
+  .cn-editor-composer-addon {
+    @apply py-0 pr-0;
+  }
+
+  /* cn-button-variant-ghost's text, quieted: a control set beside the content it serves */
+  .cn-editor-control-muted {
+    @apply text-muted-foreground;
+  }
+
+  /* cn-button-variant-outline's text and border, a control with nothing set yet: muted, its outline dashed */
+  .cn-editor-control-unset {
+    @apply data-[state=empty]:text-muted-foreground data-[state=empty]:border-dashed;
+  }
+
+  /* cn-button-variant-ghost's text, the marker of a problem */
+  .cn-editor-problem {
+    @apply text-destructive;
+  }
+
+  /* cn-field-description's colour at cn-badge's size, the name of a file uploading */
+  .cn-editor-upload-label {
+    @apply text-muted-foreground text-xs;
+  }
+
+  /* cn-input's fill on a field disabled by a data attribute, which keeps its resting fill, as cn-input draws none of its own for a disabled input */
+  .cn-editor-input {
+    @apply data-disabled:bg-transparent;
+  }
+
+  /* cn-editor-field's ring, set aside for a faint wash: a field drawn in the text's own type */
+  .cn-editor-inline-field {
+    @apply hover:bg-muted/50 focus-within:bg-muted/50 focus-within:ring-0;
   }
 }

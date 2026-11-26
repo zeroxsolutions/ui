@@ -226,7 +226,7 @@ function ImageEditView({
                 </Button>
               }
             />
-            <PopoverContent align="end" className="w-72 gap-3">
+            <PopoverContent align="end" className="w-72">
               <UploadTabs
                 upload={upload}
                 messages={uploads.messages}

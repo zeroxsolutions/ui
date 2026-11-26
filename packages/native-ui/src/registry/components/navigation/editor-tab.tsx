@@ -37,7 +37,12 @@ function EditorTab({ active = false, dirty = false, className, ...props }: Edito
 /** The document's name, muted until its tab is active. */
 function EditorTabTitle({ className, ...props }: ComponentProps<typeof ItemTitle>): ReactNode {
   const { active } = useContext(EditorTabContext);
-  return <ItemTitle className={cn('text-muted-foreground', active && 'text-foreground', className)} {...props} />;
+  return (
+    <ItemTitle
+      className={cn('cn-editor-tab-title/text', active && 'cn-editor-tab-title/text@selected', className)}
+      {...props}
+    />
+  );
 }
 
 /**

@@ -50,7 +50,7 @@ function UploadStatus({
           value={entry.progress === null ? null : Math.round(entry.progress * 100)}
           className="min-w-0 flex-1 gap-1"
         >
-          <ProgressLabel className="text-muted-foreground truncate text-xs">
+          <ProgressLabel className="cn-editor-upload-label truncate">
             {messages.uploading(entry.file.name)}
           </ProgressLabel>
         </Progress>

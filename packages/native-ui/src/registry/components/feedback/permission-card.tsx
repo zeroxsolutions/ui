@@ -59,14 +59,18 @@ type PermissionCardProps = ComponentProps<typeof Card> & {
  * the caller gives Deny the emphasised button variant.
  */
 function PermissionCard({ status, size = 'sm', className, children, ...props }: PermissionCardProps): ReactNode {
-  // The decision and resolved rows are footers the Card does not know by type, so the card drops its bottom
-  // padding for them itself, as the web's root does for their slots.
+  // The decision and resolved rows are footers the Card does not know by type, so the card's own slot reads
+  // them, padding its bottom as the style pads it above a footer, as the web's root does for their slots.
   const holdsFooter = Children.toArray(children).some(
     (child) => isValidElement(child) && (child.type === PermissionCardActions || child.type === PermissionCardResolved),
   );
   return (
     <PermissionCardContext.Provider value={status}>
-      <Card size={size} className={cn(holdsFooter && 'pb-0', className)} {...props}>
+      <Card
+        size={size}
+        className={cn(holdsFooter && 'cn-permission-card@slot=permission-card-actions', className)}
+        {...props}
+      >
         {children}
       </Card>
     </PermissionCardContext.Provider>

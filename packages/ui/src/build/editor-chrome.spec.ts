@@ -107,7 +107,7 @@ const PIECES: Record<string, string[]> = {
   'profiles/email/email-editor.tsx': ['<Tooltip', '<TabsList'],
   'profiles/sms/sms-editor.tsx': ['<Tooltip'],
   'document/features/callout/callout.tsx': ['cn-alert'],
-  'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-sm'],
+  'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-xs'],
   'document/react/editor.tsx': [
     'cn-editor-content',
     'cn-button cn-button-variant-ghost cn-button-size-icon-sm',
@@ -136,8 +136,6 @@ const LITERAL =
 /** The literal radii a file keeps on purpose: a design-system part set flush inside a surface of the editor's own. */
 const KEPT: Record<string, string[]> = {
   'code/file-content-router.tsx': ['rounded-none'],
-  'document/features/mermaid/mermaid.tsx': ['rounded-none'],
-  'mermaid/react/editor.tsx': ['rounded-none'],
 };
 
 /** A source with its comments dropped, since a comment may name a class it does not write. */
@@ -213,13 +211,14 @@ describe("the editor's chrome", () => {
   });
 
   it.each(STYLES)('highlights a menu row as cn-combobox-item does, in %s', (style) => {
-    const combobox = styleMapOf(ROOT, style)['cn-combobox-item'].split(/\s+/);
-    expect(combobox).toEqual(
+    const map = styleMapOf(ROOT, style);
+    const highlight = (slot: string) => map[slot].split(/\s+/).filter((name) => name.startsWith('data-highlighted:'));
+    expect(highlight('cn-combobox-item')).toEqual(
       expect.arrayContaining(['data-highlighted:bg-accent', 'data-highlighted:text-accent-foreground']),
     );
-    for (const menu of ['document/ui/slash-menu.tsx', 'composer/triggers/trigger-menu.tsx']) {
-      expect(sources.get(menu)).toContain('data-highlighted:bg-accent data-highlighted:text-accent-foreground');
-    }
+    expect(highlight('cn-editor-menu-item')).toEqual(
+      expect.arrayContaining(['data-highlighted:bg-accent', 'data-highlighted:text-accent-foreground']),
+    );
   });
 
   it('draws each piece with the slots or the component it stands for', () => {

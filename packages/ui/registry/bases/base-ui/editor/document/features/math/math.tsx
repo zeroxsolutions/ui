@@ -198,7 +198,7 @@ export function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeV
           <span className="text-muted-foreground text-sm italic">empty formula</span>
         )}
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 p-2">
+      <PopoverContent align="start" className="w-80">
         <MathInlineForm
           initialLatex={attrs.latex}
           onCommit={(latex) => {
@@ -241,7 +241,7 @@ export function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeVi
       onPointerDown={(event) => event.stopPropagation()}
       className={cn('my-4', selected && 'ring-ring ring-2')}
     >
-      <Tabs defaultValue={initialTab} className="gap-0">
+      <Tabs defaultValue={initialTab} className="contents">
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
             <Sigma className="shrink-0" />
@@ -266,8 +266,10 @@ export function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeVi
             down an in-flight render. */}
         <CollapsibleCardContent keepMounted>
           <Separator />
-          <TabsContent value="view" className="p-2">
-            <FormulaPreview source={attrs.latex} />
+          <TabsContent value="view">
+            <div className="p-2">
+              <FormulaPreview source={attrs.latex} />
+            </div>
           </TabsContent>
           <TabsContent value="edit" className="flex flex-col">
             <div className="flex items-center justify-end px-2 pt-2">

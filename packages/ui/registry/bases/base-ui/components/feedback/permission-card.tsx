@@ -57,12 +57,7 @@ function PermissionCard({ status, size = 'sm', className, ...props }: Permission
         data-slot="permission-card"
         data-status={status}
         size={size}
-        className={cn(
-          'group/permission-card',
-          'has-data-[slot=permission-card-actions]:pb-0 has-data-[slot=permission-card-resolved]:pb-0',
-          'data-[size=sm]:has-data-[slot=permission-card-actions]:pb-0 data-[size=sm]:has-data-[slot=permission-card-resolved]:pb-0',
-          className,
-        )}
+        className={cn('cn-permission-card group/permission-card', className)}
         {...props}
       />
     </PermissionCardStatusContext.Provider>
@@ -121,9 +116,9 @@ function PermissionCardStatus({ children, ...props }: ComponentProps<typeof Badg
 
 /**
  * The decision row, a `CardFooter` shown only while the request is `pending`.
- * It sets its own `data-slot="permission-card-actions"`; the root reads that
- * slot (and `permission-card-resolved`) to drop a footer's bottom padding, in
- * place of upstream's `card-footer`.
+ * It sets its own `data-slot="permission-card-actions"`; the root's style reads
+ * that slot (and `permission-card-resolved`) as it reads upstream's
+ * `card-footer`, dropping the card's bottom padding where the style does.
  */
 function PermissionCardActions({ className, ...props }: ComponentProps<typeof CardFooter>): ReactNode {
   return (

@@ -172,7 +172,7 @@ export function EmailLinkPopover({ editor, messages = DEFAULT_PROFILE_MESSAGES }
                 describedBy={problems.length > 0 ? problemId : undefined}
                 autoFocus={reason === null}
                 messages={messages}
-                className="cn-input data-disabled:bg-input/50 h-auto min-h-8"
+                className="cn-input cn-editor-input h-auto min-h-8"
               />
               {reason !== null && <FieldDescription>{reason}</FieldDescription>}
               {problems.length > 0 && <FieldError id={problemId} errors={problems.map((message) => ({ message }))} />}

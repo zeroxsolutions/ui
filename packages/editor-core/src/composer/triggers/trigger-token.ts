@@ -25,6 +25,10 @@ export type TriggerMultiplicity = 'many' | 'one-leading';
  *  label for a reference (`@Alice`), the slug for an invocation (`/image-gen`). */
 export type TriggerQueryField = 'label' | 'slug';
 
+/** What a menu row sets its icon on: a bare glyph, or a tile as a person's avatar sits on one. The menu draws
+ *  each from its style, so a token names the kind rather than handing classes past the style. */
+export type TriggerMenuMedia = 'glyph' | 'tile';
+
 /**
  * The three interaction archetypes. `reference` and `invocation` commit an
  * inline pill node; `insertion` commits a terminal glyph (a native/image emoji)
@@ -85,8 +89,9 @@ export interface TriggerToken<Kind extends string = string, Ref = unknown> {
   filter?(options: TriggerOption[], query: string): TriggerOption[];
   /** The option field the typed query completes and commit-on-space matches. */
   queryField: TriggerQueryField;
-  /** Optional class for the menu row's icon media (an avatar box vs a light
-   *  glyph); the two menus differed here. */
+  /** What the menu row sets its icon on; a bare glyph unless the token asks for a tile. */
+  menuMedia: TriggerMenuMedia;
+  /** @deprecated Name the kind with `menuMedia`; a class here is drawn past the style's own. */
   menuMediaClassName?: string;
   /** Optional scoped accent class for the pill (defaults to the shared accent). */
   accentClass?: string;
@@ -106,6 +111,7 @@ export interface TriggerTokenConfig<Kind extends string, Ref> extends Partial<
     | 'backspaceRestore'
     | 'filter'
     | 'queryField'
+    | 'menuMedia'
     | 'menuMediaClassName'
     | 'accentClass'
     | 'emptyText'
@@ -213,6 +219,7 @@ function resolveToken<Kind extends string, Ref>(
     readRef: config.readRef,
     filter: config.filter,
     queryField: config.queryField ?? defaults.queryField,
+    menuMedia: config.menuMedia ?? 'glyph',
     menuMediaClassName: config.menuMediaClassName,
     accentClass: config.accentClass,
     emptyText: config.emptyText,

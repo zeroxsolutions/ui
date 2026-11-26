@@ -381,7 +381,8 @@ function EmailBlockDefaultView({
                     variant="ghost"
                     size="icon-xs"
                     aria-label={label}
-                    className={cn(value === '' && 'text-muted-foreground')}
+                    data-state={value === '' ? 'empty' : 'set'}
+                    className="cn-editor-control-unset"
                   >
                     <LinkIcon size={14} aria-hidden />
                   </Button>
@@ -401,7 +402,7 @@ function EmailBlockDefaultView({
                           variant="ghost"
                           size="icon-xs"
                           aria-label={messages.blockSettings}
-                          className="text-muted-foreground"
+                          className="cn-editor-control-muted"
                         />
                       }
                     />
@@ -411,7 +412,7 @@ function EmailBlockDefaultView({
                 </TooltipTrigger>
                 <TooltipContent>{messages.blockSettings}</TooltipContent>
               </Tooltip>
-              <PopoverContent align="end" className="w-64 gap-3" aria-label={messages.blockSettings}>
+              <PopoverContent align="end" className="w-64" aria-label={messages.blockSettings}>
                 <PopoverHeader>
                   <PopoverTitle>{words.title}</PopoverTitle>
                 </PopoverHeader>

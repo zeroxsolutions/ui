@@ -34,7 +34,7 @@ export function FormulaRender({ state, compact = false, className }: FormulaRend
         compact ? (
           <span className="text-muted-foreground text-sm italic">Empty formula</span>
         ) : (
-          <Empty className="min-h-32 border-0">
+          <Empty className="min-h-32">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <Sigma />

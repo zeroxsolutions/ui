@@ -56,7 +56,7 @@ export function MermaidEditor({
       className="h-full"
     />
   );
-  const canvas = <DiagramCanvas state={state} className="h-full rounded-none shadow-none ring-0" />;
+  const canvas = <DiagramCanvas state={state} variant="flush" className="h-full" />;
 
   return (
     <CollapsibleCard variant="muted" data-slot="mermaid-editor" className={className}>
@@ -69,11 +69,11 @@ export function MermaidEditor({
               <TabsTrigger value="code">Code</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
-            <TabsContent value="code" className="min-h-0 flex-1 p-2 pt-0">
-              {codePane}
+            <TabsContent value="code" className="min-h-0 flex-1">
+              <div className="h-full px-2 pb-2">{codePane}</div>
             </TabsContent>
-            <TabsContent value="preview" className="min-h-0 flex-1 p-2 pt-0">
-              {canvas}
+            <TabsContent value="preview" className="min-h-0 flex-1">
+              <div className="h-full px-2 pb-2">{canvas}</div>
             </TabsContent>
           </Tabs>
         ) : (

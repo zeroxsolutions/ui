@@ -123,7 +123,7 @@ export function BlockAddressPopover({
       }}
     >
       {opener}
-      <PopoverContent align="start" aria-labelledby={titleId} data-slot="block-address-popover" className="w-80 gap-3">
+      <PopoverContent align="start" aria-labelledby={titleId} data-slot="block-address-popover" className="w-80">
         <PopoverHeader>
           <PopoverTitle id={titleId}>{label}</PopoverTitle>
         </PopoverHeader>
