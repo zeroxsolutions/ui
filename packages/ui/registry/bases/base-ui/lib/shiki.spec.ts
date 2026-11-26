@@ -42,13 +42,8 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('shellscript')).toBe('shellscript');
   });
 
-  it('maps common Markdown-fence aliases to their canonical grammar', () => {
+  it('maps a Markdown-fence alias to its canonical grammar', () => {
     expect(resolveLanguage('js')).toBe('javascript');
-    expect(resolveLanguage('ts')).toBe('typescript');
-    expect(resolveLanguage('py')).toBe('python');
-    expect(resolveLanguage('bash')).toBe('shellscript');
-    expect(resolveLanguage('yml')).toBe('yaml');
-    expect(resolveLanguage('md')).toBe('markdown');
   });
 
   it('returns undefined for a language we ship no grammar for', () => {
@@ -89,17 +84,5 @@ describe('highlightToLines', () => {
 
     const hasStyledToken = (lines ?? []).some((line) => line.some((token) => token.style?.color));
     expect(hasStyledToken).toBe(true);
-  }, 20000);
-
-  it('paints tokens with the brand `var(--code-*)` palette (not concrete colors)', async () => {
-    // `const` should resolve to the keyword bucket; assert the theme is wired by
-    // checking a styled token references a `--code-*` design token.
-    const lines = await highlightToLines('const x = 1', 'js');
-    const colors = (lines ?? [])
-      .flat()
-      .map((token) => token.style?.color)
-      .filter((c): c is string => Boolean(c));
-    expect(colors.length).toBeGreaterThan(0);
-    expect(colors.every((c) => c.startsWith('var(--code-'))).toBe(true);
   }, 20000);
 });

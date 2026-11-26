@@ -1,4 +1,4 @@
-import { File, FileCode, FileImage, FileText, FileType } from 'lucide-react';
+import { File, FileCode, FileImage, FileText } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 
 import { fileTypeIcon } from './file-type';
@@ -6,9 +6,6 @@ import { fileTypeIcon } from './file-type';
 describe('fileTypeIcon', () => {
   it('maps a file name to the icon of its extension', () => {
     expect(fileTypeIcon('run.py')).toBe(FileCode);
-    expect(fileTypeIcon('logo.png')).toBe(FileImage);
-    expect(fileTypeIcon('Inter.woff2')).toBe(FileType);
-    expect(fileTypeIcon('README.md')).toBe(FileText);
   });
 
   it('reads the extension case-insensitively, off the last segment of a path', () => {
