@@ -259,7 +259,8 @@ describe('the section in the Document Editor', () => {
       content: [sectionOf(line('inside')), lanes([line('left')], [line('right')])],
     });
     await copyHtml('<div data-type="section" data-background="red"><p>copied</p></div>');
-    for (const text of ['left', 'inside']) {
+    // The section first: a lane's caret opens the columns' toolbar above the lanes, over the section's last line.
+    for (const text of ['inside', 'left']) {
       await userEvent.click(holding('.ProseMirror p', text));
       await userEvent.keyboard('{End}');
       await userEvent.paste();

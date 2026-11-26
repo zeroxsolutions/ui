@@ -1335,6 +1335,10 @@
         ".document-editor [data-slot='column']": {
           "--layout-container": "100%"
         },
+        ".document-editor .ProseMirror[contenteditable='true']": {
+          "--layout-bleed": "3rem",
+          "--section-bleed": "3rem"
+        },
         ".document-editor [style*='--layout-width'][data-align='center']": {
           "margin-inline": "auto"
         },
@@ -2724,13 +2728,7 @@
       "title": "Editor Embed",
       "description": "A block that shows an external page in a responsive frame, after a URL input while it is empty.",
       "categories": ["editor"],
-      "registryDependencies": [
-        "@shadcn/input",
-        "@zui/block-library",
-        "@zui/document-editor",
-        "@zui/editor-layout",
-        "@zui/lucide-frame-icon"
-      ],
+      "registryDependencies": ["@shadcn/input", "@zui/block-library", "@zui/document-editor", "@zui/lucide-frame-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/embed/index.ts",
@@ -2774,7 +2772,6 @@
         "@shadcn/popover",
         "@zui/block-library",
         "@zui/document-editor",
-        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-image-icon"
       ],
@@ -3291,9 +3288,6 @@
         ".document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image'] img": {
           "width": "100%"
         },
-        ".document-editor .ProseMirror[contenteditable='true']": {
-          "--layout-bleed": "3rem"
-        },
         ".document-editor [data-slot='block-layout'][data-width='full']": {
           "margin-inline": "calc(-1 * var(--layout-bleed, 0px))"
         },
@@ -3446,12 +3440,7 @@
       "title": "Editor Bookmark",
       "description": "A link drawn as a card with the page's title, description and image, which the host reads when the author pastes the address.",
       "categories": ["editor"],
-      "registryDependencies": [
-        "@zui/block-library",
-        "@zui/document-editor",
-        "@zui/editor-layout",
-        "@zui/lucide-bookmark-icon"
-      ],
+      "registryDependencies": ["@zui/block-library", "@zui/document-editor", "@zui/lucide-bookmark-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/bookmark/index.ts",
@@ -3551,7 +3540,6 @@
         "@shadcn/utils",
         "@zui/block-library",
         "@zui/document-editor",
-        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-id-card-icon",
         "@zui/lucide-image-icon",
@@ -3722,9 +3710,6 @@
         ".document-editor [data-slot='section'][data-padding='large']": {
           "padding": "1.5rem"
         },
-        ".document-editor .ProseMirror[contenteditable='true']": {
-          "--section-bleed": "3rem"
-        },
         ".document-editor [data-slot='section'][data-width='wide']": {
           "margin-inline": "calc(var(--section-bleed, 0px) / -2)"
         },
@@ -3840,7 +3825,6 @@
       "registryDependencies": [
         "@zui/block-library",
         "@zui/document-editor",
-        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-file-text-icon"
       ],
@@ -3888,7 +3872,6 @@
       "registryDependencies": [
         "@zui/block-library",
         "@zui/document-editor",
-        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-audio-lines-icon",
         "@zui/lucide-clapperboard-icon"
@@ -4430,7 +4413,6 @@
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
-        "@zui/editor-layout",
         "@zui/editor-section",
         "@zui/editor-table",
         "@zui/editor-uploads",

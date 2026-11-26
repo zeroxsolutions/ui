@@ -149,6 +149,14 @@
   --layout-container: 100%;
 }
 
+/* The room the editable editor leaves beside its text, its drag handle's 3rem gutter, which a full width block
+ * (`--layout-bleed`) and a wide or full section (`--section-bleed`) reach over. The Viewer draws no gutter, so
+ * both are absent there. */
+.document-editor .ProseMirror[contenteditable='true'] {
+  --layout-bleed: 3rem;
+  --section-bleed: 3rem;
+}
+
 /* A block's place across its line: a block drawn at a width moves within the line, and one drawn inline, such as
  * an image, follows the line's alignment. `left` and `right` are the email wire's names, which a product block's
  * own attributes may still write. */
@@ -324,11 +332,8 @@
   width: 100%;
 }
 
-/* A full width block bleeds over the editable editor's gutters to its edges; a lane, whose edges are its own,
- * and the Viewer, which draws no gutter, keep it at their width. */
-.document-editor .ProseMirror[contenteditable='true'] {
-  --layout-bleed: 3rem;
-}
+/* A full width block bleeds over the editable editor's gutters (`--layout-bleed`) to its edges; a lane, whose
+ * edges are its own, and the Viewer, which draws no gutter, keep it at their width. */
 .document-editor [data-slot='block-layout'][data-width='full'] {
   margin-inline: calc(-1 * var(--layout-bleed, 0px));
 }
@@ -436,9 +441,6 @@
 /* A section reaches past the text by `--section-bleed`, the room the surface leaves beside it: the editable
  * editor's gutter, none in the Viewer unless its host gives some. A wide section takes half of it, a full one all
  * of it. */
-.document-editor .ProseMirror[contenteditable='true'] {
-  --section-bleed: 3rem;
-}
 .document-editor [data-slot='section'][data-width='wide'] {
   margin-inline: calc(var(--section-bleed, 0px) / -2);
 }
