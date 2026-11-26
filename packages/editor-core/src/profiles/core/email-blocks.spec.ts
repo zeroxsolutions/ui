@@ -316,7 +316,7 @@ describe('layout the email cannot draw', () => {
     expect(docProblems(doc)).toEqual([{ kind: 'attributes-invalid', block: 'j', field: 'align' }]);
   });
 
-  it('exports a full width image as 1 and a full section as wide', () => {
+  it('exports a full width image as no width and a full section as wide', () => {
     const doc: DocJSON = {
       type: 'doc',
       content: [
@@ -328,7 +328,7 @@ describe('layout the email cannot draw', () => {
         },
       ],
     };
-    expect(toEmailBlocks(doc).map((block) => block.attributes)).toEqual([{ width: 1 }, { width: 'wide' }]);
+    expect(toEmailBlocks(doc).map((block) => block.attributes)).toEqual([{}, { width: 'wide' }]);
   });
 
   it('holds no px and no hex in an export', () => {

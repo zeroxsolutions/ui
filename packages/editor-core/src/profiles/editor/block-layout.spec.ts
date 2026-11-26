@@ -524,4 +524,13 @@ describe('blockLayout', () => {
     expect(editor.getJSON().content?.[0].attrs ?? {}).not.toHaveProperty('width');
     expect(editor.can('setBlockLayout', { pos: 1, layout: { width: 0.5 } })).toBe(true);
   });
+
+  it("keeps an email image's stored pixel width until the author sets a width", () => {
+    const { editor } = mount([image({ pixelWidth: 48 }), image({ pixelWidth: 200 })], { email: true });
+    expect(top(editor, 0).pixelWidth).toBe(48);
+    expect(editor.run('setBlockLayout', { pos: 0, layout: { width: 0.5 } })).toBe(true);
+    expect(top(editor, 0)).toMatchObject({ width: 0.5, pixelWidth: null });
+    expect(editor.run('setBlockLayout', { pos: 1, layout: { width: null } })).toBe(true);
+    expect(top(editor, 1)).toMatchObject({ width: null, pixelWidth: null });
+  });
 });

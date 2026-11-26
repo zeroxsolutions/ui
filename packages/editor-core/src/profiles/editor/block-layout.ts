@@ -360,6 +360,10 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
     { types: [...TEXT_ALIGN_NODES], attributes: { textAlign: layoutAttribute('textAlign') } },
     { types: ['paragraph'], attributes: { size: layoutAttribute('size') } },
     { types: ['table'], attributes: { columnWidths: columnWidthsAttribute } },
+    // The whole pixel width an email stored before fractions: kept so the image saves as it came, and never in HTML.
+    ...(email
+      ? [{ types: ['image'], attributes: { pixelWidth: { default: null, rendered: false, keepOnSplit: false } } }]
+      : []),
   ];
 
   const plugin = new Plugin({
@@ -437,6 +441,10 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       const steps = block && layoutSteps(block, args.layout);
       if (!block || !steps || !changeable(facade, block.pos)) return false;
       for (const [key, value] of steps) tr.setNodeAttribute(block.pos, key, value);
+      // A width the author sets, or clears, replaces the pixels an email stored.
+      if (args.layout.width !== undefined && block.node.attrs.pixelWidth != null) {
+        tr.setNodeAttribute(block.pos, 'pixelWidth', null);
+      }
       return true;
     });
 

@@ -4,9 +4,9 @@ import {
   address,
   align,
   BUTTON_HREF_MAX_LENGTH,
-  CONTENT_WIDTH,
   IMAGE_START,
   imageWidth,
+  isLegacyPixelWidth,
   LINK_START,
   readOr,
   spaceAfter,
@@ -43,17 +43,18 @@ const lenientContent = z.object({
 });
 
 /**
- * The px an image is drawn at: a fraction of the width it sits in, a legacy pixel width as stored, or the card's
- * content width when it names none; never wider than the content width, which Outlook would push the card past.
+ * The px an image is drawn at: a fraction of the width it sits in, a legacy pixel width as stored, or the whole of
+ * that width when it names none; never wider than the width it sits in, since Outlook, which reads no `max-width`,
+ * would push the lane or the card past its edge.
  */
 function drawnWidth(width: number | undefined, available: number): number {
-  if (width === undefined) return CONTENT_WIDTH;
-  return Math.min(width <= 1 ? Math.round(width * available) : width, CONTENT_WIDTH);
+  if (width === undefined) return available;
+  return Math.min(isLegacyPixelWidth(width) ? width : Math.round(width * available), available);
 }
 
 /**
  * A hosted image, its alt text read where images are off, optionally linked and captioned. It is drawn at its
- * width, at most the card's content width and that by default, and shrinks to a narrow screen. The write check
+ * width, at most the width it sits in and that by default, and shrinks to a narrow screen. The write check
  * takes an `https:` address or a url variable; drawn, any address but an `http:` or `https:` one draws nothing,
  * as for a product block's image, so a stored `http:` address or a variable filled with one still draws.
  */

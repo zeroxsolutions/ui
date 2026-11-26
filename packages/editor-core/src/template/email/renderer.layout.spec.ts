@@ -113,7 +113,7 @@ describe('layout in the email', () => {
   it("reaches the card's inner edges with a wide section, and no further", () => {
     const drawn = html([
       p('a', 'Before'),
-      section('s1', { width: 'wide', padding: 'none' }, [[image('w', { width: 1 })]]),
+      section('s1', { width: 'wide', padding: 'none' }, [[image('w', {})]]),
       p('b', 'After'),
     ]);
     expect(drawn).toContain('<td class="zx-inner zx-inner-flush-bottom"');
@@ -128,11 +128,62 @@ describe('layout in the email', () => {
     expect(widths(html([columns('c', [1, 1], [[image('i', { width: 0.5 })], [p('r', 'R')]])]))).toEqual([138]);
   });
 
-  it('never draws an image wider than 566px', () => {
-    expect(widths(html([image('a', { width: 1 }), image('b', { width: 900 })]))).toEqual([566, 566]);
-    expect(widths(html([section('s', { width: 'wide', padding: 'none' }, [[image('c', { width: 1 })]])]))).toEqual([
-      566,
+  it('never draws an image wider than the width it sits in', () => {
+    expect(widths(html([image('a', {}), image('b', { width: 900 })]))).toEqual([566, 566]);
+    expect(widths(html([section('s', { width: 'wide', padding: 'none' }, [[image('c', {})]])]))).toEqual([598]);
+  });
+
+  it('draws an image with no width at the width it sits in: the card, a lane, a padded section', () => {
+    expect(widths(html([columns('c', [1, 1], [[image('l', {})], [image('r', {})]])]))).toEqual([275, 283]);
+    expect(widths(html([section('s', { padding: 'medium' }, [[image('i', {})]])]))).toEqual([534]);
+  });
+
+  it('draws a legacy pixel width as stored, within the width it sits in', () => {
+    expect(widths(html([image('a', { width: 48 }), image('b', { width: 1 }), image('c', { width: 200 })]))).toEqual([
+      48, 1, 200,
     ]);
+    expect(widths(html([columns('c', [1, 1], [[image('l', { width: 200 })], [image('r', { width: 400 })]])]))).toEqual([
+      200, 283,
+    ]);
+    expect(widths(html([section('s', { padding: 'large' }, [[image('i', { width: 540 })]])]))).toEqual([518]);
+  });
+
+  it('draws a fraction off the drag step as stored', () => {
+    expect(widths(html([image('i', { width: 0.333 })]))).toEqual([188]);
+  });
+
+  it('draws a hero and a card inside a padded section at the section width', () => {
+    const feature = { image: 'https://x.test/h.png', alt: 'A bay', heading: 'Hi', text: 'Welcome' };
+    const drawn = html([
+      section('s', { padding: 'medium' }, [
+        [
+          { id: 'h', type: 'hero', attributes: {}, content: feature },
+          { id: 'c', type: 'card', attributes: {}, content: feature },
+        ],
+      ]),
+    ]);
+    const images = [
+      ...drawn.matchAll(/<img [^>]*width="(\d+)" class="zx-image zx-image-fluid zx-(hero|card-block)-image"/g),
+    ];
+    expect(images.map((m) => [m[2], Number(m[1])])).toEqual([
+      ['hero', 534],
+      ['card-block', 532],
+    ]);
+  });
+
+  it('draws table widths that do not make the whole, or of another count, as equal columns', () => {
+    const table = (columnWidths: number[]): EmailBlock => ({
+      id: 't',
+      type: 'table',
+      attributes: { columnWidths },
+      content: { rows: [['a', 'b']] },
+    });
+    for (const widths of [
+      [0.3, 0.3],
+      [0.2, 0.3, 0.5],
+    ]) {
+      expect(html([table(widths)])).not.toMatch(/<td width="\d+%"/);
+    }
   });
 
   it('sets the vertical alignment on each lane cell', () => {

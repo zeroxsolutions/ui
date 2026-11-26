@@ -8,7 +8,14 @@ import {
 } from '../../template/index.js';
 import { libraryBlocks, type LibraryBlockType } from '../../template/email/blocks/index.js';
 import { EMAIL_SECTION_WIDTHS } from '../../template/email/blocks/section.js';
-import { CONTENT_WIDTH, emailAlignOf, layoutAlignOf, type Align } from '../../template/email/blocks/shared.js';
+import { tableColumnWidths } from '../../template/email/blocks/table.js';
+import {
+  CONTENT_WIDTH,
+  emailAlignOf,
+  isLegacyPixelWidth,
+  layoutAlignOf,
+  type Align,
+} from '../../template/email/blocks/shared.js';
 import {
   ALIGNS,
   COLOR_TOKENS,
@@ -18,6 +25,7 @@ import {
   SPACES,
   snapWidth,
   VALIGNS,
+  WIDTH_MIN,
   widthFromPixels,
   type ColorToken,
   type LayoutAlign,
@@ -337,19 +345,35 @@ function asStored(node: NodeJSON, exported: EditorEmailBlock): EditorEmailBlock 
 }
 
 /**
- * A document image's width as the wire stores it: a fraction, `full` written as the whole width, which the email
- * draws at the card's content width, and a Document's legacy pixel width read against the Document's content width.
+ * A document image's width as the wire stores it. A fraction is written as it is, one below the narrowest snapped
+ * to it; the whole width, `full` or 1, is written as no width, since a stored 1 is one pixel; a Document's legacy
+ * pixel width is read against the Document's content width. With no width, the pixel width an email stored before
+ * fractions, which the document keeps as `pixelWidth` until the author changes it, is written back as it came.
  */
-function wireImageWidth(width: unknown): Record<string, number> {
-  if (width === 'full') return { width: 1 };
-  if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) return {};
-  return { width: width <= 1 ? snapWidth(width) : widthFromPixels(width, DOCUMENT_CONTENT_WIDTH) };
+function wireImageWidth(width: unknown, pixelWidth: unknown): Record<string, number> {
+  if (typeof width === 'number' && Number.isFinite(width) && width > 0) {
+    const fraction =
+      width <= 1 ? (width >= WIDTH_MIN ? width : snapWidth(width)) : widthFromPixels(width, DOCUMENT_CONTENT_WIDTH);
+    return fraction < 1 ? { width: fraction } : {};
+  }
+  if (width === 'full') return {};
+  return legacyPixels(pixelWidth) === undefined ? {} : { width: pixelWidth as number };
 }
 
-/** A wire image's width as the document holds it: a fraction, a legacy whole-pixel width read against the card's. */
-function documentImageWidth(width: unknown): number | null {
-  if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) return null;
-  return width <= 1 ? width : widthFromPixels(width, CONTENT_WIDTH);
+/** `value` where it is a whole pixel width an email stored before fractions: 1 to the card's content width. */
+function legacyPixels(value: unknown): number | undefined {
+  return typeof value === 'number' && isLegacyPixelWidth(value) && value <= CONTENT_WIDTH ? value : undefined;
+}
+
+/**
+ * A wire image's width as the document holds it: a fraction as `width`, and a legacy whole pixel width as
+ * `pixelWidth`, which the email editor draws at its pixels and saves back unchanged.
+ */
+function documentImageWidth(width: unknown): Record<string, number> {
+  if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) return {};
+  const pixels = legacyPixels(width);
+  if (pixels !== undefined) return { pixelWidth: pixels };
+  return width < 1 ? { width } : {};
 }
 
 /** A section's attributes on the wire: a `full` width, which no email draws, is written as `wide`. */
@@ -461,7 +485,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
         type: 'image',
         attributes: present({
           align: wireAlign(node.attrs?.align),
-          ...wireImageWidth(node.attrs?.width),
+          ...wireImageWidth(node.attrs?.width, node.attrs?.pixelWidth),
           ...spacesOf(node),
         }),
         content: {
@@ -475,14 +499,17 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
     case 'table': {
       const rows = node.content ?? [];
       const header = rows.length > 0 && (rows[0].content ?? []).every((cell) => cell.type === 'tableHeader');
+      const cells = rowsOf(node);
+      // Widths the email would not draw, of another count or not making the whole, are left out: drawn equal.
+      const widths = tableColumnWidths(columnWidthsOf(node.attrs?.columnWidths), cells[0]?.length ?? 0);
       return asStored(node, {
         ...base,
         type: 'table',
         attributes: {
           ...(header && (rows[0].content ?? []).length > 0 ? { header: true } : {}),
-          ...present({ columnWidths: columnWidthsOf(node.attrs?.columnWidths), ...spacesOf(node) }),
+          ...present({ columnWidths: widths, ...spacesOf(node) }),
         },
-        content: { rows: rowsOf(node) },
+        content: { rows: cells },
       });
     }
     case 'callout':
@@ -631,7 +658,8 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
           src: str(src),
           alt: str(alt),
           title: '',
-          width: documentImageWidth(block.attributes.width),
+          width: null,
+          ...documentImageWidth(block.attributes.width),
           caption: str(caption),
           href: str(href),
           ...present({ align: documentAlign(align) }),

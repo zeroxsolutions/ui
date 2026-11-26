@@ -84,7 +84,13 @@ export const LANE_GUTTER = 8;
 export const SPACE_PX = { none: 0, small: 6, medium: 10, large: 20 } as const satisfies Record<Space, number>;
 
 /**
- * An image's stored width: a fraction of the width it is drawn in, `WIDTH_MIN` to 1, or a legacy whole pixel width
- * from 1 to `CONTENT_WIDTH`. A stored 1 reads as the whole width, never as one pixel.
+ * An image's stored width: a fraction of the width it is drawn in, from `WIDTH_MIN` up to but not including 1, or a
+ * legacy whole pixel width from 1 to `CONTENT_WIDTH`, which an email written before fractions stored. A stored 1
+ * is one pixel, as it always was; the whole width is written as no width.
  */
-export const imageWidth = z.union([z.number().min(WIDTH_MIN).max(1), z.number().int().min(1).max(CONTENT_WIDTH)]);
+export const imageWidth = z.union([z.number().min(WIDTH_MIN).lt(1), z.number().int().min(1).max(CONTENT_WIDTH)]);
+
+/** Whether a stored image width is a legacy whole pixel width rather than a fraction. */
+export function isLegacyPixelWidth(width: number): boolean {
+  return Number.isInteger(width) && width >= 1;
+}

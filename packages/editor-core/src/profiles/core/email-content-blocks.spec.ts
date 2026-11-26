@@ -120,9 +120,9 @@ describe('an image through the email codec', () => {
     expect(toEmailBlocks(fromEmailBlocks(stored), [], ALL)).toEqual(stored);
   });
 
-  it("exports a pixel width past the Document's content as the whole width", () => {
+  it("exports a pixel width past the Document's content as the whole width, which is no width", () => {
     const image: NodeJSON = { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a', width: 900 } };
-    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({ width: 1 });
+    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({});
   });
 });
 

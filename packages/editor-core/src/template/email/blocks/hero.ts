@@ -1,7 +1,7 @@
 import { builtInEmailBlockOf, type EmailBlockView } from '../define-email-block.js';
 import { choice, imageUrl, link, plainText, richText } from '../fields.js';
 import type { EmailNode, EmailPrimitives } from '../primitives/nodes.js';
-import { BUTTON_LABEL_MAX_LENGTH, CONTENT_WIDTH } from './shared.js';
+import { BUTTON_LABEL_MAX_LENGTH } from './shared.js';
 
 /** The longest alt text and heading a hero and a card take. */
 const SHORT_TEXT_MAX_LENGTH = 200;
@@ -59,7 +59,7 @@ export const hero = builtInEmailBlockOf(
     keywords: ['banner', 'header', 'masthead'],
     fields: FEATURE_FIELDS,
     attributes: { align: choice(['left', 'center'], 'left', { label: 'Align' }) },
-    render: (view, h) => featureNodes(view, h, { prefix: 'zx-hero', width: CONTENT_WIDTH, level: 1 }),
+    render: (view, h, { available }) => featureNodes(view, h, { prefix: 'zx-hero', width: available, level: 1 }),
     sample: {
       fields: FEATURE_SAMPLE,
       attributes: { align: 'center' },

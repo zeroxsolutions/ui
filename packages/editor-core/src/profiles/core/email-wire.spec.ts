@@ -150,7 +150,7 @@ describe('layout and colour between the document and the wire', () => {
       ...layoutOf(node.content ?? []),
     ]);
 
-  it('round-trips a document with every layout value through the wire, full width coming back as 1', () => {
+  it('round-trips a document with every layout value through the wire, full width written as no width', () => {
     const content: NodeJSON[] = [
       para('Lead', { textAlign: 'center', size: 'lead', spaceBefore: 'none', spaceAfter: 'large', tone: 'muted' }),
       { type: 'heading', attrs: { level: 2, textAlign: 'end', spaceBefore: 'small' }, content: [text('Title')] },
@@ -200,28 +200,49 @@ describe('layout and colour between the document and the wire', () => {
     const wire = toEmailBlocks({ type: 'doc', content: [...content, image({ width: 'full' })] });
     const back = fromEmailBlocks(wire);
     expect(toEmailBlocks(back)).toEqual(wire);
-    expect(layoutOf(back.content ?? [])).toEqual(layoutOf([...content, image({ width: 1 })]));
+    expect(wire.at(-1)?.attributes).toEqual({});
+    expect(layoutOf(back.content ?? [])).toEqual(layoutOf([...content, image({})]));
   });
 
-  it('reads an old wire with align right and width 283 as end and 0.5, and writes it back as right and 0.5', () => {
+  const storedImage = (id: string, attributes: Record<string, unknown>): EditorEmailBlock => ({
+    id,
+    key: `k${id}`,
+    type: 'image',
+    attributes,
+    content: { src: 'https://x.test/a.png', alt: 'A' },
+  });
+
+  it('saves an old wire with pixel widths, in a lane and a section too, byte for byte', () => {
     const old: EditorEmailBlock[] = [
-      {
-        id: 'i',
-        key: 'ki',
-        type: 'image',
-        attributes: { align: 'right', width: 283 },
-        content: { src: 'https://x.test/a.png', alt: 'A' },
-      },
+      storedImage('a', { align: 'right', width: 283 }),
+      storedImage('b', { width: 48 }),
+      storedImage('c', { width: 1 }),
+      storedImage('d', { width: 0.333 }),
       { id: 'p', key: 'kp', type: 'paragraph', attributes: { align: 'right' }, content: { text: 'Right' } },
+      {
+        id: 'cols',
+        key: 'kcols',
+        type: 'columns',
+        attributes: { ratio: [1, 1] },
+        content: {},
+        lanes: [[storedImage('e', { width: 200 })], [storedImage('f', { width: 566 })]],
+      },
+      { id: 's', key: 'ks', type: 'section', attributes: {}, content: {}, lanes: [[storedImage('g', { width: 200 })]] },
     ];
     const doc = fromEmailBlocks(old);
-    expect(doc.content?.[0].attrs).toMatchObject({ align: 'end', width: 0.5 });
-    expect(doc.content?.[1].attrs).toMatchObject({ textAlign: 'end' });
-    expect(doc.content?.[1].attrs).not.toHaveProperty('align');
-    expect(toEmailBlocks(doc).map((block) => block.attributes)).toEqual([
-      { align: 'right', width: 0.5 },
-      { align: 'right' },
-    ]);
+    expect(doc.content?.[0].attrs).toMatchObject({ align: 'end', pixelWidth: 283 });
+    expect(doc.content?.[4].attrs).toMatchObject({ textAlign: 'end' });
+    expect(JSON.stringify(toEmailBlocks(doc))).toBe(JSON.stringify(old));
+  });
+
+  it('writes a width the author changes as a fraction, in place of the pixels', () => {
+    const doc = fromEmailBlocks([storedImage('a', { width: 48 })]);
+    const image = doc.content?.[0] as NodeJSON;
+    const edited: DocJSON = {
+      type: 'doc',
+      content: [{ ...image, attrs: { ...image.attrs, width: 0.5, pixelWidth: null } }],
+    };
+    expect(toEmailBlocks(edited)[0].attributes).toEqual({ width: 0.5 });
   });
 
   it('exports a coloured bold run as a colour marker around the bold', () => {
