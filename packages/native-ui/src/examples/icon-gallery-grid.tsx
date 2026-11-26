@@ -2,6 +2,7 @@ import { useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
+import { Item } from '@/components/ui/item';
 import { Text } from '@/components/ui/text';
 import { useFocusVisible } from '@/lib/focus-visible';
 import { iconTrigger, type AnimatedIconProps, type IconHandle } from '@/lib/icon-motion';
@@ -63,24 +64,26 @@ function IconGalleryGridTile({ icon, picked, onPick }: IconGalleryGridTileProps)
   const focus = useFocusVisible();
   const Glyph = iconComponentOf(icon);
   return (
-    <Pressable
-      role="button"
-      aria-label={icon.glyph}
-      aria-selected={picked}
-      {...iconTrigger([handle], { onFocus: focus.onFocus })}
-      onBlur={focus.onBlur}
-      onPress={() => onPick(icon.name)}
-      className={cn(
-        'h-24 w-24 items-center gap-2 rounded-md px-1 py-3',
-        picked && 'bg-muted',
-        focus.focusVisible && 'ring-ring ring-2',
-      )}
+    <Item
+      asChild
+      variant={picked ? 'muted' : 'default'}
+      size="xs"
+      className={cn('h-24 w-24 flex-col', focus.focusVisible && 'ring-ring ring-2')}
     >
-      {Glyph && <Icon as={Glyph} ref={handle} className="size-6" />}
-      <Text numberOfLines={2} className="text-muted-foreground text-center text-xs">
-        {icon.glyph}
-      </Text>
-    </Pressable>
+      <Pressable
+        role="button"
+        aria-label={icon.glyph}
+        aria-selected={picked}
+        {...iconTrigger([handle], { onFocus: focus.onFocus })}
+        onBlur={focus.onBlur}
+        onPress={() => onPick(icon.name)}
+      >
+        {Glyph && <Icon as={Glyph} ref={handle} className="size-6" />}
+        <Text numberOfLines={2} className="text-muted-foreground text-center text-xs">
+          {icon.glyph}
+        </Text>
+      </Pressable>
+    </Item>
   );
 }
 

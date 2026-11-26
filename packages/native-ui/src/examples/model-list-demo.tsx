@@ -1,6 +1,5 @@
 import { Sparkles } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
-import { View } from 'react-native';
 
 import {
   ModelList,
@@ -10,6 +9,7 @@ import {
   ModelListRemoveButton,
   ModelListTitle,
 } from '@/components/layout/model-list';
+import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { Switch } from '@/components/ui/switch';
@@ -33,7 +33,7 @@ function ModelListDemo(): ReactNode {
   const [models, setModels] = useState(INITIAL_MODELS);
 
   return (
-    <View className="border-border h-72 w-full flex-col rounded-lg border">
+    <Card className="h-72 w-full">
       <ModelList>
         <ModelListHeader>
           <ModelListTitle>Model list</ModelListTitle>
@@ -72,7 +72,7 @@ function ModelListDemo(): ReactNode {
           </ItemGroup>
         </ModelListContent>
       </ModelList>
-    </View>
+    </Card>
   );
 }
 

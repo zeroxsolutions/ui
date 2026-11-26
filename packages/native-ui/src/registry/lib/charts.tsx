@@ -782,10 +782,10 @@ function categoryText(
 function DefaultTooltipContent({ active, payload, label }: TooltipContentProps): ReactNode {
   if (!active || !payload?.length) return null;
   return (
-    <View className="border-border bg-background gap-1 rounded-md border px-2.5 py-1.5">
-      {label === undefined ? null : <NativeText className="text-foreground text-xs">{String(label)}</NativeText>}
+    <View className="cn-chart-tooltip min-w-32 items-start">
+      {label === undefined ? null : <NativeText className="cn-chart-tooltip/text">{String(label)}</NativeText>}
       {payload.map((item, index) => (
-        <NativeText key={index} className="text-foreground text-xs">
+        <NativeText key={index} className="cn-chart-tooltip/text">
           {`${item.name ?? ''} : ${formatValue(item.value)}`}
         </NativeText>
       ))}

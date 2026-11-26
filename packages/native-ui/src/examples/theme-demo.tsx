@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
+import { Item } from '@/components/ui/item';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
@@ -29,11 +30,13 @@ function ThemeDemo(): ReactNode {
   );
 }
 
-/** One colour token: a square filled by the class in `className`, over the token's name in `children`. */
+/** One colour token: an outlined tile filled by the class in `className`, over the token's name in `children`. */
 function ThemeDemoSwatch({ className, children }: { className: string; children: string }): ReactNode {
   return (
     <View className="w-20 gap-1.5">
-      <View className={cn('border-border h-10 rounded-md border', className)} />
+      <Item variant="outline" size="xs">
+        <View className={cn('h-8 flex-1', className)} />
+      </Item>
       <Text className="text-muted-foreground text-xs">{children}</Text>
     </View>
   );

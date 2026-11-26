@@ -7,8 +7,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 /** A small, centered content column inside a wider surface. */
 function PageContainerDemo(): ReactNode {
   return (
-    <View className="bg-muted w-full rounded-lg p-4">
-      <PageContainer size="sm">
+    <View className="bg-muted w-full">
+      <PageContainer size="sm" className="py-4">
         <Card>
           <CardHeader>
             <CardTitle>Account settings</CardTitle>
