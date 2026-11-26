@@ -3,7 +3,6 @@ import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import {
   EditorView,
   drawSelection,
-  gutters,
   highlightActiveLine,
   highlightActiveLineGutter,
   keymap,
@@ -16,6 +15,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { editorTheme, shikiHighlighting, syntaxLanguage } from './code-syntax';
+import { surfaceUnder } from './surface-under';
 
 // Contained inline, so a line that does not wrap scrolls in the pane instead of widening what holds it.
 const codeMirrorPaneVariants = cva(
@@ -119,9 +119,6 @@ export function CodeMirrorPane({
       doc: value ?? defaultValue ?? '',
       extensions: [
         lineNumbersCompartment.current.of(showLineNumbers ? lineNumbers() : []),
-        // The gutter is transparent so it sits on whatever surface hosts the pane;
-        // a fixed one would let a long line scrolled sideways show through its numbers.
-        gutters({ fixed: false }),
         highlightActiveLine(),
         highlightActiveLineGutter(),
         drawSelection(),
@@ -166,6 +163,22 @@ export function CodeMirrorPane({
       viewRef.current = null;
     };
     // Mount-once: initial doc/config are seeded here, kept in sync below.
+  }, []);
+
+  // The line numbers stay put while a long line scrolls under them, so they need the surface the
+  // pane sits on behind them; the pane draws on its host's, which differs per host, style and theme.
+  React.useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const paint = () => {
+      const surface = surfaceUnder(host);
+      if (surface) host.style.setProperty('--code-pane-surface', surface);
+      else host.style.removeProperty('--code-pane-surface');
+    };
+    paint();
+    const observer = new MutationObserver(paint);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+    return () => observer.disconnect();
   }, []);
 
   // Controlled value → editor (guarded against the edit→onValueChange feedback loop).

@@ -1089,6 +1089,11 @@
           "target": "@components/editor/shared/code-mirror/code-syntax.ts"
         },
         {
+          "path": "registry/bases/base-ui/editor/shared/code-mirror/surface-under.ts",
+          "type": "registry:lib",
+          "target": "@components/editor/shared/code-mirror/surface-under.ts"
+        },
+        {
           "path": "registry/bases/base-ui/lib/code-theme.ts",
           "type": "registry:lib",
           "target": "@lib/code-theme.ts"

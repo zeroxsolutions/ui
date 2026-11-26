@@ -150,7 +150,7 @@ export const editorTheme: Extension = EditorView.theme({
     caretColor: 'var(--foreground)',
   },
   '.cm-gutters': {
-    backgroundColor: 'transparent',
+    backgroundColor: 'var(--code-pane-surface, transparent)',
     color: 'var(--muted-foreground)',
     border: 'none',
   },
