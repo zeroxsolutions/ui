@@ -843,7 +843,7 @@ describe('cssVarsProblems', () => {
       ...item,
       cssVars: {
         theme: { 'color-hue-red': 'var(--hue-red)' },
-        light: { 'hue-red': 'oklch(0.577 0.245 27.325)' },
+        light: { 'hue-red': 'oklch(0.505 0.213 27.518)' },
         dark: { 'hue-red': 'oklch(0.704 0.191 22.216)' },
       },
     };

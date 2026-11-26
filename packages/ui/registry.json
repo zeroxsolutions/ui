@@ -3352,6 +3352,18 @@
         ".document-editor [data-slot='block-layout'][data-fit][data-align='end']": {
           "margin-inline-start": "auto"
         },
+        ".document-editor [data-slot='block-layout']:not([data-fit], [data-width='full'], [style*='--layout-width'])": {
+          "max-width": "min(100%, var(--layout-container, 100%))"
+        },
+        ".document-editor [data-slot='block-layout'][style*='--layout-pixels']": {
+          "width": "var(--layout-pixels)"
+        },
+        ".document-editor [data-slot='block-layout'][style*='--layout-pixels'][data-align='center']": {
+          "margin-inline": "auto"
+        },
+        ".document-editor [data-slot='block-layout'][style*='--layout-pixels'][data-align='end']": {
+          "margin-inline-start": "auto"
+        },
         ".document-editor [data-slot='block-layout']:not([data-fit]) > [data-slot='image']": {
           "display": "block",
           "width": "100%"
@@ -3560,6 +3572,7 @@
         "@shadcn/popover",
         "@shadcn/utils",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/lucide-mouse-pointer-click-icon"
       ],
       "files": [
