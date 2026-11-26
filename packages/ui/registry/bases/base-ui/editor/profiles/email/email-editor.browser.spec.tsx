@@ -1072,18 +1072,30 @@ describe('EmailEditor presets', () => {
     expect(slash()).not.toContain('Call to action');
   });
 
-  it('lists a preset holding a card while the caret is in a column, refusing its click and saying why', async () => {
+  it('inserts each preset clicked while the caret is in a column at the top level, after the columns', async () => {
     const probe = await mount([paragraph('Top', 'p1'), columns()], { presets });
     await caretAfter('Left');
+    await vi.waitFor(() => expect(row('Card').element().getAttribute('aria-disabled')).toBeNull());
 
-    await vi.waitFor(() => expect(row('Card').element().getAttribute('aria-disabled')).toBe('true'));
-    await expect.element(row('Card')).toHaveAccessibleDescription(/caret/);
-    expect(offered()).toEqual(['Call to action', 'Action', 'Card']);
-    expect(row('Action').element().getAttribute('aria-disabled')).toBeNull();
+    await userEvent.click(row('Action'));
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns', 'paragraph', 'button']),
+    );
+    await userEvent.click(row('Card'));
 
-    // Playwright clicks no aria-disabled element unless forced; the click a person makes still reaches the row.
-    await userEvent.click(row('Card'), { force: true });
-    expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual(['paragraph', 'columns']);
+    await vi.waitFor(() =>
+      expect(exportedOf(probe.editor).map(({ type }) => type)).toEqual([
+        'paragraph',
+        'columns',
+        'paragraph',
+        'button',
+        'card',
+      ]),
+    );
+    expect(exportedOf(probe.editor)[1].lanes?.map((lane) => lane.map(({ type }) => type))).toEqual([
+      ['paragraph'],
+      ['paragraph'],
+    ]);
   });
 
   it('drops a card over a column at the top level, before the columns, and a call to action in the column', async () => {

@@ -3,12 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import { definePreset, type BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
-import type { DocJSON, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
+import type { DocJSON, EditorFeature, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { Editor } from '../../react/editor';
+import { columns } from '../columns/index';
 import { standardKit } from '../standard/index';
-import { presetsFeature } from './presets-feature';
+import { presetsFeature, type PresetsFeatureOptions } from './presets-feature';
 import { EditorPresetsPanel, type PresetsMessages } from './presets-panel';
 
 const text = (value: string): NodeJSON[] => [{ type: 'text', text: value }];
@@ -34,17 +35,33 @@ const divided = (at: number): BlockPreset =>
     content: [line(`Part ${at}`), { type: 'horizontalRule' }],
   });
 
+const split = definePreset({
+  id: 'split',
+  label: 'Two columns',
+  content: [
+    {
+      type: 'columns',
+      content: [
+        { type: 'column', content: [line('Left')] },
+        { type: 'column', content: [line('Right')] },
+      ],
+    },
+  ],
+});
+
 const twoLines: DocJSON = { type: 'doc', content: [line('First'), line('Second')] };
 
 interface HostProps {
   presets: readonly BlockPreset[];
   editable?: boolean;
   messages?: Partial<PresetsMessages>;
+  /** What the presets feature is given besides the presets. */
+  options?: PresetsFeatureOptions;
   onReady(editor: IEditor): void;
 }
 
-function Host({ presets, editable = true, messages, onReady }: HostProps) {
-  const [features] = useState(() => [standardKit(), presetsFeature(presets)]);
+function Host({ presets, editable = true, messages, options, onReady }: HostProps) {
+  const [features] = useState((): EditorFeature[] => [standardKit(), columns(), presetsFeature(presets, options)]);
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
     <div className="style-nova flex flex-col gap-6 p-12">
@@ -106,6 +123,48 @@ describe('EditorPresetsPanel', () => {
     await vi.waitFor(() =>
       expect(summary(editor)).toEqual(['paragraph:First', 'heading:Title', 'paragraph:Body', 'paragraph:Second']),
     );
+  });
+
+  it('inserts each preset clicked at the top level, after the last one, though the last left the caret in a column', async () => {
+    const editor = await mount({ presets: [split, intro] });
+    await userEvent.click(await lineHolding('First'));
+
+    await userEvent.click(page.getByRole('button', { name: /Two columns/ }));
+    await vi.waitFor(() => expect(summary(editor)).toEqual(['paragraph:First', 'columns:', 'paragraph:Second']));
+    await userEvent.click(page.getByRole('button', { name: /Title and text/ }));
+
+    await vi.waitFor(() =>
+      expect(summary(editor)).toEqual([
+        'paragraph:First',
+        'columns:',
+        'heading:Title',
+        'paragraph:Body',
+        'paragraph:Second',
+      ]),
+    );
+  });
+
+  it('inserts the preset clicked at the end of the document while the editor has never had the caret', async () => {
+    const editor = await mount({ presets: [intro] });
+
+    await userEvent.click(page.getByRole('button', { name: /Title and text/ }));
+
+    await vi.waitFor(() =>
+      expect(summary(editor)).toEqual(['paragraph:First', 'paragraph:Second', 'heading:Title', 'paragraph:Body']),
+    );
+  });
+
+  it('lists a preset the editor refuses after the caret block, refusing its click and saying why', async () => {
+    const editor = await mount({ presets: [intro], options: { fits: (_preset, _editor, at) => at === 0 } });
+    await userEvent.click(await lineHolding('First'));
+    const row = page.getByRole('button', { name: /Title and text/ });
+
+    await vi.waitFor(() => expect(row.element().getAttribute('aria-disabled')).toBe('true'));
+    await expect.element(row).toHaveAccessibleDescription(/Does not fit/);
+    // Playwright clicks no aria-disabled element unless forced; the click a person makes still reaches the row.
+    await userEvent.click(row, { force: true });
+
+    expect(summary(editor)).toEqual(['paragraph:First', 'paragraph:Second']);
   });
 
   it('inserts the preset dragged onto the editor where it is dropped', async () => {

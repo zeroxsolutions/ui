@@ -17,8 +17,8 @@ inserted in one move.
    definition for either editor (owner's pick, approach 1). Travel defines its own; the library ships a few
    general ones.
 2. An author inserts a preset three ways: dragging it from a presets panel beside the document to the spot it
-   drops on, clicking it in that panel (inserts after the current block), and the slash menu and "+" under a
-   "Presets" group.
+   drops on, clicking it in that panel (inserts at the top level, after the current top-level block), and the
+   slash menu and "+" under a "Presets" group.
 3. An inserted preset is ordinary blocks: edited, moved and deleted like any other, with nothing tying it back
    to the preset.
 4. An editor offers only the presets it can hold: a preset with a block the editor or the email profile's
@@ -104,8 +104,8 @@ The owner asked to proceed; these were settled by the writer and are open to the
    editor-core checks node names against the schema and block kinds against `allow`; the email editor also runs
    `docProblems` over the preset's content and leaves out a preset with a `block-not-carried` problem. Where
    the caret sits matters: in a column, a preset holding `columns`, `hero` or `card` is not offered by the slash
-   menu and "+" (as the slash items do with `inLanes`); the panel lists it with its click refused
-   (`aria-disabled`, the reason read to assistive tech), so it can still be dragged to the top level. Under `structure: 'locked'` no preset is offered. `bounds` stays a
+   menu and "+" (as the slash items do with `inLanes`); the panel's click inserts at the top level (call 6), so
+   it takes such a preset there. Under `structure: 'locked'` no preset is offered. `bounds` stays a
    `validate` problem, as for any insert.
 3. **`emailPreset(profile, options)` takes the profile**, so its blocks' codecs convert the wire, and a
    product block's wire never becomes `emailUnknown`. A preset holding `emailUnknown` does not fit.
@@ -115,6 +115,12 @@ The owner asked to proceed; these were settled by the writer and are open to the
 5. **The library's presets hold placeholder text from `messages`** (labels, descriptions and the text inside),
    no variables, and empty links and images. They show the same "fill this in" problems a block inserted from
    the slash menu shows.
-6. **Where a preset lands.** Click, slash and "+" insert after the block holding the caret, at that block's
-   level. A drop snaps to the nearest block boundary at the level under the pointer; a spot where the preset
-   would be refused shows no drop indicator and drops nothing. `insertPreset`'s `at` is a document position.
+6. **Where a preset lands.** Slash and "+" insert after the block holding the caret, at that block's level: the
+   author typed them in that spot, so a lane is meant. A click in the panel inserts at the top level, after the
+   top-level block holding the caret, or at the end of the document when the editor has never had the focus
+   (`insertPreset` with `level: 'top'`); its row is refused (`aria-disabled`, the reason read to assistive tech)
+   only where the editor takes the preset somewhere but not there. A drop snaps to the nearest block boundary at
+   the level under the pointer; a spot where the preset would be refused shows no drop indicator and drops
+   nothing. `insertPreset`'s `at` is a document position.
+   Revised 2026-11-26 after the owner's review: a panel click went after the caret's block at its level, so after
+   "Two columns" left the caret in a column, the next click put a FAQ and a callout inside that column.

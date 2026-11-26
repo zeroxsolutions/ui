@@ -82,15 +82,33 @@ function holdingBlock(state: EngineState): { node: ProseMirrorNode; pos: number 
 }
 
 /**
- * After the block holding the selection, or in place of it when it is an empty line no host has saved, which
- * the slash menu and the "+" leave behind them.
+ * After `block`, or in place of it when it is an empty line no host has saved, which the slash menu and the "+"
+ * leave behind them.
  */
-function caretTarget(state: EngineState): Target | null {
-  const block = holdingBlock(state);
-  if (!block) return null;
+function beside(block: { node: ProseMirrorNode; pos: number }): Target {
   const end = block.pos + block.node.nodeSize;
   const blank = block.node.type.name === 'paragraph' && block.node.content.size === 0 && !block.node.attrs.id;
   return blank ? { from: block.pos, to: end } : { from: end, to: end };
+}
+
+/** Beside the block holding the selection, at its level. */
+function caretTarget(state: EngineState): Target | null {
+  const block = holdingBlock(state);
+  return block ? beside(block) : null;
+}
+
+/**
+ * Beside the top-level block holding the selection, or beside the document's last block while the editor has never
+ * had the focus, when its selection is only where the engine started it rather than a spot the author picked.
+ */
+function topTarget(state: EngineState, placed: boolean): Target | null {
+  const { selection, doc } = state;
+  const last = doc.lastChild;
+  if (!placed) return last ? beside({ node: last, pos: doc.content.size - last.nodeSize }) : { from: 0, to: 0 };
+  const { $from } = selection;
+  if ($from.depth >= 1) return beside({ node: $from.node(1), pos: $from.before(1) });
+  const picked = (selection as { node?: ProseMirrorNode }).node;
+  return picked ? beside({ node: picked, pos: $from.pos }) : { from: $from.pos, to: $from.pos };
 }
 
 /** Whether `nodes` may stand in `target`: a boundary between blocks whose parent takes them there. */
@@ -184,7 +202,11 @@ function dropCursorOf(): { show(view: EditorView, at: number): void; hide(): voi
   return { show, hide };
 }
 
-const insertArgs = z.object({ id: z.string().min(1), at: z.number().int().min(0).optional() });
+const insertArgs = z.object({
+  id: z.string().min(1),
+  at: z.number().int().min(0).optional(),
+  level: z.literal('top').optional(),
+});
 type InsertArgs = z.infer<typeof insertArgs>;
 
 /**
@@ -192,6 +214,11 @@ type InsertArgs = z.infer<typeof insertArgs>;
  * Presets, and dropped from a presets panel onto the document. A preset is offered where the schema holds
  * every node of it and `options.fits` agrees. Inserted blocks are new ones: no id, no key, nothing tying them
  * back to the preset; one insert is one undo step.
+ *
+ * `insertPreset` takes `{ id, at?, level? }`: at the block boundary `at`; with `level: 'top'`, after the top-level
+ * block holding the selection, or after the document's last block while the editor has never had the focus;
+ * otherwise after the block holding the selection, at its level, a column's block included. Either of the last
+ * two takes the place of an empty line no host has saved instead of going after it.
  *
  * @throws {EditorError} `editor.presets.duplicate_id` for two presets with one id, which a slash item and a drag
  * could not tell apart
@@ -208,6 +235,8 @@ export function presetsFeature(presets: readonly BlockPreset[], options: Presets
   const engines = new Set<Editor>();
   const engineOf = (facade: IEditor) =>
     [...engines].find((engine) => facadeFor(engine as unknown as EngineHandle) === facade);
+  // The engines whose view has had the focus, so a selection in them is one the author placed.
+  const placed = new WeakSet<Editor>();
   // A preset's nodes per engine, read against its schema once; null when the schema refuses them.
   const parsed = new WeakMap<Editor, Map<string, ProseMirrorNode[] | null>>();
 
@@ -236,7 +265,12 @@ export function presetsFeature(presets: readonly BlockPreset[], options: Presets
     if (!preset || !engine || !editor.isEditable()) return null;
     const nodes = nodesOf(engine, preset);
     const { state } = engine;
-    const target = args.at === undefined ? caretTarget(state) : { from: args.at, to: args.at };
+    const target =
+      args.at !== undefined
+        ? { from: args.at, to: args.at }
+        : args.level === 'top'
+          ? topTarget(state, placed.has(engine))
+          : caretTarget(state);
     if (!nodes || !target || !takes(state.doc, target, nodes)) return null;
     if (options.fits && !options.fits(preset, editor, target.from)) return null;
     return { engine, nodes, target };
@@ -260,6 +294,10 @@ export function presetsFeature(presets: readonly BlockPreset[], options: Presets
       view: () => ({ destroy: cursor.hide }),
       props: {
         handleDOMEvents: {
+          focus() {
+            placed.add(engine);
+            return false;
+          },
           dragover(view, event) {
             const id = draggedPreset(event.dataTransfer);
             if (id === null) return false;

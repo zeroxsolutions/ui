@@ -180,8 +180,10 @@ function GuideEditor({ content }: { content: DocJSON }) {
 }
 ```
 
-`insertPreset` takes `{ id, at? }`. Without `at`, it inserts after the block holding the caret, at that block's
-level; `at` is a document position. One insert is one undo step.
+`insertPreset` takes `{ id, at?, level? }`. With neither, it inserts after the block holding the caret, at that
+block's level, so in a column it goes into the column. With `level: 'top'`, it inserts after the top-level block
+holding the caret, or at the end of the document if the editor has never had the focus. `at` is a document
+position. One insert is one undo step.
 
 ```tsx
 function insertTip(editor: IEditor) {
@@ -235,10 +237,13 @@ function Newsletter({ blocks, save }: { blocks: EditorEmailBlock[]; save: (block
 ## The panel
 
 Each row of `EditorPresetsPanel` is a button showing a preset's icon, label and description. A click, or Enter or
-Space on the focused row, inserts the preset after the caret's block, and a drag carries it to the spot it drops
-on. The panel lists every preset the editor can hold somewhere. A preset that does not fit where the caret is,
-such as a card while the caret is in an email column, stays in the list and can still be dragged, but its row is
-marked `aria-disabled` and a click inserts nothing; a screen reader reads `messages.notAtCaret` as the reason.
+Space on the focused row, inserts the preset at the top level: after the top-level block holding the caret, so
+with the caret in a column it goes after the columns block, or at the end of the document if the author has not
+put the caret in the editor yet. Only the slash menu and the "+" insert into the column the caret is in. A drag
+carries the preset to the spot it drops on, a column included. The panel lists every preset the editor can hold
+somewhere. A preset the editor refuses where a click would put it stays in the list and can still be dragged, but
+its row is marked `aria-disabled` and a click inserts nothing; a screen reader reads `messages.notAtCaret` as the
+reason.
 The panel reads the presets again as the caret moves, as the document changes, as it is drawn again, and as the
 pointer or the focus comes into it, so a change to read-only or to locked structure takes the presets away. With
 more than six, a search field filters them by label and keyword. On a narrow screen the demos stack the panel under the editor; your product can put
@@ -257,7 +262,7 @@ ask the same `insertPreset` check, so the three always agree.
 | In a column, the preset holds no columns block, hero or card                      | -               | yes          |
 | `structure: 'locked'` offers no preset                                            | -               | yes          |
 
-A drop follows the same rules, at the level a click inserts at: it lands before or after the block under the
+A drop follows the same rules, at the level the slash menu inserts at: it lands before or after the block under the
 pointer, whichever side is nearer, at the innermost level that is the document or a column and takes the preset.
 Dropped over a table, a list or a callout, a preset goes beside it, never into a cell or an item; a card dropped
 over an email column goes beside the columns block. A spot where no level takes the preset draws no drop

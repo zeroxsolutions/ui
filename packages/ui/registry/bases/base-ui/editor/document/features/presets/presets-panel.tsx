@@ -21,7 +21,7 @@ export interface PresetsMessages {
   search: string;
   /** What the panel says when the editor can hold none of the presets now, or none matches the search. */
   empty: string;
-  /** Why a listed preset's click inserts nothing: it does not fit where the caret is, though a drop elsewhere does. */
+  /** Why a listed preset's click inserts nothing: it does not fit where a click puts it, though a drop elsewhere does. */
   notAtCaret: string;
 }
 
@@ -29,7 +29,7 @@ const DEFAULT_PRESETS_MESSAGES: PresetsMessages = {
   title: 'Presets',
   search: 'Search presets',
   empty: 'No presets fit here',
-  notAtCaret: 'Does not fit at the caret; drag it to a spot that takes it',
+  notAtCaret: 'Does not fit where a click puts it; drag it to a spot that takes it',
 };
 
 /** More presets than this, and the panel offers a search over them. */
@@ -39,7 +39,7 @@ export interface EditorPresetsPanelProps {
   editor: IEditor;
   /**
    * The presets the editor was built with; the panel lists those `insertPreset` can insert somewhere, and a click
-   * inserts one only where the caret is.
+   * inserts one at the top level only.
    */
   presets: readonly BlockPreset[];
   /** The host's words for any string the panel draws; the rest stay English. */
@@ -47,11 +47,14 @@ export interface EditorPresetsPanelProps {
   className?: string;
 }
 
-/** A preset the editor can hold somewhere, and whether it can go where the caret is. */
+/** A preset the editor can hold somewhere, and whether it can go where a click puts it. */
 interface PresetRow {
   preset: BlockPreset;
-  atCaret: boolean;
+  clickable: boolean;
 }
+
+/** Where a click puts a preset: the top level, so a lane the caret was left in by the last insert takes nothing. */
+const CLICKED = { level: 'top' } as const;
 
 /**
  * The presets the editor can hold somewhere, read as those it can insert at the start of the document: a lane
@@ -60,11 +63,12 @@ interface PresetRow {
 function rowsOf(editor: IEditor, presets: readonly BlockPreset[]): readonly PresetRow[] {
   return presets
     .filter(({ id }) => editor.can('insertPreset', { id, at: 0 }))
-    .map((preset) => ({ preset, atCaret: editor.can('insertPreset', { id: preset.id }) }));
+    .map((preset) => ({ preset, clickable: editor.can('insertPreset', { id: preset.id, ...CLICKED }) }));
 }
 
 const sameRows = (a: readonly PresetRow[], b: readonly PresetRow[]): boolean =>
-  a.length === b.length && a.every((row, index) => row.preset === b[index].preset && row.atCaret === b[index].atCaret);
+  a.length === b.length &&
+  a.every((row, index) => row.preset === b[index].preset && row.clickable === b[index].clickable);
 
 /**
  * The rows of `presets`, read again as the selection or the document changes, after each render, and when
@@ -103,17 +107,17 @@ function matches(preset: BlockPreset, query: string): boolean {
 
 interface EditorPresetsPanelItemProps {
   row: PresetRow;
-  /** The id of the line saying why a row that does not fit at the caret inserts nothing on a click. */
+  /** The id of the line saying why a row that does not fit where a click puts it inserts nothing on a click. */
   notAtCaretId: string;
   onInsert(id: string): void;
 }
 
 /**
- * One preset: a click, Enter or Space inserts it after the caret's block, and a drag carries it to the spot it
- * drops on. A preset that does not fit at the caret is still dragged, and its click is refused.
+ * One preset: a click, Enter or Space inserts it after the top-level block holding the caret, and a drag carries
+ * it to the spot it drops on. A preset that does not fit there is still dragged, and its click is refused.
  */
 function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPanelItemProps): ReactNode {
-  const { preset, atCaret } = row;
+  const { preset, clickable } = row;
   const { active, handlers } = useChromeActive();
   return (
     <div role="listitem" data-slot="editor-presets-panel-item">
@@ -121,11 +125,11 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
         size="sm"
         render={<button type="button" />}
         draggable
-        aria-disabled={atCaret ? undefined : true}
-        aria-describedby={atCaret ? undefined : notAtCaretId}
+        aria-disabled={clickable ? undefined : true}
+        aria-describedby={clickable ? undefined : notAtCaretId}
         onDragStart={(event) => startPresetDrag(event.dataTransfer, preset.id)}
         onClick={() => {
-          if (atCaret) onInsert(preset.id);
+          if (clickable) onInsert(preset.id);
         }}
         {...handlers}
         className="cn-editor-menu-item hover:bg-accent hover:text-accent-foreground cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
@@ -145,10 +149,11 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
 }
 
 /**
- * The presets an editor can hold, for a host to place beside it: a click inserts one after the block holding the
- * caret, and a drag drops one where the pointer lets go. A preset that does not fit at the caret, such as a card
- * while the caret is in a lane, is listed with its click refused and the reason read to assistive tech. Drawn in
- * the Document Editor's menu rows, with a search over more than six presets.
+ * The presets an editor can hold, for a host to place beside it: a click inserts one at the top level, after the
+ * top-level block holding the caret or at the end of a document the editor never had the focus in, and a drag
+ * drops one where the pointer lets go, a lane included. A preset the editor refuses where a click puts it is
+ * listed with its click refused and the reason read to assistive tech. Drawn in the Document Editor's menu rows,
+ * with a search over more than six presets.
  */
 function EditorPresetsPanel({ editor, presets, messages, className }: EditorPresetsPanelProps): ReactNode {
   const text = { ...DEFAULT_PRESETS_MESSAGES, ...messages };
@@ -163,7 +168,7 @@ function EditorPresetsPanel({ editor, presets, messages, className }: EditorPres
     [rows, searchable, query],
   );
   const insert = (id: string) => {
-    if (editor.run('insertPreset', { id })) editor.focus();
+    if (editor.run('insertPreset', { id, ...CLICKED })) editor.focus();
   };
 
   return (
