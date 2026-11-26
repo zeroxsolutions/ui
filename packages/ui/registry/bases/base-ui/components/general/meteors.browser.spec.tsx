@@ -11,9 +11,11 @@ describe('Meteors under reduced motion', () => {
         <Meteors number={5} />
       </div>,
     );
-    const meteors = [...screen.container.querySelectorAll<HTMLElement>('[data-slot=meteors] > span')];
+    const meteors = (): HTMLElement[] => [
+      ...screen.container.querySelectorAll<HTMLElement>('[data-slot=meteors] > span'),
+    ];
 
-    await expect.poll(() => meteors.length).toBe(5);
-    expect(meteors.map((meteor) => getComputedStyle(meteor).display)).toEqual(Array(5).fill('none'));
+    await expect.poll(() => meteors().length).toBe(5);
+    expect(meteors().map((meteor) => getComputedStyle(meteor).display)).toEqual(Array(5).fill('none'));
   });
 });

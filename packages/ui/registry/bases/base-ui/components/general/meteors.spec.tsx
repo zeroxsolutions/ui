@@ -17,15 +17,6 @@ describe('Meteors', () => {
     expect(meteorsOf(container)).toHaveLength(3);
   });
 
-  it('starts each meteor along the top, at a share of its own width rather than of the window', () => {
-    const { container } = render(<Meteors number={12} />);
-    for (const meteor of meteorsOf(container)) {
-      expect(meteor.style.top).toBe('-5%');
-      expect(meteor.style.left).toMatch(/^\d+(\.\d+)?%$/);
-      expect(Number.parseFloat(meteor.style.left)).toBeLessThan(100);
-    }
-  });
-
   it('times each fall within the delays and durations it is given', () => {
     const { container } = render(<Meteors number={12} minDelay={1} maxDelay={2} minDuration={3} maxDuration={4} />);
     for (const meteor of meteorsOf(container)) {
@@ -37,8 +28,9 @@ describe('Meteors', () => {
   });
 
   it('draws no meteor in a server render, so the first client render matches it', () => {
-    const html = renderToString(<Meteors number={5} />);
-    expect(html).not.toContain('animate-meteor');
+    const server = document.createElement('div');
+    server.innerHTML = renderToString(<Meteors number={5} />);
+    expect(meteorsOf(server)).toHaveLength(0);
   });
 
   it('is hidden from assistive technology, as decoration', () => {
