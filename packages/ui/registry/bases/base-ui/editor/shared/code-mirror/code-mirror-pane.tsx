@@ -3,6 +3,7 @@ import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import {
   EditorView,
   drawSelection,
+  gutters,
   highlightActiveLine,
   highlightActiveLineGutter,
   keymap,
@@ -118,6 +119,9 @@ export function CodeMirrorPane({
       doc: value ?? defaultValue ?? '',
       extensions: [
         lineNumbersCompartment.current.of(showLineNumbers ? lineNumbers() : []),
+        // The gutter is transparent so it sits on whatever surface hosts the pane;
+        // a fixed one would let a long line scrolled sideways show through its numbers.
+        gutters({ fixed: false }),
         highlightActiveLine(),
         highlightActiveLineGutter(),
         drawSelection(),

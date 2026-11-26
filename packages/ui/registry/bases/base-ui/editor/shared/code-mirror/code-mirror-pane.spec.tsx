@@ -53,6 +53,15 @@ describe('CodeMirrorPane', () => {
     expect(container.querySelector('.cm-lineNumbers')).not.toBeNull();
   });
 
+  it('scrolls the line numbers with a long line instead of drawing them over it', () => {
+    const { container } = render(
+      <CodeMirrorPane value={`export const x = '${'a'.repeat(400)}'`} language="typescript" />,
+    );
+    const gutters = container.querySelector<HTMLElement>('.cm-gutters');
+    expect(gutters).not.toBeNull();
+    expect(gutters?.style.position).not.toBe('sticky');
+  });
+
   it('mounts and keeps its text with custom indent settings (tabSize + useTabs)', () => {
     const { container } = render(<CodeMirrorPane value={'const x = 1'} language="typescript" tabSize={8} useTabs />);
     expect(container.querySelector('.cm-content')?.textContent).toContain('const x = 1');
