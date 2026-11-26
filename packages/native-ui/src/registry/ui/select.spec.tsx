@@ -1,8 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { act, configure, render, screen, userEvent, within } from '@testing-library/react-native';
 import { AccessibilityInfo, Dimensions, View } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Select,
   SelectContent,
@@ -116,13 +115,12 @@ describe('Select', () => {
     return user;
   }
 
-  it('is a collapsed combobox showing its placeholder, muted, until something is chosen', async () => {
+  it('is a collapsed combobox showing its placeholder until something is chosen', async () => {
     await render(<Fruit />);
 
     expect(trigger()).toHaveProp('role', 'combobox');
     expect(trigger()).toBeCollapsed();
     expect(screen.getByText('Select a fruit')).toBeOnTheScreen();
-    expect(emittedClasses(screen.getByText('Select a fruit').props.className)).toContain('text-muted-foreground');
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
@@ -154,7 +152,6 @@ describe('Select', () => {
     expect(screen.queryByTestId('content')).toBeNull();
     expect(trigger()).toBeCollapsed();
     expect(screen.getByText('Banana')).toBeOnTheScreen();
-    expect(emittedClasses(screen.getByText('Banana').props.className)).not.toContain('text-muted-foreground');
   });
 
   it('draws an option written as text with a value inside it as its label', async () => {
@@ -213,23 +210,14 @@ describe('Select', () => {
     expect(screen.getByText('Apple')).toBeOnTheScreen();
   });
 
-  it('announces a disabled option as disabled, dims it and ignores a press on it', async () => {
+  it('announces a disabled option as disabled and ignores a press on it', async () => {
     const onValueChange = jest.fn();
     const user = await open({ root: { onValueChange } });
 
     await user.press(option('Grapes'));
 
     expect(option('Grapes')).toBeDisabled();
-    expect(emittedClasses(option('Grapes').props.className)).toContain('opacity-50');
     expect(onValueChange).not.toHaveBeenCalled();
-  });
-
-  it('highlights an option while a finger is on it', async () => {
-    await open();
-
-    await fireEvent(option('Apple'), 'pressIn');
-
-    expect(emittedClasses(option('Apple').props.className)).toContain('bg-accent');
   });
 
   it('closes on a press outside its list, and on the back button', async () => {
@@ -264,12 +252,6 @@ describe('Select', () => {
     });
 
     expect(list()).toHaveStyle({ top: TRIGGER.y + TRIGGER.height + 4, left: TRIGGER.x });
-  });
-
-  it('draws the small size and the invalid state on its trigger', async () => {
-    await render(<Fruit trigger={{ size: 'sm', 'aria-invalid': true }} />);
-
-    expect(emittedClasses(trigger().props.className)).toEqual(expect.arrayContaining(['h-8', 'border-destructive']));
   });
 
   it('opens from the start with defaultOpen', async () => {

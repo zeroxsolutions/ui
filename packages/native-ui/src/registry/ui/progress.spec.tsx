@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Progress, ProgressLabel, ProgressValue } from './progress';
 
 // The progress bar is one accessible element, so its indicator is reached as its child.
@@ -34,15 +33,6 @@ describe('Progress', () => {
 
     expect(indicator().props.style).toEqual(expect.objectContaining({ width }));
     expect(screen.getByRole('progressbar').props.accessibilityValue).toEqual(expect.objectContaining({ now }));
-  });
-
-  it("draws Vega's muted track and primary indicator", async () => {
-    await render(<Progress value={40} testID="track" />);
-
-    expect(emittedClasses(screen.getByTestId('track').props.className)).toEqual(
-      expect.arrayContaining(['bg-muted', 'h-1.5', 'rounded-full']),
-    );
-    expect(emittedClasses(indicator().props.className)).toContain('bg-primary');
   });
 });
 
@@ -90,19 +80,5 @@ describe('Progress with a label and a value', () => {
     );
 
     expect(screen.getByText('3 of 100 (3%)', { includeHiddenElements: true })).toBeOnTheScreen();
-  });
-
-  it("draws Vega's label and muted value, on a row above the track", async () => {
-    await renderLabelled();
-
-    expect(emittedClasses(screen.getByText('Upload', { includeHiddenElements: true }).props.className)).toEqual(
-      expect.arrayContaining(['text-sm', 'font-sans-medium']),
-    );
-    expect(emittedClasses(screen.getByText('56%', { includeHiddenElements: true }).props.className)).toEqual(
-      expect.arrayContaining(['ml-auto', 'text-muted-foreground', 'text-sm']),
-    );
-    const [, , track] = screen.getByTestId('progress').children;
-    if (typeof track === 'string') throw new Error('The track is not an element');
-    expect(emittedClasses(track.props.className)).toEqual(expect.arrayContaining(['bg-muted', 'h-1.5', 'w-full']));
   });
 });

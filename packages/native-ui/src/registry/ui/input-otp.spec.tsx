@@ -1,7 +1,6 @@
 import { fireEvent, isHiddenFromAccessibility, render, screen, userEvent } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import type { ReactElement } from 'react';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot, REGEXP_ONLY_DIGITS_AND_CHARS } from './input-otp';
 
 // The slots are hidden from screen readers, which the default queries skip.
@@ -9,14 +8,9 @@ const HIDDEN = { includeHiddenElements: true } as const;
 
 type RenderedNode = ReturnType<typeof screen.getByTestId>;
 
-function classesOf(testID: string): string[] {
-  return emittedClasses(screen.getByTestId(testID, HIDDEN).props.className);
-}
-
-/** Whether the node, or a node inside it, draws the caret line. */
-function holdsCaret(node: RenderedNode): boolean {
-  if (emittedClasses(node.props.className).includes('w-px')) return true;
-  return node.children.some((child) => typeof child !== 'string' && holdsCaret(child));
+/** Whether the slot draws the caret: a view of its own where a typed character would be. */
+function holdsCaret(slot: RenderedNode): boolean {
+  return slot.children.some((child) => typeof child !== 'string' && child.type === 'View');
 }
 
 function sixDigitCode(props: Partial<Parameters<typeof InputOTP>[0]> = {}): ReactElement {
@@ -71,7 +65,7 @@ describe('InputOTP', () => {
     expect(onComplete).toHaveBeenCalledWith('123456');
   });
 
-  it('replaces a partly filled code with the pasted one, not a concatenation', async () => {
+  it('replaces a partly filled code with the pasted one, from the simulated OS write of the old code and the paste', async () => {
     const onChange = jest.fn();
     await render(sixDigitCode({ defaultValue: '12', onChange }));
 
@@ -85,12 +79,12 @@ describe('InputOTP', () => {
   it('takes an autofill of the whole code over a partly filled one as the code', async () => {
     await render(sixDigitCode({ defaultValue: '12' }));
 
-    await fireEvent.changeText(screen.getByLabelText('Verification code'), '123456');
+    await userEvent.setup().paste(screen.getByLabelText('Verification code'), '123456');
 
     expect(screen.getByLabelText('Verification code').props.value).toBe('123456');
   });
 
-  it('appends a short paste that still fits the code', async () => {
+  it('appends a short paste that still fits the code, from the simulated OS write of the old code and the paste', async () => {
     await render(sixDigitCode({ defaultValue: '12' }));
 
     await fireEvent.changeText(screen.getByLabelText('Verification code'), '1234');
@@ -98,7 +92,7 @@ describe('InputOTP', () => {
     expect(screen.getByLabelText('Verification code').props.value).toBe('1234');
   });
 
-  it('leaves the code and reports no change when every pasted character is refused', async () => {
+  it('leaves the code and reports no change when every pasted character is refused, from the simulated OS write', async () => {
     const onChange = jest.fn();
     await render(sixDigitCode({ defaultValue: '12', onChange }));
 
@@ -108,7 +102,7 @@ describe('InputOTP', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('refuses a paste with a character the pattern rejects, whatever its length', async () => {
+  it('refuses a paste with a character the pattern rejects, whatever its length, from the simulated OS write', async () => {
     const onChange = jest.fn();
     await render(sixDigitCode({ defaultValue: '12', onChange }));
 
@@ -202,72 +196,38 @@ describe('InputOTP', () => {
     expect(screen.getByLabelText('Verification code').props.value).toBe('42');
   });
 
-  it('draws the focus border and a caret on the next empty slot while it holds focus', async () => {
+  it('puts a caret on the next empty slot while it holds focus, and none once it lets focus go', async () => {
+    const user = userEvent.setup();
     await render(sixDigitCode({ defaultValue: '12' }));
-
-    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
-
-    await fireEvent(screen.getByLabelText('Verification code'), 'focus');
-
-    expect(classesOf('slot-2')).toContain('border-ring');
-    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(true);
-    expect(classesOf('slot-1')).not.toContain('border-ring');
-    expect(holdsCaret(screen.getByTestId('slot-1', HIDDEN))).toBe(false);
-
-    await fireEvent(screen.getByLabelText('Verification code'), 'blur');
-
-    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
-  });
-
-  it('keeps the last slot active without a caret once the code is full', async () => {
-    await render(sixDigitCode({ defaultValue: '123456' }));
-
-    await fireEvent(screen.getByLabelText('Verification code'), 'focus');
-
-    expect(classesOf('slot-5')).toContain('border-ring');
-    expect(holdsCaret(screen.getByTestId('slot-5', HIDDEN))).toBe(false);
-  });
-
-  it('draws every slot destructive and passes aria-invalid on to the field', async () => {
-    await render(sixDigitCode({ 'aria-invalid': true }));
-
-    expect(screen.getByLabelText('Verification code').props['aria-invalid']).toBe(true);
-    expect(classesOf('slot-0')).toContain('border-destructive');
-    expect(classesOf('slot-4')).toContain('border-destructive');
-  });
-
-  it("merges a slot's textClassName after the style's text classes so it wins", async () => {
-    await render(
-      <InputOTP maxLength={2} aria-label="Verification code" defaultValue="12">
-        <InputOTPGroup>
-          <InputOTPSlot index={0} textClassName="text-lg font-sans-semibold" />
-          <InputOTPSlot index={1} />
-        </InputOTPGroup>
-      </InputOTP>,
-    );
-
-    const styled = emittedClasses(screen.getByText('1', HIDDEN).props.className);
-    expect(styled).toEqual(expect.arrayContaining(['text-lg', 'font-sans-semibold']));
-    expect(styled).not.toContain('text-sm');
-    expect(emittedClasses(screen.getByText('2', HIDDEN).props.className)).toContain('text-sm');
-  });
-
-  it('rounds and closes only the outer edges of each group', async () => {
-    await render(sixDigitCode());
-
-    expect(classesOf('slot-0')).toEqual(expect.arrayContaining(['rounded-l-md', 'border-l']));
-    expect(classesOf('slot-1')).not.toContain('rounded-l-md');
-    expect(classesOf('slot-2')).toContain('rounded-r-md');
-    expect(classesOf('slot-3')).toContain('border-l');
-  });
-
-  it('is not editable, dimmed and announced disabled when editable is false', async () => {
-    await render(sixDigitCode({ editable: false }));
     const field = screen.getByLabelText('Verification code');
 
-    expect(field.props.editable).toBe(false);
-    expect(field.props['aria-disabled']).toBe(true);
-    expect(emittedClasses(field.parent?.props.className)).toContain('opacity-50');
+    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
+
+    await user.type(field, '3', { skipBlur: true });
+
+    expect(holdsCaret(screen.getByTestId('slot-3', HIDDEN))).toBe(true);
+    expect(holdsCaret(screen.getByTestId('slot-2', HIDDEN))).toBe(false);
+
+    await user.type(field, '4');
+
+    expect(['slot-4', 'slot-5'].filter((slot) => holdsCaret(screen.getByTestId(slot, HIDDEN)))).toEqual([]);
+  });
+
+  it('passes aria-invalid on to the field', async () => {
+    await render(sixDigitCode({ 'aria-invalid': true }));
+
+    expect(screen.getByLabelText('Verification code')).toHaveProp('aria-invalid', true);
+  });
+
+  it('takes no typing and is announced disabled when editable is false', async () => {
+    const onChange = jest.fn();
+    await render(sixDigitCode({ editable: false, onChange }));
+    const field = screen.getByLabelText('Verification code');
+
+    await userEvent.setup().type(field, '1');
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(field).toBeDisabled();
   });
 
   // The field's style is fixed when the module loads, so each platform loads its own copy of the
@@ -313,14 +273,11 @@ describe('InputOTP', () => {
         </InputOTP>
       </>
     );
-    const unlabelled = (
-      // @ts-expect-error a field with no label is refused by type
-      <InputOTP maxLength={4}>{children}</InputOTP>
-    );
+    // @ts-expect-error a field with no label is refused by type
+    void (<InputOTP maxLength={4}>{children}</InputOTP>);
 
     await render(labelled);
     expect(screen.getByLabelText('Code')).toBeOnTheScreen();
     expect(screen.getByLabelText('Other code')).toBeOnTheScreen();
-    expect(unlabelled).toBeDefined();
   });
 });

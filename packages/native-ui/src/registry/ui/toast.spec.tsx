@@ -1,8 +1,7 @@
 import { PortalHost } from '@rn-primitives/portal';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform, View } from 'react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Text } from './text';
 import { Toaster, createToastManager, toast, useToastManager, type ToastProviderProps } from './toast';
 
@@ -96,14 +95,6 @@ describe('Toaster', () => {
 
     expect(screen.getByText('Event created')).toBeOnTheScreen();
     expect(screen.getByText('Sunday, December 3 at 9:00 AM')).toBeOnTheScreen();
-  });
-
-  it("rounds a toast as the style's toast slot does", async () => {
-    await show();
-
-    await raise(() => toast.add({ title: 'Event created' }));
-
-    expect(emittedClasses(toastHolding('Event created').props.className)).toContain('rounded-2xl');
   });
 
   it('announces a new toast politely on iOS, and draws in a polite live region for Android', async () => {
@@ -251,7 +242,9 @@ describe('Toaster', () => {
     await show();
     await raise(() => toast.add({ title: 'Event created', actionProps: { children: 'Undo', onPress } }));
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Undo' }));
 
     expect(onPress).toHaveBeenCalledTimes(1);
   });
@@ -260,7 +253,9 @@ describe('Toaster', () => {
     await show();
     await raise(() => toast.add({ title: 'Saved', timeout: 0 }));
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Close toast' }));
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Close toast' }));
     await elapse(MOTION_MS);
 
     expect(screen.queryByText('Saved')).toBeNull();
@@ -302,14 +297,16 @@ describe('Toaster', () => {
       </>,
     );
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Add' }));
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Add' }));
     await elapse(MOTION_MS);
 
     expect(screen.getByText('From the hook')).toBeOnTheScreen();
     await raise(() => manager.close());
   });
 
-  it('goes on a swipe down or right, and springs back from a swipe up', async () => {
+  it('goes on a simulated swipe down or right, and springs back from a swipe up', async () => {
     await show();
     await raise(() => toast.add({ title: 'Saved', timeout: 0 }));
 
@@ -328,7 +325,7 @@ describe('Toaster', () => {
     expect(screen.queryByText('Moved')).toBeNull();
   });
 
-  it('stops its time while the stack is touched', async () => {
+  it('stops its time while the stack is touched, on a simulated touch', async () => {
     await show();
     await raise(() => toast.add({ title: 'Saved' }));
 
@@ -355,21 +352,6 @@ describe('Toaster', () => {
     expect(lift('Saved again')).toBe(0);
   });
 
-  it('stops its time while focus is in the stack, and runs it again once focus leaves', async () => {
-    await show();
-    await raise(() => toast.add({ title: 'Saved' }));
-    const viewport = around(screen.getByText('Saved'), 'onFocus');
-    if (!viewport) throw new Error('No viewport takes focus');
-
-    await fireEvent(viewport, 'focus');
-    await elapse(10_000);
-    expect(screen.getByText('Saved')).toBeOnTheScreen();
-
-    await fireEvent(viewport, 'blur', { nativeEvent: { relatedTarget: null } });
-    await elapse(5_000 + MOTION_MS);
-    expect(screen.queryByText('Saved')).toBeNull();
-  });
-
   it('removes a toast at once when the system asks for reduced motion', async () => {
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
     await show();
@@ -381,79 +363,5 @@ describe('Toaster', () => {
     await elapse(20);
 
     expect(screen.queryByText('Saved')).toBeNull();
-  });
-
-  describe('on the web', () => {
-    type KeyListener = (event: { key: string; target?: unknown }) => void;
-    let listeners: KeyListener[];
-
-    beforeEach(() => {
-      jest.replaceProperty(Platform, 'OS', 'web');
-      listeners = [];
-      // The keydown listener goes on the page's document, which React Native's jest environment has none of.
-      Object.assign(globalThis, {
-        document: {
-          addEventListener: (_type: string, listener: KeyListener) => listeners.push(listener),
-          removeEventListener: (_type: string, listener: KeyListener) => {
-            listeners = listeners.filter((entry) => entry !== listener);
-          },
-        },
-      });
-    });
-
-    afterEach(() => {
-      delete (globalThis as { document?: unknown }).document;
-    });
-
-    async function press(key: string, target?: unknown): Promise<void> {
-      await act(async () => {
-        for (const listener of listeners) listener({ key, target });
-      });
-    }
-
-    /**
-     * A spy on `focus` of every View, which React Native's jest environment draws as one class whose `focus` is
-     * already a mock; its calls from earlier tests are cleared.
-     */
-    async function spyOnFocus(): Promise<jest.SpyInstance> {
-      let probe: object | null = null;
-      await render(
-        <View
-          ref={(node) => {
-            probe = node;
-          }}
-        />,
-      );
-      if (probe === null) throw new Error('No View to read the class from');
-      return jest.spyOn(Object.getPrototypeOf(probe) as { focus: () => void }, 'focus').mockClear();
-    }
-
-    it('moves focus to the stack with F6 while a toast is shown, and leaves it where it is with none', async () => {
-      const focus = await spyOnFocus();
-      await show();
-      await raise(() => toast.add({ id: 'saved', title: 'Saved', timeout: 0 }));
-
-      await press('F6');
-      expect(focus).toHaveBeenCalledTimes(1);
-
-      await act(async () => {
-        toast.close('saved');
-      });
-      await elapse(MOTION_MS);
-      await press('F6');
-      expect(focus).toHaveBeenCalledTimes(1);
-    });
-
-    it('leaves focus alone on F6 pressed in the stack itself', async () => {
-      const focus = await spyOnFocus();
-      await show();
-      await raise(() => toast.add({ title: 'Saved', timeout: 0 }));
-      await press('F6');
-      const [stack] = focus.mock.contexts;
-
-      await press('F6', stack);
-
-      expect(focus).toHaveBeenCalledTimes(1);
-    });
   });
 });

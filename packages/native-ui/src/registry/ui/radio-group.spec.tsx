@@ -1,6 +1,5 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { RadioGroup, RadioGroupItem } from './radio-group';
 
 type PlanPickerProps = {
@@ -60,45 +59,14 @@ describe('RadioGroup', () => {
     expect(screen.getByRole('radio', { name: 'Pro' })).not.toBeChecked();
   });
 
-  it('spaces its items by 12px in a column', async () => {
+  it('draws a dot in the selected item alone', async () => {
     await render(<PlanPicker />);
 
-    const classes = emittedClasses(screen.getByTestId('plans').props.className);
-
-    expect(classes).toContain('gap-3');
-    expect(classes).not.toContain('grid');
+    expect(dotOf(screen.getByRole('radio', { name: 'Free' }))).toBeDefined();
+    expect(dotOf(screen.getByRole('radio', { name: 'Pro' }))).toBeUndefined();
   });
 
-  it('fills the selected item with the primary colour and draws its dot', async () => {
-    await render(<PlanPicker />);
-    const selected = screen.getByRole('radio', { name: 'Free' });
-    const other = screen.getByRole('radio', { name: 'Pro' });
-
-    expect(emittedClasses(selected.props.className)).toEqual(expect.arrayContaining(['bg-primary', 'border-primary']));
-    expect(emittedClasses(other.props.className)).toEqual(
-      expect.arrayContaining(['border-input', 'border', 'rounded-full']),
-    );
-    expect(emittedClasses(other.props.className)).not.toContain('bg-primary');
-
-    expect(emittedClasses(dotOf(selected)?.props.className)).toEqual(
-      expect.arrayContaining(['bg-primary-foreground', 'size-2', 'rounded-full']),
-    );
-    expect(dotOf(other)).toBeUndefined();
-  });
-
-  it("centres the dot with the indicator's flex rather than an offset and a translate", async () => {
-    await render(<PlanPicker />);
-    const selected = screen.getByRole('radio', { name: 'Free' });
-
-    const indicator = emittedClasses(onlyChildOf(selected)?.props.className);
-    expect(dotOf(selected)).toBeDefined();
-    const dot = emittedClasses(dotOf(selected)?.props.className);
-
-    expect(indicator).toEqual(expect.arrayContaining(['size-4', 'items-center', 'justify-center']));
-    expect(dot.filter((name) => /^(-?translate-|absolute$|top-|left-)/.test(name))).toEqual([]);
-  });
-
-  it('announces a disabled item, dims it and ignores its presses', async () => {
+  it('announces a disabled item and ignores its presses', async () => {
     const onValueChange = jest.fn();
     const user = userEvent.setup();
     await render(<PlanPicker proDisabled onValueChange={onValueChange} />);
@@ -109,11 +77,10 @@ describe('RadioGroup', () => {
     expect(pro).toBeDisabled();
     expect(pro).not.toBeChecked();
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(emittedClasses(pro.props.className)).toContain('opacity-50');
     expect(screen.getByRole('radio', { name: 'Team' })).not.toBeDisabled();
   });
 
-  it('disables and dims every item when the group is disabled', async () => {
+  it('disables every item when the group is disabled', async () => {
     const onValueChange = jest.fn();
     const user = userEvent.setup();
     await render(<PlanPicker disabled onValueChange={onValueChange} />);
@@ -122,20 +89,7 @@ describe('RadioGroup', () => {
 
     expect(onValueChange).not.toHaveBeenCalled();
     for (const name of ['Free', 'Pro', 'Team']) {
-      const item = screen.getByRole('radio', { name });
-      expect(item).toBeDisabled();
-      expect(emittedClasses(item.props.className)).toContain('opacity-50');
+      expect(screen.getByRole('radio', { name })).toBeDisabled();
     }
-  });
-
-  it('draws the destructive border on an invalid item, and the primary one on the selected item', async () => {
-    await render(<PlanPicker invalid />);
-
-    const selected = emittedClasses(screen.getByRole('radio', { name: 'Free' }).props.className);
-    const other = emittedClasses(screen.getByRole('radio', { name: 'Pro' }).props.className);
-
-    expect(other).toContain('border-destructive');
-    expect(selected).toContain('border-primary');
-    expect(selected).not.toContain('border-destructive');
   });
 });

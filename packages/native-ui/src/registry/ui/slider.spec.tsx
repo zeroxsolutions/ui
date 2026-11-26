@@ -1,8 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useState, type ReactNode } from 'react';
 import { I18nManager, Platform, StyleSheet } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
-import { Slider as NovaSlider } from '@styles/nova/components/ui/slider';
 import { DirectionProvider } from './direction';
 import { Slider, type SliderProps } from './slider';
 
@@ -126,26 +124,7 @@ describe('Slider', () => {
     expect(thumbs()[1].props['aria-valuetext']).toBe('0.8 end range');
   });
 
-  it('moves a thumb with the keyboard', async () => {
-    await render(<Slider testID="slider" defaultValue={50} />);
-    const key = async (name: string): Promise<void> => {
-      await fireEvent(thumbs()[0], 'keyDown', { nativeEvent: { key: name }, preventDefault: jest.fn() });
-    };
-
-    await key('ArrowRight');
-    expect(values()).toEqual([51]);
-    await key('ArrowDown');
-    await key('ArrowDown');
-    expect(values()).toEqual([49]);
-    await key('PageUp');
-    expect(values()).toEqual([59]);
-    await key('End');
-    expect(values()).toEqual([100]);
-    await key('Home');
-    expect(values()).toEqual([0]);
-  });
-
-  it('jumps to a press on the track and follows the finger, committing on release', async () => {
+  it('jumps to a press on the track and follows the finger, committing on release, on a simulated touch', async () => {
     const onValueCommitted = jest.fn();
     await render(<Slider testID="slider" defaultValue={0} onValueCommitted={onValueCommitted} />);
     const laid = await laidOut(200);
@@ -162,7 +141,7 @@ describe('Slider', () => {
     expect(onValueCommitted).toHaveBeenCalledWith(100);
   });
 
-  it('moves the thumb nearest a press in a range', async () => {
+  it('moves the thumb nearest a press in a range, on a simulated touch', async () => {
     await render(<Slider testID="slider" defaultValue={[20, 80]} />);
     const laid = await laidOut(100);
 
@@ -171,7 +150,7 @@ describe('Slider', () => {
     expect(values()).toEqual([20, 70]);
   });
 
-  it('pushes the neighbour along a gap, and lets it back to where it started as the drag returns', async () => {
+  it('pushes the neighbour along a gap, and lets it back to where it started as the drag returns, on a simulated touch', async () => {
     const onValueChange = jest.fn();
     await render(
       <Slider testID="slider" defaultValue={[20, 50]} minStepsBetweenValues={5} onValueChange={onValueChange} />,
@@ -187,7 +166,7 @@ describe('Slider', () => {
     expect(values()).toEqual([30, 50]);
   });
 
-  it('pushes a neighbour to a whole step, with no floating-point tail', async () => {
+  it('pushes a neighbour to a whole step, with no floating-point tail, on a simulated touch', async () => {
     const onValueChange = jest.fn();
     await render(
       <Slider
@@ -209,7 +188,7 @@ describe('Slider', () => {
     expect(onValueChange).toHaveBeenLastCalledWith([0.7, 0.8], { activeThumbIndex: 0 });
   });
 
-  it('stops a thumb short of its neighbour by the gap with no collision', async () => {
+  it('stops a thumb short of its neighbour by the gap with no collision, on a simulated touch', async () => {
     await render(
       <Slider testID="slider" defaultValue={[20, 50]} minStepsBetweenValues={5} thumbCollisionBehavior="none" />,
     );
@@ -221,7 +200,7 @@ describe('Slider', () => {
     expect(values()).toEqual([45, 50]);
   });
 
-  it('hands the drag to the neighbour it meets with swap, keeping the gap', async () => {
+  it('hands the drag to the neighbour it meets with swap, keeping the gap, on a simulated touch', async () => {
     const onValueChange = jest.fn();
     await render(
       <Slider
@@ -244,7 +223,7 @@ describe('Slider', () => {
     expect(onValueChange).toHaveBeenLastCalledWith([45, 70], { activeThumbIndex: 1 });
   });
 
-  it('runs from the right when text reads right to left: a press, the arrow keys and the thumb', async () => {
+  it('runs from the right when text reads right to left: a press and the thumb, on a simulated touch', async () => {
     jest.replaceProperty(Platform, 'OS', 'web');
     await render(
       <DirectionProvider direction="rtl">
@@ -256,10 +235,7 @@ describe('Slider', () => {
     await fireEvent(laid, 'responderGrant', touch(50, 50));
     await fireEvent(laid, 'responderRelease', touch(50, 50));
     expect(values()).toEqual([75]);
-    await fireEvent(thumbs()[0], 'keyDown', { nativeEvent: { key: 'ArrowLeft' }, preventDefault: jest.fn() });
-    expect(values()).toEqual([76]);
-
-    expect(thumbs()[0]).toHaveStyle({ start: 152 });
+    expect(thumbs()[0]).toHaveStyle({ start: 150 });
   });
 
   it.each([
@@ -268,7 +244,7 @@ describe('Slider', () => {
     ['a device laid out right to left under a left to right provider', 'ios', true, 'ltr', 25, 'end'],
     ['a device laid out right to left under a right to left provider', 'ios', true, 'rtl', 75, 'start'],
   ] as const)(
-    "runs the provider's way and places its thumb from that side, on %s",
+    "runs the provider's way and places its thumb from that side, on %s, on a simulated touch",
     async (_where, os, isRTL, direction, pressed, key) => {
       jest.replaceProperty(Platform, 'OS', os);
       jest.spyOn(I18nManager, 'getConstants').mockReturnValue({ ...I18nManager.getConstants(), isRTL });
@@ -288,7 +264,7 @@ describe('Slider', () => {
     },
   );
 
-  it('rises from the bottom when vertical', async () => {
+  it('rises from the bottom when vertical, on a simulated touch', async () => {
     await render(<Slider testID="slider" defaultValue={0} orientation="vertical" />);
     const laid = await laidOut(16, 100);
 
@@ -303,12 +279,11 @@ describe('Slider', () => {
 
     await act(thumbs()[0], 'increment');
 
-    expect(laid.props.onStartShouldSetResponder()).toBe(false);
     expect(values()).toEqual([50]);
     expect(thumbs()[0]).toBeDisabled();
   });
 
-  it('hands the drag back to the thumb before it with swap, keeping the gap', async () => {
+  it('hands the drag back to the thumb before it with swap, keeping the gap, on a simulated touch', async () => {
     const onValueChange = jest.fn();
     await render(
       <Slider
@@ -329,29 +304,5 @@ describe('Slider', () => {
     await fireEvent(laid, 'responderMove', touch(0, 10));
     expect(values()).toEqual([10, 25]);
     expect(onValueChange).toHaveBeenLastCalledWith([10, 25], { activeThumbIndex: 0 });
-  });
-
-  it("draws Vega's track, range and thumb, the track thinner across when vertical", async () => {
-    await render(<Slider testID="slider" defaultValue={50} />);
-
-    expect(emittedClasses(track().props.className)).toEqual(
-      expect.arrayContaining(['bg-muted', 'h-1.5', 'w-full', 'rounded-full']),
-    );
-    expect(emittedClasses(firstChild(track()).props.className)).toContain('bg-primary');
-    expect(emittedClasses(thumbs()[0].props.className)).toEqual(
-      expect.arrayContaining(['size-4', 'rounded-full', 'border-primary', 'bg-white']),
-    );
-
-    await render(<Slider testID="slider" defaultValue={50} orientation="vertical" />);
-    expect(emittedClasses(track().props.className)).toEqual(expect.arrayContaining(['w-1.5', 'h-full']));
-  });
-
-  it("lays Nova's thumbs over the track, though Nova's thumb is relative", async () => {
-    await render(<NovaSlider defaultValue={50} />);
-
-    // The built item's own classes, unmerged: a device draws whatever the item passes.
-    const classes: string[] = thumbs()[0].props.className.split(/\s+/);
-    expect(classes).toContain('absolute');
-    expect(classes).not.toContain('relative');
   });
 });

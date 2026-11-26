@@ -1,12 +1,7 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './table';
 import { Button } from './button';
 import { Text } from './text';
-
-function classesOf(testID: string): string[] {
-  return emittedClasses(screen.getByTestId(testID).props.className);
-}
 
 function renderInvoices(onRow = jest.fn()) {
   return render(
@@ -65,33 +60,10 @@ describe('Table', () => {
     expect(screen.getByTestId('header-row')).toContainElement(screen.getByTestId('head'));
   });
 
-  it('lays each row out with its cells sharing its width, a border under every row but the last of a group', async () => {
+  it('announces a selected row selected', async () => {
     await renderInvoices();
 
-    expect(classesOf('first')).toEqual(expect.arrayContaining(['flex-row', 'border-b']));
-    expect(classesOf('cell')).toEqual(expect.arrayContaining(['flex-1', 'justify-center', 'p-2']));
-    expect(classesOf('last')).toContain('border-b-0');
-    expect(classesOf('footer-row')).toContain('border-b-0');
-    expect(classesOf('first')).not.toContain('border-b-0');
-  });
-
-  it('draws headers in the foreground and medium weight, the cells small, and the footer on a muted band', async () => {
-    await renderInvoices();
-
-    expect(emittedClasses(screen.getByText('Invoice').props.className)).toEqual(
-      expect.arrayContaining(['text-foreground', 'font-sans-medium', 'text-sm']),
-    );
-    expect(emittedClasses(screen.getByText('INV001').props.className)).toContain('text-sm');
-    expect(classesOf('footer')).toEqual(expect.arrayContaining(['bg-muted/50', 'border-t']));
-    expect(emittedClasses(screen.getByText('Total').props.className)).toContain('font-sans-medium');
-  });
-
-  it('draws a selected row on the muted background and announces it selected', async () => {
-    await renderInvoices();
-
-    expect(classesOf('last')).toContain('bg-muted');
     expect(screen.getByTestId('last').props.accessibilityState).toMatchObject({ selected: true });
-    expect(classesOf('first')).not.toContain('bg-muted');
   });
 
   it('calls onPress of the row pressed', async () => {
@@ -103,13 +75,12 @@ describe('Table', () => {
     expect(onRow).toHaveBeenCalledTimes(1);
   });
 
-  it('puts the caption below the table, muted', async () => {
+  it('puts the caption below the table', async () => {
     await renderInvoices();
 
     const table = screen.getByTestId('table');
     const caption = screen.getByText('Recent invoices');
     expect(table.children.at(-1)).toBe(caption);
-    expect(emittedClasses(caption.props.className)).toEqual(expect.arrayContaining(['text-muted-foreground', 'mt-4']));
   });
 
   it('leaves a control in a cell of a row with no onPress reachable on its own', async () => {

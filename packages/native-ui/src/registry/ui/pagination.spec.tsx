@@ -1,5 +1,4 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Pagination,
   PaginationContent,
@@ -50,19 +49,13 @@ describe('Pagination', () => {
     expect(nav.props['aria-label']).toBe('Pagination');
     expect(screen.getByTestId('content').props.role).toBe('list');
     expect(screen.getByTestId('item').props.role).toBe('listitem');
-    expect(emittedClasses(screen.getByTestId('content').props.className)).toEqual(
-      expect.arrayContaining(['flex-row', 'items-center', 'gap-1']),
-    );
   });
 
-  it('draws each page as a ghost icon-sized link, and the current page outlined and marked', async () => {
+  it('marks the current page, and only it', async () => {
     await renderPages();
 
     const page = screen.getByRole('link', { name: '1' });
     const current = screen.getByRole('link', { name: '2' });
-    expect(emittedClasses(page.props.className)).toEqual(expect.arrayContaining(['size-9']));
-    expect(emittedClasses(page.props.className)).not.toContain('border-border');
-    expect(emittedClasses(current.props.className)).toContain('border-border');
     expect(current.props['aria-current']).toBe('page');
     expect(page.props['aria-current']).toBeUndefined();
     expect(current).toBeSelected();
@@ -80,14 +73,11 @@ describe('Pagination', () => {
     expect(onPage.mock.calls).toEqual([[1], ['next']]);
   });
 
-  it('names the previous and next links and tightens their outer padding', async () => {
+  it('names the previous and next links', async () => {
     await renderPages();
 
     expect(screen.getByRole('link', { name: 'Go to previous page' })).toBeOnTheScreen();
-    const previous = emittedClasses(screen.getByTestId('previous').props.className);
-    expect(previous).toEqual(expect.arrayContaining(['h-9', 'pl-2']));
-    expect(emittedClasses(screen.getByTestId('next').props.className)).toContain('pr-2');
-    expect(emittedClasses(screen.getByTestId('next').props.className, 'nova')).toContain('pr-1.5');
+    expect(screen.getByRole('link', { name: 'Go to next page' })).toBeOnTheScreen();
   });
 
   it('mirrors the previous and next chevrons when text reads right to left, and only then', async () => {

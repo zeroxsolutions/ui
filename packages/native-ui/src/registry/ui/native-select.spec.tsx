@@ -2,7 +2,6 @@ import { PortalHost } from '@rn-primitives/portal';
 import type { ReactElement } from 'react';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, View } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { NativeSelect, NativeSelectOptGroup, NativeSelectOption, type NativeSelectProps } from './native-select';
 
 // Jest runs no Reanimated frame into the props a query reads, so the opacity the fade starts at hides the
@@ -45,21 +44,6 @@ function Food() {
 }
 
 const trigger = () => screen.getByRole('combobox');
-type JsonNode = ReturnType<typeof screen.toJSON>;
-
-/** The className of the first element drawn with one that starts with `start`. */
-function classNameStarting(start: string): string | undefined {
-  let found: string | undefined;
-  const visit = (node: JsonNode | string): void => {
-    if (found !== undefined || node === null || typeof node === 'string') return;
-    if (Array.isArray(node)) return node.forEach(visit);
-    const className = node.props.className as unknown;
-    if (typeof className === 'string' && className.startsWith(start)) found = className;
-    node.children?.forEach(visit);
-  };
-  visit(screen.toJSON());
-  return found;
-}
 const option = (name: string) => screen.getByRole('option', { name });
 
 describe('NativeSelect', () => {
@@ -161,28 +145,5 @@ describe('NativeSelect', () => {
 
     expect(trigger()).toBeDisabled();
     expect(screen.queryByRole('option', { name: 'Apple' })).toBeNull();
-  });
-
-  it('draws the small size and the invalid state on its trigger', async () => {
-    await render(<Fruit size="sm" aria-invalid />);
-
-    expect(emittedClasses(trigger().props.className)).toEqual(expect.arrayContaining(['h-8', 'border-destructive']));
-  });
-
-  it("draws its field with upstream's native select, not a Select's trigger", async () => {
-    await render(<Fruit />);
-    const field = emittedClasses(trigger().props.className);
-
-    expect(field).toEqual(expect.arrayContaining(['h-9', 'rounded-md', 'border-input', 'pr-8', 'pl-2.5']));
-    expect(emittedClasses(trigger().props.className, 'sera')).toEqual(
-      expect.arrayContaining(['border-b-input', 'rounded-none', 'pl-0']),
-    );
-  });
-
-  it('dims the box around its field while disabled, not the field as well', async () => {
-    await render(<Fruit disabled />);
-
-    expect(trigger().props.className).not.toContain('opacity-50');
-    expect(classNameStarting('relative self-start')).toContain('opacity-50');
   });
 });

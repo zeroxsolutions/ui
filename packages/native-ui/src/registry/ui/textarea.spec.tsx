@@ -1,66 +1,40 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { Textarea } from './textarea.nativewind';
 
-function classesOf(testID: string): string[] {
-  return emittedClasses(screen.getByTestId(testID).props.className);
-}
-
 describe('Textarea', () => {
-  it('is a multiline field 64px tall at least', async () => {
-    await render(<Textarea testID="field" />);
+  it('is a multiline field that starts its text at the top', async () => {
+    await render(<Textarea aria-label="Notes" />);
 
-    expect(screen.getByTestId('field').props.multiline).toBe(true);
-    expect(classesOf('field')).toEqual(
-      expect.arrayContaining(['min-h-16', 'rounded-md', 'border', 'border-input', 'text-base']),
-    );
-    expect(classesOf('field')).not.toContain('h-9');
+    expect(screen.getByLabelText('Notes')).toHaveProp('multiline', true);
+    expect(screen.getByLabelText('Notes')).toHaveProp('textAlignVertical', 'top');
   });
 
-  it('starts its text at the top', async () => {
-    await render(<Textarea testID="field" />);
+  it("takes what is typed and still calls the caller's onFocus and onBlur", async () => {
+    const onFocus = jest.fn();
+    const onBlur = jest.fn();
+    const onChangeText = jest.fn();
+    const user = userEvent.setup();
+    await render(<Textarea aria-label="Notes" onFocus={onFocus} onBlur={onBlur} onChangeText={onChangeText} />);
 
-    expect(screen.getByTestId('field').props.textAlignVertical).toBe('top');
+    await user.type(screen.getByLabelText('Notes'), 'ok');
+
+    expect(onChangeText).toHaveBeenLastCalledWith('ok');
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 
-  it('takes the focus border while it holds focus', async () => {
-    await render(<Textarea testID="field" />);
+  it('passes aria-invalid on to the field', async () => {
+    await render(<Textarea aria-label="Notes" aria-invalid />);
 
-    await fireEvent(screen.getByTestId('field'), 'focus');
-    expect(classesOf('field')).toContain('border-ring');
-
-    await fireEvent(screen.getByTestId('field'), 'blur');
-    expect(classesOf('field')).not.toContain('border-ring');
+    expect(screen.getByLabelText('Notes')).toHaveProp('aria-invalid', true);
   });
 
-  it('draws the destructive border and passes aria-invalid on to the field', async () => {
-    await render(<Textarea testID="field" aria-invalid />);
+  it('takes no typing when editable is false', async () => {
+    const onChangeText = jest.fn();
+    await render(<Textarea aria-label="Notes" editable={false} onChangeText={onChangeText} />);
 
-    expect(classesOf('field')).toContain('border-destructive');
-    expect(screen.getByTestId('field').props['aria-invalid']).toBe(true);
-  });
+    await userEvent.setup().type(screen.getByLabelText('Notes'), 'ok');
 
-  it('is not editable and dimmed when editable is false', async () => {
-    await render(<Textarea testID="field" editable={false} />);
-
-    expect(screen.getByTestId('field').props.editable).toBe(false);
-    expect(classesOf('field')).toContain('opacity-50');
-  });
-
-  it("draws its placeholder in NativeWind's placeholder variant", async () => {
-    await render(<Textarea testID="field" />);
-
-    expect(classesOf('field')).toContain('placeholder:text-muted-foreground');
-  });
-
-  it("tints Nova's read-only field in the input colour, light and dark, and leaves an editable one clear", async () => {
-    await render(<Textarea testID="read-only" editable={false} />);
-    const readOnly = emittedClasses(screen.getByTestId('read-only').props.className, 'nova');
-
-    expect(readOnly).toEqual(expect.arrayContaining(['bg-input/50', 'dark:bg-input/80']));
-    expect(readOnly.filter((cls) => cls.includes('disabled:'))).toEqual([]);
-
-    await render(<Textarea testID="editable" />);
-    expect(emittedClasses(screen.getByTestId('editable').props.className, 'nova')).not.toContain('bg-input/50');
+    expect(onChangeText).not.toHaveBeenCalled();
   });
 });

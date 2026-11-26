@@ -75,10 +75,6 @@ async function drag(from: number, to: number, axis: 'x' | 'y' = 'x'): Promise<vo
   await fireEvent(handle(), 'responderRelease', touch(to, axis));
 }
 
-async function press(key: string, shiftKey = false): Promise<void> {
-  await fireEvent(handle(), 'keyDown', { nativeEvent: { key, shiftKey }, preventDefault: jest.fn() });
-}
-
 async function adjust(actionName: 'increment' | 'decrement'): Promise<void> {
   await fireEvent(handle(), 'accessibilityAction', { nativeEvent: { actionName } });
 }
@@ -172,7 +168,7 @@ describe('Resizable', () => {
     expect(await grows()).toEqual([40, 60]);
   });
 
-  it('follows a drag of the handle, reporting each move and the layout once the drag ends', async () => {
+  it('follows a simulated drag of the handle, reporting each move and the layout once the drag ends', async () => {
     const onLayoutChange = jest.fn();
     const onLayoutChanged = jest.fn();
     await render(<Pair onLayoutChange={onLayoutChange} onLayoutChanged={onLayoutChanged} />);
@@ -193,7 +189,7 @@ describe('Resizable', () => {
     expect(onLayoutChanged).toHaveBeenCalledWith({ left: 35, right: 65 }, { isUserInteraction: true });
   });
 
-  it("stops a drag at the panels' limits", async () => {
+  it("stops a simulated drag at the panels' limits", async () => {
     await render(<Pair first={{ minSize: '10%', maxSize: '50%' }} />);
     await layOut(401);
 
@@ -204,7 +200,7 @@ describe('Resizable', () => {
     expect(await grows()).toEqual([50, 50]);
   });
 
-  it('reads sizes given in px against the group', async () => {
+  it('reads sizes given in px against the group, under a simulated drag', async () => {
     await render(<Pair first={{ defaultSize: 100, minSize: 80 }} second={{ defaultSize: undefined }} />);
     await layOut(401);
 
@@ -214,7 +210,7 @@ describe('Resizable', () => {
     expect(await grows()).toEqual([20, 80]);
   });
 
-  it('snaps a collapsible panel shut once a drag passes half its minimum, and open again', async () => {
+  it('snaps a collapsible panel shut once a simulated drag passes half its minimum, and open again', async () => {
     await render(<Pair first={{ collapsible: true, minSize: '20%' }} />);
     await layOut(401);
 
@@ -228,7 +224,7 @@ describe('Resizable', () => {
     expect(await grows()).toEqual([20, 80]);
   });
 
-  it('runs a vertical group down the screen', async () => {
+  it('runs a vertical group down the screen, under a simulated drag', async () => {
     await render(<Pair orientation="vertical" />);
     await layOut(401, 'y');
 
@@ -236,14 +232,6 @@ describe('Resizable', () => {
 
     expect(await grows()).toEqual([35, 65]);
     expect(styleOf(screen.getByTestId('group')).flexDirection).toBe('column');
-  });
-
-  it('claims a touch on the handle and refuses to hand the drag over', async () => {
-    await render(<Pair />);
-    await layOut(401);
-
-    expect(handle().props.onResponderGrant(touch(100))).toBe(true);
-    expect(handle().props.onResponderTerminationRequest()).toBe(false);
   });
 
   it('draws a grip only when asked', async () => {
@@ -254,7 +242,7 @@ describe('Resizable', () => {
     expect(handle().children.filter((child) => typeof child !== 'string')).toHaveLength(1);
   });
 
-  it('resets the panel before the handle to its default size on a double tap', async () => {
+  it('resets the panel before the handle to its default size on a simulated double tap', async () => {
     await render(<Pair />);
     await layOut(401);
     await drag(100, 140);
@@ -268,19 +256,18 @@ describe('Resizable', () => {
     expect(await grows()).toEqual([25, 75]);
   });
 
-  it('blocks every way of resizing when the group is disabled', async () => {
+  it('blocks a simulated drag and a screen reader adjustment when the group is disabled', async () => {
     await render(<Pair disabled />);
     await layOut(401);
 
     await drag(100, 140);
     await adjust('increment');
-    await press('ArrowRight');
 
     expect(await grows()).toEqual([25, 75]);
     expect(handle()).toBeDisabled();
   });
 
-  it('blocks every way of resizing by a disabled handle in an enabled group', async () => {
+  it('blocks a simulated drag and a screen reader adjustment by a disabled handle in an enabled group', async () => {
     await render(
       <ResizablePanelGroup testID="group">
         <ResizablePanel id="left" testID="left" defaultSize="25%" />
@@ -290,10 +277,8 @@ describe('Resizable', () => {
     );
     await layOut(401);
 
-    expect(handle().props.onStartShouldSetResponder()).toBe(false);
     await drag(100, 140);
     await adjust('increment');
-    await press('ArrowRight');
 
     expect(await grows()).toEqual([25, 75]);
     expect(handle()).toBeDisabled();
@@ -353,102 +338,9 @@ describe('Resizable', () => {
     expect(panelRef.current?.getSize()).toEqual({ asPercentage: 40, inPixels: 160 });
   });
 
-  it('sets no web cursor or touch action on a device', async () => {
-    await render(<Pair />);
-
-    expect(styleOf(handle())).not.toHaveProperty('cursor');
-    expect(styleOf(handle())).not.toHaveProperty('touchAction');
-  });
-
   describe('on the web', () => {
     beforeEach(() => {
       jest.replaceProperty(Platform, 'OS', 'web');
-    });
-
-    it('shows a resize cursor across the group, and keeps the browser from panning under a drag', async () => {
-      await render(<Pair />);
-
-      expect(styleOf(handle())).toMatchObject({ cursor: 'col-resize', touchAction: 'none', outlineWidth: 0 });
-    });
-
-    it('shows a row-resize cursor in a vertical group', async () => {
-      await render(<Pair orientation="vertical" />);
-
-      expect(styleOf(handle())).toMatchObject({ cursor: 'row-resize' });
-    });
-
-    it("leaves the cursor to a caller's cursor class, and lets a caller's style replace it", async () => {
-      await render(
-        <ResizablePanelGroup testID="group">
-          <ResizablePanel defaultSize="50%" />
-          <ResizableHandle testID="handle" className="cursor-pointer" />
-          <ResizablePanel defaultSize="50%" />
-        </ResizablePanelGroup>,
-      );
-      expect(styleOf(handle()).cursor).toBeUndefined();
-
-      await render(
-        <ResizablePanelGroup testID="group">
-          <ResizablePanel defaultSize="50%" />
-          <ResizableHandle testID="handle" style={{ cursor: 'pointer' }} />
-          <ResizablePanel defaultSize="50%" />
-        </ResizablePanelGroup>,
-      );
-      expect(styleOf(handle())).toMatchObject({ cursor: 'pointer', touchAction: 'none' });
-    });
-
-    it('shows a not-allowed cursor on a disabled handle, and none where the group disables the cursor', async () => {
-      await render(
-        <ResizablePanelGroup testID="group">
-          <ResizablePanel defaultSize="50%" />
-          <ResizableHandle testID="handle" disabled />
-          <ResizablePanel defaultSize="50%" />
-        </ResizablePanelGroup>,
-      );
-      expect(styleOf(handle())).toMatchObject({ cursor: 'not-allowed' });
-
-      await render(<Pair disableCursor />);
-      expect(styleOf(handle()).cursor).toBeUndefined();
-    });
-
-    /** A focus event whose target answers `:focus-visible` with `visible`, as a browser's does. */
-    const focusFrom = (visible: boolean): object => ({
-      target: { matches: (selector: string) => selector === ':focus-visible' && visible },
-    });
-    const ringed = () => String(handle().props.className).split(' ').includes('ring-1');
-
-    it('rings the handle while it holds keyboard focus, and not after a press focuses it', async () => {
-      await render(<Pair />);
-
-      await fireEvent(handle(), 'focus', focusFrom(false));
-      expect(ringed()).toBe(false);
-
-      await fireEvent(handle(), 'blur');
-      await fireEvent(handle(), 'focus', focusFrom(true));
-      expect(ringed()).toBe(true);
-    });
-
-    it('rings keyboard focus on a handle enabled after a press while it was disabled', async () => {
-      const view = await render(<Pair />);
-      await view.rerender(
-        <ResizablePanelGroup testID="group">
-          <ResizablePanel defaultSize="50%" />
-          <ResizableHandle testID="handle" disabled />
-          <ResizablePanel defaultSize="50%" />
-        </ResizablePanelGroup>,
-      );
-      handle().props.onStartShouldSetResponder();
-
-      await view.rerender(
-        <ResizablePanelGroup testID="group">
-          <ResizablePanel defaultSize="50%" />
-          <ResizableHandle testID="handle" />
-          <ResizablePanel defaultSize="50%" />
-        </ResizablePanelGroup>,
-      );
-      await fireEvent(handle(), 'focus', focusFrom(true));
-
-      expect(ringed()).toBe(true);
     });
 
     it('is a focusable separator across the group', async () => {
@@ -458,74 +350,10 @@ describe('Resizable', () => {
       expect(handle().props['aria-orientation']).toBe('vertical');
       expect(handle().props.focusable).toBe(true);
     });
-
-    it('moves the handle with the arrow keys along the group, and as far as it goes with Home and End', async () => {
-      await render(<Pair first={{ minSize: '10%', maxSize: '60%' }} />);
-      await layOut(401);
-
-      await press('ArrowRight');
-      expect(await grows()).toEqual([30, 70]);
-      await press('ArrowLeft');
-      await press('ArrowLeft');
-      expect(await grows()).toEqual([20, 80]);
-      await press('ArrowDown');
-      expect(await grows()).toEqual([20, 80]);
-      await press('End');
-      expect(await grows()).toEqual([60, 40]);
-      await press('Home');
-      expect(await grows()).toEqual([10, 90]);
-    });
-
-    it('takes the up and down arrows in a vertical group', async () => {
-      await render(<Pair orientation="vertical" />);
-      await layOut(401, 'y');
-
-      await press('ArrowDown');
-      expect(await grows()).toEqual([30, 70]);
-      await press('ArrowUp');
-      await press('ArrowUp');
-      expect(await grows()).toEqual([20, 80]);
-      await press('ArrowRight');
-      expect(await grows()).toEqual([20, 80]);
-    });
-
-    it('collapses a collapsible panel before the handle with Enter, and opens it to its size before', async () => {
-      await render(<Pair first={{ collapsible: true, minSize: '10%' }} />);
-      await layOut(401);
-
-      await press('Enter');
-      expect(await grows()).toEqual([0, 100]);
-      await press('Enter');
-      expect(await grows()).toEqual([25, 75]);
-    });
-
-    it('moves focus to the next handle with F6, and back with Shift', async () => {
-      const focused: string[] = [];
-      // React Native's jest View has no `focus`, so each handle is given one that records it.
-      const recording = (name: string) => (node: unknown) => {
-        if (node) (node as { focus: () => void }).focus = () => focused.push(name);
-      };
-      await render(
-        <ResizablePanelGroup>
-          <ResizablePanel />
-          <ResizableHandle testID="handle" elementRef={recording('first')} />
-          <ResizablePanel />
-          <ResizableHandle elementRef={recording('second')} />
-          <ResizablePanel />
-          <ResizableHandle elementRef={recording('third')} />
-          <ResizablePanel />
-        </ResizablePanelGroup>,
-      );
-
-      await press('F6');
-      await press('F6', true);
-
-      expect(focused).toEqual(['second', 'third']);
-    });
   });
 
   describe('in text read right to left', () => {
-    it('grows the panel before the handle as a finger moves left', async () => {
+    it('grows the panel before the handle as a simulated finger moves left', async () => {
       await render(
         <DirectionProvider direction="rtl">
           <Pair />

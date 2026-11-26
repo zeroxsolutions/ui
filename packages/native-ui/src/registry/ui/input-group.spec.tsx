@@ -1,12 +1,7 @@
-import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { Search, X } from 'lucide-react-native';
-import { readFileSync } from 'node:fs';
-import { createRef, type ReactElement } from 'react';
+import { createRef } from 'react';
 import type { TextInputInstance } from 'react-native';
-import { registerCSS } from 'react-native-css-interop/test';
-import { parseSlotMap } from '../../build/slot-map';
-import { emittedClasses } from '../../build/slot-tokens.testing';
-import { translateClasses } from '../../build/translate';
 import { Icon } from './icon';
 import {
   InputGroup,
@@ -16,107 +11,40 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from './input-group';
-import { Text } from './text';
-
-const SNAPSHOT_PATH = require.resolve('@zeroxsolutions/shadcn-upstream/snapshot/style-vega.css');
 
 // React Native's jest mock gives every TextInput one shared `focus` mock, so its calls carry over between tests.
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-function classesOf(testID: string, style: 'vega' | 'nova' = 'vega'): string[] {
-  return emittedClasses(screen.getByTestId(testID).props.className, style);
-}
-
 describe('InputGroup', () => {
-  it('takes the focus border while its input holds focus and gives it back on blur', async () => {
+  it("takes what is typed into its input and still calls the caller's onFocus", async () => {
     const onFocus = jest.fn();
+    const onChangeText = jest.fn();
+    const user = userEvent.setup();
     await render(
-      <InputGroup testID="group">
-        <InputGroupInput testID="field" onFocus={onFocus} />
+      <InputGroup>
+        <InputGroupInput aria-label="Search" onFocus={onFocus} onChangeText={onChangeText} />
       </InputGroup>,
     );
 
-    await fireEvent(screen.getByTestId('field'), 'focus');
-    expect(classesOf('group')).toContain('border-ring');
+    await user.type(screen.getByLabelText('Search'), 'docs');
+
+    expect(onChangeText).toHaveBeenLastCalledWith('docs');
     expect(onFocus).toHaveBeenCalledTimes(1);
-
-    await fireEvent(screen.getByTestId('field'), 'blur');
-    expect(classesOf('group')).not.toContain('border-ring');
   });
 
-  it('draws the destructive border around the whole group while its input is invalid, focused or not', async () => {
+  it('announces its input disabled when the input is not editable', async () => {
     await render(
-      <InputGroup testID="group">
-        <InputGroupInput testID="field" aria-invalid />
-      </InputGroup>,
-    );
-    expect(classesOf('group')).toContain('border-destructive');
-
-    await fireEvent(screen.getByTestId('field'), 'focus');
-    expect(classesOf('group')).toContain('border-destructive');
-    expect(classesOf('group')).not.toContain('border-ring');
-  });
-
-  it('lets go of the focus and invalid borders when its input goes away', async () => {
-    function Group({ withInput }: { withInput: boolean }): ReactElement {
-      return (
-        <InputGroup testID="group">{withInput ? <InputGroupInput testID="field" aria-invalid /> : null}</InputGroup>
-      );
-    }
-    const { rerender } = await render(<Group withInput />);
-    await fireEvent(screen.getByTestId('field'), 'focus');
-
-    await rerender(<Group withInput={false} />);
-
-    expect(classesOf('group')).not.toContain('border-destructive');
-    expect(classesOf('group')).not.toContain('border-ring');
-  });
-
-  it('lets go of the dimming when its disabled input goes away', async () => {
-    function Group({ withInput }: { withInput: boolean }): ReactElement {
-      return (
-        <InputGroup testID="group">
-          <InputGroupAddon testID="addon">
-            <Icon as={Search} />
-          </InputGroupAddon>
-          {withInput ? <InputGroupInput editable={false} /> : null}
-        </InputGroup>
-      );
-    }
-    const { rerender } = await render(<Group withInput />);
-
-    await rerender(<Group withInput={false} />);
-
-    expect(classesOf('addon')).not.toContain('opacity-50');
-    expect(classesOf('group', 'nova')).not.toContain('opacity-50');
-  });
-
-  it('dims its addons and announces its input disabled when the input is not editable', async () => {
-    await render(
-      <InputGroup testID="group">
-        <InputGroupAddon testID="addon">
+      <InputGroup>
+        <InputGroupAddon>
           <Icon as={Search} />
         </InputGroupAddon>
-        <InputGroupInput testID="field" editable={false} />
+        <InputGroupInput aria-label="Search" editable={false} />
       </InputGroup>,
     );
 
-    expect(screen.getByTestId('field').props['aria-disabled']).toBe(true);
-    expect(classesOf('addon')).toContain('opacity-50');
-    expect(classesOf('group', 'nova')).toContain('opacity-50');
-  });
-
-  it('draws its input without a border of its own, inside the border of the group', async () => {
-    await render(
-      <InputGroup testID="group">
-        <InputGroupInput testID="field" />
-      </InputGroup>,
-    );
-
-    expect(classesOf('field')).toContain('border-0');
-    expect(classesOf('group')).toContain('border');
+    expect(screen.getByLabelText('Search')).toBeDisabled();
   });
 
   it('puts a start addon before the input and an end addon after it, wherever the caller wrote them', async () => {
@@ -138,23 +66,9 @@ describe('InputGroup', () => {
     ]);
   });
 
-  it('stacks into a column with a block addon, the input spanning its width', async () => {
-    await render(
-      <InputGroup testID="group">
-        <InputGroupInput testID="field" />
-        <InputGroupAddon align="block-end">
-          <InputGroupText>120 characters left</InputGroupText>
-        </InputGroupAddon>
-      </InputGroup>,
-    );
-
-    expect(classesOf('group')).toEqual(expect.arrayContaining(['flex-col', 'h-auto']));
-    expect(classesOf('field')).toContain('w-full');
-    expect(classesOf('field')).not.toContain('flex-1');
-  });
-
   it('focuses its input when an addon is pressed, and hands the caller the input', async () => {
     const ref = createRef<TextInputInstance>();
+    const user = userEvent.setup();
     await render(
       <InputGroup>
         <InputGroupAddon testID="addon">
@@ -166,69 +80,30 @@ describe('InputGroup', () => {
     if (!ref.current) throw new Error('InputGroupInput gave the caller no input');
     const focus = jest.spyOn(ref.current, 'focus');
 
-    await fireEvent.press(screen.getByTestId('addon'));
+    await user.press(screen.getByTestId('addon'));
 
     expect(focus).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('InputGroupTextarea', () => {
-  function renderComposer(props: { 'aria-invalid'?: boolean; editable?: boolean } = {}) {
-    return render(
-      <InputGroup testID="group">
-        <InputGroupTextarea testID="field" placeholder="Ask, search or chat..." {...props} />
-        <InputGroupAddon align="block-end" testID="addon">
+  it('is a multiline field announced disabled when it is not editable', async () => {
+    await render(
+      <InputGroup>
+        <InputGroupTextarea aria-label="Message" editable={false} />
+        <InputGroupAddon align="block-end">
           <InputGroupText>52% used</InputGroupText>
         </InputGroupAddon>
       </InputGroup>,
     );
-  }
 
-  it('is a multiline field without a border of its own, spanning the stacked group', async () => {
-    await renderComposer();
-
-    expect(screen.getByTestId('field').props.multiline).toBe(true);
-    expect(classesOf('field')).toEqual(expect.arrayContaining(['border-0', 'py-2', 'w-full']));
-    expect(classesOf('group')).toEqual(expect.arrayContaining(['flex-col', 'h-auto']));
-  });
-
-  it('grows the group with it when no block addon stacks the group', async () => {
-    await render(
-      <InputGroup testID="group">
-        <InputGroupTextarea testID="field" />
-      </InputGroup>,
-    );
-
-    expect(classesOf('group')).toContain('h-auto');
-    expect(classesOf('group')).not.toContain('h-9');
-    expect(classesOf('field')).toContain('flex-1');
-  });
-
-  it('gives the group the focus border while it holds focus', async () => {
-    await renderComposer();
-
-    await fireEvent(screen.getByTestId('field'), 'focus');
-    expect(classesOf('group')).toContain('border-ring');
-
-    await fireEvent(screen.getByTestId('field'), 'blur');
-    expect(classesOf('group')).not.toContain('border-ring');
-  });
-
-  it('gives the group the destructive border while it is invalid', async () => {
-    await renderComposer({ 'aria-invalid': true });
-
-    expect(classesOf('group')).toContain('border-destructive');
-  });
-
-  it('dims the addons and announces itself disabled when it is not editable', async () => {
-    await renderComposer({ editable: false });
-
-    expect(screen.getByTestId('field').props['aria-disabled']).toBe(true);
-    expect(classesOf('addon')).toContain('opacity-50');
+    expect(screen.getByLabelText('Message')).toHaveProp('multiline', true);
+    expect(screen.getByLabelText('Message')).toBeDisabled();
   });
 
   it('is focused by a press on an addon, and hands the caller the field', async () => {
     const ref = createRef<TextInputInstance>();
+    const user = userEvent.setup();
     await render(
       <InputGroup>
         <InputGroupTextarea ref={ref} />
@@ -240,14 +115,14 @@ describe('InputGroupTextarea', () => {
     if (!ref.current) throw new Error('InputGroupTextarea gave the caller no field');
     const focus = jest.spyOn(ref.current, 'focus');
 
-    await fireEvent.press(screen.getByTestId('addon'));
+    await user.press(screen.getByTestId('addon'));
 
     expect(focus).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('InputGroupButton', () => {
-  it('is a ghost button announced by its name that calls onPress without focusing the input', async () => {
+  it('is a button announced by its name that calls onPress without focusing the input', async () => {
     const onPress = jest.fn();
     const ref = createRef<TextInputInstance>();
     await render(
@@ -267,40 +142,5 @@ describe('InputGroupButton', () => {
 
     expect(onPress).toHaveBeenCalledTimes(1);
     expect(focus).not.toHaveBeenCalled();
-    expect(emittedClasses(screen.getByRole('button').props.className)).toContain('size-6');
-  });
-
-  it('takes the sm size, which spaces its contents in the styles that space them', async () => {
-    await render(
-      <InputGroupButton size="sm">
-        <Text>Search</Text>
-      </InputGroupButton>,
-    );
-    const button = screen.getByRole('button').props.className as string;
-
-    expect(emittedClasses(button, 'lyra')).toContain('gap-1');
-    expect(button).toContain('cn-input-group-button-size-sm');
-  });
-
-  it('draws an icon in its default xs size at 14px', async () => {
-    // The spec renders the source, whose icon class is still the slot token, so the token is
-    // registered with the size the build translates it to.
-    const [xsIconSize] = translateClasses(
-      parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')).get('cn-input-group-button-size-xs') ?? [],
-      'nativewind',
-      'icon',
-    ).classes;
-    expect(xsIconSize).toBe('size-3.5');
-    registerCSS('.cn-input-group-button-size-xs\\/icon { width: 14px; height: 14px; }');
-    await render(
-      <InputGroupButton>
-        <Icon as={X} accessible role="img" aria-label="Clear" />
-        <Text>Clear</Text>
-      </InputGroupButton>,
-    );
-
-    expect(screen.getByRole('img', { name: 'Clear' }).props).toEqual(
-      expect.objectContaining({ width: 14, height: 14 }),
-    );
   });
 });

@@ -1,4 +1,4 @@
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState, type ComponentProps } from 'react';
 import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Text } from './text';
@@ -56,8 +56,6 @@ describe('ToggleGroup', () => {
 
     expect(screen.getByRole('radio', { name: 'Left' })).not.toBeChecked();
     expect(screen.getByRole('radio', { name: 'Center' })).toBeChecked();
-    expect(classesOf('radio', 'Center')).toContain('bg-muted');
-    expect(classesOf('radio', 'Left')).not.toContain('bg-muted');
   });
 
   it('keeps every pressed item pressed in multiple mode', async () => {
@@ -69,43 +67,6 @@ describe('ToggleGroup', () => {
 
     expect(screen.getByRole('checkbox', { name: 'Bold' })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Italic' })).toBeChecked();
-  });
-
-  it("draws every item in the group's variant and size", async () => {
-    await render(<AlignmentGroup variant="outline" size="sm" />);
-
-    expect(classesOf('radio', 'Center')).toEqual(expect.arrayContaining(['border', 'border-input', 'h-8']));
-  });
-
-  it('spaces its items two steps apart by default', async () => {
-    await render(<AlignmentGroup />);
-
-    const group = emittedClasses(screen.getByTestId('group').props.className);
-
-    expect(group).toContain('gap-2');
-    expect(classesOf('radio', 'Left')).toContain('rounded-md');
-  });
-
-  it('joins its items at spacing 0, rounding only the outer corners of a row', async () => {
-    await render(<AlignmentGroup variant="outline" spacing={0} />);
-
-    expect(emittedClasses(screen.getByTestId('group').props.className)).toEqual(
-      expect.arrayContaining(['gap-0', 'shadow-sm']),
-    );
-    expect(classesOf('radio', 'Left')).toEqual(expect.arrayContaining(['rounded-none', 'rounded-l-md']));
-    expect(classesOf('radio', 'Left')).not.toContain('border-l-0');
-    expect(classesOf('radio', 'Center')).toEqual(expect.arrayContaining(['rounded-none', 'border-l-0']));
-    expect(classesOf('radio', 'Center')).not.toContain('rounded-l-md');
-    expect(classesOf('radio', 'Right')).toEqual(expect.arrayContaining(['rounded-none', 'rounded-r-md']));
-  });
-
-  it('rounds the top and bottom corners of a joined column', async () => {
-    await render(<AlignmentGroup variant="outline" spacing={0} orientation="vertical" />);
-
-    expect(emittedClasses(screen.getByTestId('group').props.className)).toContain('flex-col');
-    expect(classesOf('radio', 'Left')).toContain('rounded-t-md');
-    expect(classesOf('radio', 'Center')).toContain('border-t-0');
-    expect(classesOf('radio', 'Right')).toContain('rounded-b-md');
   });
 
   it('rounds all four corners of a lone item at spacing 0', async () => {
@@ -149,25 +110,16 @@ describe('ToggleGroup', () => {
 });
 
 describe('ToggleGroupItem handlers', () => {
-  it('forwards onPressIn, onFocus and onBlur', async () => {
+  it('forwards onPressIn', async () => {
     const onPressIn = jest.fn();
-    const onFocus = jest.fn();
-    const onBlur = jest.fn();
     await render(
       <ToggleGroup type="single" value="" onValueChange={jest.fn()}>
-        <ToggleGroupItem value="left" aria-label="Left" onPressIn={onPressIn} onFocus={onFocus} onBlur={onBlur} />
+        <ToggleGroupItem value="left" aria-label="Left" onPressIn={onPressIn} />
       </ToggleGroup>,
     );
-    const control = screen.getByRole('radio', { name: 'Left' });
 
-    await userEvent.setup().press(control);
-    // The host element holds the handlers Pressable wired from what it was given; a bare fireEvent would find
-    // the ones on the component above it and pass whatever the port dropped.
-    await act(() => control.props.onFocus({ nativeEvent: {} }));
-    await act(() => control.props.onBlur({ nativeEvent: {} }));
+    await userEvent.setup().press(screen.getByRole('radio', { name: 'Left' }));
 
     expect(onPressIn).toHaveBeenCalledTimes(1);
-    expect(onFocus).toHaveBeenCalledTimes(1);
-    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

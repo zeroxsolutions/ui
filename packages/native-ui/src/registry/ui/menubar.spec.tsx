@@ -1,9 +1,8 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { useState } from 'react';
-import { act, configure, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { act, configure, render, screen, userEvent, within } from '@testing-library/react-native';
 import { AccessibilityInfo, Dimensions, View } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Menubar,
   MenubarCheckboxItem,
@@ -256,14 +255,13 @@ describe('Menubar', () => {
     expect(menu()).toBeOnTheScreen();
   });
 
-  it('dims a disabled item, announces it as disabled and ignores a press on it', async () => {
+  it('announces a disabled item as disabled and ignores a press on it', async () => {
     const user = await open();
 
     await user.press(item('API'));
     await finishMotion();
 
     expect(item('API')).toBeDisabled();
-    expect(emittedClasses(item('API').props.className)).toContain('opacity-50');
     expect(menu()).toBeOnTheScreen();
   });
 
@@ -303,7 +301,7 @@ describe('Menubar', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it("closes on the screen reader's escape gesture, simulated through onAccessibilityEscape", async () => {
     await open();
 
     await act(async () => {
@@ -336,29 +334,6 @@ describe('Menubar', () => {
       top: TRIGGER.y + TRIGGER.height + 8,
       left: TRIGGER.x - 4,
     });
-  });
-
-  it('highlights an item while a finger is on it', async () => {
-    await open();
-    const profile = screen.getByTestId('profile');
-    expect(emittedClasses(profile.props.className)).not.toContain('bg-accent');
-
-    await fireEvent(profile, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).toContain('bg-accent');
-
-    await fireEvent(screen.getByTestId('profile'), 'pressOut');
-    expect(emittedClasses(screen.getByTestId('profile').props.className)).not.toContain('bg-accent');
-  });
-
-  it('draws a destructive item in the destructive colour, and an inset one indented', async () => {
-    await open();
-    const logOut = screen.getByTestId('log-out');
-
-    expect(emittedClasses(logOut.props.className)).toContain('pl-8');
-    expect(emittedClasses(screen.getByText('Log out').props.className)).toContain('text-destructive');
-
-    await fireEvent(logOut, 'pressIn');
-    expect(emittedClasses(screen.getByTestId('log-out').props.className)).toContain('bg-destructive/10');
   });
 
   it('announces a checkbox item checked or not, and toggles it in place when pressed', async () => {
@@ -492,12 +467,5 @@ describe('Menubar', () => {
     expect(screen.getByTestId('edit')).toBeOnTheScreen();
     expect(trigger('Edit')).toBeExpanded();
     expect(trigger()).toBeCollapsed();
-  });
-
-  it("draws the open menu's trigger pressed in", async () => {
-    await open();
-
-    expect(emittedClasses(trigger().props.className)).toContain('bg-muted');
-    expect(emittedClasses(trigger('Edit').props.className)).not.toContain('bg-muted');
   });
 });

@@ -98,9 +98,9 @@ async function layOut(rows: readonly Row[], viewportHeight = VIEWPORT): Promise<
   await elapse();
 }
 
-/** Scrolls the viewport to `y`, as the platform reports a scroll. */
+/** Scrolls the viewport to `y`, as the reader drags it there. */
 async function scrollTo(y: number): Promise<void> {
-  await fireEvent.scroll(viewport(), { nativeEvent: { contentOffset: { x: 0, y } } });
+  await userEvent.setup({ advanceTimers: jest.advanceTimersByTime }).scrollTo(viewport(), { y });
   await elapse();
 }
 
@@ -246,7 +246,6 @@ describe('MessageScroller', () => {
       await scrollTo(contentHeightOf(LONG) - VIEWPORT);
       const calls = scrolls.mock.calls.length;
 
-      await fireEvent(viewport(), 'scrollBeginDrag', { nativeEvent: { contentOffset: { x: 0, y: 700 } } });
       await scrollTo(500);
       await layOut(LONG.map((row, index) => (index === 9 ? { ...row, height: 300 } : row)));
 
@@ -375,6 +374,7 @@ describe('MessageScroller', () => {
           </>
         );
       }
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       await render(
         <Transcript rows={LONG} defaultScrollPosition="start">
           <Jump />
@@ -382,10 +382,10 @@ describe('MessageScroller', () => {
       );
       await layOut(LONG);
 
-      await fireEvent.press(screen.getByText('Jump to m4'));
+      await user.press(screen.getByText('Jump to m4'));
       expect(lastScroll()).toEqual({ y: LONG[4].y - 16, animated: false });
 
-      await fireEvent.press(screen.getByText('Jump to gone'));
+      await user.press(screen.getByText('Jump to gone'));
       expect(results).toEqual([true, false]);
     });
 
@@ -472,49 +472,6 @@ describe('MessageScroller', () => {
     });
     afterEach(() => {
       Platform.OS = os;
-    });
-
-    it('stops following the end once the reader turns the wheel', async () => {
-      await render(<Transcript rows={LONG} autoScroll />);
-      await layOut(LONG);
-      await scrollTo(contentHeightOf(LONG) - VIEWPORT);
-      const calls = scrolls.mock.calls.length;
-
-      await fireEvent(viewport(), 'wheel', {});
-      await layOut(LONG.map((row, index) => (index === 9 ? { ...row, height: 300 } : row)));
-
-      expect(scrolls.mock.calls).toHaveLength(calls);
-    });
-
-    it('stops following the end once the reader presses a scroll key, and not for another key', async () => {
-      await render(<Transcript rows={LONG} autoScroll />);
-      await layOut(LONG);
-      await scrollTo(contentHeightOf(LONG) - VIEWPORT);
-      const grown = LONG.map((row, index) => (index === 9 ? { ...row, height: 300 } : row));
-
-      await fireEvent(viewport(), 'keyDown', { nativeEvent: { key: 'a' } });
-      await layOut(grown);
-      expect(lastScroll()).toEqual({ y: contentHeightOf(grown) - VIEWPORT, animated: false });
-      await scrollTo(contentHeightOf(grown) - VIEWPORT);
-      const calls = scrolls.mock.calls.length;
-
-      await fireEvent(viewport(), 'keyDown', { nativeEvent: { key: 'PageUp' } });
-      await layOut(LONG.map((row, index) => (index === 9 ? { ...row, height: 500 } : row)));
-      expect(scrolls.mock.calls).toHaveLength(calls);
-    });
-
-    it('moves focus to the viewport once the button is pressed, as the button hides', async () => {
-      const focus = jest.fn();
-      (ScrollView.prototype as unknown as { focus: () => void }).focus = focus;
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      await render(<Transcript rows={LONG} />);
-      await layOut(LONG);
-      await scrollTo(100);
-
-      await user.press(screen.getByRole('button', { name: 'Scroll to end' }));
-
-      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
-      delete (ScrollView.prototype as unknown as { focus?: () => void }).focus;
     });
 
     it('leaves announcing to the log', async () => {

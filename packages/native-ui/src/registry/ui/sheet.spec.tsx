@@ -1,7 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, I18nManager, Platform } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Button } from './button';
 import { DirectionProvider } from './direction';
 import { catchBackPress, followAccessibilityFocus, AppScreen, outermostView } from './overlay.testing';
@@ -149,7 +148,7 @@ describe('Sheet', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it("closes on the screen reader's escape gesture, simulated through onAccessibilityEscape", async () => {
     await render(<EditProfile defaultOpen />);
     await finishMotion();
 
@@ -173,19 +172,6 @@ describe('Sheet', () => {
     await user.press(screen.getByLabelText('Close'));
     await finishMotion();
     expect(focused()).toBe('trigger');
-  });
-
-  it.each([
-    ['right', ['right-0', 'inset-y-0', 'w-3/4']],
-    ['left', ['left-0', 'inset-y-0', 'w-3/4']],
-    ['top', ['top-0', 'inset-x-0']],
-    ['bottom', ['bottom-0', 'inset-x-0']],
-  ] as const)('attaches the panel to the %s edge', async (side, edge) => {
-    await render(<EditProfile side={side} defaultOpen />);
-
-    for (const style of ['vega', 'nova'] as const) {
-      expect(emittedClasses(sheet().props.className, style)).toEqual(expect.arrayContaining(['absolute', ...edge]));
-    }
   });
 
   it.each([

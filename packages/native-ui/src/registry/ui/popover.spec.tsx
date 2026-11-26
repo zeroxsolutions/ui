@@ -164,7 +164,7 @@ describe('Popover', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 
-  it("closes on the screen reader's escape gesture", async () => {
+  it("closes on the screen reader's escape gesture, simulated through onAccessibilityEscape", async () => {
     await open();
 
     await act(async () => {

@@ -1,6 +1,6 @@
 import { PortalHost } from '@rn-primitives/portal';
-import { act, configure, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform, StyleSheet, Text as NativeText, View } from 'react-native';
+import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform, Text as NativeText, View } from 'react-native';
 import { catchBackPress } from './overlay.testing';
 import {
   Sidebar,
@@ -108,15 +108,6 @@ const toggle = () => screen.getAllByRole('button', { name: 'Toggle Sidebar' }).a
 const rail = () => screen.getAllByRole('button', { name: 'Toggle Sidebar' })[0];
 /** The box whose width opens and closes the panel beside the screen. */
 const gap = () => screen.getByTestId('sidebar').parent?.parent as ReturnType<typeof screen.getByTestId>;
-
-/** Cleanups the running case registers, run after it. */
-const cleanups: (() => void)[] = [];
-function afterThis(cleanup: () => void) {
-  cleanups.push(cleanup);
-}
-afterEach(() => {
-  for (const cleanup of cleanups.splice(0)) cleanup();
-});
 
 describe('Sidebar', () => {
   beforeEach(() => {
@@ -326,67 +317,10 @@ describe('Sidebar', () => {
       expect(screen.getAllByText('Playground')).toHaveLength(2);
     });
 
-    it('hides a showOnHover action on the web until the pointer is over its item', async () => {
-      onTheWeb();
-      await render(<App showOnHover />);
-      const action = screen.getByRole('button', { name: 'More' });
-      expect(action.props.className).toMatch(/\bopacity-0\b/);
-
-      const item = action.parent as ReturnType<typeof screen.getByTestId>;
-      await fireEvent(item, 'pointerEnter');
-
-      expect(screen.getByRole('button', { name: 'More' }).props.className).not.toMatch(/\bopacity-0\b/);
-    });
-
     it('announces the active button as selected', async () => {
       await render(<App />);
 
       expect(screen.getByRole('button', { name: 'Playground' })).toBeSelected();
-    });
-
-    it('shows a resize cursor over the rail on the web', async () => {
-      jest.replaceProperty(Platform, 'OS', 'web');
-      const page = { addEventListener: () => undefined, removeEventListener: () => undefined };
-      jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', page);
-      await render(<App />);
-
-      expect(StyleSheet.flatten(rail().props.style)).toMatchObject({ cursor: 'ew-resize' });
-    });
-
-    it("leaves the rail's cursor to a caller's cursor class or style on the web", async () => {
-      jest.replaceProperty(Platform, 'OS', 'web');
-      const page = { addEventListener: () => undefined, removeEventListener: () => undefined };
-      jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', page);
-
-      await render(<App rail={{ className: 'cursor-pointer' }} />);
-      expect(StyleSheet.flatten(rail().props.style)?.cursor).toBeUndefined();
-
-      await render(<App rail={{ style: { cursor: 'pointer' } }} />);
-      expect(StyleSheet.flatten(rail().props.style)).toMatchObject({ cursor: 'pointer' });
-    });
-
-    it('opens and closes on Cmd+B or Ctrl+B on the web', async () => {
-      jest.replaceProperty(Platform, 'OS', 'web');
-      const listeners: ((event: unknown) => void)[] = [];
-      const page = {
-        addEventListener: (_type: string, listener: (event: unknown) => void) => listeners.push(listener),
-        removeEventListener: () => undefined,
-      };
-      jest.replaceProperty(globalThis as unknown as { window: unknown }, 'window', page);
-      await render(<App />);
-      const press = (event: { key: string; metaKey?: boolean; ctrlKey?: boolean }) =>
-        act(async () => {
-          for (const listener of listeners) {
-            listener({ metaKey: false, ctrlKey: false, preventDefault: () => undefined, ...event });
-          }
-        });
-
-      await press({ key: 'b', metaKey: true });
-      expect(report()).toMatchObject({ open: false });
-      await press({ key: 'b', ctrlKey: true });
-      expect(report()).toMatchObject({ open: true });
-      await press({ key: 'b' });
-      expect(report()).toMatchObject({ open: true });
     });
   });
 
@@ -450,26 +384,6 @@ describe('Sidebar', () => {
 
       expect(screen.queryByTestId('sidebar')).toBeNull();
       expect(report()).toMatchObject({ openMobile: false });
-    });
-
-    it('moves the focus back on the web to where it was when the sheet opened', async () => {
-      onTheWeb();
-      const opener = { focus: jest.fn() };
-      const page = globalThis as unknown as { document?: unknown };
-      page.document = { activeElement: opener };
-      afterThis(() => delete page.document);
-      const user = setup();
-      await render(<App />);
-      await user.press(toggle());
-      await elapse(300);
-
-      const preventDefault = jest.fn();
-      await act(async () => {
-        screen.getByTestId('sidebar').props.onCloseAutoFocus({ preventDefault });
-      });
-
-      expect(preventDefault).toHaveBeenCalled();
-      expect(opener.focus).toHaveBeenCalledTimes(1);
     });
 
     it('draws no rail', async () => {

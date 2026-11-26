@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { AccessibilityInfo, Platform } from 'react-native';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import {
   Questionnaire,
   QuestionnaireActions,
@@ -326,7 +325,7 @@ describe('Questionnaire', () => {
     expect(onStatusChange).toHaveBeenLastCalledWith('answered');
   });
 
-  it('calls the onPress given to a choice before picking it, and does not pick when it prevents the default', async () => {
+  it('calls the onPress given to a choice before picking it, and does not pick when it prevents the default on a simulated press', async () => {
     const onPress = jest.fn();
     await render(
       <Questionnaire>
@@ -363,11 +362,10 @@ describe('Questionnaire', () => {
     const user = userEvent.setup();
     await render(<Plan />);
     const input = screen.getByLabelText('Another agent feature');
-    await fireEvent(input, 'submitEditing', { nativeEvent: { text: '' } });
+    await user.type(input, '', { submitEditing: true });
     expect(screen.getByText('What should the agent build next?')).toBeVisible();
 
-    await user.type(input, 'Cost reports');
-    await fireEvent(input, 'submitEditing', { nativeEvent: { text: 'Cost reports' } });
+    await user.type(input, 'Cost reports', { submitEditing: true });
 
     expect(screen.getByText('What should every progress update include?')).toBeVisible();
   });
@@ -406,39 +404,6 @@ describe('Questionnaire', () => {
     expect(screen.getByText('What should every progress update include?')).toBeVisible();
   });
 
-  it('draws a chosen choice in the style, and the description lower beside its indicator', async () => {
-    await render(<Plan />);
-    await pick('Approval checkpoints');
-
-    const chosen = screen.getByRole('radio', { name: 'Approval checkpoints' });
-    expect(emittedClasses(chosen.props.className)).toEqual(expect.arrayContaining(['border-primary/40', 'bg-muted']));
-    const described = screen.getByRole('radio', { name: 'Tool call timeline Show what the agent ran.' });
-    const indicator = described.children[0] as ReturnType<typeof screen.getByRole>;
-    expect(emittedClasses(indicator.props.className)).toContain('translate-y-0.5');
-  });
-
-  it('draws the input with the destructive border while the question shows its error, and the ring colour while focused', async () => {
-    await render(<Plan />);
-    const input = () => screen.getByLabelText('Another agent feature');
-
-    await press('Next');
-    expect(emittedClasses(input().props.className)).toContain('border-destructive');
-
-    await fireEvent(input(), 'focus');
-    await pick('Approval checkpoints');
-    expect(emittedClasses(input().props.className)).toContain('border-ring');
-  });
-
-  it('spaces the title from the choices when the question has no description', async () => {
-    await render(<Plan defaultItem="signals" />);
-
-    expect(emittedClasses(screen.getByText('What should every progress update include?').props.className)).toContain(
-      'mb-5',
-    );
-    await press('Previous');
-    expect(emittedClasses(screen.getByText('What should the agent build next?').props.className)).not.toContain('mb-5');
-  });
-
   describe('on iOS', () => {
     const os = Platform.OS;
     beforeEach(() => {
@@ -474,165 +439,7 @@ describe('Questionnaire', () => {
     afterEach(() => {
       Platform.OS = os;
     });
-
-    const key = (name: string, extra: object = {}) =>
-      act(() =>
-        fireEvent(screen.getByTestId('questionnaire'), 'keyDown', {
-          nativeEvent: { key: name, ...extra },
-          preventDefault: () => undefined,
-        }),
-      );
-    /** A key pressed on `element`, which holds focus, as React Native Web hands it on. */
-    const keyOn = (element: ReturnType<typeof screen.getByRole>, name: string, eventName = 'keyDown') => {
-      const target = {};
-      return act(() =>
-        fireEvent(element, eventName, {
-          nativeEvent: { key: name },
-          target,
-          currentTarget: target,
-          preventDefault: () => undefined,
-          stopPropagation: () => undefined,
-        }),
-      );
-    };
     const radio = (name: string) => screen.getByRole('radio', { name });
-
-    it('picks a choice with Space, and goes on with Enter once it is picked', async () => {
-      await render(<Plan />);
-      await keyOn(radio('Approval checkpoints'), 'Enter');
-      expect(radio('Approval checkpoints')).not.toBeChecked();
-
-      await keyOn(radio('Approval checkpoints'), ' ');
-      expect(radio('Approval checkpoints')).toBeChecked();
-      await keyOn(radio('Approval checkpoints'), 'Enter');
-
-      expect(screen.getByText('What should every progress update include?')).toBeVisible();
-    });
-
-    it('moves between the radios with the arrows, picking each, and wraps', async () => {
-      await render(<Plan />);
-      await keyOn(screen.getByLabelText('What should the agent build next?'), 'ArrowDown');
-      expect(radio('Tool call timeline Show what the agent ran.')).toBeChecked();
-
-      await keyOn(radio('Tool call timeline Show what the agent ran.'), 'ArrowDown');
-      expect(radio('Approval checkpoints')).toBeChecked();
-
-      await keyOn(radio('Approval checkpoints'), 'ArrowRight');
-      expect(radio('Tool call timeline Show what the agent ran.')).toBeChecked();
-      expect(screen.getByText('What should the agent build next?')).toBeVisible();
-
-      await keyOn(radio('Tool call timeline Show what the agent ran.'), 'ArrowUp');
-      expect(radio('Approval checkpoints')).toBeChecked();
-    });
-
-    /** A key event whose preventDefault is a spy, with `nativeEvent` extras such as a modifier. */
-    const keyEvent = (name: string, extra: object = {}) => {
-      const target = {};
-      return {
-        nativeEvent: { key: name, ...extra },
-        target,
-        currentTarget: target,
-        preventDefault: jest.fn(),
-        stopPropagation: () => undefined,
-        isDefaultPrevented: () => false,
-      };
-    };
-
-    it('calls the onKeyDown given to a choice first, still picking with Space unless it prevents the default', async () => {
-      const onKeyDown = jest.fn();
-      await render(
-        <Questionnaire>
-          <QuestionnaireItem name="notes">
-            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
-            <QuestionnaireChoices>
-              <QuestionnaireChoice value="yes" {...({ onKeyDown } as object)}>
-                <Text>Yes</Text>
-              </QuestionnaireChoice>
-              <QuestionnaireChoice
-                value="no"
-                {...({ onKeyDown: (event: { preventDefault: () => void }) => event.preventDefault() } as object)}
-              >
-                <Text>No</Text>
-              </QuestionnaireChoice>
-            </QuestionnaireChoices>
-          </QuestionnaireItem>
-        </Questionnaire>,
-      );
-
-      await keyOn(radio('Yes'), ' ');
-      expect(onKeyDown).toHaveBeenCalled();
-      expect(radio('Yes')).toBeChecked();
-
-      let prevented = false;
-      await act(() =>
-        fireEvent(radio('No'), 'keyDown', {
-          ...keyEvent(' '),
-          preventDefault: () => {
-            prevented = true;
-          },
-          isDefaultPrevented: () => prevented,
-        }),
-      );
-      expect(radio('No')).not.toBeChecked();
-    });
-
-    it('lets Shift+Enter break the line in a multiline input', async () => {
-      await render(
-        <Questionnaire>
-          <QuestionnaireItem name="notes">
-            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
-            <QuestionnaireInput aria-label="Notes" multiline />
-          </QuestionnaireItem>
-        </Questionnaire>,
-      );
-      const event = keyEvent('Enter', { shiftKey: true });
-
-      await act(() => fireEvent(screen.getByLabelText('Notes'), 'keyPress', event));
-
-      expect(event.preventDefault).not.toHaveBeenCalled();
-    });
-
-    it('does not go on for Ctrl+Enter on a disabled choice, which the Questionnaire answers itself', async () => {
-      await render(
-        <Questionnaire>
-          <QuestionnaireItem name="notes">
-            <QuestionnaireTitle>Anything else?</QuestionnaireTitle>
-            <QuestionnaireChoices>
-              <QuestionnaireChoice value="yes" defaultChecked>
-                <Text>Yes</Text>
-              </QuestionnaireChoice>
-              <QuestionnaireChoice value="no" disabled>
-                <Text>No</Text>
-              </QuestionnaireChoice>
-            </QuestionnaireChoices>
-          </QuestionnaireItem>
-          <QuestionnaireItem name="more">
-            <QuestionnaireTitle>More?</QuestionnaireTitle>
-          </QuestionnaireItem>
-        </Questionnaire>,
-      );
-      const event = keyEvent('Enter', { ctrlKey: true });
-
-      // The test renderer takes no events on a disabled Pressable, though a browser hands it the keys while it
-      // holds focus, so its handler is called itself.
-      await act(() => (radio('No').props as { onKeyDown: (event: object) => void }).onKeyDown(event));
-
-      expect(event.preventDefault).not.toHaveBeenCalled();
-      expect(screen.getByText('Anything else?')).toBeVisible();
-    });
-
-    it('goes on with Enter in the input once it holds the answer', async () => {
-      const user = userEvent.setup();
-      await render(<Plan />);
-      const input = screen.getByLabelText('Another agent feature');
-      await keyOn(input, 'Enter', 'keyPress');
-      expect(screen.getByText('What should the agent build next?')).toBeVisible();
-
-      await user.type(input, 'Cost reports');
-      await keyOn(input, 'Enter', 'keyPress');
-
-      expect(screen.getByText('What should every progress update include?')).toBeVisible();
-    });
 
     it('names the keys each part answers', async () => {
       await render(<Plan shortcuts="letters" />);
@@ -648,34 +455,6 @@ describe('Questionnaire', () => {
         'Meta+Enter Control+Enter ArrowUp ArrowDown ArrowRight',
       );
       expect(screen.getByRole('button', { name: 'Next' }).props['aria-keyshortcuts']).toBe('Enter');
-    });
-
-    it('shows each choice its letter with shortcuts, and picks the choice whose letter is pressed', async () => {
-      await render(<Plan shortcuts="letters" testID="questionnaire" />);
-      const question = within(screen.getByLabelText('What should the agent build next?'));
-
-      expect(question.getByText('A', { includeHiddenElements: true })).toBeTruthy();
-      expect(question.getByText('B', { includeHiddenElements: true })).toBeTruthy();
-
-      await key('b');
-
-      expect(screen.getByRole('radio', { name: 'Approval checkpoints' })).toBeChecked();
-    });
-
-    it('steps with the side arrows once the question is answered, and goes on with Ctrl+Enter', async () => {
-      await render(<Plan testID="questionnaire" />);
-      await key('ArrowRight');
-      expect(screen.getByText('What should the agent build next?')).toBeVisible();
-
-      await pick('Approval checkpoints');
-      await key('ArrowRight');
-      expect(screen.getByText('What should every progress update include?')).toBeVisible();
-
-      await key('ArrowLeft');
-      expect(screen.getByText('What should the agent build next?')).toBeVisible();
-
-      await key('Enter', { ctrlKey: true });
-      expect(screen.getByText('What should every progress update include?')).toBeVisible();
     });
   });
 

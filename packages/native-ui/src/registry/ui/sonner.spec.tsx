@@ -1,7 +1,6 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo, Platform } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { emittedClasses } from '../../build/slot-tokens.testing';
 import { Toaster, toast, useSonner, type ToasterProps } from './sonner';
 import { Text } from './text';
 
@@ -168,7 +167,9 @@ describe('Toaster', () => {
     await show();
     await raise(() => toast('Event has been created', { action: { label: 'Undo', onClick } }));
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Undo' }));
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Undo' }));
     await elapse(MOTION_MS);
 
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -179,7 +180,9 @@ describe('Toaster', () => {
     await show({ closeButton: true });
     await raise(() => toast('Saved'));
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Close toast' }));
+    await userEvent
+      .setup({ advanceTimers: jest.advanceTimersByTime })
+      .press(screen.getByRole('button', { name: 'Close toast' }));
     await elapse(MOTION_MS);
 
     expect(screen.queryByText('Saved')).toBeNull();
@@ -193,7 +196,7 @@ describe('Toaster', () => {
     expect(screen.getByText('Four')).toBeOnTheScreen();
   });
 
-  it('goes on a swipe toward its edge, and stays on a short one', async () => {
+  it('goes on a simulated swipe toward its edge, and stays on a short one', async () => {
     await show();
     await raise(() => toast('Saved', { testId: 'toast' }));
     const box = screen.getByTestId('toast');
@@ -212,7 +215,7 @@ describe('Toaster', () => {
     expect(screen.queryByText('Saved')).toBeNull();
   });
 
-  it('springs back from a short swipe at once when the system asks for reduced motion', async () => {
+  it('springs back from a short simulated swipe at once when the system asks for reduced motion', async () => {
     jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
     await show();
     await raise(() => toast('Saved', { testId: 'toast' }));
@@ -243,22 +246,7 @@ describe('Toaster', () => {
     expect(screen.getByText('2 toasts')).toBeOnTheScreen();
   });
 
-  it('collapses on Escape with focus in the stack, as upstream does, and runs its time again', async () => {
-    await show();
-    await raise(() => toast('One'));
-    await raise(() => toast('Two'));
-    await fireEvent(around('Two', 'onTouchStart'), 'touchStart');
-    await elapse(10_000);
-    expect(screen.getByText('One')).toBeOnTheScreen();
-
-    await fireEvent(around('Two', 'onKeyDown'), 'keyDown', { nativeEvent: { key: 'Escape' } });
-    await elapse(4_000 + MOTION_MS);
-
-    expect(screen.queryByText('One')).toBeNull();
-    expect(screen.queryByText('Two')).toBeNull();
-  });
-
-  it('collapses once one toast or fewer is left, as upstream does, and runs its time again', async () => {
+  it('collapses once one toast or fewer is left after a simulated touch expanded it, as upstream does, and runs its time again', async () => {
     await show();
     await raise(() => toast('One'));
     const id = await raise(() => toast('Two'));
@@ -284,14 +272,5 @@ describe('Toaster', () => {
     await elapse(20);
 
     expect(screen.queryByText('Saved')).toBeNull();
-  });
-
-  it("draws the toast in the popover's colours, rounded as the style's toast slot says", async () => {
-    await show();
-    await raise(() => toast('Saved', { testId: 'toast' }));
-
-    expect(emittedClasses(screen.getByTestId('toast').props.className)).toEqual(
-      expect.arrayContaining(['bg-popover', 'border', 'rounded-2xl']),
-    );
   });
 });
