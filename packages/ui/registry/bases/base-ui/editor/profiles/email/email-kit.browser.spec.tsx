@@ -944,14 +944,19 @@ describe('the email kit', () => {
     expect(() => editor.run('insertButton')).toThrow(/Unknown command/);
   });
 
-  it("turns a text block into the email's text kinds only", async () => {
+  it("turns a text block into the email's text kinds and paragraph styles only", async () => {
     await mount([paragraph('Lines')]);
     await openBlockMenu('Lines');
     await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
 
     const choices = page.getByRole('menuitemradio');
     await expect.element(choices.nth(0)).toBeVisible();
-    expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Text', 'Bulleted list']);
+    expect(choices.elements().map((choice) => choice.textContent)).toEqual([
+      'Text',
+      'Lead',
+      'Small text',
+      'Bulleted list',
+    ]);
   });
 
   it('offers no Turn into on a block whose kind is not text', async () => {
