@@ -53,6 +53,10 @@ const KEPT: Record<string, string> = {
     "a virtualised row's height, fixed by the list's item layout",
   // Nine category tabs share a phone's width; a toggle's own padding and minimum width would push them past it.
   'registry/components/data-entry/emoji-picker.tsx: <ToggleGroupItem> px-0': "nine tabs sharing a phone's width",
+  // No native part draws a keyboard focus ring on a pressable tile, and a demo writes no slot, as its source is
+  // copied to the preview unchanged in every style.
+  'examples/icon-gallery-grid.tsx: <Item> ring-ring': "an icon tile's keyboard focus ring",
+  'examples/icon-gallery-grid.tsx: <Item> ring-2': "an icon tile's keyboard focus ring",
 };
 
 /** Each `.tsx` source under `directory`; a spec is none. */
@@ -406,5 +410,111 @@ describe("a design-system component's classes", () => {
   it('keep only classes a composed item still writes', () => {
     const written = new Set(found.map((entry) => entry.replace(/ \([^)]+\)$/, '')));
     expect(Object.keys(KEPT).filter((entry) => !written.has(entry))).toEqual([]);
+  });
+});
+
+/**
+ * Every native source that draws markup outside `ui/`: the registry's composed items, hooks and icons, the demos
+ * written here rather than ported from upstream's, the preview's own parts, and the preview apps.
+ */
+const MARKUP = [
+  ...['components', 'hooks', 'icons', 'lib'].map((folder) => join(REGISTRY, folder)),
+  join(SRC, 'examples'),
+  join(SRC, 'preview'),
+  ...['native-preview', 'native-preview-uniwind'].map((app) => join(PROJECT, '../../apps', app, 'src')),
+];
+
+/** The elements kept drawing a surface of their own, each `<path under src/ or the app>: <element>`, with why. */
+const KEPT_SURFACES: Record<string, string> = {
+  // A fork of upstream's resizable handle, whose focus ring is the primitive's own and drawn by no style.
+  'registry/components/data-entry/resize-handle.tsx: <View>': "upstream's resizable handle's own focus ring",
+};
+
+/** What a style draws on a control, a chip or a panel: each property a raw element must take from a slot. */
+const SURFACE = new Set([
+  'padding',
+  'gap',
+  'radius',
+  'text size',
+  'font weight',
+  'tracking',
+  'height',
+  'border',
+  'ring',
+  'shadow',
+  'background',
+]);
+
+/**
+ * Whether a class makes its element a surface or a control: a radius, a ring, a shadow or a whole border, the
+ * shape a style varies. A class that clears one and a circle draw nothing a style varies, and neither do a fill
+ * or a rule along one side alone: a swatch, a dot or a divider is the theme's colour, the same in every style.
+ */
+function shapesSurface(name: string): boolean {
+  const drawn = utility(name);
+  if (/-(0|none|full)$/.test(drawn)) return false;
+  const property = decided(name);
+  if (property === 'border') return /^border(-[0-9]+)?$/.test(drawn);
+  return property === 'radius' || property === 'ring' || property === 'shadow';
+}
+
+/**
+ * Whether a class fills its element, which makes a panel of it once the element is also padded. A page's own
+ * background, a clear fill and a gradient's direction fill nothing a style varies.
+ */
+function fills(name: string): boolean {
+  return decided(name) === 'background' && !/^bg-(background$|transparent$|linear-|radial-|conic-)/.test(utility(name));
+}
+
+/** Whether classes draw a surface: a shape a style varies, or a fill padded as a panel. */
+function drawsSurface(names: string[]): boolean {
+  return names.some(shapesSurface) || (names.some(fills) && names.some((name) => decided(name) === 'padding'));
+}
+
+/**
+ * Each element a source draws a surface on with classes of its own, past any slot and any design-system
+ * component, with each class it sets there that a style decides: a surface no style reaches, so it looks the
+ * same in every style.
+ */
+function unslotted(path: string): string[] {
+  const file = parse(path);
+  const imported = imports(file);
+  const found: string[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const element = node.tagName.getText();
+      const target = imported.get(element);
+      for (const attribute of node.attributes.properties) {
+        if (!ts.isJsxAttribute(attribute) || attribute.name.getText() !== 'className' || !attribute.initializer)
+          continue;
+        if (target?.kind === 'ui' && !PRIMITIVES.has(target.name)) continue;
+        const names = classStrings(attribute.initializer).flatMap((text) => text.split(/\s+/).filter(Boolean));
+        if (names.some((name) => name.startsWith('cn-')) || !drawsSurface(names)) continue;
+        if (target?.kind === 'module' && slotsOf(target.path, target.name).length > 0) continue;
+        if (!target && /^[A-Z]/.test(element) && slotsOf(path, element).length > 0) continue;
+        const classes = names.filter((name) => SURFACE.has(decided(name) ?? ''));
+        found.push(`${relative(SRC, path)}: <${element}> ${classes.join(' ')}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return found;
+}
+
+describe('a surface drawn outside a design-system component', () => {
+  const found = MARKUP.filter((path) => existsSync(path))
+    .flatMap(sources)
+    .filter((path) => !portsUpstreamDemo(path))
+    .flatMap(unslotted);
+  const element = (entry: string) => entry.slice(0, entry.indexOf('> ') + 1);
+
+  it('takes what its style decides from a slot, so it follows the style in use', () => {
+    expect(found.filter((entry) => !(element(entry) in KEPT_SURFACES))).toEqual([]);
+  });
+
+  it('keeps only surfaces a source still draws', () => {
+    const drawn = new Set(found.map(element));
+    expect(Object.keys(KEPT_SURFACES).filter((entry) => !drawn.has(entry))).toEqual([]);
   });
 });
