@@ -125,6 +125,24 @@ function useHoldsCaret(editor: IEditor, root: HTMLElement | null): boolean {
   return holds;
 }
 
+/** Whether a drag is in flight on the page, as a block dragged by its grip is; its drop target must stay clear. */
+function useDragInFlight(): boolean {
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => {
+    const start = () => setDragging(true);
+    const end = () => setDragging(false);
+    document.addEventListener('dragstart', start);
+    document.addEventListener('dragend', end);
+    document.addEventListener('drop', end);
+    return () => {
+      document.removeEventListener('dragstart', start);
+      document.removeEventListener('dragend', end);
+      document.removeEventListener('drop', end);
+    };
+  }, []);
+  return dragging;
+}
+
 function ColumnsView({
   attrs,
   children,
@@ -137,6 +155,7 @@ function ColumnsView({
   const [preview, setPreview] = useState<number[] | null>(null);
   const lanes = useColumnsLaneCount(root);
   const active = useHoldsCaret(editor, root);
+  const dragging = useDragInFlight();
   const pos = getPos();
   const words = layoutWordsOf(options.messages);
   const changeable = editable && pos !== undefined && (options.changeable?.(editor, pos) ?? true);
@@ -156,18 +175,20 @@ function ColumnsView({
             onPreview={setPreview}
             onCommit={(ratio) => set({ ratio })}
           />
-          <ColumnsToolbar
-            editor={editor}
-            pos={pos}
-            anchor={root}
-            lanes={lanes}
-            maxLanes={Math.min(options.maxLanes ?? MAX_LANES, MAX_LANES)}
-            valign={valignOf(attrs.valign)}
-            words={words}
-            // A lane added or removed draws the lanes equal again.
-            onLanes={(count) => set({ lanes: count, ratio: Array.from({ length: count }, () => 1) })}
-            onValign={(valign) => set({ valign })}
-          />
+          {!dragging && (
+            <ColumnsToolbar
+              editor={editor}
+              pos={pos}
+              anchor={root}
+              lanes={lanes}
+              maxLanes={Math.min(options.maxLanes ?? MAX_LANES, MAX_LANES)}
+              valign={valignOf(attrs.valign)}
+              words={words}
+              // A lane added or removed draws the lanes equal again.
+              onLanes={(count) => set({ lanes: count, ratio: Array.from({ length: count }, () => 1) })}
+              onValign={(valign) => set({ valign })}
+            />
+          )}
         </>
       )}
     </ColumnsShell>
