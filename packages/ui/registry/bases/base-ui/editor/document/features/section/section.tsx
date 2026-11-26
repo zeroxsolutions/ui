@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { LayoutPanelTopIcon } from '@/registry/bases/base-ui/icons/lucide/layout-panel-top-icon';
+import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import {
@@ -92,6 +93,24 @@ function SectionContent({ children }: { children: ReactNode }) {
   );
 }
 
+/** A dot of a section's background, as the toolbar offers it; `none` is the empty ring, struck through. */
+function SectionSwatch({ background }: { background: SectionBackground }) {
+  return (
+    <svg
+      data-slot="section-swatch"
+      data-background={background}
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      aria-hidden
+      className="cn-editor-icon"
+    >
+      <circle cx="8" cy="8" r="7.5" />
+      {background === 'none' && <line x1="3.5" y1="12.5" x2="12.5" y2="3.5" />}
+    </svg>
+  );
+}
+
 interface SectionToolbarProps {
   editor: IEditor;
   pos: number | undefined;
@@ -166,7 +185,7 @@ function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionTo
           value={tokenOf(SECTION_BACKGROUNDS, attrs.background)}
           fallback={DEFAULTS.background}
           nameOf={(token) => (token === 'none' ? words.noBackground : words.colors[token])}
-          render={(token) => <span data-slot="section-swatch" data-background={token} aria-hidden />}
+          render={(token) => <SectionSwatch background={token} />}
           onChange={(background) => set({ background })}
         />
         <div className="flex flex-wrap items-center">
@@ -178,6 +197,7 @@ function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionTo
             nameOf={(space) => words.spaces[space]}
             onChange={(padding) => set({ padding })}
           />
+          {widths.length > 1 && <Separator orientation="vertical" className="mx-0.5 h-5 data-vertical:self-center" />}
           {widths.length > 1 && (
             <SectionToolbarGroup<SectionWidth>
               label={words.sectionWidth}

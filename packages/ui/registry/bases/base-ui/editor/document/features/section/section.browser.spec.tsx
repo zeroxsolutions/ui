@@ -44,7 +44,8 @@ const lanes = (left: NodeJSON[], right: NodeJSON[]): NodeJSON => ({
 function Host({ content, onReady }: { content: DocJSON; onReady(editor: IEditor): void }) {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
-    <div className="style-nova p-12">
+    // Room above the editor, where the section's toolbar opens.
+    <div className="style-nova p-12 pt-40">
       <Editor
         features={features}
         content={content}
