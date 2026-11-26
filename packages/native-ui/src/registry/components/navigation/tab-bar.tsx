@@ -78,7 +78,7 @@ type TabBarProps = ComponentProps<typeof View> & {
   labels?: TabBarLabels;
   /** `translucent` when omitted, or `solid`. */
   surface?: TabBarSurface;
-  /** `attached` when omitted, or `floating`, which is `rounded-full`. */
+  /** `attached` when omitted, or `floating`, which is rounded as the style rounds a badge. */
   shape?: TabBarShape;
 };
 
@@ -119,7 +119,7 @@ function TabBar({
         wrapped ? null : 'absolute z-50',
         side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
         surface === 'solid' ? 'bg-background' : 'bg-background/70',
-        floating ? 'rounded-full p-1.5 shadow-lg' : null,
+        floating ? 'cn-tab-bar-floating p-1.5 shadow-lg' : null,
         floating ? (wrapped ? null : FLOATING_EDGE[side]) : ATTACHED_EDGE[side],
         className,
       )}
@@ -176,7 +176,7 @@ function TabBarItem({
           accessibilityState={{ ...accessibilityState, selected: active }}
           accessibilityHint={accessibilityHint ?? description}
           className={cn(
-            'min-h-12 min-w-16 items-center justify-center gap-1 rounded-lg p-1',
+            'cn-tab-bar-item min-h-12 min-w-16 items-center justify-center gap-1 p-1',
             side === 'top' || side === 'bottom' ? 'flex-1' : null,
             className,
           )}
@@ -201,7 +201,7 @@ function TabBarItem({
 }
 
 /**
- * The pill behind the icon: tinted while its item is active, and muted while an inactive item is pressed. Holds
+ * The shape behind the icon, rounded as the style rounds a badge: tinted while its item is active, and muted while an inactive item is pressed. Holds
  * the `TabBarIcon` and any `TabBarBadge`.
  */
 function TabBarIndicator({ className, ...props }: ComponentProps<typeof View>): ReactNode {
@@ -209,7 +209,7 @@ function TabBarIndicator({ className, ...props }: ComponentProps<typeof View>): 
   return (
     <View
       className={cn(
-        'relative h-8 w-14 items-center justify-center rounded-full',
+        'cn-tab-bar-indicator relative h-8 w-14 items-center justify-center',
         active ? 'bg-primary/10' : pressed && 'bg-muted',
         className,
       )}

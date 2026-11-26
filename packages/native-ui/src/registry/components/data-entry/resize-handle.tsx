@@ -177,7 +177,7 @@ function ResizeHandle({
       {...props}
     >
       {web ? <View style={{ position: 'absolute', top: 0, bottom: 0, left: -extra, right: -extra }} /> : null}
-      <View className="bg-border z-10 h-6 w-1 shrink-0 rounded-lg" />
+      <View className="cn-resizable-handle-icon z-10 shrink-0" />
     </View>
   );
 }
