@@ -4,7 +4,7 @@ import { Combobox as ComboboxPrimitive } from '@base-ui/react';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { toggleVariants } from '@/registry/bases/base-ui/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
-import { CHROME_ICON_CLASS, ChromeControl, type AnimatedIconComponent } from './chrome-icon';
+import { ChromeControl, type AnimatedIconComponent } from './chrome-icon';
 
 export type EditorToolbarComboboxTriggerProps = ComboboxPrimitive.Trigger.Props & {
   /** An animated icon component, played while the trigger holds the pointer or the focus. */
@@ -21,7 +21,7 @@ export function EditorToolbarComboboxTrigger({ icon, label, className, ...props 
   return (
     <ChromeControl
       icon={icon}
-      iconClassName={CHROME_ICON_CLASS}
+      iconSized
       render={({ children, ...control }) => (
         <Tooltip>
           <TooltipTrigger

@@ -138,4 +138,19 @@
   .cn-editor-field {
     @apply focus-within:border-ring focus-within:ring-ring/30 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40 data-invalid:border-destructive dark:data-invalid:border-destructive/50 focus-within:ring-2 data-invalid:ring-2;
   }
+
+  /* cn-alert's radius and padding, a lane of a columns block */
+  .cn-editor-lane {
+    @apply rounded-lg px-2 py-1.5;
+  }
+
+  /* cn-dropdown-menu-item's icon size, a menu or toolbar icon whose control would size it otherwise */
+  .cn-editor-icon {
+    @apply size-3.5 [&_svg]:size-3.5!;
+  }
+
+  /* cn-badge's type, a short label the editor sets on a block, as a spacer's size */
+  .cn-editor-caption {
+    @apply text-[0.625rem] font-medium;
+  }
 }

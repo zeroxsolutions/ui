@@ -5,7 +5,7 @@ import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutio
 import type { NodeJSON, NodeViewProps, SerializeContext } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactNodeCodec } from '../../../react-types';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { CHROME_ICON_CLASS, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
+import { ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 
 /**
  * A toggle block — a collapsible/details section (like Notion's toggle or the
@@ -42,7 +42,8 @@ export function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<Toggl
         <ChromeIcon
           icon={ChevronRightIcon}
           active={marker.active}
-          className={cn(CHROME_ICON_CLASS, 'transition-transform', attrs.open && 'rotate-90')}
+          sized
+          className={cn('transition-transform', attrs.open && 'rotate-90')}
         />
       </span>
       <div className={cn('min-w-0 flex-1', attrs.open ? 'block' : 'hidden')}>{children as ReactNode}</div>

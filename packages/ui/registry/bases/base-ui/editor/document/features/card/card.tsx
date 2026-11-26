@@ -288,10 +288,10 @@ export function CardView({
                   className={
                     hero
                       ? cn(
-                          'cn-editor-block cn-editor-control text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm outline-none',
+                          'cn-editor-block cn-editor-control cn-field-description hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed outline-none',
                         )
                       : cn(
-                          'cn-editor-control text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm outline-none',
+                          'cn-editor-control cn-field-description hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed outline-none',
                         )
                   }
                 >
@@ -315,9 +315,11 @@ export function CardView({
             className={
               hero
                 ? cn(
-                    'cn-editor-block text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm',
+                    'cn-editor-block cn-field-description flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed',
                   )
-                : 'text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm'
+                : cn(
+                    'cn-field-description flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed',
+                  )
             }
           >
             <ImageIcon size={16} aria-hidden />

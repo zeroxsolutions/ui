@@ -9,7 +9,7 @@ import type { CaretRect, IEditor, SlashItem, TriggerQuery } from '@zeroxsolution
 import { filterSlashItems, groupByHeading } from '@zeroxsolutions/editor-core/document/ui/index';
 import { RectPopover } from './rect-popover';
 import { pinHorizontal } from './selection-rect';
-import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
+import { ChromeIcon } from './chrome-icon';
 
 /**
  * The slash (`/`) insert menu — Notion-style **inline**: typing `/` leaves the
@@ -233,7 +233,7 @@ export function SlashMenu({
                         className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
                       >
                         <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
-                          <ChromeIcon icon={item.icon} className={CHROME_ICON_CLASS} active={highlighted} />
+                          <ChromeIcon icon={item.icon} sized active={highlighted} />
                         </ItemMedia>
                         <ItemContent className="gap-0.5">
                           <ItemTitle>{item.title}</ItemTitle>

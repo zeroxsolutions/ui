@@ -61,7 +61,7 @@ function UploadTabsDropZone({ upload, messages, onStart }: UploadTabsDropZonePro
         setDragging(false);
         take(event.dataTransfer.files[0]);
       }}
-      className="cn-editor-block text-muted-foreground data-dragging:bg-muted/50 data-dragging:border-ring flex flex-col items-center gap-2 border border-dashed p-4 text-center text-sm"
+      className="cn-editor-block cn-field-description data-dragging:bg-muted/50 data-dragging:border-ring flex flex-col items-center gap-2 border border-dashed p-4 text-center"
     >
       <UploadIcon size={18} aria-hidden />
       <Button

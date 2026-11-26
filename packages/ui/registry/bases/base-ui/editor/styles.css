@@ -258,6 +258,38 @@
   padding: 0.05rem 0.1rem;
 }
 
+/* Callout node view — colored per `data-callout` on both the editable node
+ * view and the static Viewer (its root carries `.document-editor` too). The
+ * `--info`/`--success`/`--warning`/`--destructive` tokens flip with `.dark`.
+ * Unlayered: a style's `cn-alert` may fill the alert itself, as sera's
+ * `bg-background`, and once the build writes the slot that fill is a utility. */
+.document-editor [data-slot='callout'] {
+  border-color: var(--border);
+  background: color-mix(in oklab, var(--muted-foreground) 6%, var(--background));
+}
+.document-editor [data-callout='info'] {
+  border-color: color-mix(in oklab, var(--info) 35%, var(--border));
+  background: color-mix(in oklab, var(--info) 8%, var(--background));
+}
+.document-editor [data-callout='success'] {
+  border-color: color-mix(in oklab, var(--success) 35%, var(--border));
+  background: color-mix(in oklab, var(--success) 8%, var(--background));
+}
+.document-editor [data-callout='warning'] {
+  border-color: color-mix(in oklab, var(--warning) 40%, var(--border));
+  background: color-mix(in oklab, var(--warning) 10%, var(--background));
+}
+.document-editor [data-callout='danger'] {
+  border-color: color-mix(in oklab, var(--destructive) 35%, var(--border));
+  background: color-mix(in oklab, var(--destructive) 8%, var(--background));
+}
+
+/* A table cell's padding, both sides of every column. Unlayered to beat the typography plugin, which drops the
+ * first column's start padding and the last's end padding, as a table without an outer border wants. */
+.document-editor :is(th, td) {
+  padding: 0.375rem 0.75rem;
+}
+
 @layer components {
   /* 2. Engine internals the `prose` plugin doesn't cover. */
 
@@ -342,7 +374,6 @@
     border: 0 solid var(--border);
     border-inline-end-width: 1px;
     border-block-end-width: 1px;
-    padding: 0.375rem 0.75rem;
     vertical-align: top;
     position: relative;
   }
@@ -365,6 +396,11 @@
     width: 4px;
     background: var(--primary);
     pointer-events: none;
+  }
+  /* The last column's handle sits inside its cell, where the table's clipping and the wrapper's scroll reach
+   * none of it. */
+  .document-editor tr > :last-child > .column-resize-handle {
+    right: 0;
   }
   .document-editor .tableWrapper {
     overflow-x: auto;
@@ -469,30 +505,6 @@
   .document-editor.is-dragging .ProseMirror-selectednode {
     filter: grayscale(1);
     opacity: 0.45;
-  }
-
-  /* Callout node view — colored per `data-callout` on both the editable node
-   * view and the static Viewer (its root carries `.document-editor` too). The
-   * `--info`/`--success`/`--warning`/`--destructive` tokens flip with `.dark`. */
-  .document-editor [data-slot='callout'] {
-    border-color: var(--border);
-    background: color-mix(in oklab, var(--muted-foreground) 6%, var(--background));
-  }
-  .document-editor [data-callout='info'] {
-    border-color: color-mix(in oklab, var(--info) 35%, var(--border));
-    background: color-mix(in oklab, var(--info) 8%, var(--background));
-  }
-  .document-editor [data-callout='success'] {
-    border-color: color-mix(in oklab, var(--success) 35%, var(--border));
-    background: color-mix(in oklab, var(--success) 8%, var(--background));
-  }
-  .document-editor [data-callout='warning'] {
-    border-color: color-mix(in oklab, var(--warning) 40%, var(--border));
-    background: color-mix(in oklab, var(--warning) 10%, var(--background));
-  }
-  .document-editor [data-callout='danger'] {
-    border-color: color-mix(in oklab, var(--destructive) 35%, var(--border));
-    background: color-mix(in oklab, var(--destructive) 8%, var(--background));
   }
 
   /* Static toggle (`<details>`): the chrome-owned `toReact` codec lays it out with

@@ -46,7 +46,21 @@ const STANDS_FOR: [editor: string, component: string, properties: Property[]][] 
   ['cn-editor-block', 'cn-alert', ['radius']],
   ['cn-editor-inline', 'cn-kbd', ['radius']],
   ['cn-editor-diagram', 'cn-card', ['radius', 'shadow', 'ring']],
+  ['cn-editor-lane', 'cn-alert', ['radius', 'padding']],
 ];
+
+/** The size a slot's rule draws an unsized svg at, as `[&_svg:not([class*='size-'])]:size-4` reads `size-4`. */
+function svgSize(classes: string): string | undefined {
+  return /\[&_svg:not\(\[class\*='size-'\]\)\]:(size-[0-9.]+)/.exec(classes)?.[1];
+}
+
+/** A slot's type: its size, weight, case and tracking. */
+function type(classes: string): string[] {
+  return classes
+    .split(/\s+/)
+    .filter((name) => /^(text-(xs|sm|\[[^\]]+\])$|font-|uppercase$|tracking-)/.test(name))
+    .sort();
+}
 
 /** The engine's own nodes the editor's root rounds, through `cn-editor-content`, as `cn-kbd` is rounded. */
 const ROUNDED_FROM_THE_ROOT = ['[&_.slash-active]:', '[&_mark]:'];
@@ -77,6 +91,8 @@ const PIECES: Record<string, string[]> = {
   'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar'],
   'document/ui/bubble-menu.tsx': ['cn-editor-toolbar'],
   'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media', 'cn-combobox-label'],
+  'document/ui/chrome-icon.tsx': ['cn-editor-icon'],
+  'document/features/image/image.tsx': ['cn-editor-block', 'cn-field-description'],
   'composer/triggers/trigger-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
   'document/features/mention/mention.tsx': ['<Badge'],
   'composer/triggers/inline-token.tsx': ['<Badge'],
@@ -99,15 +115,14 @@ const PIECES: Record<string, string[]> = {
   ],
   'document/features/math/math.tsx': ['cn-editor-block', 'cn-editor-inline'],
   'mermaid/react/preview.tsx': ['cn-editor-diagram'],
-  'document/features/image/image.tsx': ['cn-editor-block'],
   'document/features/embed/embed.tsx': ['cn-editor-block'],
-  'document/features/columns/columns.tsx': ['cn-editor-block'],
-  'document/features/card/card.tsx': ['cn-editor-block', 'cn-editor-control'],
-  'document/uploads/upload-tabs.tsx': ['cn-editor-block'],
-  'profiles/email/email-block-feature.tsx': ['cn-editor-block', 'cn-editor-control'],
+  'document/features/columns/columns.tsx': ['cn-editor-lane'],
+  'document/features/card/card.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description'],
+  'document/uploads/upload-tabs.tsx': ['cn-editor-block', 'cn-field-description'],
+  'profiles/email/email-block-feature.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description', '<Label'],
   'profiles/email/email-block-items.tsx': ['cn-editor-inline', 'cn-editor-control'],
   'profiles/email/email-inline-field.tsx': ['cn-editor-inline'],
-  'profiles/email/email-spacer-view.tsx': ['cn-editor-block'],
+  'profiles/email/email-spacer-view.tsx': ['cn-editor-block', 'cn-editor-caption'],
   'profiles/variables/variable-text-field.tsx': ['cn-editor-field'],
   'document/react/viewer.tsx': ['cn-editor-content'],
   'composer/chat-input.tsx': ['cn-editor-content'],
@@ -182,6 +197,19 @@ describe("the editor's chrome", () => {
       expect(theirs.length, component).toBeGreaterThan(0);
       expect((map[editor] ?? '').split(/\s+/).sort(), editor).toEqual(theirs.sort());
     }
+  });
+
+  it.each(STYLES)('draws a chrome icon at the size cn-dropdown-menu-item draws its icon, in %s', (style) => {
+    const map = styleMapOf(ROOT, style);
+    const size = svgSize(map['cn-dropdown-menu-item']);
+    expect(size).toBeDefined();
+    // The svg is held to the size with `!`, as a toggle's or a menu row's own rule would otherwise size it.
+    expect((map['cn-editor-icon'] ?? '').split(/\s+/).sort()).toEqual([size, `[&_svg]:${size}!`].sort());
+  });
+
+  it.each(STYLES)('sets a caption in the type of cn-badge, in %s', (style) => {
+    const map = styleMapOf(ROOT, style);
+    expect(type(map['cn-editor-caption'] ?? '')).toEqual(type(map['cn-badge']));
   });
 
   it.each(STYLES)('highlights a menu row as cn-combobox-item does, in %s', (style) => {

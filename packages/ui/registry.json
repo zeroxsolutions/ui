@@ -2341,27 +2341,25 @@
         ".document-editor :where( [data-slot='callout'] > div > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
         },
-        "@layer components": {
-          ".document-editor [data-slot='callout']": {
-            "border-color": "var(--border)",
-            "background": "color-mix(in oklab, var(--muted-foreground) 6%, var(--background))"
-          },
-          ".document-editor [data-callout='info']": {
-            "border-color": "color-mix(in oklab, var(--info) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--info) 8%, var(--background))"
-          },
-          ".document-editor [data-callout='success']": {
-            "border-color": "color-mix(in oklab, var(--success) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--success) 8%, var(--background))"
-          },
-          ".document-editor [data-callout='warning']": {
-            "border-color": "color-mix(in oklab, var(--warning) 40%, var(--border))",
-            "background": "color-mix(in oklab, var(--warning) 10%, var(--background))"
-          },
-          ".document-editor [data-callout='danger']": {
-            "border-color": "color-mix(in oklab, var(--destructive) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--destructive) 8%, var(--background))"
-          }
+        ".document-editor [data-slot='callout']": {
+          "border-color": "var(--border)",
+          "background": "color-mix(in oklab, var(--muted-foreground) 6%, var(--background))"
+        },
+        ".document-editor [data-callout='info']": {
+          "border-color": "color-mix(in oklab, var(--info) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--info) 8%, var(--background))"
+        },
+        ".document-editor [data-callout='success']": {
+          "border-color": "color-mix(in oklab, var(--success) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--success) 8%, var(--background))"
+        },
+        ".document-editor [data-callout='warning']": {
+          "border-color": "color-mix(in oklab, var(--warning) 40%, var(--border))",
+          "background": "color-mix(in oklab, var(--warning) 10%, var(--background))"
+        },
+        ".document-editor [data-callout='danger']": {
+          "border-color": "color-mix(in oklab, var(--destructive) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--destructive) 8%, var(--background))"
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "zod"]
@@ -2833,6 +2831,9 @@
         }
       ],
       "css": {
+        ".document-editor :is(th, td)": {
+          "padding": "0.375rem 0.75rem"
+        },
         "@layer components": {
           ".document-editor table": {
             "border-collapse": "separate",
@@ -2846,7 +2847,6 @@
             "border": "0 solid var(--border)",
             "border-inline-end-width": "1px",
             "border-block-end-width": "1px",
-            "padding": "0.375rem 0.75rem",
             "vertical-align": "top",
             "position": "relative"
           },
@@ -2869,6 +2869,9 @@
             "width": "4px",
             "background": "var(--primary)",
             "pointer-events": "none"
+          },
+          ".document-editor tr > :last-child > .column-resize-handle": {
+            "right": "0"
           },
           ".document-editor .tableWrapper": {
             "overflow-x": "auto"
@@ -3852,6 +3855,7 @@
         "@shadcn/combobox",
         "@shadcn/field",
         "@shadcn/input",
+        "@shadcn/label",
         "@shadcn/popover",
         "@shadcn/tabs",
         "@shadcn/tooltip",
