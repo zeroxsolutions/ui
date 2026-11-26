@@ -109,6 +109,11 @@ test-results
 __screenshots__/
 .vitest-attachments/
 
+# The visual suite's references from a machine other than CI's, which a local run writes and compares
+# against; only CI's Linux references are committed.
+visual-baselines/**/*-darwin.png
+visual-baselines/**/*-win32.png
+
 gate.log
 
 # Expo's local state, which `expo export` writes beside the app (its dist is ignored above)

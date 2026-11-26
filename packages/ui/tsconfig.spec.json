@@ -18,6 +18,7 @@
     "vite.config.mts",
     "vitest.config.ts",
     "vitest.config.mts",
+    "vitest.visual.config.mts",
     "test/**/*.ts",
     "test/**/*.tsx",
     "registry/**/*.test.ts",

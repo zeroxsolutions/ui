@@ -91,6 +91,7 @@ pnpm install
 pnpm nx run-many -t lint typecheck test build      # the gate CI runs
 pnpm nx run-many -t wrangler:dev -p @zeroxsolutions/registry-ui   # the site on the Workers runtime, port 8787
 pnpm nx e2e @zeroxsolutions/registry-ui-e2e
+pnpm nx test-visual @zeroxsolutions/ui                 # every item, editor and the docs' chrome against its screenshots
 ```
 
 Tasks run through [Nx](https://nx.dev); `pnpm nx show project <name>` lists a project's targets.

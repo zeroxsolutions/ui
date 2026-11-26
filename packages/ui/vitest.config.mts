@@ -23,7 +23,8 @@ export default defineConfig({
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
     },
-    // A spec named `*.browser.spec.tsx` runs in Chromium; every other spec runs in jsdom.
+    // A spec named `*.browser.spec.tsx` runs in Chromium; every other spec runs in jsdom. A `*.visual.spec.tsx`
+    // is `vitest.visual.config.mts`'s.
     projects: [
       {
         extends: true,
@@ -32,7 +33,7 @@ export default defineConfig({
           environment: 'jsdom',
           setupFiles: ['test/setup.ts'],
           include: ['registry/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
-          exclude: ['**/*.browser.spec.tsx', '**/node_modules/**'],
+          exclude: ['**/*.browser.spec.tsx', '**/*.visual.spec.tsx', '**/node_modules/**'],
         },
       },
       {

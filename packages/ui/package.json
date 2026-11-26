@@ -158,6 +158,41 @@
           "^build",
           "examples-index"
         ]
+      },
+      "test-visual": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build",
+          "examples-index"
+        ],
+        "cache": true,
+        "inputs": [
+          "default",
+          "^production",
+          {
+            "externalDependencies": [
+              "vitest",
+              "playwright"
+            ]
+          },
+          {
+            "env": "CI"
+          }
+        ],
+        "outputs": [
+          "{workspaceRoot}/test-output/visual/ui"
+        ],
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "vitest --config vitest.visual.config.mts"
+        }
+      },
+      "adopt-visual": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "node tools/adopt-visual-captures.mts"
+        }
       }
     }
   }

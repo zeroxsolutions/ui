@@ -1,0 +1,6 @@
+/* What the editor docs zone's global stylesheet imports, a superset of the web docs' own: the items'
+ * stylesheet, the editor's, then every style's slots under its `style-<style>` class on `<html>`. One file,
+ * because the slots apply utilities only the first defines. */
+@import '../registry/bases/base-ui/styles.css';
+@import '../registry/bases/base-ui/editor/styles.css';
+@import '../src/site/styles/styles.css';
