@@ -50,6 +50,8 @@ const DYNAMIC_IMPORT = /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
 const CSS_PACKAGE_IMPORT = /^@import\s+['"](?![./]|[a-z]+:)([^'"]+)['"]/;
 const SHIPPED = /^registry\/bases\/base-ui\/(lib|hooks|types)\//;
 const TOKEN_CLASS = /\b(?:bg|text|border|ring|fill|stroke)-(success|warning)(?![\w-])/g;
+/** A hue variable an item's `css` draws with, such as `var(--hue-red-surface)`, its name captured. */
+const HUE_VARIABLE = /var\(--(hue-[a-z]+(?:-surface)?)\)/g;
 const FAMILY = /^registry\/bases\/base-ui\/(?:components\/([^/]+)|(blocks))\/([^/]+)\.tsx$/;
 const PUBLISHED = ['registry:component', 'registry:block'];
 /** A document editor feature's own folder, which its item's first file sits in; the `features/index.ts` barrel is none. */
@@ -209,11 +211,13 @@ function themeValue(selector: ':root' | '.dark', token: string): string {
 
 function cssVarsProblems(item: RegistryItem): string[] {
   const tokens = [
-    ...new Set(
-      item.files.flatMap((file) =>
+    ...new Set([
+      ...item.files.flatMap((file) =>
         [...readFileSync(join(APP, file.path), 'utf8').matchAll(TOKEN_CLASS)].map(([, token]) => token),
       ),
-    ),
+      // A hue is the base theme's too; an item whose rules draw with one ships its light and dark values.
+      ...[...JSON.stringify(item.css ?? {}).matchAll(HUE_VARIABLE)].map(([, token]) => token),
+    ]),
   ].sort();
   if (tokens.length === 0) {
     return item.cssVars ? [`${item.name}: carries cssVars but paints with neither success nor warning`] : [];
@@ -830,6 +834,20 @@ describe('cssVarsProblems', () => {
   it('reports cssVars on an item that paints with neither token', () => {
     const item = { ...treeItem, cssVars: { theme: {}, light: {}, dark: {} } };
     expect(cssVarsProblems(item)).toEqual(['tree-item: carries cssVars but paints with neither success nor warning']);
+  });
+
+  it('asks the light and dark value of each hue variable an item draws with in its css', () => {
+    const item = { ...treeItem, css: { '.x': { color: 'var(--hue-red)' } } };
+    expect(cssVarsProblems(item)).toEqual(['tree-item: paints with hue-red but carries no cssVars']);
+    const carried = {
+      ...item,
+      cssVars: {
+        theme: { 'color-hue-red': 'var(--hue-red)' },
+        light: { 'hue-red': 'oklch(0.577 0.245 27.325)' },
+        dark: { 'hue-red': 'oklch(0.704 0.191 22.216)' },
+      },
+    };
+    expect(cssVarsProblems(carried)).toEqual([]);
   });
 
   it('reports cssVars that leave out a token the item paints with', () => {

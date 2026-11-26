@@ -133,8 +133,34 @@
   content: none;
 }
 
-/* The email profile's attributes ride as data attributes on the document's own nodes (a paragraph, a list, a
- * rule), which have no view to draw them. Unlayered to beat the typography plugin's own margin and color. */
+/* MARK: layout */
+/* The block layout `blockLayout` declares, as `data-*` attributes on a node, its view's element or the Viewer's
+ * (`layoutProps`). Unlayered, to beat the typography plugin's own margins and colours. Each rule here serves every
+ * block; a block's own drawing goes in its track's region below. */
+
+/* A block's width: the share of its line its view writes as `--layout-width`. A surface that draws its content
+ * narrower than its line caps it through `--layout-container`, as the email editor does at the card's content
+ * width; a lane draws a share of itself. */
+.document-editor [style*='--layout-width'] {
+  width: calc(var(--layout-width) * var(--layout-container, 100%));
+  max-width: 100%;
+}
+.document-editor [data-slot='column'] {
+  --layout-container: 100%;
+}
+
+/* A block's place across its line: a block drawn at a width moves within the line, and one drawn inline, such as
+ * an image, follows the line's alignment. `left` and `right` are the email wire's names, which a product block's
+ * own attributes may still write. */
+.document-editor [style*='--layout-width'][data-align='center'] {
+  margin-inline: auto;
+}
+.document-editor [style*='--layout-width'][data-align='end'] {
+  margin-inline-start: auto;
+}
+.document-editor .ProseMirror [data-align='start'] {
+  text-align: start;
+}
 .document-editor .ProseMirror [data-align='left'],
 .document-editor .ProseMirror [data-align='left'] p {
   text-align: left;
@@ -143,21 +169,143 @@
 .document-editor .ProseMirror [data-align='center'] p {
   text-align: center;
 }
+.document-editor .ProseMirror [data-align='end'] {
+  text-align: end;
+}
 .document-editor .ProseMirror [data-align='right'],
 .document-editor .ProseMirror [data-align='right'] p {
   text-align: right;
 }
-.document-editor .ProseMirror [data-tone='muted'] {
-  color: var(--muted-foreground);
+
+/* A line's alignment. */
+.document-editor [data-text-align='start'] {
+  text-align: start;
 }
-.document-editor .ProseMirror [data-space-after='small'] {
+.document-editor [data-text-align='center'] {
+  text-align: center;
+}
+.document-editor [data-text-align='end'] {
+  text-align: end;
+}
+.document-editor [data-text-align='justify'] {
+  text-align: justify;
+}
+
+/* The space before and after a block, in the editor and in the Viewer, whose blocks are the root's children. */
+.document-editor .ProseMirror [data-space-before='none'],
+.document-editor > [data-space-before='none'] {
+  margin-top: 0;
+}
+.document-editor .ProseMirror [data-space-before='small'],
+.document-editor > [data-space-before='small'] {
+  margin-top: 0.5rem;
+}
+.document-editor .ProseMirror [data-space-before='medium'],
+.document-editor > [data-space-before='medium'] {
+  margin-top: 1rem;
+}
+.document-editor .ProseMirror [data-space-before='large'],
+.document-editor > [data-space-before='large'] {
+  margin-top: 2rem;
+}
+.document-editor .ProseMirror [data-space-after='none'],
+.document-editor > [data-space-after='none'] {
+  margin-bottom: 0;
+}
+.document-editor .ProseMirror [data-space-after='small'],
+.document-editor > [data-space-after='small'] {
   margin-bottom: 0.5rem;
 }
-.document-editor .ProseMirror [data-space-after='medium'] {
+.document-editor .ProseMirror [data-space-after='medium'],
+.document-editor > [data-space-after='medium'] {
   margin-bottom: 1rem;
 }
-.document-editor .ProseMirror [data-space-after='large'] {
+.document-editor .ProseMirror [data-space-after='large'],
+.document-editor > [data-space-after='large'] {
   margin-bottom: 2rem;
+}
+
+/* A run's text and background colour, from the theme's tokens and its hue variables, so each follows light and
+ * dark mode. `default` is no colour, which the marks never store. */
+.document-editor [data-color='muted'] {
+  color: var(--muted-foreground);
+}
+.document-editor [data-color='primary'] {
+  color: var(--primary);
+}
+.document-editor [data-color='accent'] {
+  color: var(--accent-foreground);
+}
+.document-editor [data-color='red'] {
+  color: var(--hue-red);
+}
+.document-editor [data-color='orange'] {
+  color: var(--hue-orange);
+}
+.document-editor [data-color='amber'] {
+  color: var(--hue-amber);
+}
+.document-editor [data-color='green'] {
+  color: var(--hue-green);
+}
+.document-editor [data-color='teal'] {
+  color: var(--hue-teal);
+}
+.document-editor [data-color='blue'] {
+  color: var(--hue-blue);
+}
+.document-editor [data-color='violet'] {
+  color: var(--hue-violet);
+}
+.document-editor [data-color='pink'] {
+  color: var(--hue-pink);
+}
+.document-editor [data-bg='muted'] {
+  background-color: var(--muted);
+}
+.document-editor [data-bg='primary'] {
+  background-color: color-mix(in oklab, var(--primary) 15%, transparent);
+}
+.document-editor [data-bg='accent'] {
+  background-color: var(--accent);
+}
+.document-editor [data-bg='red'] {
+  background-color: var(--hue-red-surface);
+}
+.document-editor [data-bg='orange'] {
+  background-color: var(--hue-orange-surface);
+}
+.document-editor [data-bg='amber'] {
+  background-color: var(--hue-amber-surface);
+}
+.document-editor [data-bg='green'] {
+  background-color: var(--hue-green-surface);
+}
+.document-editor [data-bg='teal'] {
+  background-color: var(--hue-teal-surface);
+}
+.document-editor [data-bg='blue'] {
+  background-color: var(--hue-blue-surface);
+}
+.document-editor [data-bg='violet'] {
+  background-color: var(--hue-violet-surface);
+}
+.document-editor [data-bg='pink'] {
+  background-color: var(--hue-pink-surface);
+}
+
+/* MARK: layout - media */
+
+/* MARK: layout - columns */
+
+/* MARK: layout - section */
+
+/* MARK: layout - text */
+
+/* MARK: email */
+/* The email's own attributes on the document's nodes, which have no view to draw them. */
+.document-editor .ProseMirror [data-tone='muted'] {
+  color: var(--muted-foreground);
 }
 
 /* A columns block's columns, and an email product block's lanes, are the children of its content element, which its

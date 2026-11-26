@@ -1,0 +1,161 @@
+---
+title: Editor Layout
+description: "The layout controls the editors' blocks share: a block's floating toolbar, its alignment and full width toggles, the width handles dragged on each side, the props a view and the Viewer draw a layout with, and the layout's words."
+---
+
+<ComponentPreview name="editor-layout-demo" />
+
+## Installation
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli">Command</TabsTrigger>
+  <TabsTrigger value="manual">Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+```bash
+pnpm dlx shadcn@latest add @zui/editor-layout
+```
+
+The blocks that take a layout, such as [Editor Image](/docs/editor/editor-image), and the
+[Email Editor](/docs/editor/email-editor), install it with them.
+
+</TabsContent>
+
+<TabsContent value="manual">
+
+<Steps>
+
+<Step>Install the packages it imports.</Step>
+
+```bash
+pnpm add @zeroxsolutions/editor-core
+```
+
+<Step>Add the components it is built from.</Step>
+
+```bash
+pnpm dlx shadcn@latest add popover toggle toggle-group tooltip @zui/document-editor @zui/lucide-maximize-2-icon @zui/lucide-text-align-center-icon @zui/lucide-text-align-end-icon @zui/lucide-text-align-start-icon
+```
+
+<Step>Copy the files into your project.</Step>
+
+<ComponentSource name="editor-layout" title="components/editor/document/layout/index.ts" />
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/align-control.tsx"
+  title="components/editor/document/layout/align-control.tsx"
+/>
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/block-toolbar.tsx"
+  title="components/editor/document/layout/block-toolbar.tsx"
+/>
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/layout-props.ts"
+  title="components/editor/document/layout/layout-props.ts"
+/>
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/layout-words.ts"
+  title="components/editor/document/layout/layout-words.ts"
+/>
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/resize-handles.tsx"
+  title="components/editor/document/layout/resize-handles.tsx"
+/>
+
+<ComponentSource
+  name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/width-toggle.tsx"
+  title="components/editor/document/layout/width-toggle.tsx"
+/>
+
+<Step>Update the import paths to match your project.</Step>
+
+</Steps>
+
+</TabsContent>
+
+</CodeTabs>
+
+## Usage
+
+A block's layout is stored as tokens and fractions: `align` is `start`, `center` or `end`, `width` a share of
+the line from `0.25` to `1` or `full`. The standard kit declares them on every block, with the commands that set
+them, such as `setBlockLayout`. A block's view draws them with `layoutProps`, as its Viewer codec does, so both
+draw the same:
+
+```tsx
+import {
+  AlignControl,
+  BlockToolbar,
+  DEFAULT_LAYOUT_WORDS,
+  layoutProps,
+  ResizeHandles,
+  WidthToggle,
+} from '@/components/editor/document/layout';
+
+function PanelView({ attrs, editor, getPos, selected }: NodeViewProps<PanelAttrs>) {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [preview, setPreview] = useState<number | null>(null);
+  const set = (layout: Partial<Layout>) => editor.run('setBlockLayout', { pos: getPos(), layout });
+  return (
+    <div ref={setAnchor} {...layoutProps({ ...attrs, width: preview ?? attrs.width })} className="relative">
+      {selected && (
+        <ResizeHandles
+          value={typeof attrs.width === 'number' ? attrs.width : 1}
+          align={attrs.align ?? 'start'}
+          words={DEFAULT_LAYOUT_WORDS}
+          onPreview={setPreview}
+          onCommit={(width) => {
+            setPreview(null);
+            set({ width });
+          }}
+          onCancel={() => setPreview(null)}
+        />
+      )}
+      <BlockToolbar editor={editor} pos={getPos()} anchor={anchor} label={DEFAULT_LAYOUT_WORDS.toolbar}>
+        <AlignControl value={attrs.align} onChange={(align) => set({ align })} words={DEFAULT_LAYOUT_WORDS} />
+        <WidthToggle
+          full={attrs.width === 'full'}
+          onChange={(full) => set({ width: full ? 'full' : null })}
+          words={DEFAULT_LAYOUT_WORDS}
+        />
+      </BlockToolbar>
+    </div>
+  );
+}
+```
+
+A product block takes the layout through the standard kit's `layout` option:
+`standardKit({ layout: { types: { panel: ['align', 'width'] } } })`.
+
+## The width handles
+
+A handle is dragged with a mouse, a pen or a finger. The block draws each width the drag passes, snapped to steps
+of 5%, and the document changes once, on release, as one undo step; Escape during the drag puts the width back
+with no change. A focused handle is a slider: the arrow keys step the width by 5%, Home takes it to 25% and End to
+the whole line. A centred block grows on both sides as one edge is dragged. In the email editor the whole line is
+the card's content width, 566px.
+
+## The toolbar
+
+The toolbar shows above a block that is selected or holds the caret, and opening it leaves the focus in the text.
+Tab from a selected block, or Alt+F10 from its text, moves into it; the arrow keys move between its controls and
+Escape goes back to the text.
+
+## Words
+
+Every word the controls draw is in `LayoutWords`, with `DEFAULT_LAYOUT_WORDS` in English; the email editor takes
+its own in `messages.layout`.

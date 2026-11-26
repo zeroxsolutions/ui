@@ -190,8 +190,8 @@ describe('a variable', () => {
 
     // The empty paragraph after it is the trailing line the standard kit keeps below a last block.
     await vi.waitFor(() =>
-      expect(editor.getJSON().content).toEqual([
-        expect.objectContaining({ type: 'emailHtml', content: [text('a{{code}}b')] }),
+      expect(editor.getJSON().content).toMatchObject([
+        { type: 'emailHtml', content: [text('a{{code}}b')] },
         { type: 'paragraph' },
       ]),
     );

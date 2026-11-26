@@ -425,7 +425,8 @@ describe('the block a grip addresses inside another block', () => {
     const { blocks, editor } = await mountDocument(laneDoc, 1, [columns]);
     await userEvent.dragAndDrop(await gripBeside(holding('.ProseMirror p', 'l1')), blocks[1], { steps: 10 });
     await vi.waitFor(() => expect(types(editor())).toEqual(['paragraph', 'columns', 'paragraph']));
-    expect(editor().getJSON().content?.[1]).toEqual(twoLanes(['l1', 'l2'], ['r1', 'r2']));
+    // Each line now carries the block layout's attributes, each null; the shape is what moved.
+    expect(editor().getJSON().content?.[1]).toMatchObject(twoLanes(['l1', 'l2'], ['r1', 'r2']));
   });
 
   const tableDoc: DocJSON = {
@@ -510,7 +511,7 @@ describe('the block a grip addresses inside another block', () => {
     await userEvent.click(await gripBeside(holding('.ProseMirror blockquote blockquote', 'inner')));
     await userEvent.click(page.getByRole('menuitem', { name: 'Delete' }));
     await vi.waitFor(() =>
-      expect(editor().getJSON().content?.[0]).toEqual({ type: 'blockquote', content: [line('outer')] }),
+      expect(editor().getJSON().content?.[0]).toMatchObject({ type: 'blockquote', content: [line('outer')] }),
     );
     expect(types(editor())).toEqual(['blockquote', 'paragraph']);
   });

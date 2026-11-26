@@ -97,7 +97,7 @@ export interface SmsKitOptions {
  */
 export function smsKit(profile: EditorProfile, options: SmsKitOptions = {}): EditorFeature[] {
   const variables = options.variables ?? variableFeature(options.declarations ?? (() => profile.variables));
-  const standard = standardKit({ placeholder: options.placeholder ?? '', dragHandle: false });
+  const standard = standardKit({ placeholder: options.placeholder ?? '', dragHandle: false, layout: false });
   return [
     { ...standard, slash: [], toolbar: [], bubble: [], blockMenu: [] },
     variables.feature,

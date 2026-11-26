@@ -149,6 +149,8 @@ function pasteHtml(html: string): void {
   );
 }
 
+/** An image the browser draws without the network: one transparent pixel. */
+const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 const buttonHtml = '<div data-type="button" label="Go" href="{{resetUrl}}"></div>';
 const typesOf = (editor: IEditor) => (editor.getJSON().content ?? []).map((node) => node.type);
 
@@ -352,7 +354,7 @@ describe('the email kit', () => {
         id: 'i',
         key: 'i',
         type: 'image',
-        attributes: { align: 'center', width: 300 },
+        attributes: { align: 'center', width: 0.5 },
         content: { src: 'https://x.test/a.png', alt: 'A bay', caption: 'Morning', href: '{{resetUrl}}' },
       }),
       block({
@@ -370,6 +372,75 @@ describe('the email kit', () => {
     ];
     const editor = await mount(stored);
     expect(exportedFor(editor)).toEqual(stored);
+  });
+
+  it("draws an image's width as a share of the card's content width, and writes a stored pixel width as one", async () => {
+    await page.viewport(900, 700);
+    const image = (id: string, width: number) =>
+      block({ id, key: id, type: 'image', attributes: { width }, content: { src: PIXEL, alt: id } });
+    const editor = await mount([image('share', 0.5), image('pixels', 283)]);
+
+    const figures = await vi.waitFor(() => {
+      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=image]')];
+      if (found.length < 2) throw new Error('the images are not drawn');
+      return found;
+    });
+    for (const figure of figures) expect(figure.getBoundingClientRect().width).toBeCloseTo(283, 0);
+    expect(exportedFor(editor).map((exported) => exported.attributes.width)).toEqual([0.5, 0.5]);
+    await page.viewport(414, 896);
+  });
+
+  it('draws a stored right-aligned image at the end of its line, under the layout name', async () => {
+    await mount([
+      block({
+        id: 'i',
+        key: 'i',
+        type: 'image',
+        attributes: { align: 'right', width: 0.25 },
+        content: { src: PIXEL, alt: 'i' },
+      }),
+    ]);
+
+    const figure = await vi.waitFor(() => find('[data-slot=image]'));
+    const line = figure.closest<HTMLElement>('[data-align]');
+    expect(line?.getAttribute('data-align')).toBe('end');
+    const drawn = figure.getBoundingClientRect();
+    const bounds = (line as HTMLElement).getBoundingClientRect();
+    expect(Math.abs(drawn.right - bounds.right)).toBeLessThan(2);
+    expect(drawn.left - bounds.left).toBeGreaterThan(drawn.width / 4);
+  });
+
+  it('draws a stored right-aligned button at the end of its line, and exports it as it was stored', async () => {
+    const stored = [
+      block({
+        id: 'b',
+        key: 'b',
+        type: 'button',
+        attributes: { align: 'right' },
+        content: { label: 'Go', href: '{{resetUrl}}' },
+      }),
+    ];
+    const editor = await mount(stored);
+
+    const row = await vi.waitFor(() => find('[data-slot=link-button]'));
+    const label = row.querySelector<HTMLElement>('[data-slot=link-button-label]') as HTMLElement;
+    expect(Math.abs(label.getBoundingClientRect().right - row.getBoundingClientRect().right)).toBeLessThan(2);
+    expect(exported(editor)).toEqual(stored);
+  });
+
+  it("sets an image's place from the block menu as the layout's align, exported in the wire's names", async () => {
+    const editor = await mount([
+      paragraph('Before', 'p'),
+      block({ id: 'i', key: 'i', type: 'image', attributes: { width: 0.5 }, content: { src: PIXEL, alt: 'i' } }),
+    ]);
+
+    await chooseInBlockMenu('', 'Align', 'Right', '[data-slot=image]');
+
+    await vi.waitFor(() => expect(editor.getJSON().content?.[1]?.attrs?.align).toBe('end'));
+    expect(exported(editor)[1].attributes).toEqual({ align: 'right', width: 0.5 });
+    await openBlockMenu('', '[data-slot=image]');
+    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Right' })).toBeChecked();
   });
 
   it("sets a heading's level from the block menu", async () => {
@@ -700,12 +771,14 @@ describe('the email kit', () => {
     ]);
 
     const text = await vi.waitFor(() => find('[contenteditable=true] p', 'Note'));
+    // The alignment is its line's own, as the document holds it; the space is the callout's.
+    expect(text.getAttribute('data-text-align')).toBe('center');
+    expect(getComputedStyle(text).textAlign).toBe('center');
     const host = await vi.waitFor(() => {
-      const found = text.closest<HTMLElement>('[data-align=center]');
-      if (!found) throw new Error('the callout carries no align');
+      const found = text.closest<HTMLElement>('[data-space-after]');
+      if (!found) throw new Error('the callout carries no space after');
       return found;
     });
-    expect(getComputedStyle(text).textAlign).toBe('center');
     expect(host.getAttribute('data-space-after')).toBe('large');
     expect(getComputedStyle(host).marginBottom).toBe('32px');
   });
@@ -750,6 +823,8 @@ describe('the email kit', () => {
     await vi.waitFor(() =>
       expect(exported(editor)[0].attributes).toEqual({ align: 'center', spaceAfter: 'large', tone: 'muted' }),
     );
+    expect(editor.getJSON().content?.[0]?.attrs).toMatchObject({ textAlign: 'center' });
+    expect(editor.getJSON().content?.[0]?.attrs).not.toHaveProperty('align');
     const shown = find('[contenteditable=true] p', 'Hi there');
     expect(getComputedStyle(shown).textAlign).toBe('center');
   });
