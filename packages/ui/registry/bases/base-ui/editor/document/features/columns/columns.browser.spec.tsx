@@ -152,6 +152,16 @@ describe('the columns in the Document Editor', () => {
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([1, 1]));
   });
 
+  it('undoes a drag with Mod+Z on the divider itself', async () => {
+    await page.viewport(1000, 700);
+    const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
+
+    await dragDivider(across(0.75));
+    await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([9, 3]));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.ratio).toEqual([1, 1]));
+  });
+
   it('the divider is a slider named from words and moves by keyboard to the next snap', async () => {
     await page.viewport(1000, 700);
     const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));

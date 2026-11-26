@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { passHistoryKey } from '../../layout/history-keys';
 import type { LayoutWords } from '../../layout/layout-words';
 import { COLUMN_WIDTH_MIN, COLUMN_WIDTH_STEP, inFourPlaces } from './table-widths';
 
@@ -173,7 +174,7 @@ export function TableBorders({ table, shares, words, onPreview, onCommit }: Tabl
   };
 
   const keyDown = (index: number, event: KeyboardEvent<HTMLElement>): void => {
-    if (drag.current || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (passHistoryKey(event) || drag.current || event.altKey || event.ctrlKey || event.metaKey) return;
     const { at, least, most } = rangeOf(shares, index, floor);
     const forward = (rtl() ? ['ArrowLeft', 'ArrowUp'] : ['ArrowRight', 'ArrowUp']).includes(event.key);
     const back = (rtl() ? ['ArrowRight', 'ArrowDown'] : ['ArrowLeft', 'ArrowDown']).includes(event.key);

@@ -3396,6 +3396,11 @@
           "target": "@components/editor/document/layout/layout-props.ts"
         },
         {
+          "path": "registry/bases/base-ui/editor/document/layout/history-keys.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/history-keys.ts"
+        },
+        {
           "path": "registry/bases/base-ui/editor/document/layout/resize-handles.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/layout/resize-handles.tsx"

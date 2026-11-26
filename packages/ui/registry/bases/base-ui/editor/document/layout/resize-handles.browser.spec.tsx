@@ -209,6 +209,25 @@ describe('ResizeHandles', () => {
     expect(changes()).toBe(5);
   });
 
+  it('undoes a drag and a key with Mod+Z on the handle itself, and redoes with Mod+Shift+Z', async () => {
+    await page.viewport(800, 600);
+    const { editor } = await mount(0.5);
+    await dragEnd(lineWidth() / 4);
+    await vi.waitFor(() => expect(widthOf(editor)).toBe(0.75));
+    expect(document.activeElement).toBe(handle('end'));
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(widthOf(editor)).toBe(0.5));
+    await userEvent.keyboard('{ControlOrMeta>}{Shift>}z{/Shift}{/ControlOrMeta}');
+    await vi.waitFor(() => expect(widthOf(editor)).toBe(0.75));
+
+    await userEvent.click(handle('end'));
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => expect(widthOf(editor)).toBe(0.8));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(widthOf(editor)).toBe(0.75));
+  });
+
   it('names each handle from words and reads the width in percent', async () => {
     await mount(0.5);
     await expect

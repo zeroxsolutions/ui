@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { WIDTH_MIN, WIDTH_STEP, type LayoutAlign } from '@zeroxsolutions/editor-core/template/layout/index';
+import { passHistoryKey } from './history-keys';
 import type { LayoutWords } from './layout-words';
 
 /** A side of a block a width handle sits on, in the reading direction. */
@@ -154,6 +155,7 @@ export function useResize({
       if (drag.current?.pointerId === event.pointerId) end(event.type === 'pointerup');
     },
     keyDown(event) {
+      if (passHistoryKey(event)) return;
       const next = KEY_STEPS[event.key];
       if (!next || drag.current) return;
       event.preventDefault();

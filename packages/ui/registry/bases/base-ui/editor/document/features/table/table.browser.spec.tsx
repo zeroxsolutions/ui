@@ -149,6 +149,16 @@ describe('the table in the Document Editor', () => {
       .toHaveAttribute('aria-valuemin', String(Math.round(widths[0]! * 100)));
   });
 
+  it('undoes a border moved by its keys with Mod+Z on the border itself', async () => {
+    const { editor } = await mount(tableDoc({ columnWidths: [0.5, 0.5] }));
+    await userEvent.click(page.getByRole('slider', { name: 'Border after column 1' }));
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.55, 0.45]));
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+    await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).toEqual([0.5, 0.5]));
+  });
+
   it('a border is a slider named from words, moved by a twentieth with the keys', async () => {
     const { editor } = await mount(tableDoc({ columnWidths: [0.5, 0.5] }));
     const border = page.getByRole('slider', { name: 'Border after column 1' });

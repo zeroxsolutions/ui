@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { RATIO_SNAPS, ratioFractions, snapRatio } from '@zeroxsolutions/editor-core/template/layout/index';
+import { passHistoryKey } from '../../layout/history-keys';
 import type { LayoutWords } from '../../layout/layout-words';
 
 /** The twelfths a columns block's weights are snapped to. */
@@ -210,7 +211,7 @@ export function ColumnsDividers({ root, weights, words, onPreview, onCommit }: C
   };
 
   const keyDown = (index: number, event: KeyboardEvent<HTMLElement>): void => {
-    if (drag.current || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (passHistoryKey(event) || drag.current || event.altKey || event.ctrlKey || event.metaKey) return;
     const twelfths = inTwelfths(weights);
     const { at, least, most } = rangeOf(twelfths, index);
     const rtl = root !== null && getComputedStyle(root).direction === 'rtl';
