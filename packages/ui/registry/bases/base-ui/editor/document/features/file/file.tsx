@@ -100,14 +100,20 @@ export function file(options: FileOptions = {}): EditorFeature {
     });
 
   function FileView({ fields, attributes, editable, update, place }: FileViewProps): ReactNode {
-    const upload = useBlockUpload(editable ? place : null, FILE_SLOT, requestOf());
+    const upload = useBlockUpload(place, FILE_SLOT, requestOf());
     const entry = upload?.entry ?? null;
     if (upload && entry) {
       const messages = uploadMessagesOf(options.messages);
       return (
         <div data-slot="file-upload" contentEditable={false} className="not-prose my-2 flex flex-col gap-1">
           <FileRow name={entry.file.name} size={entry.file.size} href={undefined} editable dimmed />
-          <UploadStatus entry={entry} messages={messages} onCancel={upload.cancel} onRetry={upload.retry} />
+          <UploadStatus
+            entry={entry}
+            messages={messages}
+            onCancel={upload.cancel}
+            onRetry={upload.retry}
+            readOnly={!editable}
+          />
         </div>
       );
     }

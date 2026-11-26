@@ -208,7 +208,7 @@ function EmailBlockImage({
   messages: ProfileEditorMessages;
   update: EmailBlockViewProps['update'];
 }): ReactNode {
-  const upload = useEmailImageUpload(live ? editor : null, live ? place : null, field.name, false, (_attrs, url) => ({
+  const upload = useEmailImageUpload(editor, place, field.name, false, (_attrs, url) => ({
     [field.name]: url,
   }));
   const entry = upload?.upload.entry ?? null;
@@ -230,7 +230,25 @@ function EmailBlockImage({
         </span>
       )
     );
-  if (!live || editor === null) return drawn && <div className="not-prose">{drawn}</div>;
+  const status = upload && entry && (
+    <UploadStatus
+      entry={entry}
+      messages={upload.messages}
+      onCancel={upload.upload.cancel}
+      onRetry={upload.upload.retry}
+      readOnly={!live}
+    />
+  );
+  if (!live || editor === null) {
+    return (
+      (drawn || status) && (
+        <div contentEditable={false} className="not-prose flex flex-col gap-2">
+          {drawn}
+          {status}
+        </div>
+      )
+    );
+  }
   return (
     <div contentEditable={false} className="not-prose flex flex-col gap-2">
       <EmailAddressPopover
@@ -262,14 +280,7 @@ function EmailBlockImage({
           </button>
         }
       />
-      {upload && entry && (
-        <UploadStatus
-          entry={entry}
-          messages={upload.messages}
-          onCancel={upload.upload.cancel}
-          onRetry={upload.upload.retry}
-        />
-      )}
+      {status}
     </div>
   );
 }

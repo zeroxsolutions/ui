@@ -214,14 +214,17 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
   const land = (record: UploadRecord, url: string): void => {
     const { pos, file, slot } = record.entry;
     const node = engine.isDestroyed ? null : engine.state.doc.nodeAt(pos);
-    release(record, false);
-    if (!node) return;
+    if (!node) return release(record, false);
     const tr = engine.state.tr;
     for (const [name, value] of Object.entries(record.request.land(node.attrs, url, file, slot))) {
       tr.setNodeAttribute(pos, name, value);
     }
+    const before = engine.state.doc;
     // Its own undo step, whatever the author typed just before it landed.
     engine.view.dispatch(closeHistory(tr));
+    // A rule of the host's refused the change; the file stays, to be tried again.
+    if (tr.docChanged && engine.state.doc === before) return fail(record, record.request.messages.failed, true);
+    release(record, false);
   };
 
   const run = (record: UploadRecord): void => {

@@ -214,7 +214,7 @@ export function CardView({
   const unsent = fields.buttonLabel === '' || fields.buttonHref.trim() === '' || !drawsButton(fields.buttonHref);
   const hero = variant === 'hero';
   const standIn = image === undefined && fields.image.trim() !== '' ? imageStandIn?.(fields.image) : undefined;
-  const uploading = editable ? (imageUpload?.upload.entry ?? null) : null;
+  const uploading = imageUpload?.upload.entry ?? null;
   const shownImage = uploading?.preview ?? image;
   const imageElement = shownImage !== undefined && (
     <img
@@ -224,6 +224,16 @@ export function CardView({
       alt={editable ? '' : fields.alt}
       contentEditable={false}
       className={cn('w-full data-dimmed:opacity-50', !hero && 'aspect-video object-cover')}
+    />
+  );
+  const status = uploading && imageUpload && (
+    <UploadStatus
+      entry={uploading}
+      messages={imageUpload.messages}
+      onCancel={imageUpload.upload.cancel}
+      onRetry={imageUpload.upload.retry}
+      readOnly={!editable}
+      className={hero ? 'mt-2' : 'px-4 pt-2'}
     />
   );
   return (
@@ -273,15 +283,12 @@ export function CardView({
               )
             }
           />
-          {uploading && imageUpload && (
-            <UploadStatus
-              entry={uploading}
-              messages={imageUpload.messages}
-              onCancel={imageUpload.upload.cancel}
-              onRetry={imageUpload.upload.retry}
-              className={hero ? 'mt-2' : 'px-4 pt-2'}
-            />
-          )}
+          {status}
+        </div>
+      ) : status ? (
+        <div contentEditable={false} className="w-full">
+          {imageElement}
+          {status}
         </div>
       ) : (
         (imageElement || standIn) &&
@@ -387,7 +394,7 @@ export function card(definition: Block, options: CardOptions = {}): EditorFeatur
     blockUploadRequest(options, { accept: 'image/*', preview: true, land: (_attrs, url) => ({ image: url }) });
 
   function CardFeatureView(props: BlockViewPropsOf<Block>): ReactNode {
-    const upload = useBlockUpload(props.editable ? props.place : null, 'image', requestOf());
+    const upload = useBlockUpload(props.place, 'image', requestOf());
     return (
       <CardView
         {...props}

@@ -250,6 +250,27 @@ describe('the image block with uploads', () => {
     expect(editor.getText()).toContain('Notes');
   });
 
+  it('shows its upload in a read-only editor without the controls, and lands it there', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], withImage);
+    await openUpload();
+    await userEvent.upload(fileInput(), pngFile());
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+
+    editor.setEditable(false);
+
+    await expect.element(page.getByText('Uploading cat.png')).toBeVisible();
+    expect(document.querySelector('[data-slot=upload-status] button')).toBeNull();
+    calls[0].fail();
+    await expect.element(page.getByRole('alert')).toHaveTextContent('The upload failed');
+    expect(document.querySelector('[data-slot=upload-status] button')).toBeNull();
+
+    editor.setEditable(true);
+    await userEvent.click(page.getByRole('button', { name: 'Retry' }));
+    calls[1].answer('https://cdn.test/cat.png');
+    await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
+  });
+
   it('ends its upload when the author types an address instead, which stays', async () => {
     const { upload, calls } = heldUpload();
     const editor = await mountDocumentEditor([standardKit(), image({ upload })], withImage);

@@ -136,7 +136,7 @@ function ImageEditView({
   const hrefId = useId();
   const widthId = useId();
   const [open, setOpen] = useState(false);
-  const upload = useBlockUpload(editable ? { editor, getPos } : null, IMAGE_SLOT, uploads.request);
+  const upload = useBlockUpload({ editor, getPos }, IMAGE_SLOT, uploads.request);
   const entry = upload?.entry ?? null;
   return (
     <ImageFigure
@@ -156,6 +156,7 @@ function ImageEditView({
             messages={uploads.messages}
             onCancel={upload.cancel}
             onRetry={upload.retry}
+            readOnly={!editable}
             className="mt-2"
           />
         )

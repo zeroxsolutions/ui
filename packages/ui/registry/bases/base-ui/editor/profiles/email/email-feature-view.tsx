@@ -100,7 +100,7 @@ export function EmailFeatureView({
 }: EmailBlockViewProps & { variant: 'hero' | 'card' }): ReactNode {
   const live = editor !== null && editable;
   // A hero's and a card's image loads over https only, as the image block's does.
-  const imageUpload = useEmailImageUpload(live ? editor : null, live ? place : null, 'image', true, (_attrs, url) => ({
+  const imageUpload = useEmailImageUpload(editor, place, 'image', true, (_attrs, url) => ({
     image: url,
   }));
   const label = (name: string) => words.field(name, block.fields.find((field) => field.name === name)?.label ?? name);

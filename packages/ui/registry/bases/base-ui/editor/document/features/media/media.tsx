@@ -93,7 +93,7 @@ export function media(options: MediaOptions = {}): EditorFeature {
 
   function MediaView({ fields, attributes, editable, update, place }: MediaViewProps): ReactNode {
     const audio = attributes.kind === 'audio';
-    const upload = useBlockUpload(editable ? place : null, MEDIA_SLOT, requestOf(attributes.kind));
+    const upload = useBlockUpload(place, MEDIA_SLOT, requestOf(attributes.kind));
     const entry = upload?.entry ?? null;
     const messages = uploadMessagesOf(options.messages);
     if (upload && entry) {
@@ -104,7 +104,13 @@ export function media(options: MediaOptions = {}): EditorFeature {
             <span className="min-w-0 truncate">{entry.file.name}</span>
             <span className="text-muted-foreground shrink-0 text-xs">{fileSizeText(entry.file.size)}</span>
           </div>
-          <UploadStatus entry={entry} messages={messages} onCancel={upload.cancel} onRetry={upload.retry} />
+          <UploadStatus
+            entry={entry}
+            messages={messages}
+            onCancel={upload.cancel}
+            onRetry={upload.retry}
+            readOnly={!editable}
+          />
         </figure>
       );
     }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
-import { Extension, type Editor } from '@zeroxsolutions/editor-core/document/advanced';
+import { Extension, Plugin, type Editor } from '@zeroxsolutions/editor-core/document/advanced';
 import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { findElement, mountDocumentEditor } from '../../../../../../src/test/document-editor';
 import { standardKit } from '../features/standard/index';
@@ -11,6 +11,8 @@ import { uploadsExtension, uploadStoreOf, type UploadRequest, type UploadStore }
 
 // The engine behind the editor a spec mounted, so a spec can make the change a drag or a paste makes.
 let engine: Editor | null = null;
+// Whether the mounted editor refuses every change, as a host's rule can refuse one.
+let refusing = false;
 
 const picture = defineFeature({
   id: 'picture',
@@ -29,7 +31,9 @@ const picture = defineFeature({
         name: 'pictureSpecEngine',
         onBeforeCreate() {
           engine = this.editor;
+          refusing = false;
         },
+        addProseMirrorPlugins: () => [new Plugin({ filterTransaction: (tr) => !refusing || !tr.docChanged })],
       }),
     ],
   },
@@ -123,6 +127,39 @@ describe('the upload store', () => {
 
     await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/old.png'));
     expect(editor.getText()).toContain('Now Before');
+  });
+
+  it('lands in a read-only editor', async () => {
+    const { editor, store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    editor.setEditable(false);
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
+  });
+
+  it('fails, to be tried again, an upload whose address the editor refuses to land', async () => {
+    const { editor, store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    refusing = true;
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() =>
+      expect(store.find(PICTURE_AT, 'src')).toMatchObject({
+        phase: 'failed',
+        message: DEFAULT_UPLOAD_MESSAGES.failed,
+        retryable: true,
+      }),
+    );
+    expect(store.find(PICTURE_AT, 'src')?.preview).toMatch(/^blob:/);
+    refusing = false;
+    store.retry(store.entries()[0].id);
+    calls[1].answer('https://cdn.test/cat.png');
+    await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
   });
 
   it('aborts on cancel and leaves the block as it was', async () => {
