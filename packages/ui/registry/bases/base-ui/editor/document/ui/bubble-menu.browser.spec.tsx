@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { DocJSON, EditorFeature, IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -137,6 +137,23 @@ describe('the bubble menu text alignment', () => {
 
     // The editor keeps an empty line after the list, which the selection takes too.
     await vi.waitFor(() => expect(alignments(editor)).toEqual(['center', 'center', 'center', 'center', 'center']));
+  });
+
+  it('keeps every control on a screen narrower than its row, the colours and justify included', async () => {
+    await page.viewport(320, 800);
+    onTestFinished(() => page.viewport(414, 896));
+    await mount([standardKit()], { content: plain });
+    await selectNotes();
+
+    const controls = page.getByRole('toolbar').getByRole('button').elements();
+    expect(controls.map((control) => control.getAttribute('aria-label'))).toContain('Text color');
+    for (const control of controls) {
+      const box = control.getBoundingClientRect();
+      expect([control.getAttribute('aria-label'), box.left >= 0 && box.right <= 320]).toEqual([
+        control.getAttribute('aria-label'),
+        true,
+      ]);
+    }
   });
 
   it('offers justify in the Document Editor and shows the alignment the selection has', async () => {

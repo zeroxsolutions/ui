@@ -162,7 +162,8 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
         initialFocus={false}
         role="toolbar"
         data-slot="bubble-menu"
-        className="cn-editor-toolbar flex w-max flex-row items-center"
+        // A screen narrower than the row wraps it, so every control stays in reach.
+        className="cn-editor-toolbar flex w-max max-w-(--available-width) flex-row flex-wrap items-center"
       >
         <TooltipProvider>
           {items.map((item) => {
