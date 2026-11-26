@@ -54,17 +54,15 @@ describe('NativePreviewFrame', () => {
   it('frames the default style in light where the page names no style and the site is light', async () => {
     await renderFrame('button-demo');
 
-    await expect
-      .element(page.getByTitle(nativePreviewTitle('button-demo')))
-      .toHaveAttribute(
-        'src',
-        nativePreviewSrc({
-          engine: 'nativewind',
-          style: DEFAULT_PLATFORM_STYLE.native,
-          demo: 'button-demo',
-          theme: 'light',
-        }),
-      );
+    await expect.element(page.getByTitle(nativePreviewTitle('button-demo'))).toHaveAttribute(
+      'src',
+      nativePreviewSrc({
+        engine: 'nativewind',
+        style: DEFAULT_PLATFORM_STYLE.native,
+        demo: 'button-demo',
+        theme: 'light',
+      }),
+    );
   });
 
   it('stops showing it is loading, and lets the frame be reached, once the preview posts its height', async () => {
