@@ -2569,7 +2569,7 @@
             "max-width": "100%",
             "height": "auto"
           },
-          ".document-editor img.ProseMirror-selectednode, .document-editor [data-slot='image'].ProseMirror-selectednode, .document-editor .ProseMirror-selectednode:is(img, video, iframe)": {
+          ".document-editor img.ProseMirror-selectednode, .document-editor [data-slot='image'].ProseMirror-selectednode, .document-editor [data-slot='image'][data-selected='true'] > img, .document-editor [data-slot='image'][data-selected='true'] > a > img, .document-editor [data-slot='image'][data-selected='true'] > [data-slot='image-empty'], .document-editor .ProseMirror-selectednode:is(img, video, iframe)": {
             "outline": "2px solid var(--primary)",
             "outline-offset": "2px"
           }
