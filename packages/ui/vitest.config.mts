@@ -15,6 +15,19 @@ export default defineConfig({
   css: { postcss: { plugins: [tailwindcss()] } },
   // The items import each other through the alias `components.json` names, which tsconfig.lib.json maps.
   resolve: { alias: [{ find: '@/registry', replacement: resolve(import.meta.dirname, 'registry') }] },
+  // Bundled before the first browser spec loads: a dependency Vite finds mid-run is bundled again with a React of its
+  // own, and the spec importing it fails reading a hook from a null React.
+  optimizeDeps: {
+    include: [
+      'fumadocs-core/page-tree',
+      'fumadocs-core/search/client',
+      'fumadocs-core/search/client/orama-static',
+      'fumadocs-core/search/server',
+      'fumadocs-core/toc',
+      'msw',
+      'msw/browser',
+    ],
+  },
   test: {
     watch: false,
     globals: true,
