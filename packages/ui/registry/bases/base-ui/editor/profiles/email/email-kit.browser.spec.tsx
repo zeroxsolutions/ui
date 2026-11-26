@@ -554,13 +554,20 @@ describe('the email kit', () => {
     await expect.element(page.getByRole('button', { name: 'Centre' })).toBeVisible();
   });
 
-  it('draws no layout controls on a card, whose place and width the email does not carry', async () => {
-    await mount([paragraph('Before', 'p'), block({ id: 'c', key: 'c', type: 'card', content: { heading: 'Bay' } })]);
+  it('draws no layout controls on a card and sets it no layout, which the email does not carry', async () => {
+    const editor = await mount([
+      paragraph('Before', 'p'),
+      block({ id: 'c', key: 'c', type: 'card', content: { heading: 'Bay' } }),
+    ]);
     const card = await vi.waitFor(() => find('[data-slot=card]'));
     await userEvent.click(card, { position: { x: 4, y: 4 } });
 
     expect(document.querySelector('[data-slot=block-layout]')).toBeNull();
     expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    const pos = (editor.getJSON().content?.[0].content?.[0].text?.length ?? 0) + 2;
+    expect(editor.can('setBlockLayout', { pos, layout: { width: 0.5 } })).toBe(false);
+    expect(editor.run('setBlockLayout', { pos, layout: { align: 'center' } })).toBe(false);
+    expect(exported(editor)[1].attributes).toEqual({});
   });
 
   it('draws a stored right-aligned button at the end of its line, and exports it as it was stored', async () => {
