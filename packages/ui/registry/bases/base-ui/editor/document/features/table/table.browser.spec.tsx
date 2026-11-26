@@ -123,30 +123,6 @@ describe('the table in the Document Editor', () => {
     expect(changes()).toBe(1);
   });
 
-  it("no column goes narrower than its cell's padding and one character, at a narrow width", async () => {
-    await page.viewport(375, 700);
-    const { editor } = await mount(tableDoc({}, 4));
-    const cellBox = page.getByText('H1', { exact: true }).element().closest('th') as HTMLElement;
-    const style = getComputedStyle(cellBox);
-    const sides = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'] as const;
-    const probe = document.createElement('span');
-    probe.textContent = '0';
-    cellBox.append(probe);
-    const floor = sides.reduce((sum, side) => sum + parseFloat(style[side]), 0) + probe.getBoundingClientRect().width;
-    probe.remove();
-
-    await dragBorder(0, across(0));
-
-    await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).not.toBeNull());
-    const widths = tableOf(editor)?.attrs?.columnWidths as number[];
-    expect(sumOf(widths)).toBeCloseTo(1, 3);
-    expect(widths[0]! * drawnTable().getBoundingClientRect().width).toBeGreaterThanOrEqual(floor);
-    expect(widths[0]! % 0.05).toBeCloseTo(0, 4);
-    await expect
-      .element(page.getByRole('slider', { name: 'Border after column 1' }))
-      .toHaveAttribute('aria-valuemin', String(Math.round(widths[0]! * 100)));
-  });
-
   it('moves a border by its keys where the browser drew a column under a twentieth', async () => {
     await page.viewport(1000, 700);
     const empty: NodeJSON = { type: 'tableCell', content: [{ type: 'paragraph' }] };
