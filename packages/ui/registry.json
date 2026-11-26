@@ -3558,14 +3558,17 @@
         ".document-editor :where( [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child, [data-slot='column'] > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
         },
-        ".document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+        ".document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react] > * > [data-node-view-wrapper]": {
+          "height": "100%"
+        },
+        ".document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns']:is([data-valign='center'], [data-valign='bottom']) > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
           "display": "flex",
           "flex-direction": "column"
         },
-        ".document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+        ".document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns'][data-valign='center'] > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
           "justify-content": "center"
         },
-        ".document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > :is([data-slot='column'], * > [data-slot='column'])": {
+        ".document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > [data-slot='column'], .document-editor [data-slot='columns'][data-valign='bottom'] > [data-node-view-content] > [data-node-view-content-react] > * > * > [data-slot='column']": {
           "justify-content": "flex-end"
         }
       },

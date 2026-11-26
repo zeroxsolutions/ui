@@ -297,13 +297,30 @@
 /* MARK: layout - media */
 
 /* MARK: layout - columns */
-/* Where a columns block's lanes hold their blocks against the tallest lane, which every lane stretches to: the
- * editor's lanes are its column views' hosts, the Viewer's the columns themselves. */
+/* Every lane reaches down to the tallest, as the Viewer's grid items do: in the editor a lane is drawn inside its
+ * column view's wrapper, which takes the height the grid gives its host. */
+.document-editor
+  [data-slot='columns']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > [data-node-view-wrapper] {
+  height: 100%;
+}
+/* Where a columns block's lanes hold their blocks against the tallest lane: the Viewer's lanes are the grid's items,
+ * the editor's sit in their column views' host and wrapper. */
 .document-editor
   [data-slot='columns']:is([data-valign='center'], [data-valign='bottom'])
   > [data-node-view-content]
   > [data-node-view-content-react]
-  > :is([data-slot='column'], * > [data-slot='column']) {
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns']:is([data-valign='center'], [data-valign='bottom'])
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
   display: flex;
   flex-direction: column;
 }
@@ -311,14 +328,28 @@
   [data-slot='columns'][data-valign='center']
   > [data-node-view-content]
   > [data-node-view-content-react]
-  > :is([data-slot='column'], * > [data-slot='column']) {
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns'][data-valign='center']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
   justify-content: center;
 }
 .document-editor
   [data-slot='columns'][data-valign='bottom']
   > [data-node-view-content]
   > [data-node-view-content-react]
-  > :is([data-slot='column'], * > [data-slot='column']) {
+  > [data-slot='column'],
+.document-editor
+  [data-slot='columns'][data-valign='bottom']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > *
+  > *
+  > [data-slot='column'] {
   justify-content: flex-end;
 }
 

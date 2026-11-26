@@ -200,13 +200,27 @@ describe('the columns in the Document Editor', () => {
     ]);
   });
 
-  it('valign center sets data-valign in the Editor and the Viewer', async () => {
-    const editor = await mount(columnsDoc({ ratio: [1, 1] }, 'left', 'right'));
+  it('valign center sets data-valign and centres the shorter lane, in the Editor and the Viewer', async () => {
+    await page.viewport(1000, 700);
+    const tall = { type: 'column', content: [line('one'), line('two'), line('three'), line('four')] };
+    const content = columnsDoc({ ratio: [1, 1] }, 'left', 'right');
+    content.content![1].content![1] = tall;
+    const editor = await mount(content);
     await caretIn('left');
     await userEvent.click(page.getByRole('button', { name: 'Middle' }));
 
     await vi.waitFor(() => expect(columnsOf(editor)?.attrs?.valign).toBe('center'));
     expect(document.querySelector('.ProseMirror [data-slot=columns]')?.getAttribute('data-valign')).toBe('center');
+    /** How far the line holding `text` sits from the middle of its columns block, in pixels. */
+    const offMiddle = (scope: string, text: string) => {
+      const block = document.querySelector(`${scope} [data-slot=columns]`)!.getBoundingClientRect();
+      const held = [...document.querySelectorAll(`${scope} [data-slot=columns] p`)].find(
+        (p) => p.textContent === text,
+      )!;
+      const rect = held.getBoundingClientRect();
+      return Math.abs(rect.top + rect.height / 2 - (block.top + block.height / 2));
+    };
+    await vi.waitFor(() => expect(offMiddle('.ProseMirror', 'left')).toBeLessThan(4));
 
     const doc = editor.getJSON();
     await render(<Viewer doc={doc} features={features} />);
@@ -216,6 +230,7 @@ describe('the columns in the Document Editor', () => {
       return drawn;
     });
     expect(viewer.getAttribute('data-valign')).toBe('center');
+    expect(offMiddle('[data-editor=document]:not(:has(.ProseMirror))', 'left')).toBeLessThan(4);
   });
 
   it('on a narrow screen the lanes stack, no divider is drawn and nothing scrolls sideways', async () => {
