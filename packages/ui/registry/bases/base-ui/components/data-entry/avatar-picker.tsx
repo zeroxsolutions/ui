@@ -484,7 +484,7 @@ function AvatarPickerColorGroup({
           aria-label={c}
           aria-pressed={value.color === c}
           style={{ backgroundColor: c, color: avatarPickerCheckColor(c) }}
-          className="focus-visible:ring-ring/50 flex size-8 items-center justify-center rounded-full outline-none focus-visible:ring-3"
+          className="cn-avatar-picker-color-focus-ring flex size-8 items-center justify-center rounded-full outline-none"
         >
           {value.color === c && <AvatarPickerSwatchCheck animate={drawn} />}
         </button>

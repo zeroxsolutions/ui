@@ -17,7 +17,7 @@ type TabBarLabels = 'always' | 'selected' | 'none';
 /** `translucent` blurs what scrolls behind it, `solid` covers it. */
 type TabBarSurface = 'translucent' | 'solid';
 
-/** `attached` runs edge to edge, `floating` is a pill inset 16px from the edges. */
+/** `attached` runs edge to edge, `floating` is inset 16px from the edges and rounded as the style rounds a badge. */
 type TabBarShape = 'attached' | 'floating';
 
 const tabBarVariants = cva('group/tab-bar fixed z-50 flex text-foreground', {
@@ -34,7 +34,7 @@ const tabBarVariants = cva('group/tab-bar fixed z-50 flex text-foreground', {
     },
     shape: {
       attached: '',
-      floating: 'rounded-full p-1.5 shadow-lg',
+      floating: 'cn-tab-bar-floating p-1.5 shadow-lg',
     },
   },
   compoundVariants: [
@@ -172,7 +172,7 @@ function TabBarItem({ active = false, className, render, ...props }: TabBarItemP
       {
         'aria-current': active ? 'page' : undefined,
         className: cn(
-          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground rounded-lg outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-2 not-has-data-[slot=tab-bar-indicator]:focus-visible:ring-ring data-active:text-primary',
+          'group/tab-bar-item relative flex min-h-12 min-w-16 flex-col items-center justify-center gap-1 p-1 text-muted-foreground cn-tab-bar-item cn-tab-bar-item-focus-ring outline-none select-none group-data-[orientation=horizontal]/tab-bar:flex-1 data-active:text-primary',
           className,
         ),
       },
@@ -188,7 +188,7 @@ function TabBarItem({ active = false, className, render, ...props }: TabBarItemP
 }
 
 /**
- * The pill behind the icon: tinted while its item is active, muted while pressed, and ringed while the
+ * The shape behind the icon, rounded as the style rounds a badge: tinted while its item is active, muted while pressed, and ringed while the
  * item has keyboard focus. Holds the `TabBarIcon` and any `TabBarBadge`. Carries `data-active`.
  */
 function TabBarIndicator({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
@@ -198,7 +198,7 @@ function TabBarIndicator({ className, ...props }: React.ComponentProps<'span'>):
       data-slot="tab-bar-indicator"
       data-active={active ? '' : undefined}
       className={cn(
-        'relative flex h-8 w-14 items-center justify-center rounded-full transition-colors group-focus-visible/tab-bar-item:ring-2 group-focus-visible/tab-bar-item:ring-ring group-active/tab-bar-item:not-data-active:bg-muted data-active:bg-primary/10',
+        'cn-tab-bar-indicator cn-tab-bar-indicator-focus-ring relative flex h-8 w-14 items-center justify-center transition-colors group-active/tab-bar-item:not-data-active:bg-muted data-active:bg-primary/10',
         className,
       )}
       {...props}
