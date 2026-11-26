@@ -1,6 +1,6 @@
 ---
 title: Editor Table
-description: A table with header cells, resizable columns and selectable cells.
+description: A table with header cells and selectable cells, its columns sized as shares of the table by dragging a border, and a full width toggle.
 ---
 
 <ComponentPreview name="editor-table-demo" />
@@ -35,13 +35,13 @@ pnpm dlx shadcn@latest add @zui/document-editor
 <Step>Install the packages it imports.</Step>
 
 ```bash
-pnpm add @tiptap/extension-table @zeroxsolutions/editor-core
+pnpm add @tiptap/extension-table @tiptap/react @zeroxsolutions/editor-core
 ```
 
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/lucide-table-icon
+pnpm dlx shadcn@latest add @zui/editor-layout @zui/lucide-table-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -52,6 +52,24 @@ pnpm dlx shadcn@latest add @zui/lucide-table-icon
   name="editor-table"
   file="registry/bases/base-ui/editor/document/features/table/table.tsx"
   title="components/editor/document/features/table/table.tsx"
+/>
+
+<ComponentSource
+  name="editor-table"
+  file="registry/bases/base-ui/editor/document/features/table/table-view.tsx"
+  title="components/editor/document/features/table/table-view.tsx"
+/>
+
+<ComponentSource
+  name="editor-table"
+  file="registry/bases/base-ui/editor/document/features/table/table-borders.tsx"
+  title="components/editor/document/features/table/table-borders.tsx"
+/>
+
+<ComponentSource
+  name="editor-table"
+  file="registry/bases/base-ui/editor/document/features/table/table-widths.ts"
+  title="components/editor/document/features/table/table-widths.ts"
 />
 
 <Step>Add its styles to your global CSS.</Step>
@@ -95,6 +113,12 @@ pnpm dlx shadcn@latest add @zui/lucide-table-icon
     background: color-mix(in oklab, var(--primary) 12%, transparent);
     pointer-events: none;
   }
+}
+.document-editor [data-slot='table'][data-sized] table {
+  table-layout: fixed;
+}
+.document-editor .ProseMirror[contenteditable='true'] > * > [data-slot='table'][data-width='full'] {
+  margin-inline: -3rem;
 }
 ```
 
