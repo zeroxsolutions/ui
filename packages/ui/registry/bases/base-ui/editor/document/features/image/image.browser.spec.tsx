@@ -383,6 +383,19 @@ describe('the image block layout', () => {
     expect(Math.abs(drawnShare(viewed) - drawnShare(edited))).toBeLessThan(0.01);
   });
 
+  it('draws no layout toolbar and no width handle on an image the host keeps from changing', async () => {
+    await page.viewport(900, 700);
+    const editor = await mountDocumentEditor(
+      [standardKit(), image({ changeable: () => false })],
+      sized({ width: 0.5 }),
+    );
+    await userEvent.click(layoutFrame(), { position: { x: 4, y: 4 } });
+
+    await vi.waitFor(() => expect(editor.getSelection().isNode).toBe(true));
+    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    expect(document.querySelector('[data-slot=resize-handle]')).toBeNull();
+  });
+
   it('dragging the right handle to half the column stores 0.5 in one undo step', async () => {
     await page.viewport(900, 700);
     const editor = await mountDocumentEditor(features, sized({ width: 1 }));

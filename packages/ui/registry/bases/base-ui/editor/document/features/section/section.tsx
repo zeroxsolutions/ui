@@ -33,6 +33,11 @@ export interface SectionOptions {
   messages?: Partial<LayoutWords> | (() => LayoutWords);
   /** The widths its toolbar offers, in order; every width when absent. The email editor offers content and wide. */
   widths?: readonly SectionWidth[];
+  /**
+   * Whether the section at `pos` may be laid out, as a host's block menu decides; false draws no toolbar on it. Every
+   * section may when absent.
+   */
+  changeable?(editor: IEditor, pos: number): boolean;
 }
 
 interface SectionAttrs extends SectionLayout {
@@ -220,13 +225,20 @@ function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionTo
   );
 }
 
-function sectionView(words: () => LayoutWords, widths: readonly SectionWidth[]) {
+function sectionView(
+  words: () => LayoutWords,
+  widths: readonly SectionWidth[],
+  changeable: SectionOptions['changeable'],
+) {
   return function SectionView({ attrs, children, editor, getPos }: NodeViewProps<SectionAttrs>) {
     const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+    const pos = getPos();
     return (
       <SectionShell attrs={attrs as Record<string, unknown>} ref={setAnchor}>
         {children as ReactNode}
-        <SectionToolbar editor={editor} pos={getPos()} anchor={anchor} attrs={attrs} widths={widths} words={words()} />
+        {pos !== undefined && (changeable?.(editor, pos) ?? true) && (
+          <SectionToolbar editor={editor} pos={pos} anchor={anchor} attrs={attrs} widths={widths} words={words()} />
+        )}
       </SectionShell>
     );
   };
@@ -309,7 +321,7 @@ export function section(options: SectionOptions = {}): EditorFeature {
   const widths = options.widths ?? SECTION_WIDTHS;
   return defineFeature({
     id: 'section',
-    nodes: [{ ...sectionNode, render: sectionView(words, widths) }],
+    nodes: [{ ...sectionNode, render: sectionView(words, widths, options.changeable) }],
     codecs: [sectionCodec as NodeCodec],
     slash: [
       {

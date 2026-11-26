@@ -53,13 +53,21 @@ const lanes = (left: NodeJSON[], right: NodeJSON[]): NodeJSON => ({
   ],
 });
 
-function Host({ content, onReady }: { content: DocJSON; onReady(editor: IEditor): void }) {
+function Host({
+  content,
+  onReady,
+  drawn = features,
+}: {
+  content: DocJSON;
+  onReady(editor: IEditor): void;
+  drawn?: EditorFeature[];
+}) {
   const [editor, setEditor] = useState<IEditor | null>(null);
   return (
     // Room above the editor, where the section's toolbar opens.
     <div className="style-nova p-12 pt-40">
       <Editor
-        features={features}
+        features={drawn}
         content={content}
         onReady={(ready) => {
           setEditor(ready);
@@ -71,9 +79,12 @@ function Host({ content, onReady }: { content: DocJSON; onReady(editor: IEditor)
   );
 }
 
-async function mount(content: DocJSON = { type: 'doc', content: [{ type: 'paragraph' }] }): Promise<IEditor> {
+async function mount(
+  content: DocJSON = { type: 'doc', content: [{ type: 'paragraph' }] },
+  drawn = features,
+): Promise<IEditor> {
   let mounted: IEditor | null = null;
-  await render(<Host content={content} onReady={(editor) => (mounted = editor)} />);
+  await render(<Host content={content} drawn={drawn} onReady={(editor) => (mounted = editor)} />);
   return vi.waitFor(() => {
     if (!mounted) throw new Error('the editor is not ready');
     return mounted;
@@ -200,6 +211,17 @@ describe('the section in the Document Editor', () => {
     // The section's defaults are stored as no value at all.
     await userEvent.click(toolbar().getByRole('button', { name: 'Aucun', exact: true }));
     await vi.waitFor(() => expect(sectionAttrs(editor)?.background ?? null).toBeNull());
+  });
+
+  it('draws no toolbar on a section the host keeps from changing', async () => {
+    const editor = await mount({ type: 'doc', content: [sectionOf(line('inside')), line('after')] }, [
+      standardKit(),
+      section({ messages: words, changeable: () => false }),
+    ]);
+    await userEvent.click(page.getByText('inside'));
+
+    await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
+    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
   });
 
   it('takes a block dragged into it, and gives one dragged out', async () => {

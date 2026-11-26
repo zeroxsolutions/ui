@@ -8,6 +8,7 @@ import { z } from 'zod';
 import {
   defineFeature,
   type EditorFeature,
+  type IEditor,
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
@@ -192,6 +193,8 @@ interface ImageUploads {
   readonly messages: UploadMessages;
   readonly words: ImageWords;
   readonly layoutWords: LayoutWords;
+  /** Whether the image at `pos` may be laid out; every image may when absent. */
+  readonly changeable?: (editor: IEditor, pos: number) => boolean;
 }
 
 const NO_UPLOADS: ImageUploads = {
@@ -218,6 +221,8 @@ function ImageEditView({
   const upload = useBlockUpload({ editor, getPos }, IMAGE_SLOT, uploads.request);
   const entry = upload?.entry ?? null;
   const { words } = uploads;
+  const pos = getPos();
+  const changeable = editable && !!editor && pos !== undefined && (uploads.changeable?.(editor, pos) ?? true);
   return (
     <ImageFigure
       empty={words.empty}
@@ -229,7 +234,7 @@ function ImageEditView({
       layout={{
         align: attrs.align,
         // A view drawn without its editor, as a spec draws one, has nothing to lay the image out in.
-        place: editable && editor ? { editor, getPos } : null,
+        place: changeable ? { editor, getPos } : null,
         words: uploads.layoutWords,
       }}
       selected={selected}
@@ -404,6 +409,11 @@ export interface ImageOptions extends BlockUploadOptions {
   words?: Partial<ImageWords> | (() => ImageWords);
   /** The words of its layout toolbar and width handles, over the English; a getter is read each time it draws. */
   layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
+  /**
+   * Whether the image at `pos` may be laid out, as a host's block menu decides; false draws no layout toolbar and no
+   * width handle on it. Every image may when absent.
+   */
+  changeable?(editor: IEditor, pos: number): boolean;
 }
 
 /**
@@ -434,6 +444,7 @@ export function image(options: ImageOptions = {}): EditorFeature {
         messages: uploadMessagesOf(options.messages),
         words: wordsOf(),
         layoutWords: layoutWords(),
+        changeable: options.changeable,
       }}
     />
   );
