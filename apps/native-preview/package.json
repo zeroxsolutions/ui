@@ -96,6 +96,14 @@
           ]
         }
       },
+      "serve-static": {
+        "executor": "nx:run-commands",
+        "continuous": true,
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "expo serve ../registry-native-ui-docs-zone/public --port 8790"
+        }
+      },
       "test": {
         "dependsOn": [
           "^build",
