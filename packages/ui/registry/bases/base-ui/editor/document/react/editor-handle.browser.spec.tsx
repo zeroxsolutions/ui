@@ -125,7 +125,8 @@ async function mountDocument(content: DocJSON, index: number, extra: EditorFeatu
   );
   const blocks = await vi.waitFor(() => {
     const found = Array.from(document.querySelectorAll<HTMLElement>('.ProseMirror > *'));
-    if (found.length !== content.content?.length) throw new Error('the editor is not mounted');
+    // A document ending on a block other than a paragraph opens with the trailing line below it.
+    if (found.length < (content.content?.length ?? 0)) throw new Error('the editor is not mounted');
     return found;
   });
   await userEvent.hover(blocks[index]);

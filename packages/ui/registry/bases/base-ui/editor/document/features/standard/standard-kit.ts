@@ -7,6 +7,7 @@ import { TaskList } from '@tiptap/extension-task-list';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
+import { Extension } from '@zeroxsolutions/editor-core/document/advanced';
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockLayout, type BlockLayoutOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
@@ -16,6 +17,23 @@ import { TaskItemView } from './task-item-view';
 /** The width the drag handle is given. The handle looks this much plus 50px right of the pointer for the node it
  *  drags, and the grip's menu reads it back from the engine to look at the same point. */
 const DRAG_HANDLE_WIDTH_PX = 24;
+
+/**
+ * Opens a document that ends on a block other than a paragraph with the empty line the trailing node keeps below it,
+ * as JSON, before the editor is built. The trailing node would add it on the first transaction, which is the focus
+ * the first press on the editor dispatches: ProseMirror then sets the block's selection, built on the document before
+ * the line, on the document after it, and throws. Content given as HTML takes the line on its first transaction.
+ */
+const OpeningTrailingLine = Extension.create({
+  name: 'openingTrailingLine',
+  onBeforeCreate() {
+    const content = this.editor.options.content as { type?: unknown; content?: { type?: unknown }[] } | null;
+    if (typeof content !== 'object' || content === null || content.type !== 'doc') return;
+    const blocks = Array.isArray(content.content) ? content.content : [];
+    if (blocks.length === 0 || blocks.at(-1)?.type === 'paragraph') return;
+    this.editor.options.content = { ...content, content: [...blocks, { type: 'paragraph' }] } as never;
+  },
+});
 
 /** Options for the standard block set. */
 export interface StandardKitOptions {
@@ -92,6 +110,7 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
             node.type.name === 'heading' ? `Heading ${node.attrs.level as number}` : placeholder,
         }),
         ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: DRAG_HANDLE_WIDTH_PX })] : []),
+        ...(trailingNode ? [OpeningTrailingLine] : []),
         ...(layoutFeature?.advanced?.engineExtensions ?? []),
       ],
     },
