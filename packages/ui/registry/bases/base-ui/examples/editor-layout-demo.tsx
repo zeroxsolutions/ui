@@ -111,7 +111,11 @@ const content: DocJSON = {
 
 /** The layout kit on a block of the Document Editor: its toolbar, its alignment, its full width and its handles. */
 function EditorLayoutDemo(): ReactNode {
-  return <Editor features={features} content={content} className="min-h-48" />;
+  return (
+    <div className="w-full max-w-2xl">
+      <Editor features={features} content={content} />
+    </div>
+  );
 }
 
 export { EditorLayoutDemo };
