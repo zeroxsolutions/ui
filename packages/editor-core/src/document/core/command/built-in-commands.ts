@@ -110,21 +110,31 @@ function turnInto(
   const declared = target.spec.attrs ?? {};
   const kept = Object.fromEntries(Object.entries(source.attrs).filter(([key]) => key in declared));
   const firstAttrs = { ...kept, ...a };
+  // Each line keeps what its new type declares of its own attributes, such as its alignment; what the block as a
+  // whole took, its id among them, stays with the block alone.
+  const lineAttrs = (line: PmNode, type: typeof target) =>
+    Object.fromEntries(
+      Object.entries(line.attrs).filter(
+        ([key]) => key in (type.spec.attrs ?? {}) && !(line === source && key in kept) && key !== 'id',
+      ),
+    );
   let built: PmNode[];
   if (name === 'paragraph' || name === 'heading') {
-    built = lines.map((line, index) => target.create(index === 0 ? firstAttrs : a, line.content));
+    built = lines.map((line, index) =>
+      target.create({ ...lineAttrs(line, target), ...(index === 0 ? firstAttrs : a) }, line.content),
+    );
   } else if (name === 'blockquote') {
     built = [
       target.create(
         firstAttrs,
-        lines.map((line) => paragraph.create(null, line.content)),
+        lines.map((line) => paragraph.create(lineAttrs(line, paragraph), line.content)),
       ),
     ];
   } else if (item && target.contentMatch.matchType(item)) {
     built = [
       target.create(
         firstAttrs,
-        lines.map((line) => item.create(null, paragraph.create(null, line.content))),
+        lines.map((line) => item.create(null, paragraph.create(lineAttrs(line, paragraph), line.content))),
       ),
     ];
   } else {
