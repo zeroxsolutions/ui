@@ -206,7 +206,7 @@ describe('SmsEditor', () => {
     expect(find('[contenteditable=true] [data-variable=code]')).toBeTruthy();
     // More than "Hello " alone: the chip costs what the meter reserves for its variable.
     await vi.waitFor(() => expect(Number.parseInt(meter() ?? '', 10)).toBeGreaterThan('Hello '.length));
-    expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
+    await vi.waitFor(() => expect(document.querySelector('[data-slot=slash-menu]')).toBeNull());
   });
 
   it('leaves the typed "/" as text when its menu is dismissed', async () => {
