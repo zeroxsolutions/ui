@@ -3,6 +3,10 @@ import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { IEditor, SlashItem } from '@zeroxsolutions/editor-core/document/core/index';
 
+import '../../../../../../test/nova-style.css';
+import '../../styles.css';
+import { mountDocumentEditor } from '../../../../../../src/test/document-editor';
+import { standardKit } from '../features/standard/index';
 import { SlashMenu } from './slash-menu';
 
 /**
@@ -44,42 +48,25 @@ const items: SlashItem[] = Array.from({ length: 16 }, (_, at) => ({
   command: 'insert',
 }));
 
-function box(element: Element): { top: number; bottom: number } {
-  const { top, bottom } = element.getBoundingClientRect();
-  return { top, bottom };
+const popup = page.getByTestId('slash-menu');
+const viewport = popup.getByTestId('scroll-area-viewport');
+const row = (title: string) => popup.getByTestId('item').filter({ hasText: new RegExp(`^${title}A block$`) });
+
+/** Resolves once the list has finished the scroll the keys started, which the browser reports after answering it. */
+function scrollEnded(): Promise<void> {
+  return new Promise((ended) => viewport.element().addEventListener('scrollend', () => ended(), { once: true }));
 }
 
 describe('SlashMenu with more items than it holds', () => {
-  it('scrolls its list inside the popup instead of spilling past it', async () => {
+  it('scrolls the option the keys move to into view, the list scrolling inside the popup', async () => {
     render(<SlashMenu editor={slashEditor()} items={items} />);
-    const popup = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found) throw new Error('the menu is not open');
-      return found;
-    });
-    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
-
-    expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
-    expect(box(viewport).bottom).toBeLessThanOrEqual(box(popup).bottom + 1);
-  });
-
-  it('keeps the option the keys move to in view', async () => {
-    render(<SlashMenu editor={slashEditor()} items={items} />);
-    const popup = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found) throw new Error('the menu is not open');
-      return found;
-    });
-    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
+    await expect.element(popup).toBeVisible();
+    await expect.element(row('Item 15')).not.toBeInViewport();
 
     await userEvent.keyboard('{ArrowUp}');
 
-    const highlighted = popup.querySelector('[data-highlighted]')!;
-    expect(highlighted.textContent).toContain('Item 15');
-    await vi.waitFor(() => {
-      expect(box(highlighted).bottom).toBeLessThanOrEqual(box(viewport).bottom + 1);
-      expect(box(highlighted).top).toBeGreaterThanOrEqual(box(viewport).top - 1);
-    });
+    await expect.element(row('Item 15')).toHaveAttribute('data-highlighted');
+    await expect.element(row('Item 15')).toBeInViewport({ ratio: 1 });
   });
 
   it('keeps the option the keys move to under a cursor that has not moved', async () => {
@@ -90,35 +77,23 @@ describe('SlashMenu with more items than it holds', () => {
     await userEvent.hover(rest);
     rest.remove();
     render(<SlashMenu editor={slashEditor()} items={items} />);
-    const popup = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found) throw new Error('the menu is not open');
-      return found;
-    });
-    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
+    await expect.element(popup).toBeVisible();
 
+    const ended = scrollEnded();
     await userEvent.keyboard('{ArrowUp}');
-    // The list scrolls under the cursor, and the browser answers on a later frame.
-    await vi.waitFor(() => expect(viewport.scrollTop).toBeGreaterThan(0));
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await ended;
 
-    expect(popup.querySelector('[data-highlighted]')!.textContent).toContain('Item 15');
+    await expect.element(row('Item 15')).toHaveAttribute('data-highlighted');
   });
 
   it('highlights the option the pointer moves onto', async () => {
     render(<SlashMenu editor={slashEditor()} items={items} />);
-    const popup = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found) throw new Error('the menu is not open');
-      return found;
-    });
-    const third = Array.from(popup.querySelectorAll('[data-slot=item-title]')).find(
-      (title) => title.textContent === 'Item 2',
-    )!;
 
-    await userEvent.hover(third);
+    await userEvent.hover(popup.getByText('Item 1', { exact: true }));
+    await userEvent.hover(popup.getByText('Item 2', { exact: true }));
 
-    await vi.waitFor(() => expect(popup.querySelector('[data-highlighted]')!.textContent).toContain('Item 2'));
+    await expect.element(row('Item 2')).toHaveAttribute('data-highlighted');
+    await expect.element(row('Item 0')).not.toHaveAttribute('data-highlighted');
   });
 
   it('keeps its left edge when its list scrolls after the trigger highlight moved the caret', async () => {
@@ -128,20 +103,14 @@ describe('SlashMenu with more items than it holds', () => {
       { top: 10, bottom: 30, left: 24, right: 84 },
     );
     render(<SlashMenu editor={editor} items={items} />);
-    const popup = await vi.waitFor(() => {
-      const found = document.querySelector('[data-slot=slash-menu]');
-      if (!found) throw new Error('the menu is not open');
-      return found;
-    });
-    const viewport = popup.querySelector('[data-slot=scroll-area-viewport]')!;
-    await vi.waitFor(() => expect(popup.getBoundingClientRect().left).toBeGreaterThan(0));
-    const opened = popup.getBoundingClientRect().left;
+    await vi.waitFor(() => expect(popup.element().getBoundingClientRect().left).toBeGreaterThan(0));
+    const opened = popup.element().getBoundingClientRect().left;
 
+    const ended = scrollEnded();
     await userEvent.keyboard('{ArrowUp}');
-    await vi.waitFor(() => expect(viewport.scrollTop).toBeGreaterThan(0));
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await ended;
 
-    expect(popup.getBoundingClientRect().left).toBe(opened);
+    expect(popup.element().getBoundingClientRect().left).toBe(opened);
   });
 });
 
@@ -155,5 +124,61 @@ describe('SlashMenu at a caret where a command cannot run', () => {
 
     await expect.element(page.getByText('Heading', { exact: true })).toBeVisible();
     expect(page.getByText('Columns', { exact: true }).elements()).toHaveLength(0);
+  });
+});
+
+/** Mounts the Document Editor with its slash menu and puts the caret at the end of its one line. */
+async function mountWithSlash(): Promise<IEditor> {
+  const editor = await mountDocumentEditor([standardKit()], {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Notes' }] }],
+  });
+  await userEvent.click(page.getByText('Notes'));
+  await userEvent.keyboard('{End}');
+  return editor;
+}
+
+describe('SlashMenu over the Document Editor', () => {
+  it('opens at a typed `/` and offers the items its query matches', async () => {
+    await mountWithSlash();
+    await userEvent.keyboard('{Enter}/head');
+
+    await expect.element(popup.getByText('Heading 1', { exact: true })).toBeVisible();
+    await expect.element(popup.getByText('Quote', { exact: true })).not.toBeInTheDocument();
+  });
+
+  it('says so when no item matches', async () => {
+    await mountWithSlash();
+    await userEvent.keyboard('{Enter}/zzznomatch');
+
+    await expect.element(popup.getByText('No matching blocks')).toBeVisible();
+  });
+
+  it('stays closed while no `/` is typed', async () => {
+    const editor = await mountWithSlash();
+    await userEvent.keyboard(' head');
+
+    await vi.waitFor(() => expect(editor.getText()).toBe('Notes head'));
+    await expect.element(popup).not.toBeInTheDocument();
+  });
+
+  it('shows what to type after a bare `/`, and the rest of the item the query leads to', async () => {
+    await mountWithSlash();
+    await userEvent.keyboard('{Enter}/');
+    await expect.element(page.getByText('Type to search')).toBeVisible();
+
+    await userEvent.keyboard('head');
+
+    await expect.element(page.getByText('ing 1', { exact: true })).toBeVisible();
+  });
+
+  it('takes the typed `/query` out and runs the picked item', async () => {
+    const editor = await mountWithSlash();
+    await userEvent.keyboard('{Enter}/quote');
+
+    await userEvent.click(popup.getByText('Quote', { exact: true }));
+
+    await vi.waitFor(() => expect(editor.getJSON().content?.map((block) => block.type)).toContain('blockquote'));
+    expect(editor.getText()).not.toContain('/quote');
   });
 });

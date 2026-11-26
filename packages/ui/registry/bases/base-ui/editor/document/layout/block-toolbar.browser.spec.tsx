@@ -42,7 +42,7 @@ function BoxView({ attrs, editor, getPos }: NodeViewProps<z.infer<typeof boxAttr
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const set = (layout: Record<string, unknown>) => editor.run('setBlockLayout', { pos: getPos(), layout });
   return (
-    <div ref={setAnchor} data-testid="box" {...layoutProps(attrs)} className="h-16">
+    <div ref={setAnchor} data-slot="box" {...layoutProps(attrs)} className="h-16">
       <BlockToolbar editor={editor} pos={getPos()} anchor={anchor} label={words.toolbar}>
         <AlignControl value={attrs.align} onChange={(align) => set({ align })} words={words} />
         <WidthToggle
@@ -99,7 +99,7 @@ describe('BlockToolbar', () => {
   it('selecting a block opens the toolbar without moving focus', async () => {
     await mount();
     await expect.element(page.getByTestId('box')).toBeInTheDocument();
-    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    await expect.element(toolbar()).not.toBeInTheDocument();
 
     await selectBox();
 
@@ -136,7 +136,7 @@ describe('BlockToolbar', () => {
     await expect.element(page.getByRole('button', { name: 'Pleine largeur' })).toHaveAttribute('aria-pressed', 'true');
 
     await userEvent.click(page.getByText('After'));
-    await vi.waitFor(() => expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull());
+    await expect.element(toolbar()).not.toBeInTheDocument();
   });
 
   it('stays out of the way of a block dragged by its grip, and opens again on the dropped block', async () => {
@@ -154,6 +154,7 @@ describe('BlockToolbar', () => {
     );
     const target = page.getByText('After');
     await userEvent.hover(page.getByTestId('box'), { position: { x: 4, y: 4 } });
+    // The drag extension draws the handle with no role, name or slot, so it is found by the class it gives it.
     const grip = await vi.waitFor(() => {
       const found = document.querySelector<HTMLElement>('.drag-handle:not(.hide)');
       if (!found) throw new Error('the grip is not shown');
@@ -178,10 +179,11 @@ describe('BlockToolbar', () => {
     await expect.element(toolbar()).toBeVisible();
   });
 
-  it('draws nothing in a read-only editor', async () => {
+  it('draws nothing in a read-only editor, the block selected', async () => {
     const editor = await mount();
     editor.setEditable(false);
     await userEvent.click(page.getByTestId('box'));
-    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    await vi.waitFor(() => expect(editor.getSelection()).toMatchObject({ isNode: true }));
+    await expect.element(toolbar()).not.toBeInTheDocument();
   });
 });

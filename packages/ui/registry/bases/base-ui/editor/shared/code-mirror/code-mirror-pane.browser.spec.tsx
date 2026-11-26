@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { CodeMirrorPane } from './code-mirror-pane';
 import { surfaceUnder } from './surface-under';
 
@@ -19,9 +19,9 @@ describe('CodeMirrorPane in a browser', () => {
         <CodeMirrorPane value={`${LONG_LINE}\nshort`} language="typescript" />
       </div>,
     );
-    const pane = screen.container.querySelector<HTMLElement>('[data-slot="code-mirror-pane"]')!;
+    const pane = page.getByTestId('code-mirror-pane').element();
     const scroller = pane.querySelector<HTMLElement>('.cm-scroller')!;
-    await userEvent.click(pane.querySelector('.cm-line')!);
+    await userEvent.click(page.getByRole('textbox'));
     await userEvent.keyboard('{End}');
     await expect.poll(() => scroller.scrollLeft).toBeGreaterThan(0);
 
@@ -32,6 +32,71 @@ describe('CodeMirrorPane in a browser', () => {
     const numberBox = number.getBoundingClientRect();
     expect(numberBox.left).toBeGreaterThanOrEqual(paneBox.left);
     expect(numberBox.right).toBeLessThanOrEqual(paneBox.left + paneBox.width / 2);
+  });
+});
+
+describe('CodeMirrorPane', () => {
+  let screen: Awaited<ReturnType<typeof render>> | null = null;
+  afterEach(() => {
+    screen?.unmount();
+    screen = null;
+  });
+  const text = page.getByRole('textbox');
+
+  it('shows the text it is given, and the text the host gives it next', async () => {
+    screen = await render(<CodeMirrorPane value="first" language="typescript" />);
+    await expect.element(text).toHaveTextContent('first');
+
+    await screen.rerender(<CodeMirrorPane value="second" language="typescript" />);
+
+    await expect.element(text).toHaveTextContent('second');
+    await expect.element(text).not.toHaveTextContent('first');
+  });
+
+  it('takes no typing while read-only', async () => {
+    const reported: string[] = [];
+    screen = await render(
+      <CodeMirrorPane value="x" language="python" readOnly onValueChange={(value) => reported.push(value)} />,
+    );
+    await userEvent.click(text);
+
+    await userEvent.keyboard('abc');
+
+    await expect.element(text).toHaveTextContent(/^x$/);
+    expect(reported).toEqual([]);
+  });
+
+  it('numbers its lines, and stops once the host turns the numbers off', async () => {
+    const pane = (showLineNumbers: boolean) => (
+      <CodeMirrorPane value={'a\nb'} language="typescript" showLineNumbers={showLineNumbers} />
+    );
+    screen = await render(pane(true));
+    const second = page.getByTestId('code-mirror-pane').getByText('2', { exact: true });
+    await expect.element(second).toBeVisible();
+
+    await screen.rerender(pane(false));
+    await expect.element(second).not.toBeInTheDocument();
+
+    await screen.rerender(pane(true));
+    await expect.element(second).toBeVisible();
+  });
+
+  it('indents with a tab character when the host asks for tabs', async () => {
+    const reported: string[] = [];
+    screen = await render(
+      <CodeMirrorPane
+        value=""
+        language="typescript"
+        tabSize={8}
+        useTabs
+        onValueChange={(value) => reported.push(value)}
+      />,
+    );
+    await userEvent.click(text);
+
+    await userEvent.keyboard('{Tab}');
+
+    await vi.waitFor(() => expect(reported.at(-1)).toBe('\t'));
   });
 });
 

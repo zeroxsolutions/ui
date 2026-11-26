@@ -162,18 +162,23 @@ describe('the upload store', () => {
     await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
   });
 
-  it('aborts on cancel and leaves the block as it was', async () => {
+  it('aborts on cancel and never lands the answer that comes late', async () => {
     const { editor, store } = await mount();
     const { upload, calls } = heldUpload();
     store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+    const drawn: unknown[] = [];
+    editor.onChange(() => drawn.push(srcOf(editor)));
 
     store.cancel(store.entries()[0].id);
-    calls[0].answer('https://cdn.test/late.png');
-
     expect(calls[0].signal.aborted).toBe(true);
     expect(store.entries()).toEqual([]);
-    await expect.poll(() => calls[0].signal.aborted).toBe(true);
-    expect(srcOf(editor)).toBe('https://cdn.test/old.png');
+    calls[0].answer('https://cdn.test/late.png');
+    // A second upload answered after the late one lands after it, so by then the late one has been handled.
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+    calls[1].answer('https://cdn.test/new.png');
+
+    await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/new.png'));
+    expect(drawn).not.toContain('https://cdn.test/late.png');
   });
 
   it('aborts when the block is deleted', async () => {

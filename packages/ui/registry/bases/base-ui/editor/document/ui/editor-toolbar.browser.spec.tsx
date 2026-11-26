@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { useState, type ReactNode } from 'react';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page, userEvent } from 'vitest/browser';
-import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import { cdp, page, userEvent } from 'vitest/browser';
+import type { DocJSON, IEditor, ToolbarItem } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import '../../../../../../test/nova-style.css';
 import { standardKit } from '../features/index';
+import { Editor } from '../react/editor';
 import { EditorToolbar } from './editor-toolbar';
 
 /** An editor with nothing active, whose commands do nothing: the toolbar's keys are under test, not its commands. */
@@ -93,5 +95,84 @@ describe('EditorToolbar', () => {
 
     for (const item of items)
       await expect.element(page.getByRole('button', { name: item.title, exact: true })).toBeDisabled();
+  });
+});
+
+/** The Document Editor with its toolbar, as a host draws it. */
+function ToolbarHarness({ toolbar = items }: { toolbar?: ToolbarItem[] }): ReactNode {
+  const [ready, setReady] = useState<IEditor | null>(null);
+  return (
+    <div className="style-nova">
+      {ready && <EditorToolbar editor={ready} items={toolbar} />}
+      <Editor features={[standardKit()]} content={notes} onReady={setReady} />
+    </div>
+  );
+}
+
+const notes: DocJSON = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Notes' }] }] };
+
+/** Runs as a reader whose system asks for motion, which the icons read as they mount, until the returned undo. */
+async function askForMotion(): Promise<() => Promise<void>> {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // Motion reads the setting from this same query, on the change event the emulation raises.
+  const changed = new Promise((done) => reduced.addEventListener('change', done, { once: true }));
+  await cdp().send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
+  });
+  await changed;
+  return async () => {
+    await cdp().send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  };
+}
+
+/**
+ * Counts every attribute `icon` draws differently from now on, and reads what it draws. Motion leaves
+ * `transform: none` on a drawing it has animated back to rest, which draws as no transform at all.
+ */
+function watchIcon(icon: Element): { changes: () => number; drawn: () => string } {
+  let changes = 0;
+  new MutationObserver((records) => (changes += records.length)).observe(icon, { subtree: true, attributes: true });
+  return { changes: () => changes, drawn: () => icon.innerHTML.replaceAll(' style="transform: none;"', '') };
+}
+
+describe('EditorToolbar over the Document Editor', () => {
+  it('bolds the selection from its Bold control, and presses Bold, not Italic, over bold text', async () => {
+    await render(<ToolbarHarness />);
+    await userEvent.tripleClick(page.getByText('Notes'));
+
+    await userEvent.click(page.getByRole('button', { name: 'Bold' }));
+
+    await expect.element(page.getByRole('button', { name: 'Bold' })).toHaveAttribute('aria-pressed', 'true');
+    await expect.element(page.getByRole('button', { name: 'Italic' })).toHaveAttribute('aria-pressed', 'false');
+    await expect.element(page.getByText('Notes')).toHaveProperty('tagName', 'STRONG');
+  });
+
+  it('draws an element a feature passes as its icon', async () => {
+    const plain: ToolbarItem[] = [
+      { id: 'plain', title: 'Plain', icon: <svg role="img" aria-label="Plain mark" />, command: 'focus' },
+    ];
+    await render(<ToolbarHarness toolbar={plain} />);
+
+    await expect.element(page.getByRole('img', { name: 'Plain mark' })).toBeInTheDocument();
+  });
+
+  it("moves a control's icon while the pointer or the focus is on it, and draws it still once both leave", async () => {
+    onTestFinished(await askForMotion());
+    await render(<ToolbarHarness />);
+    const bold = page.getByRole('button', { name: 'Bold' });
+    await expect.element(bold).toBeVisible();
+    const icon = watchIcon(bold.element().querySelector('svg')!.parentElement!);
+    const still = icon.drawn();
+
+    await userEvent.hover(bold);
+    await vi.waitFor(() => expect(icon.changes()).toBeGreaterThan(0));
+    await userEvent.unhover(bold);
+    await vi.waitFor(() => expect(icon.drawn()).toBe(still));
+
+    const before = icon.changes();
+    await userEvent.click(page.getByText('Notes'));
+    await userEvent.tab({ shift: true });
+    await expect.element(bold).toHaveFocus();
+    await vi.waitFor(() => expect(icon.changes()).toBeGreaterThan(before));
   });
 });
