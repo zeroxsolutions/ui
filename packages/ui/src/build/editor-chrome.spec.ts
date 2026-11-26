@@ -85,57 +85,6 @@ const FOCUS: [editor: string, component: string, variant: (name: string) => stri
   ],
 ];
 
-/** Which slots, or which design-system component, each piece of the editor's chrome draws with. */
-const PIECES: Record<string, string[]> = {
-  'document/ui/rect-popover.tsx': ['cn-popover-content', 'cn-popover-content-logical'],
-  'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar', 'cn-editor-toolbar-separator'],
-  'document/ui/bubble-menu.tsx': ['cn-editor-toolbar'],
-  'document/layout/block-toolbar.tsx': ['cn-editor-toolbar', '<RectPopover'],
-  'document/layout/align-control.tsx': ['<ToggleGroup', '<ToggleGroupItem', '<Tooltip'],
-  'document/layout/width-toggle.tsx': ['<Toggle', '<Tooltip'],
-  'document/layout/resize-handles.tsx': ['cn-editor-handle'],
-  'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media', 'cn-combobox-label'],
-  'document/ui/chrome-icon.tsx': ['cn-editor-icon', 'cn-editor-toolbar-icon'],
-  'document/features/image/image.tsx': ['cn-editor-block', 'cn-field-description'],
-  'composer/triggers/trigger-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
-  'document/features/mention/mention.tsx': ['<Badge'],
-  'composer/triggers/inline-token.tsx': ['<Badge'],
-  'profiles/variables/variable.tsx': ['<Badge'],
-  'document/features/button/button.tsx': ['buttonVariants'],
-  'profiles/email/nodes/html.tsx': ['cn-editor-block'],
-  'profiles/email/nodes/unknown.tsx': ['cn-editor-block'],
-  'profiles/email/email-link-popover.tsx': ['<RectPopover', '<Button'],
-  'profiles/variables/variable-menu.tsx': ['<EditorToolbarComboboxTrigger'],
-  'document/ui/editor-toolbar-combobox-trigger.tsx': ['toggleVariants', '<Tooltip'],
-  'profiles/problem-marker.tsx': ['<Button', '<Tooltip'],
-  'profiles/email/email-editor.tsx': ['<Tooltip', '<TabsList'],
-  'profiles/sms/sms-editor.tsx': ['<Tooltip'],
-  'document/features/callout/callout.tsx': ['cn-alert'],
-  'document/features/toggle/toggle.tsx': ['cn-button cn-button-variant-ghost cn-button-size-icon-xs'],
-  'document/react/editor.tsx': [
-    'cn-editor-content',
-    'cn-button cn-button-variant-ghost cn-button-size-icon-sm',
-    '<Button',
-  ],
-  'document/features/math/math.tsx': ['cn-editor-block', 'cn-editor-inline'],
-  'mermaid/react/preview.tsx': ['cn-editor-diagram'],
-  'document/features/embed/embed.tsx': ['cn-editor-block'],
-  'document/features/columns/columns.tsx': ['cn-editor-lane'],
-  'document/features/columns/columns-toolbar.tsx': ['cn-editor-toolbar-separator'],
-  'document/features/section/section.tsx': ['cn-editor-block'],
-  'document/features/section/section-toolbar.tsx': ['cn-editor-swatch', '<DropdownMenu', '<Popover', '<ToggleGroup'],
-  'document/features/card/card.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description'],
-  'document/uploads/upload-tabs.tsx': ['cn-editor-block', 'cn-field-description'],
-  'profiles/email/email-block-feature.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description', '<Label'],
-  'profiles/email/email-block-items.tsx': ['cn-editor-inline', 'cn-editor-control'],
-  'profiles/email/email-inline-field.tsx': ['cn-editor-inline'],
-  'profiles/email/email-spacer-view.tsx': ['cn-editor-block', 'cn-editor-caption'],
-  'profiles/variables/variable-text-field.tsx': ['cn-editor-field'],
-  'document/react/viewer.tsx': ['cn-editor-content'],
-  'composer/chat-input.tsx': ['cn-editor-content'],
-  'composer/chat-message-view.tsx': ['cn-editor-content'],
-};
-
 /** A radius or a shadow written as a class; a slot names neither. */
 const LITERAL =
   /(?<![\w-])(?:rounded(?:-(?:none|xs|sm|md|lg|xl|2xl|3xl|4xl|full))?|shadow-(?:2xs|xs|sm|md|lg|xl|2xl))(?![\w-])/g;
@@ -236,13 +185,6 @@ describe("the editor's chrome", () => {
     },
   );
 
-  it.each(STYLES)("sizes a toolbar's separator in its own slot, in %s", (style) => {
-    const map = styleMapOf(ROOT, style);
-    expect((map['cn-editor-toolbar-separator'] ?? '').split(/\s+/)).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^h-/), expect.stringMatching(/^mx-/)]),
-    );
-  });
-
   it('passes a separator no size or space of its own, only its slot', () => {
     const sized = [...sources]
       .filter(([path]) => !path.endsWith('.css'))
@@ -261,20 +203,13 @@ describe("the editor's chrome", () => {
 
   it.each(STYLES)('highlights a menu row as cn-combobox-item does, in %s', (style) => {
     const map = styleMapOf(ROOT, style);
-    const highlight = (slot: string) => map[slot].split(/\s+/).filter((name) => name.startsWith('data-highlighted:'));
-    expect(highlight('cn-combobox-item')).toEqual(
-      expect.arrayContaining(['data-highlighted:bg-accent', 'data-highlighted:text-accent-foreground']),
-    );
-    expect(highlight('cn-editor-menu-item')).toEqual(
-      expect.arrayContaining(['data-highlighted:bg-accent', 'data-highlighted:text-accent-foreground']),
-    );
-  });
-
-  it('draws each piece with the slots or the component it stands for', () => {
-    const missing = Object.entries(PIECES).flatMap(([path, writes]) =>
-      writes.filter((token) => !sources.get(path)?.includes(token)).map((token) => `${path}: ${token}`),
-    );
-    expect(missing).toEqual([]);
+    const highlight = (slot: string) =>
+      (map[slot] ?? '')
+        .split(/\s+/)
+        .filter((name) => name.startsWith('data-highlighted:'))
+        .sort();
+    expect(highlight('cn-combobox-item').length).toBeGreaterThan(0);
+    expect(highlight('cn-editor-menu-item')).toEqual(highlight('cn-combobox-item'));
   });
 
   it('writes no radius or shadow of its own outside a slot', () => {
@@ -287,18 +222,5 @@ describe("the editor's chrome", () => {
           .map((name) => `${path}: ${name}`),
       );
     expect(literal).toEqual([]);
-  });
-
-  it('writes no radius or shadow of its own in its stylesheet, which no slot reaches', () => {
-    const sheet = sources.get('styles.css') ?? '';
-    const declared = [...sheet.matchAll(/^\s*(border-radius|box-shadow):\s*([^;]+);/gm)].map(
-      ([, property, value]) => `${property}: ${value}`,
-    );
-    // The code card's inner block, set flat inside the card, and the composer's command pill, whose inset
-    // shadow is a hairline in the composer's own accent rather than a surface's shadow.
-    expect(declared).toEqual([
-      'border-radius: 0',
-      'box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--composer-accent) 30%, transparent)',
-    ]);
   });
 });

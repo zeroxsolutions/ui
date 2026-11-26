@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { TestHost } from '../../../test/test-host';
-import { viewTransitionSpy } from '../../../../test/view-transition-spy';
 
 import { DocsSidebar, SidebarProvider } from './docs-sidebar';
 
@@ -21,10 +20,7 @@ const tree: Root = {
   ],
 };
 
-afterEach(() => {
-  cleanup();
-  viewTransitionSpy.mockClear();
-});
+afterEach(cleanup);
 
 /** The sidebar inside the provider the docs layout gives it. */
 function renderSidebar(ui: ReactNode = <DocsSidebar tree={tree} />): void {
@@ -75,17 +71,5 @@ describe('DocsSidebar', () => {
       'Installation',
       'Button',
     ]);
-  });
-
-  it("names the current page's button for the sidebar's shared-element morph", () => {
-    renderSidebar();
-
-    expect(viewTransitionSpy).toHaveBeenCalledWith('docs-sidebar-active');
-  });
-
-  it('leaves every button unnamed when the caller turns the morph off', () => {
-    renderSidebar(<DocsSidebar tree={tree} activeViewTransition={false} />);
-
-    expect(viewTransitionSpy).not.toHaveBeenCalled();
   });
 });

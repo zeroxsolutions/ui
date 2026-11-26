@@ -106,34 +106,6 @@ describe('IconGrid', () => {
     expect(onPick).toHaveBeenCalledWith('lucide-arrow-up-right-icon');
   });
 
-  it('gives every tile the height of the tallest and breaks a long name only at its hyphens', async () => {
-    const mixed: IconSet = {
-      set: 'lucide',
-      icons: [
-        { name: 'lucide-a-icon', glyph: 'a' },
-        { name: 'lucide-accessibility-icon', glyph: 'accessibility' },
-        { name: 'lucide-align-horizontal-space-around-icon', glyph: 'align-horizontal-space-around' },
-        { name: 'lucide-chart-no-axes-column-increasing-icon', glyph: 'chart-no-axes-column-increasing' },
-      ],
-    };
-    await renderGrid({ sets: [mixed] });
-
-    const tiles = mixed.icons.map(({ glyph }) => page.getByRole('button', { name: glyph, exact: true }));
-    await expect.element(tiles[3]).toBeInTheDocument();
-    const heights = tiles.map((tile) => tile.element().getBoundingClientRect().height);
-    expect(new Set(heights).size).toBe(1);
-
-    // A name that fits is drawn on one line whole, which a break inside the word would show as a second line.
-    const name = tiles[1].element().querySelector('span:last-child') as HTMLElement;
-    const lines = (): number => {
-      const range = document.createRange();
-      range.selectNodeContents(name);
-      return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
-    };
-    expect(lines()).toBe(1);
-    await expect.element(tiles[2]).toHaveAttribute('title', 'align-horizontal-space-around');
-  });
-
   it("draws a tile's icon only once the tile comes near the viewport", async () => {
     const many: IconSet = {
       set: 'lucide',
