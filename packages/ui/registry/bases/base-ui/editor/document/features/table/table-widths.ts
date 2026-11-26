@@ -41,3 +41,32 @@ export function sharesOfPixels(widths: readonly (number | null | undefined)[]): 
     )
     .map(inFourPlaces);
 }
+
+/**
+ * Shares as the document can store them: each at least `COLUMN_WIDTH_MIN`, summing to 1. A column the browser drew
+ * narrower, as an empty one beside a long one is, takes the least share and the others give up the room in
+ * proportion; shares that already fit come back as they were.
+ */
+export function fittedShares(shares: readonly number[]): number[] {
+  if (shares.every((share) => share >= COLUMN_WIDTH_MIN)) return [...shares];
+  const least = new Set<number>();
+  for (;;) {
+    const free = shares.map((_share, index) => index).filter((index) => !least.has(index));
+    const room = 1 - least.size * COLUMN_WIDTH_MIN;
+    const total = free.reduce((sum, index) => sum + shares[index]!, 0);
+    const scaled = new Map(
+      free.map((index) => [index, total > 0 ? (shares[index]! / total) * room : room / free.length]),
+    );
+    const under = free.filter((index) => scaled.get(index)! < COLUMN_WIDTH_MIN);
+    if (under.length === 0) {
+      const fitted = shares.map((_share, index) => inFourPlaces(scaled.get(index) ?? COLUMN_WIDTH_MIN));
+      // The widest column takes up what rounding to four places left over, so the shares sum to 1.
+      const widest = fitted.indexOf(Math.max(...fitted));
+      fitted[widest] = inFourPlaces(
+        1 - fitted.reduce((sum, share, index) => (index === widest ? sum : sum + share), 0),
+      );
+      return fitted;
+    }
+    for (const index of under) least.add(index);
+  }
+}

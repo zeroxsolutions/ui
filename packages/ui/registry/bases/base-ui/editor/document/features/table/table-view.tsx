@@ -9,7 +9,7 @@ import { layoutProps } from '../../layout/layout-props';
 import type { LayoutWords } from '../../layout/layout-words';
 import { WidthToggle } from '../../layout/width-toggle';
 import { TableBorders } from './table-borders';
-import { storedShares } from './table-widths';
+import { fittedShares, storedShares } from './table-widths';
 
 type TableNode = ReactNodeViewProps['node'];
 
@@ -123,7 +123,8 @@ export function TableView({
     if (!table || stored !== null) return;
     const measure = () =>
       setMeasured((current) => {
-        const next = drawnShares(table, count);
+        // The document stores no share under a twentieth, so one drawn narrower would refuse every move.
+        const next = fittedShares(drawnShares(table, count));
         return current?.join() === next.join() ? current : next;
       });
     const sizes = new ResizeObserver(measure);

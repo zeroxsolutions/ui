@@ -149,6 +149,28 @@ describe('the table in the Document Editor', () => {
       .toHaveAttribute('aria-valuemin', String(Math.round(widths[0]! * 100)));
   });
 
+  it('moves a border by its keys where the browser drew a column under a twentieth', async () => {
+    await page.viewport(1000, 700);
+    const empty: NodeJSON = { type: 'tableCell', content: [{ type: 'paragraph' }] };
+    const long = cell('tableCell', 'A heading long enough to take almost all of the row the table is drawn across');
+    const { editor } = await mount({
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Before' }] },
+        { type: 'table', content: [{ type: 'tableRow', content: [long, empty, empty] }] },
+      ],
+    });
+    await vi.waitFor(() => expect(Math.min(...drawnShares())).toBeLessThan(0.05));
+
+    await userEvent.click(page.getByRole('slider', { name: 'Border after column 1' }));
+    await userEvent.keyboard('{ArrowLeft}');
+
+    await vi.waitFor(() => expect(tableOf(editor)?.attrs?.columnWidths).not.toBeNull());
+    const widths = tableOf(editor)?.attrs?.columnWidths as number[];
+    expect(Math.min(...widths)).toBeGreaterThanOrEqual(0.05);
+    expect(sumOf(widths)).toBeCloseTo(1, 3);
+  });
+
   it('undoes a border moved by its keys with Mod+Z on the border itself', async () => {
     const { editor } = await mount(tableDoc({ columnWidths: [0.5, 0.5] }));
     await userEvent.click(page.getByRole('slider', { name: 'Border after column 1' }));
