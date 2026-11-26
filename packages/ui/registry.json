@@ -2951,6 +2951,56 @@
       "dependencies": ["@zeroxsolutions/editor-core", "zod"]
     },
     {
+      "name": "editor-uploads",
+      "type": "registry:component",
+      "title": "Editor Uploads",
+      "description": "Uploads into the editors' blocks through a host's upload callback: the Upload and Link tabs, the progress, cancel and retry drawn in the block, and pasted or dropped files turned into blocks.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/button",
+        "@shadcn/field",
+        "@shadcn/progress",
+        "@shadcn/tabs",
+        "@shadcn/utils",
+        "@zui/document-editor",
+        "@zui/lucide-upload-icon",
+        "@zui/lucide-x-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/upload.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/upload.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/upload-store.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/upload-store.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/use-block-upload.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/use-block-upload.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/upload-tabs.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/upload-tabs.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/uploads/upload-status.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/uploads/upload-status.tsx"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
       "name": "block-library-demo",
       "type": "registry:example",
       "title": "Block Library Demo",

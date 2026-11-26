@@ -20,6 +20,8 @@ export interface NodeViewProps<A = Record<string, unknown>> {
   editor: IEditor;
   /** Delete this node from the document. */
   deleteNode(): void;
+  /** Where the node starts in the document now; undefined once the view is detached from it. */
+  getPos(): number | undefined;
   /** The editable content slot for content-bearing nodes; opaque at core (the
    *  chrome types it as a React tree). Render it where the node's children
    *  belong; omit for atoms. */

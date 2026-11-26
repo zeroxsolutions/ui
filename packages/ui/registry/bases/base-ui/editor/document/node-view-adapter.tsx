@@ -42,6 +42,7 @@ export function buildNodeViewComponent(spec: NodeSpec): unknown {
       editable,
       editor: facade as NodeViewProps['editor'],
       deleteNode: () => engineProps.deleteNode(),
+      getPos: () => engineProps.getPos(),
       children: spec.content ? <NodeViewContent /> : undefined,
     };
     return (

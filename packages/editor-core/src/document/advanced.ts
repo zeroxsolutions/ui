@@ -19,7 +19,7 @@ export { Decoration, DecorationSet } from '@tiptap/pm/view';
 export type { EditorView } from '@tiptap/pm/view';
 export { Fragment, Slice } from '@tiptap/pm/model';
 export { dropPoint } from '@tiptap/pm/transform';
-export { isHistoryTransaction } from '@tiptap/pm/history';
+export { closeHistory, isHistoryTransaction } from '@tiptap/pm/history';
 export type { Node as ProseMirrorNode, NodeType } from '@tiptap/pm/model';
 export type { AdvancedContribution } from './core/types/feature.js';
 export { CONTENT_LOAD_META } from './core/engine/content-load.js';
