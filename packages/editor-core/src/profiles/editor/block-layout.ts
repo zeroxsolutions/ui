@@ -13,11 +13,12 @@ import {
   facadeFor,
 } from '../../document/advanced.js';
 import type { Editor, EngineHandle } from '../../document/advanced.js';
-import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
+import type { DocJSON, EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
 import {
   colorTokenFromElement,
   layoutDataAttributes,
   layoutFromElement,
+  withSectionsAtTop,
   type LayoutAttributes,
 } from '../../document/layout/index.js';
 import { MAX_LANES } from '../../template/email/blocks/columns.js';
@@ -47,8 +48,19 @@ type EngineTransaction = EngineState['tr'];
 export interface BlockLayoutOptions {
   /** Block types and the layout keys each takes, beside `LAYOUT_NODES` or in place of its entry, such as a product block's. */
   types?: Readonly<Record<string, readonly string[]>>;
-  /** Refuse what an email cannot draw: a `full` width, justified text and a `full` section. */
+  /**
+   * Refuse what an email cannot draw: a `full` width, justified text, a `full` section, and any layout on a card,
+   * whose email block stores none.
+   */
   email?: boolean;
+  /** The most lanes a columns block may have, at most `MAX_LANES`; `MAX_LANES` when absent. */
+  lanes?: number;
+  /**
+   * Whether the block at `pos` may change, as the host's block menu decides: false refuses every layout command on
+   * it, and the alignment and size of the text inside it. Colouring its text is an edit of the text and stays.
+   * Every block may change when absent.
+   */
+  changeable?(editor: IEditor, pos: number): boolean;
 }
 
 /** The block types whose own node spec declares their layout attributes, so they are declared nowhere else. */
@@ -173,16 +185,19 @@ function withoutPixels(node: NodeJSON): NodeJSON {
   return { ...node, ...(attrs === undefined ? {} : { attrs }), ...(content === undefined ? {} : { content }) };
 }
 
-/** A document about to open with its pixel widths read as fractions, without a transaction: the opening is no edit. */
+/**
+ * A document about to open with its pixel widths read as fractions and each section below its top read as its
+ * blocks, without a transaction: the opening is no edit.
+ */
 function openingContent(content: unknown): unknown {
   if (typeof content !== 'object' || content === null || Array.isArray(content)) return content;
-  return withoutPixels(content as NodeJSON);
+  const doc = withoutPixels(content as NodeJSON);
+  return doc.type === 'doc' ? withSectionsAtTop(doc as DocJSON) : doc;
 }
 
-/** The steps that read a loaded document's pixel widths as fractions, or null when it holds none. */
-function pixelFixes(state: EngineState): EngineTransaction | null {
-  const tr = state.tr;
-  state.doc.descendants((node, pos) => {
+/** Adds to `tr` the steps that read its document's pixel widths as fractions. */
+function fixPixels(tr: EngineTransaction): void {
+  tr.doc.descendants((node, pos) => {
     if (node.type.name === 'image' && typeof node.attrs.width === 'number' && node.attrs.width > 1) {
       tr.setNodeAttribute(pos, 'width', widthFromPixels(node.attrs.width, DOCUMENT_CONTENT_WIDTH));
     }
@@ -197,7 +212,24 @@ function pixelFixes(state: EngineState): EngineTransaction | null {
     });
     return false;
   });
-  return tr.docChanged ? tr : null;
+}
+
+/** Whether `doc` fits the schema once each section below its top is read as the blocks it holds. */
+function fitsWithSectionsAtTop(doc: EngineNode): boolean {
+  try {
+    doc.type.schema.nodeFromJSON(withSectionsAtTop(doc.toJSON())).check();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Adds to `tr` the step that replaces each section below its document's top with the blocks it holds. */
+function fixSections(tr: EngineTransaction): void {
+  const json = tr.doc.toJSON();
+  const fixed = withSectionsAtTop(json);
+  if (fixed === json) return;
+  tr.replaceWith(0, tr.doc.content.size, tr.doc.type.schema.nodeFromJSON(fixed).content);
 }
 
 interface Block {
@@ -283,13 +315,29 @@ const sectionArgs = z.object({ pos: position, layout: sectionPatch });
  * `textAlign`, a paragraph `size`, a table `columnWidths`; the columns, section and button nodes declare theirs in
  * their own specs. Adds the marks `textColor` and `textBackground` (attribute `token`, `<span data-color>` and
  * `<span data-bg>`), and the commands below, each one undo step, refused (`can` false) where the block does not take
- * the value or, with `email`, where the email cannot draw it. A document opened or loaded with an image's pixel
- * width, or a table's pixel `colwidth`s, holds fractions instead, with no undo step; a paste or a drop holding them
- * holds fractions too, in the paste's own undo step.
+ * the value, where `changeable` keeps the block from changing or, with `email`, where the email cannot draw it. A
+ * document opened or loaded with an image's pixel width, or a table's pixel `colwidth`s, holds fractions instead,
+ * and with a section below its top holds that section's blocks in its place, with no undo step; a paste or a drop
+ * holding pixel widths holds fractions too, in the paste's own undo step.
  */
 export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
-  const layoutTypes: Readonly<Record<string, readonly string[]>> = { ...LAYOUT_NODES, ...options.types };
   const email = options.email === true;
+  const allTypes: Readonly<Record<string, readonly string[]>> = { ...LAYOUT_NODES, ...options.types };
+  // The email's card block stores no layout, so its node takes none and a width set on it would be lost on save.
+  const layoutTypes = email
+    ? Object.fromEntries(Object.entries(allTypes).filter(([type]) => type !== 'card'))
+    : allTypes;
+  const maxLanes = Math.min(options.lanes ?? MAX_LANES, MAX_LANES);
+  const changeable = (facade: IEditor, pos: number) => options.changeable?.(facade, pos) ?? true;
+  /** Whether the text block at `pos` may change: it, and each block around it up to the lane or the top. */
+  const textChangeable = (facade: IEditor, state: EngineState, pos: number) => {
+    if (!changeable(facade, pos)) return false;
+    const $pos = state.doc.resolve(pos);
+    for (let depth = $pos.depth; depth > 0 && $pos.node(depth).type.name !== 'column'; depth -= 1) {
+      if (!changeable(facade, $pos.before(depth))) return false;
+    }
+    return true;
+  };
   // Feature commands receive the facade; this is how they find the engine behind it.
   const engines = new Set<Editor>();
   const engineOf = (facade: IEditor) =>
@@ -317,15 +365,11 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
   const plugin = new Plugin({
     key: layoutKey,
     // ProseMirror builds a loaded document without checking it against the schema, so a section in a section or in
-    // a lane would open; a load that does not fit is refused and the document stays as it was.
+    // a lane would open: such a load passes here and `appendTransaction` reads each such section as its blocks. A
+    // load that does not fit for another reason is refused and the document stays as it was.
     filterTransaction(tr) {
       if (!tr.docChanged || !tr.getMeta(CONTENT_LOAD_META)) return true;
-      try {
-        tr.doc.check();
-        return true;
-      } catch {
-        return false;
-      }
+      return fitsWithSectionsAtTop(tr.doc);
     },
     appendTransaction(trs, _oldState, newState) {
       const fresh = trs.filter((tr) => tr.docChanged && !tr.getMeta(layoutKey));
@@ -334,8 +378,11 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       // undo step.
       const brought = fresh.some((tr) => ['paste', 'drop'].includes(tr.getMeta('uiEvent') as string));
       if (!loaded && !brought) return null;
-      const tr = pixelFixes(newState);
-      if (!tr || !loaded) return tr && tr.setMeta(layoutKey, true);
+      const tr = newState.tr;
+      if (loaded) fixSections(tr);
+      fixPixels(tr);
+      if (!tr.docChanged) return null;
+      if (!loaded) return tr.setMeta(layoutKey, true);
       return tr.setMeta(layoutKey, true).setMeta(CONTENT_LOAD_META, true).setMeta('addToHistory', false);
     },
   });
@@ -388,7 +435,7 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
     apply(facade, dispatch, (state, tr) => {
       const block = blockAt(state, args.pos, (node) => layoutSteps({ node, pos: 0 }, args.layout) !== null);
       const steps = block && layoutSteps(block, args.layout);
-      if (!block || !steps) return false;
+      if (!block || !steps || !changeable(facade, block.pos)) return false;
       for (const [key, value] of steps) tr.setNodeAttribute(block.pos, key, value);
       return true;
     });
@@ -399,6 +446,7 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       apply(facade, dispatch, (state, tr) => {
         if (email && align === 'justify') return false;
         const blocks = textblocksIn(state, TEXT_ALIGN_NODES);
+        if (!blocks.every(({ pos }) => textChangeable(facade, state, pos))) return false;
         for (const { pos } of blocks) tr.setNodeAttribute(pos, 'textAlign', align);
         return blocks.length > 0;
       });
@@ -408,6 +456,7 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
     (facade: IEditor, { size }: z.infer<typeof paragraphSizeArgs>) =>
       apply(facade, dispatch, (state, tr) => {
         const blocks = textblocksIn(state, ['paragraph']);
+        if (!blocks.every(({ pos }) => textChangeable(facade, state, pos))) return false;
         for (const { pos } of blocks) tr.setNodeAttribute(pos, 'size', size);
         return blocks.length > 0;
       });
@@ -434,9 +483,9 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
   const setColumnsLayout = (dispatch: boolean) => (facade: IEditor, args: z.infer<typeof columnsArgs>) =>
     apply(facade, dispatch, (state, tr) => {
       const block = blockAt(state, args.pos, (node) => node.type.name === 'columns');
-      if (!block) return false;
+      if (!block || !changeable(facade, block.pos)) return false;
       const lanes = args.lanes ?? block.node.childCount;
-      if (lanes < 2 || lanes > MAX_LANES) return false;
+      if (lanes < 2 || (lanes > maxLanes && lanes !== block.node.childCount)) return false;
       if (args.ratio !== undefined && args.ratio.length !== lanes) return false;
       if (args.lanes === undefined && args.ratio === undefined && args.valign === undefined) return false;
       const column = state.schema.nodes.column;
@@ -456,8 +505,9 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
         tr.delete(lastPos, lastPos + last.nodeSize);
         if (!empty) tr.insert(lastPos - 1, last.content);
       }
+      // A ratio of the old count would not fit the new one, and the email's columns block needs one weight per lane.
       if (args.lanes !== undefined && args.lanes !== block.node.childCount && args.ratio === undefined) {
-        tr.setNodeAttribute(block.pos, 'ratio', null);
+        tr.setNodeAttribute(block.pos, 'ratio', Array<number>(lanes).fill(1));
       }
       if (args.ratio !== undefined) tr.setNodeAttribute(block.pos, 'ratio', args.ratio);
       if (args.valign !== undefined) tr.setNodeAttribute(block.pos, 'valign', args.valign);
@@ -468,6 +518,7 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
     apply(facade, dispatch, (state, tr) => {
       const block = blockAt(state, args.pos, (node) => node.type.name === 'table');
       if (!block || args.columnWidths === undefined || !('columnWidths' in block.node.attrs)) return false;
+      if (!changeable(facade, block.pos)) return false;
       if (args.columnWidths !== null) {
         const widths = columnWidthsOf(args.columnWidths);
         if (widths === null || widths.length !== columnCount(block.node)) return false;
@@ -481,6 +532,7 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       const block = blockAt(state, args.pos, (node) => node.type.name === 'section');
       const entries = Object.entries(args.layout as SectionPatch).filter(([, value]) => value !== undefined);
       if (!block || entries.length === 0 || (email && args.layout.width === 'full')) return false;
+      if (!changeable(facade, block.pos)) return false;
       for (const [key, value] of entries) tr.setNodeAttribute(block.pos, key, value);
       return true;
     });
@@ -524,8 +576,8 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       },
       /**
        * Weighs a columns block's lanes (`ratio`, one whole weight of 1 to 12 per lane), aligns them (`valign`) or
-       * changes how many it has (`lanes`, 2 to 4): a new lane opens empty at the end, and the last lane's blocks move
-       * into the lane before it as it goes. A lane count changed without a ratio draws the lanes equal.
+       * changes how many it has (`lanes`, 2 to the host's bound, at most 4): a new lane opens empty at the end, and the last lane's blocks move
+       * into the lane before it as it goes. A lane count changed without a ratio weighs every lane 1.
        */
       setColumnsLayout: { args: columnsArgs, run: setColumnsLayout(true), can: setColumnsLayout(false) },
       /** Sets a table's column widths, one share per column of at least a twentieth; null draws them equal. */

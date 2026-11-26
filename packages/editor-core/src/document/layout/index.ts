@@ -5,3 +5,4 @@ export {
   layoutFromElement,
   type LayoutAttributes,
 } from './layout-html.js';
+export { withSectionsAtTop } from './sections.js';

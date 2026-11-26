@@ -302,7 +302,7 @@ describe('blockLayout', () => {
     expect(editor.can('setColumnsLayout', { pos: 0, ratio: [1, 1, 1] })).toBe(false);
     expect(editor.run('setColumnsLayout', { pos: 0, lanes: 3 })).toBe(true);
     expect(editor.getJSON().content?.[0].content).toHaveLength(3);
-    expect(top(editor).ratio ?? null).toBeNull();
+    expect(top(editor).ratio).toEqual([1, 1, 1]);
     expect(editor.run('setColumnsLayout', { pos: 0, lanes: 2 })).toBe(true);
     expect(editor.run('setColumnsLayout', { pos: 0, lanes: 1 })).toBe(false);
     editor.run('setColumnsLayout', { pos: 0, lanes: 4 });
@@ -365,39 +365,25 @@ describe('blockLayout', () => {
     expect(editor.can('setSectionLayout', { pos: 0, layout: { background: 'teal' } })).toBe(false);
   });
 
-  it('refuses a section inside a section, by setContent and by paste', () => {
-    const nested: NodeJSON = { type: 'section', content: [{ type: 'section', content: [paragraph('deep')] }] };
+  it('opens a section inside a section with its blocks in its place, by setContent and on mount', () => {
+    const nested: NodeJSON = {
+      type: 'section',
+      content: [paragraph('before'), { type: 'section', content: [paragraph('deep')] }, paragraph('after')],
+    };
     const { editor, engine } = mount([{ type: 'section', content: [paragraph('in')] }]);
-    try {
-      editor.setContent({ type: 'doc', content: [nested] });
-    } catch {
-      // A refused load leaves the document as it was.
-    }
-    expect(sectionInSection(editor.getJSON())).toBe(false);
+    editor.setContent({ type: 'doc', content: [nested] });
+    expect(editor.getJSON().content?.[0].content?.map((node) => node.content?.[0]?.text)).toEqual([
+      'before',
+      'deep',
+      'after',
+    ]);
+    expect(mount([nested]).editor.getJSON()).toEqual(editor.getJSON());
     const copied = mount([{ type: 'section', content: [paragraph('copied')] }]);
     const html = copied.engine.getHTML();
     engine.commands.setTextSelection(2);
     paste(engine, html);
     expect(sectionInSection(editor.getJSON())).toBe(false);
     expect(walk(editor.getJSON().content ?? []).some(({ node }) => node.text?.includes('copied'))).toBe(true);
-  });
-
-  it('refuses a section in a lane', () => {
-    const columns: NodeJSON = {
-      type: 'columns',
-      content: [
-        { type: 'column', content: [{ type: 'section', content: [paragraph('deep')] }] },
-        { type: 'column', content: [paragraph('r')] },
-      ],
-    };
-    const { editor } = mount([paragraph('')]);
-    try {
-      editor.setContent({ type: 'doc', content: [columns] });
-    } catch {
-      // A refused load leaves the document as it was.
-    }
-    const lanes = walk(editor.getJSON().content ?? []).filter(({ node }) => node.type === 'column');
-    expect(lanes.some((lane) => (lane.node.content ?? []).some((child) => child.type === 'section'))).toBe(false);
   });
 
   describe('keeps a section at the top of the document', () => {
@@ -421,14 +407,14 @@ describe('blockLayout', () => {
       section: (content) => ({ type: 'section', content }),
     };
 
-    it.each(Object.entries(holders))('refuses one in a %s, by setContent and by paste', (_, holder) => {
+    it.each(Object.entries(holders))('unwraps one in a %s, by setContent and by paste', (_, holder) => {
       const { editor, engine } = mount([holder([inner])]);
-      try {
-        editor.setContent({ type: 'doc', content: [holder([{ type: 'section', content: [paragraph('deep')] }])] });
-      } catch {
-        // A refused load leaves the document as it was.
-      }
+      editor.setContent({ type: 'doc', content: [holder([{ type: 'section', content: [paragraph('deep')] }])] });
       expect(sectionBelowTop(editor.getJSON())).toBe(false);
+      expect(walk(editor.getJSON().content ?? []).some(({ node }) => node.text === 'deep')).toBe(true);
+      const opened = mount([holder([{ type: 'section', content: [paragraph('deep')] }])]).editor.getJSON();
+      expect(opened).toEqual(editor.getJSON());
+      editor.setContent({ type: 'doc', content: [holder([inner])] });
       const html = mount([{ type: 'section', content: [paragraph('copied')] }]).engine.getHTML();
       caretIn(engine, 'inner');
       paste(engine, html);
@@ -467,5 +453,75 @@ describe('blockLayout', () => {
     const sectionPos = 1 + 3;
     expect(editor.can('setSectionLayout', { pos: sectionPos, layout: { width: 'full' } })).toBe(false);
     expect(editor.can('setSectionLayout', { pos: sectionPos, layout: { width: 'wide' } })).toBe(true);
+  });
+
+  it('weighs a lane count changed with no ratio as equal lanes, within the host bound', () => {
+    const columns: NodeJSON = {
+      type: 'columns',
+      attrs: { ratio: [8, 4] },
+      content: [
+        { type: 'column', content: [paragraph('left')] },
+        { type: 'column', content: [paragraph('right')] },
+      ],
+    };
+    const { editor } = mount([columns], { lanes: 3 });
+    expect(editor.run('setColumnsLayout', { pos: 0, lanes: 3 })).toBe(true);
+    expect(top(editor).ratio).toEqual([1, 1, 1]);
+    expect(editor.can('setColumnsLayout', { pos: 0, lanes: 4 })).toBe(false);
+    expect(editor.run('setColumnsLayout', { pos: 0, lanes: 2 })).toBe(true);
+    expect(top(editor).ratio).toEqual([1, 1]);
+  });
+
+  it('refuses every layout change to a block the host keeps from changing, and keeps colouring its text', () => {
+    const table: NodeJSON = {
+      type: 'table',
+      content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [paragraph('a')] }] }],
+    };
+    const columns: NodeJSON = {
+      type: 'columns',
+      content: [
+        { type: 'column', content: [paragraph('l')] },
+        { type: 'column', content: [paragraph('r')] },
+      ],
+    };
+    const { editor, engine } = mount(
+      [image(), paragraph('text'), { type: 'section', content: [paragraph('in')] }, table, columns],
+      { changeable: () => false },
+    );
+    const at = (type: string) => {
+      let found = -1;
+      engine.state.doc.forEach((node, offset) => {
+        if (found < 0 && node.type.name === type) found = offset;
+      });
+      return found;
+    };
+    expect(editor.can('setBlockLayout', { pos: 0, layout: { align: 'center' } })).toBe(false);
+    expect(editor.can('setSectionLayout', { pos: at('section'), layout: { background: 'teal' } })).toBe(false);
+    expect(editor.can('setTableLayout', { pos: at('table'), columnWidths: null })).toBe(false);
+    expect(editor.can('setColumnsLayout', { pos: at('columns'), valign: 'center' })).toBe(false);
+    caretIn(engine, 'text');
+    expect(editor.can('setTextAlign', { align: 'center' })).toBe(false);
+    expect(editor.can('setParagraphSize', { size: 'lead' })).toBe(false);
+    engine.commands.setTextSelection({ from: at('paragraph') + 1, to: at('paragraph') + 3 });
+    expect(editor.run('setTextColor', { token: 'teal' })).toBe(true);
+  });
+
+  it('asks the host about the block around a paragraph it aligns', () => {
+    const quote: NodeJSON = { type: 'blockquote', content: [paragraph('quoted')] };
+    const { editor, engine } = mount([quote, paragraph('free')], {
+      changeable: (_editor, pos) => engine.state.doc.nodeAt(pos)?.type.name !== 'blockquote',
+    });
+    caretIn(engine, 'quoted');
+    expect(editor.can('setTextAlign', { align: 'end' })).toBe(false);
+    caretIn(engine, 'free');
+    expect(editor.can('setTextAlign', { align: 'end' })).toBe(true);
+  });
+
+  it('takes no layout on a card in the email, whose wire carries none', () => {
+    const { editor } = mount([{ type: 'card' }, image()], { email: true });
+    expect(editor.can('setBlockLayout', { pos: 0, layout: { width: 0.5 } })).toBe(false);
+    expect(editor.can('setBlockLayout', { pos: 0, layout: { align: 'center' } })).toBe(false);
+    expect(editor.getJSON().content?.[0].attrs ?? {}).not.toHaveProperty('width');
+    expect(editor.can('setBlockLayout', { pos: 1, layout: { width: 0.5 } })).toBe(true);
   });
 });
