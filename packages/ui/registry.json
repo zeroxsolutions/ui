@@ -3161,7 +3161,7 @@
       "name": "block-library",
       "type": "registry:component",
       "title": "Block Library",
-      "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with, and the frame a block's place and width are drawn in.",
+      "description": "The library's own blocks and the builder they share: blockFeature, which turns a block's shared definition into a Document Editor feature, with the address field and helpers each block's view draws with.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/button",

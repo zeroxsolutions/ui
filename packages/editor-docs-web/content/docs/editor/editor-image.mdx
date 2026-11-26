@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add button field input popover @zui/editor-layout @zui/editor-uploads @zui/lucide-image-icon
+pnpm dlx shadcn@latest add button field input popover @zui/block-library @zui/editor-layout @zui/editor-uploads @zui/lucide-image-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -97,7 +97,7 @@ function NotesEditor({ content }: { content: DocJSON }) {
 }
 ```
 
-`image` adds the `image` block, with the attributes `src`, `alt`, `title` and `width`. Selecting it opens an Edit popover for the alt text and the width. Its slash item is "Image" and its command `insertImage` takes a `src` and an optional `alt` and `title`.
+`image` adds the `image` block, with the attributes `src`, `alt`, `title`, `caption` and `href`, and the layout's `align` and `width`. Selecting it shows the block toolbar, which aligns it and makes it full width, and a width handle on each side, which resizes it as a share of the line; its Edit button opens a popover for the address, the alt text, the caption and the link. `layoutWords` names the toolbar and the handles in the host's words. Its slash item is "Image" and its command `insertImage` takes a `src` and an optional `alt` and `title`.
 
 `words` sets the popover's button and fields and what an image with no address shows, over the English of
 `DEFAULT_IMAGE_WORDS`. Pass a function to read them each time the block draws, so a change of language shows
