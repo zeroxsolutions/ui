@@ -53,7 +53,7 @@ function ModelListHeader({ className, ...props }: React.ComponentProps<'div'>): 
 
 /** The section's heading, growing to push the header's controls to its end. */
 function ModelListTitle({ className, ...props }: React.ComponentProps<'h3'>): React.ReactNode {
-  return <h3 data-slot="model-list-title" className={cn('flex-1 text-base font-medium', className)} {...props} />;
+  return <h3 data-slot="model-list-title" className={cn('cn-model-list-title flex-1', className)} {...props} />;
 }
 
 /** Trailing header controls - search, refresh and the like. */

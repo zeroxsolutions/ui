@@ -235,8 +235,10 @@ function EmojiPickerSearch({
 function EmojiPickerGroupLabel({ className, children, ...props }: ComponentProps<typeof View>): ReactNode {
   const surface = useContext(EmojiPickerContext)?.surface ?? 'background';
   return (
-    <TextClassContext.Provider value="text-muted-foreground text-xs">
-      <View className={cn('justify-center px-2 py-1.5', SURFACE_CLASSES[surface], className)} {...props}>
+    <TextClassContext.Provider value="cn-combobox-label/text">
+      {/* The row's height is fixed by the list's item layout, so the label centres itself in place of the style's
+          vertical padding. */}
+      <View className={cn('cn-combobox-label justify-center py-0', SURFACE_CLASSES[surface], className)} {...props}>
         {asText(children)}
       </View>
     </TextClassContext.Provider>

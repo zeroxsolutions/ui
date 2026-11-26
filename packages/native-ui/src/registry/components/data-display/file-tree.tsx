@@ -459,7 +459,7 @@ function FileTreeLabel({
         className={cn(
           'cn-file-tree-item flex-row items-center gap-1.5 pr-2',
           item.selected && 'bg-muted',
-          item.focusVisible && 'border-ring/50 border-[3px]',
+          item.focusVisible && 'cn-file-tree-item-focus-ring@focused',
           className,
         )}
         style={

@@ -21,6 +21,7 @@ import {
   ItemTitle,
 } from '@/registry/bases/base-ui/ui/item';
 import { Switch } from '@/registry/bases/base-ui/ui/switch';
+import { Card } from '@/registry/bases/base-ui/ui/card';
 
 interface ModelEntry {
   id: string;
@@ -41,7 +42,7 @@ function ModelListDemo(): ReactNode {
   const [models, setModels] = useState(INITIAL_MODELS);
 
   return (
-    <div className="flex h-72 w-full flex-col rounded-lg border">
+    <Card className="h-72 w-full gap-0 py-0">
       <ModelList>
         <ModelListHeader>
           <ModelListTitle>Model list</ModelListTitle>
@@ -79,7 +80,7 @@ function ModelListDemo(): ReactNode {
           </ItemGroup>
         </ModelListContent>
       </ModelList>
-    </div>
+    </Card>
   );
 }
 

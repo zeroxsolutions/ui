@@ -1438,6 +1438,30 @@ describe('translateClasses for the questionnaire and trace', () => {
   );
 });
 
+describe("translateClasses for zui's keyboard focus rings", () => {
+  it.each([
+    ['cn-tree-item-focus-ring', ['focus-visible:ring-ring/50', 'focus-visible:ring-1'], ['border', 'border-ring/50']],
+    [
+      'cn-file-tree-item-focus-ring',
+      ['group-focus-visible/file-tree-item:ring-ring/30', 'group-focus-visible/file-tree-item:ring-2'],
+      ['border-ring/30', 'border-2'],
+    ],
+    [
+      'cn-ai-provider-card-trigger-focus-ring',
+      ['focus-visible:inset-ring-ring/50', 'focus-visible:inset-ring-3'],
+      ['border-ring/50', 'border-[3px]'],
+    ],
+  ] as const)("draws %s as a border of the ring's width and colour while focused", (name, classes, drawn) => {
+    for (const engine of ['nativewind', 'uniwind'] as const) {
+      expect(translateClasses(classes, engine, 'view', 'focused', { name })).toEqual({
+        classes: expect.arrayContaining([...drawn]),
+        unknown: [],
+      });
+      expect(translateClasses(classes, engine, 'view', '', { name })).toEqual({ classes: [], unknown: [] });
+    }
+  });
+});
+
 describe('translateClasses for the rings and offsets a component draws as a border or a length', () => {
   const STYLES = {
     vega: parseSlotMap(readFileSync(SNAPSHOT_PATH, 'utf8')),

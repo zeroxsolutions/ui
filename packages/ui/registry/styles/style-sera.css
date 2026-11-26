@@ -80,6 +80,76 @@
     @apply rounded-none;
   }
 
+  /* MARK: Focus Rings */
+  /* cn-button's focus ring, a tree row holding keyboard focus */
+  .cn-tree-item-focus-ring {
+    @apply focus-visible:ring-ring/30 focus-visible:ring-2;
+  }
+
+  /* cn-button's focus ring, a file tree row whose item holds keyboard focus */
+  .cn-file-tree-item-focus-ring {
+    @apply group-focus-visible/file-tree-item:ring-ring/30 group-focus-visible/file-tree-item:ring-2;
+  }
+
+  /* cn-button's focus ring, inset on the card the trigger covers */
+  .cn-ai-provider-card-trigger-focus-ring {
+    @apply focus-visible:inset-ring-ring/30 focus-visible:inset-ring-2;
+  }
+
+  /* cn-button's focus ring, a colour swatch */
+  .cn-avatar-picker-color-focus-ring {
+    @apply focus-visible:ring-ring/30 focus-visible:ring-2;
+  }
+
+  /* MARK: Icon Media */
+  /* cn-kbd's radius, a tile of the same 20px */
+  .cn-icon-media {
+    @apply rounded-none;
+  }
+
+  /* MARK: Markdown View */
+  /* cn-kbd's radius, an inline code chip */
+  .cn-markdown-view-inline-code {
+    @apply rounded-none;
+  }
+
+  /* cn-dropdown-menu-item's radius, as the image preview's */
+  .cn-markdown-view-image {
+    @apply rounded-none;
+  }
+
+  /* MARK: Model List */
+  /* cn-card-title's text size and weight */
+  .cn-model-list-title {
+    @apply text-lg font-semibold;
+  }
+
+  /* MARK: Tab Bar */
+  /* cn-badge's radius, a pill wherever the badge is one, the floating bar */
+  .cn-tab-bar-floating {
+    @apply rounded-none;
+  }
+
+  /* cn-badge's radius, a pill wherever the badge is one, behind the icon */
+  .cn-tab-bar-indicator {
+    @apply rounded-none;
+  }
+
+  /* cn-button's radius, a destination */
+  .cn-tab-bar-item {
+    @apply rounded-none;
+  }
+
+  /* cn-button's focus ring, a destination, which its indicator carries instead where it has one */
+  .cn-tab-bar-item-focus-ring {
+    @apply focus-visible:ring-ring/30 focus-visible:ring-2;
+  }
+
+  /* cn-button's focus ring, the indicator of a destination holding keyboard focus */
+  .cn-tab-bar-indicator-focus-ring {
+    @apply group-focus-visible/tab-bar-item:ring-ring/30 group-focus-visible/tab-bar-item:ring-2;
+  }
+
   /* MARK: Floating Toolbar */
   /* cn-dropdown-menu-content's ring, radius and shadow */
   .cn-floating-toolbar {

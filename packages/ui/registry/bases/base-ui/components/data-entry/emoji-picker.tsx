@@ -322,7 +322,9 @@ function EmojiPickerGroupLabel({ className, ...props }: React.ComponentProps<'di
     <div
       data-slot="emoji-picker-group-label"
       className={cn(
-        'text-muted-foreground bg-[var(--emoji-picker-surface,var(--background))] px-2 py-1.5 text-xs',
+        // The row's height is fixed by the list's scroll offsets, so the label takes the style's inset, size and
+        // case but centres itself in place of the style's vertical padding.
+        'cn-combobox-label flex items-center bg-[var(--emoji-picker-surface,var(--background))] py-0',
         '[[data-slot=card]_&]:bg-[var(--emoji-picker-surface,var(--card))]',
         '[[data-slot=popover-content]_&]:bg-[var(--emoji-picker-surface,var(--popover))]',
         className,

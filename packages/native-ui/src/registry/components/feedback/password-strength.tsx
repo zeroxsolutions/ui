@@ -74,8 +74,8 @@ function PasswordStrengthMeter({ children, valueText, className, ...props }: Pas
   return (
     <CardContent className={cn('gap-2', className)} {...props}>
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="font-sans-medium text-sm">{children}</Text>
-        <Text accessibilityLiveRegion="polite" className="text-muted-foreground text-sm">
+        <Text className="font-sans-medium">{children}</Text>
+        <Text accessibilityLiveRegion="polite" className="text-muted-foreground">
           {valueText}
         </Text>
       </View>
@@ -129,9 +129,7 @@ function PasswordStrengthRequirement({
       {...props}
     >
       <Icon as={met ? CircleCheckIcon : CircleIcon} ref={icon} className="text-foreground size-4 shrink-0" />
-      <Text className={cn('min-w-0 flex-1 text-sm', met ? 'text-foreground' : 'text-muted-foreground')}>
-        {children}
-      </Text>
+      <Text className={cn('min-w-0 flex-1', met ? 'text-foreground' : 'text-muted-foreground')}>{children}</Text>
     </View>
   );
 }

@@ -145,7 +145,7 @@ function PasswordStrengthRequirement({
     <li
       data-slot="password-strength-requirement"
       data-met={met || undefined}
-      className={cn('flex items-center gap-2 text-sm text-muted-foreground data-met:text-foreground', className)}
+      className={cn('flex items-center gap-2 text-muted-foreground data-met:text-foreground', className)}
       {...props}
     >
       {met ? (
