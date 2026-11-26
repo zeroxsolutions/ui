@@ -31,6 +31,18 @@ describe('button', () => {
     expect(importHTML(html, registry).doc).toEqual(doc);
   });
 
+  it.each(['none', 'small', 'medium', 'large'])(
+    'round-trips a space after of %s and draws it in the Viewer',
+    (space) => {
+      const doc = docOf({ label: 'Go', href: 'https://x.test', spaceAfter: space });
+      const html = serialize(doc, 'html', registry);
+      expect(html).toContain(`data-space-after="${space}"`);
+      expect(importHTML(html, registry).doc).toEqual(doc);
+      const markup = renderToStaticMarkup(<Viewer doc={doc} features={[button(), standardKit()]} />);
+      expect(markup).toContain(`data-space-after="${space}"`);
+    },
+  );
+
   it('escapes its label in HTML and reads it back as written', () => {
     const doc = docOf({ label: '"><script>alert(1)</script>', href: 'https://x.test' });
     const html = serialize(doc, 'html', registry);

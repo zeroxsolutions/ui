@@ -11,12 +11,7 @@ import {
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { columnsNodeSpecs } from '@zeroxsolutions/editor-core/profiles/index';
 import { MAX_LANES } from '@zeroxsolutions/editor-core/template/email/index';
-import {
-  SPACES as LAYOUT_SPACES,
-  VALIGNS,
-  type LayoutSpace,
-  type VAlign,
-} from '@zeroxsolutions/editor-core/template/layout/index';
+import { SPACES, VALIGNS, type LayoutSpace, type VAlign } from '@zeroxsolutions/editor-core/template/layout/index';
 import type { ReactNodeCodec } from '../../../react-types';
 import { layoutProps } from '../../layout/layout-props';
 import { layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
@@ -44,7 +39,6 @@ export interface ColumnsOptions {
   changeable?(editor: IEditor, pos: number): boolean;
 }
 
-const SPACES = ['small', 'medium', 'large'] as const;
 /** The heaviest a column may weigh against its siblings: a twelve-column grid. */
 const COLUMN_WEIGHT_MAX = 12;
 
@@ -86,7 +80,7 @@ function ColumnsShell({
       data-slot="columns"
       data-valign={valignOf(attrs.valign)}
       data-active={active || undefined}
-      {...layoutProps({ spaceBefore: attrs.spaceBefore })}
+      {...layoutProps({ spaceBefore: attrs.spaceBefore, spaceAfter: attrs.spaceAfter })}
       style={style}
       className={`group/columns relative ${blockClasses(attrs)}`}
     >
@@ -202,7 +196,7 @@ const columnsCodecs: ReactNodeCodec[] = [
       const ratio = weights === null ? '' : ` data-ratio="${weights.join(',')}"`;
       const valign = valignOf(node.attrs?.valign);
       const aligned = valign ? ` data-valign="${valign}"` : '';
-      const spaceBefore = LAYOUT_SPACES.find((space) => space === node.attrs?.spaceBefore);
+      const spaceBefore = SPACES.find((space) => space === node.attrs?.spaceBefore);
       const before = spaceBefore ? ` data-space-before="${spaceBefore}"` : '';
       const spaceAfter = SPACES.find((space) => space === node.attrs?.spaceAfter);
       const space = spaceAfter ? ` data-space-after="${spaceAfter}"` : '';
@@ -223,7 +217,7 @@ const columnsCodecs: ReactNodeCodec[] = [
       if (!element.hasAttribute('data-columns')) return null;
       const ratio = ratioOf(element.getAttribute('data-ratio'));
       const valign = valignOf(element.getAttribute('data-valign'));
-      const spaceBefore = LAYOUT_SPACES.find((space) => space === element.getAttribute('data-space-before'));
+      const spaceBefore = SPACES.find((space) => space === element.getAttribute('data-space-before'));
       const spaceAfter = SPACES.find((space) => space === element.getAttribute('data-space-after'));
       const content = ctx.fromHTMLChildren(element).filter((child) => child.type === 'column');
       if (content.length === 0) return null;

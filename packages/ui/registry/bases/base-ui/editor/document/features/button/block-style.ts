@@ -1,8 +1,10 @@
+import type { LayoutSpace } from '@zeroxsolutions/editor-core/template/layout/index';
+
 /** The attributes a button or a columns block draws its place from; each is absent on a block that does not set it. */
 export interface BlockStyle {
   /** The layout's names, or the email wire's `left` and `right`, which a block written before them holds. */
   align?: 'start' | 'left' | 'center' | 'end' | 'right' | null;
-  spaceAfter?: 'small' | 'medium' | 'large' | null;
+  spaceAfter?: LayoutSpace | null;
 }
 
 const ALIGN_CLASSES = {
@@ -19,7 +21,10 @@ const JUSTIFY_CLASSES = {
   end: 'justify-end',
   right: 'justify-end',
 } as const;
-const SPACE_CLASSES = { small: 'mb-2', medium: 'mb-4', large: 'mb-8' } as const;
+const SPACE_CLASSES = { none: 'mb-0', small: 'mb-2', medium: 'mb-4', large: 'mb-8' } as const satisfies Record<
+  LayoutSpace,
+  string
+>;
 
 /** The classes a block's `align` and `spaceAfter` read as; `medium` is the house default space. */
 export function blockClasses({ align, spaceAfter }: BlockStyle): string {

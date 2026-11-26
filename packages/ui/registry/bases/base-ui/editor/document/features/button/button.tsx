@@ -14,7 +14,9 @@ import {
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { buttonNodeSpec } from '@zeroxsolutions/editor-core/profiles/index';
+import { SPACES } from '@zeroxsolutions/editor-core/template/layout/index';
 import type { ReactNodeCodec } from '../../../react-types';
+import { layoutProps } from '../../layout/layout-props';
 import { blockClasses, justifyClass, type BlockStyle } from './block-style';
 
 interface ButtonAttrs extends BlockStyle {
@@ -60,7 +62,6 @@ const escapedMarkdown = (value: string): string =>
 const labelOf = (attrs: ButtonAttrs): string => (typeof attrs.label === 'string' ? attrs.label : '');
 
 const ALIGNS = ['start', 'left', 'center', 'end', 'right'] as const;
-const SPACES = ['small', 'medium', 'large'] as const;
 const WIDTHS = ['inline', 'full'] as const;
 
 function oneOf<const T extends string>(values: readonly T[], value: string | null): T | undefined {
@@ -73,6 +74,7 @@ function ButtonShell({ attrs, children }: { attrs: ButtonAttrs; children: ReactN
     <div
       data-slot="link-button"
       data-width={attrs.width ?? 'inline'}
+      {...layoutProps({ spaceAfter: attrs.spaceAfter })}
       className={cn('flex flex-wrap items-center gap-2', justifyClass(attrs.align), blockClasses(attrs))}
     >
       {children}

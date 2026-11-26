@@ -34,6 +34,18 @@ describe('columns', () => {
     expect(markup).toContain('data-space-before="none"');
   });
 
+  it.each(['none', 'small', 'medium', 'large'])(
+    'round-trips a space after of %s and draws it in the Viewer',
+    (space) => {
+      const doc = docOf({ ratio: [1, 1], spaceAfter: space }, [line('left')], [line('right')]);
+      const html = serialize(doc, 'html', registry);
+      expect(html).toContain(`data-space-after="${space}"`);
+      expect(importHTML(html, registry).doc).toEqual(doc);
+      const markup = renderToStaticMarkup(<Viewer doc={doc} features={[columns(), standardKit()]} />);
+      expect(markup).toContain(`data-space-after="${space}"`);
+    },
+  );
+
   it('reads no vertical alignment outside its set', () => {
     const html =
       '<div data-columns data-valign="middle"><div data-column><p>a</p></div><div data-column><p>b</p></div></div>';
