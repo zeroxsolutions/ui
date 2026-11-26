@@ -71,6 +71,13 @@ describe('archetype presets', () => {
   });
 });
 
+describe("a menu row's icon", () => {
+  it('sits on a tile when a token asks for one, and as a bare glyph by default', () => {
+    expect(referenceToken('mention', '@', config({ menuMedia: 'tile' })).menuMedia).toBe('tile');
+    expect(referenceToken('mention', '@', config()).menuMedia).toBe('glyph');
+  });
+});
+
 describe('the boundary before the char', () => {
   it('opens after anything when a token asks for it', () => {
     const token = referenceToken('variable', '{{', config({ boundary: 'any' }));
