@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useReducer, useState, type CSSProperties, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { PaletteIcon } from '@/registry/bases/base-ui/icons/lucide/palette-icon';
 import { FieldGroup, FieldLegend, FieldSet } from '@/registry/bases/base-ui/ui/field';
 import { Popover, PopoverContent, PopoverTrigger } from '@/registry/bases/base-ui/ui/popover';
@@ -45,10 +46,12 @@ interface ColorMenuSwatchesProps {
   editor: IEditor;
   paint: Paint;
   words: LayoutWords;
+  /** Draws the menu again at once, after a swatch has coloured the selection. */
+  onPicked(): void;
 }
 
 /** One palette, the text's or the background's: a toggle per token, each showing the letter it would draw. */
-function ColorMenuSwatches({ editor, paint, words }: ColorMenuSwatchesProps): ReactNode {
+function ColorMenuSwatches({ editor, paint, words, onPicked }: ColorMenuSwatchesProps): ReactNode {
   const current = paintIn(editor, paint);
   return (
     <FieldSet>
@@ -61,7 +64,7 @@ function ColorMenuSwatches({ editor, paint, words }: ColorMenuSwatchesProps): Re
         onValueChange={(values) => {
           const [picked] = values as ColorToken[];
           // Pressing the token already picked keeps it, as a radio does.
-          if (picked !== undefined) editor.run(PAINT_COMMANDS[paint], { token: picked });
+          if (picked !== undefined && editor.run(PAINT_COMMANDS[paint], { token: picked })) onPicked();
         }}
       >
         {COLOR_TOKENS.map((token) => (
@@ -98,8 +101,11 @@ export interface ColorMenuProps {
  */
 function ColorMenu({ editor, words, onOpenChange }: ColorMenuProps): ReactNode {
   const [open, setOpen] = useState(false);
-  // The pressed swatches follow each colour picked, which no prop of this menu carries.
+  // The pressed swatches follow each colour picked, which no prop of this menu carries. Those changes are drawn a
+  // frame later, so a pick draws the menu at once, in the same frame as the coloured text, not with Default pressed.
   useEditorChanges(editor);
+  const [, redraw] = useReducer((count: number) => count + 1, 0);
+  const picked = () => flushSync(redraw);
   const painted = paintIn(editor, 'text') !== 'default' || paintIn(editor, 'background') !== 'default';
   return (
     <Popover
@@ -137,8 +143,8 @@ function ColorMenu({ editor, words, onOpenChange }: ColorMenuProps): ReactNode {
       />
       <PopoverContent aria-label={words.textColor} side="bottom" align="start">
         <FieldGroup>
-          <ColorMenuSwatches editor={editor} paint="text" words={words} />
-          <ColorMenuSwatches editor={editor} paint="background" words={words} />
+          <ColorMenuSwatches editor={editor} paint="text" words={words} onPicked={picked} />
+          <ColorMenuSwatches editor={editor} paint="background" words={words} onPicked={picked} />
         </FieldGroup>
       </PopoverContent>
     </Popover>

@@ -175,6 +175,52 @@ describe('the bubble menu colours', () => {
     await vi.waitFor(() => expect(firstMarks(editor)).toEqual([{ type: 'textBackground', attrs: { token: 'amber' } }]));
   });
 
+  it('presses the swatch picked as the colour lands, and Default no longer', async () => {
+    const editor = await mount([standardKit()], { content: plain });
+    await selectNotes();
+    await openColors();
+    const amber = swatch('Background', 'Amber').element();
+    const fallback = swatch('Background', 'Default').element();
+    // Read as the editor draws the colour, before the browser draws another frame.
+    const seen: string[] = [];
+    const text = document.querySelector('.ProseMirror') as HTMLElement;
+    const drawn = new MutationObserver(() => {
+      if (seen.length === 0 && text.querySelector('[data-bg=amber]')) {
+        seen.push(`${amber.getAttribute('aria-pressed')} ${fallback.getAttribute('aria-pressed')}`);
+      }
+    });
+    drawn.observe(text, { subtree: true, childList: true, attributes: true });
+
+    await userEvent.click(amber);
+
+    await vi.waitFor(() => expect(seen).toHaveLength(1));
+    drawn.disconnect();
+    expect(seen).toEqual(['true false']);
+    expect(firstMarks(editor)).toEqual([{ type: 'textBackground', attrs: { token: 'amber' } }]);
+  });
+
+  it('opens on a selection that carries a background with its swatch pressed', async () => {
+    const amber: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Notes for the bay', marks: [{ type: 'textBackground', attrs: { token: 'amber' } }] },
+          ],
+        },
+        line('Trip'),
+      ],
+    };
+    await mount([standardKit()], { content: amber });
+    await selectNotes();
+    await openColors();
+
+    expect(swatch('Background', 'Amber').element().getAttribute('aria-pressed')).toBe('true');
+    expect(swatch('Background', 'Default').element().getAttribute('aria-pressed')).toBe('false');
+    expect(swatch('Text color', 'Default').element().getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('keeps the bubble and the selection while the menu is open', async () => {
     const editor = await mount([standardKit()], { content: plain });
     await selectNotes();
