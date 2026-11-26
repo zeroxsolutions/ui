@@ -1,6 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
 import { TooltipProvider } from '@/registry/bases/base-ui/ui/tooltip';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
@@ -17,6 +27,24 @@ export interface BlockToolbarProps {
   label: string;
   /** The controls, each a design-system control such as `AlignControl` or `WidthToggle`. */
   children: ReactNode;
+}
+
+/**
+ * Called with the way to close a control's menu as it opens, and with null as it closes; no toolbar around the control
+ * holds nothing.
+ */
+type BlockToolbarHold = (close: (() => void) | null) => void;
+
+const BlockToolbarHoldContext = createContext<BlockToolbarHold>(() => {});
+
+/**
+ * What a control of a `BlockToolbar` calls as its menu or popover opens, with the way to close it, and with null as it
+ * closes, so the toolbar stays drawn while the focus is in that menu, which its portal draws outside the toolbar. The
+ * toolbar reads again whether it shows on the next focus or selection change after the menu closes, so a menu handing
+ * the focus back to its trigger keeps it. Escape pressed on the trigger before the menu takes the focus closes it.
+ */
+export function useBlockToolbarHold(): BlockToolbarHold {
+  return useContext(BlockToolbarHoldContext);
 }
 
 /** The toolbar's controls that take the focus, in order. */
@@ -122,7 +150,7 @@ function useDragInFlight(): boolean {
 }
 
 /**
- * A block's floating toolbar: a popover above the block, shown while the block is selected whole or holds the
+ * A block's floating toolbar: a popover above the block's end, shown while the block is selected whole or holds the
  * caret in an editable editor, and while the focus is in the toolbar itself, never while a block is dragged.
  * Opening it never moves the focus.
  * Of the toolbars of blocks nested around the caret, as a section's around its columns', only the innermost shows.
@@ -136,6 +164,12 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
   const [open, setOpen] = useState(false);
   const entering = useRef(false);
   const shown = useRef<Shown | null>(null);
+  // How to close the control's menu that is open, the focus in it or on its way there; null while none is.
+  const held = useRef<(() => void) | null>(null);
+  const hold = useCallback<BlockToolbarHold>((close) => {
+    held.current = close;
+    if (close) shown.current?.update();
+  }, []);
   const rect = useMemo(() => (anchor ? liveRect(anchor) : null), [anchor]);
   const dragging = useDragInFlight();
 
@@ -157,7 +191,7 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
     const own: Shown = {
       anchor,
       around: () => picked() || holdsCaret(),
-      wants: () => editor.isEditable() && own.around() && (editor.isFocused() || inToolbar()),
+      wants: () => editor.isEditable() && own.around() && (editor.isFocused() || inToolbar() || held.current !== null),
       update: () => setOpen(showsIn(toolbars, own)),
       enter: () => {
         const first = controlsOf(toolbar.current)[0];
@@ -173,7 +207,7 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
     };
     // A focus outside every toolbar, back in the text or elsewhere, ends a step out.
     const focusIn = (event: FocusEvent) => {
-      if (toolbars.raised === own && !toolbar.current?.contains(event.target as Node)) {
+      if (toolbars.raised === own && held.current === null && !toolbar.current?.contains(event.target as Node)) {
         toolbars.raised = null;
         updateAll();
         return;
@@ -230,8 +264,17 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
     };
   }, [open]);
 
-  // Before a control's tooltip, which takes Escape to close itself.
+  // Before a control's tooltip, which takes Escape to close itself. A key pressed in a control's menu reaches here
+  // through its portal, and is the menu's.
   const escape = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!toolbar.current?.contains(event.target as Node)) return;
+    // A menu opened by a pointer takes the focus a moment later; Escape pressed before then closes it, which the
+    // menu's own dismissal does not hear from its trigger's toolbar.
+    if (event.key === 'Escape' && held.current) {
+      event.preventDefault();
+      held.current();
+      return;
+    }
     if (event.key === 'F10' && event.altKey) {
       event.preventDefault();
       stepOut();
@@ -271,7 +314,8 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
         ref={toolbar}
         rect={rect}
         side="top"
-        align="center"
+        // It covers the line above the block; text running left to right most often leaves that line's end empty.
+        align="end"
         sideOffset={8}
         // The editor owns the caret: opening and closing the toolbar leave the focus where it is.
         initialFocus={false}
@@ -287,7 +331,9 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
           if (!(event.target instanceof HTMLElement) || !event.target.closest('input')) event.preventDefault();
         }}
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <BlockToolbarHoldContext value={hold}>
+          <TooltipProvider>{children}</TooltipProvider>
+        </BlockToolbarHoldContext>
       </RectPopover>
     </Popover>
   );

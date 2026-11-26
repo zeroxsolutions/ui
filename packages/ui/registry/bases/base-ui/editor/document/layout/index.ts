@@ -1,5 +1,5 @@
 export { AlignControl, type AlignControlProps } from './align-control';
-export { BlockToolbar, type BlockToolbarProps } from './block-toolbar';
+export { BlockToolbar, useBlockToolbarHold, type BlockToolbarProps } from './block-toolbar';
 export { layoutProps, type LayoutProps } from './layout-props';
 export { DEFAULT_LAYOUT_WORDS, layoutWordsOf, type LayoutWords } from './layout-words';
 export {

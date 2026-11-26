@@ -218,10 +218,13 @@ padding.
 
 ## The toolbar
 
-The toolbar shows above a block that is selected or holds the caret, and opening it leaves the focus in the text.
+The toolbar shows above the end of a block that is selected or holds the caret, and opening it leaves the focus in
+the text. It covers the line above the block, at that line's end, where left-to-right text most often leaves room.
 It draws nothing while a block is dragged by its grip, so it never covers the place a block is dropped.
 Tab from a selected block, or Alt+F10 from its text, moves into it; the arrow keys move between its controls and
-Escape goes back to the text.
+Escape goes back to the text. A control that opens a menu, as the section's do, opens it with Enter; Escape closes
+the menu back to its control. Such a control hands the function `useBlockToolbarHold` returns the way to close its
+menu as it opens, and null as it closes, so the toolbar stays while the focus is in the menu.
 
 Where blocks sit inside each other, as columns in a section, only the innermost block's toolbar shows. Alt+F10 from
 the text moves into that toolbar; Alt+F10 again, from inside a toolbar, moves out to the next enclosing block's
