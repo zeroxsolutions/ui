@@ -110,22 +110,23 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* The named hues a document's text, its background and a section take: each a colour to read on the page and
-     a surface to set text on, Tailwind's 600 and 100 steps here and its 400 and 950 steps in dark. */
-  --hue-red: oklch(0.577 0.245 27.325);
+     a surface to set text on, Tailwind's 700 (green a shade darker) and 100 steps here and its 400 and 950 steps
+     in dark, so each text reads at WCAG AA on the page and on its own surface. */
+  --hue-red: oklch(0.505 0.213 27.518);
   --hue-red-surface: oklch(0.936 0.032 17.717);
-  --hue-orange: oklch(0.646 0.222 41.116);
+  --hue-orange: oklch(0.553 0.195 38.402);
   --hue-orange-surface: oklch(0.954 0.038 75.164);
-  --hue-amber: oklch(0.666 0.179 58.318);
+  --hue-amber: oklch(0.555 0.163 48.998);
   --hue-amber-surface: oklch(0.962 0.059 95.617);
-  --hue-green: oklch(0.627 0.194 149.214);
+  --hue-green: oklch(0.515 0.154 150.069);
   --hue-green-surface: oklch(0.962 0.044 156.743);
-  --hue-teal: oklch(0.6 0.118 184.704);
+  --hue-teal: oklch(0.511 0.096 186.391);
   --hue-teal-surface: oklch(0.953 0.051 180.801);
-  --hue-blue: oklch(0.546 0.245 262.881);
+  --hue-blue: oklch(0.488 0.243 264.376);
   --hue-blue-surface: oklch(0.932 0.032 255.585);
-  --hue-violet: oklch(0.541 0.281 293.009);
+  --hue-violet: oklch(0.491 0.27 292.581);
   --hue-violet-surface: oklch(0.943 0.029 294.588);
-  --hue-pink: oklch(0.592 0.249 0.584);
+  --hue-pink: oklch(0.525 0.223 3.958);
   --hue-pink-surface: oklch(0.948 0.028 342.258);
 
   /* The surface the palette below sits on. Not `--muted`: dark keeps the
