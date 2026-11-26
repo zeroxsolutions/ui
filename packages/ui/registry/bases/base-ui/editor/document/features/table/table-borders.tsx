@@ -4,18 +4,24 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, typ
 import type { LayoutWords } from '../../layout/layout-words';
 import { COLUMN_WIDTH_MIN, COLUMN_WIDTH_STEP, inFourPlaces } from './table-widths';
 
-/** Where border `index` may move between: a twentieth after the border before it, a twentieth before the next. */
-function rangeOf(shares: readonly number[], index: number): { at: number; least: number; most: number } {
+/**
+ * Where border `index` may move between: `floor` after the border before it and `floor` before the next. A column
+ * already narrower than `floor` may grow and not shrink.
+ */
+function rangeOf(
+  shares: readonly number[],
+  index: number,
+  floor: number,
+): { at: number; before: number; after: number; least: number; most: number } {
   const before = shares.slice(0, index).reduce((sum, share) => sum + share, 0);
   const at = before + shares[index];
-  return { at, least: before + COLUMN_WIDTH_MIN, most: at + shares[index + 1] - COLUMN_WIDTH_MIN };
+  const after = at + shares[index + 1];
+  return { at, before, after, least: Math.min(at, before + floor), most: Math.max(at, after - floor) };
 }
 
 /** `shares` with border `index` moved to `at`, the columns either side of it resized and the rest kept. */
-function movedTo(shares: readonly number[], index: number, at: number): number[] {
-  const { least, most } = rangeOf(shares, index);
-  const before = least - COLUMN_WIDTH_MIN;
-  const after = most + COLUMN_WIDTH_MIN;
+function movedTo(shares: readonly number[], index: number, at: number, floor: number): number[] {
+  const { before, after, least, most } = rangeOf(shares, index, floor);
   const border = Math.min(most, Math.max(least, at));
   return shares.map((share, column) =>
     inFourPlaces(column === index ? border - before : column === index + 1 ? after - border : share),
@@ -23,6 +29,42 @@ function movedTo(shares: readonly number[], index: number, at: number): number[]
 }
 
 const snapped = (share: number): number => Math.round(share / COLUMN_WIDTH_STEP) * COLUMN_WIDTH_STEP;
+
+/**
+ * The narrowest share of `table` a column may take where it is drawn now: its first cell's side padding and borders
+ * and one character of its text, rounded up to a step, and never below a twentieth. A wider or narrower table, or
+ * another style's padding, moves it; the widths stay shares.
+ */
+function floorOf(table: HTMLTableElement | null): number {
+  const cell = table?.querySelector<HTMLElement>('tr > th, tr > td');
+  const width = table?.getBoundingClientRect().width ?? 0;
+  if (!table || !cell || width <= 0) return COLUMN_WIDTH_MIN;
+  const style = getComputedStyle(cell);
+  const sides = [style.paddingLeft, style.paddingRight, style.borderLeftWidth, style.borderRightWidth];
+  const probe = cell.ownerDocument.createElement('span');
+  probe.textContent = '0';
+  probe.style.position = 'absolute';
+  probe.style.visibility = 'hidden';
+  cell.append(probe);
+  const character = probe.getBoundingClientRect().width;
+  probe.remove();
+  const pixels = sides.reduce((sum, side) => sum + (parseFloat(side) || 0), character);
+  return Math.max(COLUMN_WIDTH_MIN, inFourPlaces(Math.ceil(pixels / width / COLUMN_WIDTH_STEP) * COLUMN_WIDTH_STEP));
+}
+
+/** `floorOf(table)`, read again as the table's drawn width changes. */
+function useColumnFloor(table: HTMLTableElement | null): number {
+  const [floor, setFloor] = useState(COLUMN_WIDTH_MIN);
+  useEffect(() => {
+    if (!table) return;
+    const measure = () => setFloor(floorOf(table));
+    const sizes = new ResizeObserver(measure);
+    sizes.observe(table);
+    measure();
+    return () => sizes.disconnect();
+  }, [table]);
+  return floor;
+}
 const same = (a: readonly number[], b: readonly number[]): boolean =>
   a.map(inFourPlaces).join() === b.map(inFourPlaces).join();
 
@@ -31,6 +73,8 @@ interface Drag {
   readonly pointerId: number;
   readonly handle: HTMLElement;
   readonly start: readonly number[];
+  /** The narrowest share a column may take, as the drag began. */
+  readonly floor: number;
   /** The table's start edge and width, in pixels, as the drag began. */
   readonly edge: number;
   readonly width: number;
@@ -54,13 +98,14 @@ export interface TableBordersProps {
 /**
  * A handle on the border after each column but the last, each a `role="slider"` reading where the border sits in
  * percent of the table. Any pointer drags one, the border snapping to a twentieth of the table and keeping each
- * column at least a twentieth wide; each move previews, the release commits once and Escape cancels. On a focused
- * handle the arrow keys move the border by a twentieth, Home and End as far as it goes. Drawn inside the table's
- * positioned box.
+ * column at least as wide as its cell's padding and one character where the table is drawn now, and a twentieth;
+ * each move previews, the release commits once and Escape cancels. On a focused handle the arrow keys move the
+ * border by a twentieth, Home and End as far as it goes. Drawn inside the table's positioned box.
  */
 export function TableBorders({ table, shares, words, onPreview, onCommit }: TableBordersProps): ReactNode {
   const drag = useRef<Drag | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
+  const floor = useColumnFloor(table);
   const latest = useRef({ onPreview, onCommit });
   latest.current = { onPreview, onCommit };
 
@@ -104,6 +149,7 @@ export function TableBorders({ table, shares, words, onPreview, onCommit }: Tabl
       pointerId: event.pointerId,
       handle,
       start: shares,
+      floor: floorOf(table),
       edge: direction === 1 ? rect.left : rect.right,
       width: rect.width,
       direction,
@@ -116,7 +162,7 @@ export function TableBorders({ table, shares, words, onPreview, onCommit }: Tabl
     const moving = drag.current;
     if (!moving || event.pointerId !== moving.pointerId || moving.width <= 0) return;
     const at = snapped(((event.clientX - moving.edge) * moving.direction) / moving.width);
-    const next = movedTo(moving.start, moving.index, at);
+    const next = movedTo(moving.start, moving.index, at, moving.floor);
     if (same(next, moving.current)) return;
     moving.current = next;
     latest.current.onPreview(next);
@@ -128,7 +174,7 @@ export function TableBorders({ table, shares, words, onPreview, onCommit }: Tabl
 
   const keyDown = (index: number, event: KeyboardEvent<HTMLElement>): void => {
     if (drag.current || event.altKey || event.ctrlKey || event.metaKey) return;
-    const { at, least, most } = rangeOf(shares, index);
+    const { at, least, most } = rangeOf(shares, index, floor);
     const forward = (rtl() ? ['ArrowLeft', 'ArrowUp'] : ['ArrowRight', 'ArrowUp']).includes(event.key);
     const back = (rtl() ? ['ArrowRight', 'ArrowDown'] : ['ArrowLeft', 'ArrowDown']).includes(event.key);
     const to = forward
@@ -143,13 +189,13 @@ export function TableBorders({ table, shares, words, onPreview, onCommit }: Tabl
     if (to === undefined) return;
     event.preventDefault();
     event.stopPropagation();
-    const next = movedTo(shares, index, to);
+    const next = movedTo(shares, index, to, floor);
     if (!same(next, shares)) latest.current.onCommit(next);
   };
 
   const percents = shares.map((share) => Math.round(share * 100));
   return shares.slice(0, -1).map((_share, index) => {
-    const { at, least, most } = rangeOf(shares, index);
+    const { at, least, most } = rangeOf(shares, index, floor);
     return (
       <div
         key={index}
