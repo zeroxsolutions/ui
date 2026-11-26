@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import '../../../../../../../test/nova-style.css';
 import '../../../styles.css';
 import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
+import { fileInput, heldUpload, pngFile } from '../../../../../../../src/test/uploads';
 import { standardKit } from '../standard/index';
 import { card } from './card';
 import { card as cardDefinition } from '@zeroxsolutions/editor-core/blocks/index';
@@ -41,5 +42,26 @@ describe('the card in the Document Editor', () => {
         },
         content: [{ type: 'text', text: 'Lanterns' }],
       });
+  });
+});
+
+describe('the card with uploads', () => {
+  it('uploads its image from the image popover, drawn faint until the address lands', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), card(cardDefinition, { upload })]);
+    await insertFromSlashMenu('Card');
+    await userEvent.click(page.getByRole('button', { name: 'Image', exact: true }));
+
+    await userEvent.upload(fileInput(), pngFile());
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+
+    expect((await findElement('[data-slot=card-image]')).getAttribute('src')).toMatch(/^blob:/);
+    expect(JSON.stringify(editor.getJSON())).not.toMatch(/blob:/);
+    calls[0].answer('https://i.test/hoi-an.jpg');
+    await vi.waitFor(() =>
+      expect(editor.getJSON().content?.find((node) => node.type === 'card')?.attrs?.image).toBe(
+        'https://i.test/hoi-an.jpg',
+      ),
+    );
   });
 });

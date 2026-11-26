@@ -13,6 +13,9 @@ import {
 } from '@/registry/bases/base-ui/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-ui/ui/tooltip';
 import { TrashIcon } from '@/registry/bases/base-ui/icons/lucide/trash-icon';
+import { DEFAULT_UPLOAD_MESSAGES } from '../uploads/upload';
+import { UploadTabs } from '../uploads/upload-tabs';
+import type { BlockUploadControl } from '../uploads/use-block-upload';
 
 /** What a popover's address field is drawn from, when the host draws its own field in place of the input. */
 export interface BlockAddressPopoverFieldProps {
@@ -56,6 +59,8 @@ export interface BlockAddressPopoverProps {
   children?: ReactNode;
   /** Where a press outside the popover keeps it open, as a menu the field opens in a layer of its own. */
   keepOpenWithin?: string;
+  /** Uploads a file into the address, from an Upload tab beside the field's Link tab; the field alone when absent. */
+  upload?: BlockUploadControl | null;
 }
 
 /**
@@ -78,6 +83,7 @@ export function BlockAddressPopover({
   choices,
   children,
   keepOpenWithin,
+  upload = null,
 }: BlockAddressPopoverProps): ReactNode {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -119,44 +125,51 @@ export function BlockAddressPopover({
         <PopoverHeader>
           <PopoverTitle id={titleId}>{label}</PopoverTitle>
         </PopoverHeader>
-        <Field data-invalid={shown.length > 0 || undefined} data-disabled={disabled || undefined}>
-          {field ? (
-            field({
-              value: draft,
-              onValueChange: setDraft,
-              onCommit: apply,
-              label,
-              placeholder,
-              disabled,
-              invalid: shown.length > 0,
-              describedBy: shown.length > 0 ? problemId : undefined,
-            })
-          ) : (
-            <>
-              <label htmlFor={inputId} className="sr-only">
-                {label}
-              </label>
-              <Input
-                id={inputId}
-                type="url"
-                value={draft}
-                placeholder={placeholder}
-                disabled={disabled}
-                aria-invalid={shown.length > 0 || undefined}
-                aria-describedby={shown.length > 0 ? problemId : undefined}
-                onChange={(event) => setDraft(event.currentTarget.value)}
-                onKeyDown={(event) => {
-                  if (event.key !== 'Enter') return;
-                  event.preventDefault();
-                  apply(event.currentTarget.value);
-                }}
-              />
-            </>
-          )}
-          {disabled && <FieldDescription>{disabledReason}</FieldDescription>}
-          {shown.length > 0 && <FieldError id={problemId} errors={shown.map((message) => ({ message }))} />}
-        </Field>
-        {!disabled && choices?.(apply)}
+        <UploadTabs
+          upload={disabled ? null : (upload?.upload ?? null)}
+          messages={upload?.messages ?? DEFAULT_UPLOAD_MESSAGES}
+          defaultTab={value === '' ? 'upload' : 'link'}
+          onStart={() => setOpen(false)}
+        >
+          <Field data-invalid={shown.length > 0 || undefined} data-disabled={disabled || undefined}>
+            {field ? (
+              field({
+                value: draft,
+                onValueChange: setDraft,
+                onCommit: apply,
+                label,
+                placeholder,
+                disabled,
+                invalid: shown.length > 0,
+                describedBy: shown.length > 0 ? problemId : undefined,
+              })
+            ) : (
+              <>
+                <label htmlFor={inputId} className="sr-only">
+                  {label}
+                </label>
+                <Input
+                  id={inputId}
+                  type="url"
+                  value={draft}
+                  placeholder={placeholder}
+                  disabled={disabled}
+                  aria-invalid={shown.length > 0 || undefined}
+                  aria-describedby={shown.length > 0 ? problemId : undefined}
+                  onChange={(event) => setDraft(event.currentTarget.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter') return;
+                    event.preventDefault();
+                    apply(event.currentTarget.value);
+                  }}
+                />
+              </>
+            )}
+            {disabled && <FieldDescription>{disabledReason}</FieldDescription>}
+            {shown.length > 0 && <FieldError id={problemId} errors={shown.map((message) => ({ message }))} />}
+          </Field>
+          {!disabled && choices?.(apply)}
+        </UploadTabs>
         {children}
         <div className="flex items-center justify-end gap-2">
           {onRemove && removeLabel && (

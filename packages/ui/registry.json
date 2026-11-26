@@ -2536,7 +2536,7 @@
       "name": "editor-image",
       "type": "registry:component",
       "title": "Editor Image",
-      "description": "A block image with alt text and an optional width, edited in a popover.",
+      "description": "A block image with alt text and an optional width, edited in a popover, and uploaded through the host's upload where it gives one.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/button",
@@ -2544,6 +2544,7 @@
         "@shadcn/input",
         "@shadcn/popover",
         "@zui/document-editor",
+        "@zui/editor-uploads",
         "@zui/lucide-image-icon"
       ],
       "files": [
@@ -2918,6 +2919,7 @@
         "@shadcn/tooltip",
         "@shadcn/utils",
         "@zui/document-editor",
+        "@zui/editor-uploads",
         "@zui/lucide-blocks-icon",
         "@zui/lucide-trash-icon"
       ],
@@ -2962,7 +2964,6 @@
         "@shadcn/progress",
         "@shadcn/tabs",
         "@shadcn/utils",
-        "@zui/document-editor",
         "@zui/lucide-upload-icon",
         "@zui/lucide-x-icon"
       ],
@@ -3126,6 +3127,7 @@
         "@shadcn/utils",
         "@zui/block-library",
         "@zui/document-editor",
+        "@zui/editor-uploads",
         "@zui/lucide-id-card-icon",
         "@zui/lucide-image-icon",
         "@zui/lucide-link-icon"
@@ -3224,7 +3226,12 @@
       "title": "Editor File",
       "description": "A file to download, drawn as a row with its icon, its name and its size.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/block-library", "@zui/document-editor", "@zui/lucide-file-text-icon"],
+      "registryDependencies": [
+        "@zui/block-library",
+        "@zui/document-editor",
+        "@zui/editor-uploads",
+        "@zui/lucide-file-text-icon"
+      ],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/file/index.ts",
@@ -3269,6 +3276,7 @@
       "registryDependencies": [
         "@zui/block-library",
         "@zui/document-editor",
+        "@zui/editor-uploads",
         "@zui/lucide-audio-lines-icon",
         "@zui/lucide-clapperboard-icon"
       ],

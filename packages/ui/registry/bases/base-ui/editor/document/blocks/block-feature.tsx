@@ -21,6 +21,7 @@ import type {
   RichTextField,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import type { ReactNodeCodec, ReactSerializeContext } from '../../react-types';
+import type { BlockPlace } from '../uploads/use-block-upload';
 
 type FieldMap = Readonly<Record<string, EmailBlockField>>;
 type AttributeMap = Readonly<Record<string, EmailBlockAttribute>>;
@@ -44,6 +45,8 @@ export interface BlockViewProps<F extends FieldMap, A extends AttributeMap> {
   update(patch: Readonly<Record<string, unknown>>): void;
   /** The whole document, for a block that draws from it (`readsDocument`); null otherwise. */
   readonly doc: NodeJSON | null;
+  /** Where the block is in the editor, which an upload into it is kept at; null in the Viewer. */
+  readonly place: BlockPlace | null;
 }
 
 /** The view props of block `B`, as `defineBlock` returned it. */
@@ -158,7 +161,7 @@ export function blockFeature<Type extends string, F extends FieldMap, A extends 
   const insertCommand = `insertBlock:${block.type}`;
   const attrs = side.node.attrs as z.ZodObject<Record<string, z.ZodType>>;
 
-  function BlockNodeView({ attrs: values, updateAttrs, editable, selected, editor, children }: NodeViewProps) {
+  function BlockNodeView({ attrs: values, updateAttrs, editable, selected, editor, getPos, children }: NodeViewProps) {
     useDocumentChanges(editor, readsDocument);
     return (
       <View
@@ -168,6 +171,7 @@ export function blockFeature<Type extends string, F extends FieldMap, A extends 
         selected={selected}
         update={(patch) => updateAttrs(patch)}
         doc={readsDocument ? editor.getJSON() : null}
+        place={{ editor, getPos }}
       />
     );
   }
@@ -182,6 +186,7 @@ export function blockFeature<Type extends string, F extends FieldMap, A extends 
         selected={false}
         update={() => {}}
         doc={readsDocument ? ctx.doc : null}
+        place={null}
       />
     ),
   };

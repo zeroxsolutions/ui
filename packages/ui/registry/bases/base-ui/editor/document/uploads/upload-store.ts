@@ -12,7 +12,15 @@ import {
   type ProseMirrorNode,
 } from '@zeroxsolutions/editor-core/document/advanced';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { acceptScore, uploadRefusal, type EditorUpload, type UploadLimits, type UploadMessages } from './upload';
+import {
+  acceptScore,
+  uploadMessagesOf,
+  uploadRefusal,
+  type BlockUploadOptions,
+  type EditorUpload,
+  type UploadLimits,
+  type UploadMessages,
+} from './upload';
 
 interface UploadEntryBase {
   readonly id: number;
@@ -56,6 +64,24 @@ export interface UploadRequest {
   problems?(url: string): readonly string[];
 }
 
+/**
+ * The request a feature's block uploads with under `options`, or null where the host gave no `upload`. `accept`
+ * is the block's own types; the host's `accept` narrows them.
+ */
+export function blockUploadRequest(
+  options: BlockUploadOptions,
+  block: Pick<UploadRequest, 'accept' | 'preview' | 'land' | 'problems'>,
+): UploadRequest | null {
+  const { upload, accept, maxBytes } = options;
+  if (!upload) return null;
+  return {
+    ...block,
+    upload,
+    limits: { accept, maxBytes },
+    messages: uploadMessagesOf(options.messages),
+  };
+}
+
 /** A block a pasted or dropped file becomes, offered by the feature that draws it. */
 export interface UploadTaker {
   /** The types it takes; a file goes to the taker that names its type closest. */
@@ -64,7 +90,8 @@ export interface UploadTaker {
   readonly slot: string;
   /** The empty block the file becomes, or null where the editor holds none for it. */
   node(engine: Editor, file: File): ProseMirrorNode | null;
-  request(): UploadRequest;
+  /** What the block made for `file` uploads it with. */
+  request(file: File): UploadRequest;
 }
 
 /** The uploads of one editor. */
@@ -325,8 +352,12 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
         const taker = best(file);
         const node = taker?.node(engine, file);
         if (!taker || !node) continue;
-        if (point === null) tr.replaceSelectionWith(node, false);
-        else {
+        if (point === null) {
+          tr.replaceSelectionWith(node, false);
+          // The next file goes after this one rather than replacing it, as the selection now picks it.
+          const at = positionOf(tr.doc, node);
+          point = at === undefined ? null : at + node.nodeSize;
+        } else {
           const spot = dropPoint(tr.doc, point, new Slice(Fragment.from(node), 0, 0)) ?? point;
           tr.insert(spot, node);
           point = spot + node.nodeSize;
@@ -338,7 +369,7 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
       for (const { node, taker, file } of made) {
         const pos = positionOf(tr.doc, node);
         if (pos === undefined) continue;
-        const request = taker.request();
+        const request = taker.request(file);
         const refusal = uploadRefusal(file, request.accept, request.limits, request.messages);
         const record: UploadRecord = {
           entry: entryOf(pos, taker.slot, file, request, true, refusal),

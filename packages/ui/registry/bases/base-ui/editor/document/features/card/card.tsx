@@ -8,9 +8,19 @@ import { Input } from '@/registry/bases/base-ui/ui/input';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { Block } from '@zeroxsolutions/editor-core/blocks/index';
 import type { EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
-import { blockFeature } from '../../blocks/block-feature';
+import { blockFeature, type BlockViewPropsOf } from '../../blocks/block-feature';
 import { BlockAddressPopover } from '../../blocks/block-address-popover';
 import { linkAddress, sourceAddress } from '../../blocks/block-address';
+import {
+  blockUploadRequest,
+  uploadMessagesOf,
+  uploadsExtension,
+  UploadStatus,
+  useBlockUpload,
+  type BlockUploadControl,
+  type BlockUploadOptions,
+  type UploadRequest,
+} from '../../uploads/index';
 
 /** The fields a card's view reads, each `''` where the card leaves it out; its rich text is the body. */
 export interface CardFields {
@@ -21,7 +31,7 @@ export interface CardFields {
   readonly buttonHref: string;
 }
 
-export interface CardOptions {
+export interface CardOptions extends BlockUploadOptions {
   /** The host's words for what the editor shows on a card. */
   words?: Partial<CardWords>;
 }
@@ -65,6 +75,8 @@ export interface CardAddressProps {
   onApply(address: string): void;
   /** The image's alt text, written in the image's popover. */
   readonly alt?: { readonly label: string; readonly value: string; onValueChange(value: string): void };
+  /** Uploads a file into the address from an Upload tab; the address field alone when absent. */
+  readonly upload?: BlockUploadControl | null;
 }
 
 /** The controls a card's view writes with; an editor of another profile hands in its own, as the email editor's. */
@@ -99,6 +111,8 @@ export interface CardViewProps {
    * a web or mail address alone when absent.
    */
   readonly drawsButton?: (address: string) => boolean;
+  /** An upload into the image, drawn in its place while it runs or once it failed; none when absent. */
+  readonly imageUpload?: BlockUploadControl | null;
 }
 
 export const DEFAULT_CARD_WORDS: CardWords = {
@@ -135,7 +149,16 @@ function CardTextField({ label, value, placeholder, className, onValueChange }: 
 export function cardParts(words: CardWords): CardParts {
   return {
     Text: CardTextField,
-    Address: function CardAddressPopover({ kind, label, value, trigger, tooltip, onApply, alt }: CardAddressProps) {
+    Address: function CardAddressPopover({
+      kind,
+      label,
+      value,
+      trigger,
+      tooltip,
+      onApply,
+      alt,
+      upload,
+    }: CardAddressProps) {
       const altId = useId();
       return (
         <BlockAddressPopover
@@ -151,6 +174,7 @@ export function cardParts(words: CardWords): CardParts {
               : []
           }
           onApply={onApply}
+          upload={upload}
         >
           {alt && (
             <Field>
@@ -182,6 +206,7 @@ export function CardView({
   headingAs: Heading = 'h4',
   imageStandIn,
   drawsButton = (address) => linkAddress(address) !== undefined,
+  imageUpload = null,
 }: CardViewProps): ReactNode {
   const { Text, Address } = parts;
   const image = sourceAddress(fields.image);
@@ -189,13 +214,16 @@ export function CardView({
   const unsent = fields.buttonLabel === '' || fields.buttonHref.trim() === '' || !drawsButton(fields.buttonHref);
   const hero = variant === 'hero';
   const standIn = image === undefined && fields.image.trim() !== '' ? imageStandIn?.(fields.image) : undefined;
-  const imageElement = image !== undefined && (
+  const uploading = editable ? (imageUpload?.upload.entry ?? null) : null;
+  const shownImage = uploading?.preview ?? image;
+  const imageElement = shownImage !== undefined && (
     <img
       data-slot="card-image"
-      src={image}
+      data-dimmed={uploading !== null || undefined}
+      src={shownImage}
       alt={editable ? '' : fields.alt}
       contentEditable={false}
-      className={cn('w-full', !hero && 'aspect-video object-cover')}
+      className={cn('w-full data-dimmed:opacity-50', !hero && 'aspect-video object-cover')}
     />
   );
   return (
@@ -217,6 +245,7 @@ export function CardView({
             tooltip={words.image}
             onApply={(address) => update({ image: address })}
             alt={{ label: words.alt, value: fields.alt, onValueChange: (alt) => update({ alt }) }}
+            upload={imageUpload}
             trigger={
               imageElement ? (
                 <button
@@ -244,6 +273,15 @@ export function CardView({
               )
             }
           />
+          {uploading && imageUpload && (
+            <UploadStatus
+              entry={uploading}
+              messages={imageUpload.messages}
+              onCancel={imageUpload.upload.cancel}
+              onRetry={imageUpload.upload.retry}
+              className={hero ? 'mt-2' : 'px-4 pt-2'}
+            />
+          )}
         </div>
       ) : (
         (imageElement || standIn) &&
@@ -345,8 +383,22 @@ export function CardView({
 export function card(definition: Block, options: CardOptions = {}): EditorFeature {
   const words: CardWords = { ...DEFAULT_CARD_WORDS, ...options.words };
   const parts = cardParts(words);
-  return blockFeature(definition, {
-    icon: IdCardIcon,
-    view: (props) => <CardView {...props} fields={props.fields as unknown as CardFields} words={words} parts={parts} />,
-  });
+  const requestOf = (): UploadRequest | null =>
+    blockUploadRequest(options, { accept: 'image/*', preview: true, land: (_attrs, url) => ({ image: url }) });
+
+  function CardFeatureView(props: BlockViewPropsOf<Block>): ReactNode {
+    const upload = useBlockUpload(props.editable ? props.place : null, 'image', requestOf());
+    return (
+      <CardView
+        {...props}
+        fields={props.fields as unknown as CardFields}
+        words={words}
+        parts={parts}
+        imageUpload={upload && { upload, messages: uploadMessagesOf(options.messages) }}
+      />
+    );
+  }
+
+  const feature = blockFeature(definition, { icon: IdCardIcon, view: CardFeatureView });
+  return options.upload ? { ...feature, advanced: { engineExtensions: [uploadsExtension('card', null)] } } : feature;
 }

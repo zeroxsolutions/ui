@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { ImageIcon } from '@/registry/bases/base-ui/icons/lucide/image-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Field, FieldLabel } from '@/registry/bases/base-ui/ui/field';
@@ -11,6 +11,18 @@ import {
   type NodeCodec,
   type NodeViewProps,
 } from '@zeroxsolutions/editor-core/document/core/index';
+import {
+  blockUploadRequest,
+  uploadMessagesOf,
+  uploadsExtension,
+  UploadStatus,
+  UploadTabs,
+  useBlockUpload,
+  type BlockUploadOptions,
+  type UploadMessages,
+  type UploadRequest,
+  type UploadTaker,
+} from '../../uploads/index';
 
 /**
  * A block image — a pure custom node (no engine extension): declarative
@@ -49,6 +61,8 @@ function ImageFigure({
   href,
   selected,
   contentEditable,
+  dimmed,
+  status,
   children,
 }: {
   src: string;
@@ -60,14 +74,19 @@ function ImageFigure({
   href?: string | null;
   selected?: boolean;
   contentEditable?: boolean;
+  /** Drawn faint, as a file still uploading is. */
+  dimmed?: boolean;
+  /** How an upload into the image stands, under it. */
+  status?: ReactNode;
   children?: ReactNode;
-}) {
+}): ReactNode {
   const drawn = (
     <img
       src={src}
       alt={alt}
       title={title}
-      className="cn-editor-block h-auto max-w-full border"
+      data-dimmed={dimmed || undefined}
+      className="cn-editor-block data-dimmed:bg-muted h-auto max-w-full border data-dimmed:min-h-24 data-dimmed:min-w-48 data-dimmed:opacity-50"
       style={{ width: width ? `${width}px` : undefined }}
     />
   );
@@ -87,27 +106,60 @@ function ImageFigure({
       ) : (
         <span className="text-muted-foreground text-sm">Empty image</span>
       )}
+      {status}
       {caption || alt ? <figcaption className="text-muted-foreground mt-1 text-sm">{caption || alt}</figcaption> : null}
       {children}
     </figure>
   );
 }
 
-export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewProps<ImageAttrs>) {
+/** What the image view uploads with: its request, null for an editor given no upload, and its words. */
+interface ImageUploads {
+  readonly request: UploadRequest | null;
+  readonly messages: UploadMessages;
+}
+
+const NO_UPLOADS: ImageUploads = { request: null, messages: uploadMessagesOf(undefined) };
+
+function ImageEditView({
+  attrs,
+  updateAttrs,
+  editable,
+  selected,
+  editor,
+  getPos,
+  uploads,
+}: NodeViewProps<ImageAttrs> & { uploads: ImageUploads }): ReactNode {
   const srcId = useId();
   const altId = useId();
   const captionId = useId();
   const hrefId = useId();
   const widthId = useId();
+  const [open, setOpen] = useState(false);
+  const upload = useBlockUpload(editable ? { editor, getPos } : null, IMAGE_SLOT, uploads.request);
+  const entry = upload?.entry ?? null;
   return (
     <ImageFigure
-      src={attrs.src}
+      src={entry?.preview ?? attrs.src}
       alt={attrs.alt}
       title={attrs.title || undefined}
       width={attrs.width}
       caption={attrs.caption}
       selected={selected}
       contentEditable={false}
+      dimmed={entry !== null}
+      status={
+        upload &&
+        entry && (
+          <UploadStatus
+            entry={entry}
+            messages={uploads.messages}
+            onCancel={upload.cancel}
+            onRetry={upload.retry}
+            className="mt-2"
+          />
+        )
+      }
     >
       {editable && (
         // A design-system `Popover` for the alt/width editor (DOM-anchored to the
@@ -120,7 +172,7 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
           onPointerDown={(event) => event.stopPropagation()}
           className="absolute top-2 right-2"
         >
-          <Popover>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger
               render={
                 <Button type="button" variant="outline" size="sm">
@@ -129,15 +181,22 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
               }
             />
             <PopoverContent align="end" className="w-72 gap-3">
-              <Field>
-                <FieldLabel htmlFor={srcId}>Image address</FieldLabel>
-                <Input
-                  id={srcId}
-                  placeholder="https://"
-                  defaultValue={attrs.src}
-                  onBlur={(event) => updateAttrs({ src: event.target.value.trim() })}
-                />
-              </Field>
+              <UploadTabs
+                upload={upload}
+                messages={uploads.messages}
+                defaultTab={attrs.src === '' ? 'upload' : 'link'}
+                onStart={() => setOpen(false)}
+              >
+                <Field>
+                  <FieldLabel htmlFor={srcId}>Image address</FieldLabel>
+                  <Input
+                    id={srcId}
+                    placeholder="https://"
+                    defaultValue={attrs.src}
+                    onBlur={(event) => updateAttrs({ src: event.target.value.trim() })}
+                  />
+                </Field>
+              </UploadTabs>
               <Field>
                 <FieldLabel htmlFor={altId}>Alt text</FieldLabel>
                 <Input
@@ -184,6 +243,11 @@ export function ImageView({ attrs, updateAttrs, editable, selected }: NodeViewPr
       )}
     </ImageFigure>
   );
+}
+
+/** The image's node view in an editor whose images take an address only. */
+export function ImageView(props: NodeViewProps<ImageAttrs>): ReactNode {
+  return <ImageEditView {...props} uploads={NO_UPLOADS} />;
 }
 
 const attr = (value: string): string => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -234,7 +298,40 @@ const imageCodec: NodeCodec<ImageAttrs> = {
   // with a warning; HTML is image's two-way path in Phase 1.
 };
 
-export function image(): EditorFeature {
+/** The address of an image an upload fills. */
+const IMAGE_SLOT = 'src';
+
+export interface ImageOptions extends BlockUploadOptions {
+  /**
+   * What is wrong with an address an upload answered, each as a sentence, as a profile checks a typed one; the
+   * upload fails with the first and the image keeps the address it had. Any web address is taken when absent.
+   */
+  problems?(url: string): readonly string[];
+}
+
+/**
+ * The image block. Given `upload`, its popover uploads a file beside taking an address, and an image file pasted
+ * or dropped into the editor becomes an image block that uploads it.
+ */
+export function image(options: ImageOptions = {}): EditorFeature {
+  const requestOf = (): UploadRequest | null =>
+    blockUploadRequest(options, {
+      accept: 'image/*',
+      preview: true,
+      land: (_attrs, url) => ({ src: url }),
+      problems: options.problems,
+    });
+  const taker: UploadTaker = {
+    accept: 'image/*',
+    slot: IMAGE_SLOT,
+    node: (engine) => engine.schema.nodes.image?.create({ src: '' }) ?? null,
+    request: () => requestOf() as UploadRequest,
+  };
+  const render = options.upload
+    ? (props: NodeViewProps<ImageAttrs>) => (
+        <ImageEditView {...props} uploads={{ request: requestOf(), messages: uploadMessagesOf(options.messages) }} />
+      )
+    : ImageView;
   return defineFeature({
     id: 'image',
     nodes: [
@@ -245,7 +342,7 @@ export function image(): EditorFeature {
         selectable: true,
         draggable: true,
         attrs: imageAttrs,
-        render: ImageView,
+        render,
       },
     ],
     codecs: [imageCodec as NodeCodec],
@@ -280,5 +377,6 @@ export function image(): EditorFeature {
         command: 'insertImage',
       },
     ],
+    ...(options.upload ? { advanced: { engineExtensions: [uploadsExtension('image', taker)] } } : {}),
   });
 }

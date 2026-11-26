@@ -103,3 +103,17 @@ export function uploadRefusal(
   if (limits.maxBytes !== undefined && file.size > limits.maxBytes) return messages.tooLarge(limits.maxBytes);
   return null;
 }
+
+/** What a feature whose blocks take an image or a file is given to upload with. */
+export interface BlockUploadOptions extends UploadLimits {
+  /** The host's upload; without it a block takes an address only, as before. */
+  readonly upload?: EditorUpload;
+  /** The words the upload controls draw, over the English; a getter is read each time they are drawn. */
+  readonly messages?: Partial<UploadMessages> | (() => UploadMessages);
+}
+
+/** The upload words `messages` gives, the English under them. */
+export function uploadMessagesOf(messages: BlockUploadOptions['messages']): UploadMessages {
+  if (typeof messages === 'function') return messages();
+  return messages ? { ...DEFAULT_UPLOAD_MESSAGES, ...messages } : DEFAULT_UPLOAD_MESSAGES;
+}

@@ -1,1 +1,1 @@
-export { image } from './image';
+export { image, ImageView, type ImageOptions } from './image';

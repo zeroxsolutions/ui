@@ -4,30 +4,9 @@ import { z } from 'zod';
 import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { findElement, mountDocumentEditor } from '../../../../../../src/test/document-editor';
 import { standardKit } from '../features/standard/index';
+import { heldUpload } from '../../../../../../src/test/uploads';
 import { DEFAULT_UPLOAD_MESSAGES, type EditorUpload } from './upload';
 import { uploadsExtension, uploadStoreOf, type UploadRequest, type UploadStore } from './upload-store';
-
-/** An upload the spec answers by hand: each call waits until the spec resolves or rejects it. */
-function heldUpload() {
-  const calls: {
-    file: File;
-    signal: AbortSignal;
-    progress(fraction: number): void;
-    answer(url: string): void;
-    fail(): void;
-  }[] = [];
-  const upload: EditorUpload = (file, { signal, onProgress }) =>
-    new Promise((resolve, reject) => {
-      calls.push({
-        file,
-        signal,
-        progress: onProgress,
-        answer: (url) => resolve({ url }),
-        fail: () => reject(new Error('offline')),
-      });
-    });
-  return { upload, calls };
-}
 
 const picture = defineFeature({
   id: 'picture',

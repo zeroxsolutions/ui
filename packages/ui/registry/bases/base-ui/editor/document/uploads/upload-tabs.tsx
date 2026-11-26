@@ -30,7 +30,6 @@ interface UploadTabsDropZoneProps {
 
 /** The upload tab's panel: a button opening the file picker, and the area a file is dropped on. */
 function UploadTabsDropZone({ upload, messages, onStart }: UploadTabsDropZoneProps): ReactNode {
-  const inputId = useId();
   const errorId = useId();
   const input = useRef<HTMLInputElement>(null);
   const [refusal, setRefusal] = useState<string | null>(null);
@@ -75,16 +74,13 @@ function UploadTabsDropZone({ upload, messages, onStart }: UploadTabsDropZonePro
         {messages.chooseFile}
       </Button>
       <span>{messages.dropHint}</span>
-      <label htmlFor={inputId} className="sr-only">
-        {messages.chooseFile}
-      </label>
+      {/* The button above is the control a person reaches; this input only opens the browser's picker for it. */}
       <input
         ref={input}
-        id={inputId}
         type="file"
-        tabIndex={-1}
+        hidden
+        data-slot="upload-tabs-file-input"
         accept={upload.accept === '' ? undefined : upload.accept}
-        className="sr-only"
         onChange={(event) => {
           take(event.currentTarget.files?.[0]);
           event.currentTarget.value = '';
@@ -110,14 +106,16 @@ function UploadTabs({
   if (upload === null) return children;
   return (
     <Tabs data-slot="upload-tabs" defaultValue={defaultTab} className={cn('gap-3', className)}>
-      <TabsList className="w-full">
+      {/* Each panel is drawn at once, so an arrow key shows the tab it reaches, as the tabs pattern does. */}
+      <TabsList activateOnFocus className="w-full">
         <TabsTrigger value="upload">{messages.upload}</TabsTrigger>
         <TabsTrigger value="link">{messages.link}</TabsTrigger>
       </TabsList>
-      <TabsContent value="upload">
+      {/* Each panel holds a control of its own, so Tab goes from the tabs straight to it. */}
+      <TabsContent value="upload" tabIndex={-1}>
         <UploadTabsDropZone upload={upload} messages={messages} onStart={onStart} />
       </TabsContent>
-      <TabsContent value="link" className="flex flex-col gap-3">
+      <TabsContent value="link" tabIndex={-1} className="flex flex-col gap-3">
         {children}
       </TabsContent>
     </Tabs>

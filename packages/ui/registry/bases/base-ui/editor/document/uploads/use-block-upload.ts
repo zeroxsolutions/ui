@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
+import type { UploadMessages } from './upload';
 import { uploadStoreOf, type UploadEntry, type UploadRequest } from './upload-store';
 
 /** Where a block is: the editor it is in and its position there, read when it is needed. */
@@ -21,6 +22,12 @@ export interface BlockUpload {
   /** Stops the upload, or drops a failed one; the block is left as it was. */
   cancel(): void;
   retry(): void;
+}
+
+/** An upload into one address of a block, with the words its controls draw, handed to a control drawing it. */
+export interface BlockUploadControl {
+  readonly upload: BlockUpload;
+  readonly messages: UploadMessages;
 }
 
 const NO_STORE = (): (() => void) => () => {};
