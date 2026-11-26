@@ -75,7 +75,11 @@ export function fontStack(theme: EmailTheme): string {
   return `${theme.font.family}, ${theme.font.fallback}`;
 }
 
-/** The ZUI palette, light and dark, that a renderer composed with no theme draws with: hues at Tailwind's 600 and 400. */
+/**
+ * The ZUI palette, light and dark, that a renderer composed with no theme draws with. Hues are at Tailwind's 700
+ * (orange, amber, green and teal at 800) and 400 steps, each reading at WCAG AA on the background and on its own
+ * tinted surface.
+ */
 export const DEFAULT_EMAIL_THEME = {
   colors: {
     background: '#FFFFFF',
@@ -87,14 +91,14 @@ export const DEFAULT_EMAIL_THEME = {
     border: '#E4E4E7',
     accent: '#4F46E5',
     hues: {
-      red: '#DC2626',
-      orange: '#EA580C',
-      amber: '#D97706',
-      green: '#16A34A',
-      teal: '#0D9488',
-      blue: '#2563EB',
-      violet: '#7C3AED',
-      pink: '#DB2777',
+      red: '#B91C1C',
+      orange: '#9A3412',
+      amber: '#92400E',
+      green: '#166534',
+      teal: '#115E59',
+      blue: '#1D4ED8',
+      violet: '#6D28D9',
+      pink: '#BE185D',
     },
   },
   dark: {

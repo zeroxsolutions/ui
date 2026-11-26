@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
+import { HUES } from '../layout/index.js';
+import { surfaceColorOf, textColorOf } from './css/base-stylesheet.js';
 import { FIXTURE_THEME } from './fixtures.fixture.js';
 import {
   assertEmailTheme,
@@ -84,5 +86,30 @@ describe('tint', () => {
     expect(tint('#0D9488', '#FFFFFF', 0.15)).toBe('#DBEFED');
     expect(tint('#000000', '#FFFFFF', 0)).toBe('#FFFFFF');
     expect(tint('#000000', '#FFFFFF', 1)).toBe('#000000');
+  });
+});
+
+/** A six-digit hex colour's relative luminance, as WCAG 2 defines it. */
+function luminance(hex: string): number {
+  const [red, green, blue] = [1, 3, 5]
+    .map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255)
+    .map((channel) => (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+function contrast(one: string, other: string): number {
+  const [lighter, darker] = [luminance(one), luminance(other)].sort((x, y) => y - x);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+describe('the default hues', () => {
+  const palettes = { light: DEFAULT_EMAIL_THEME.colors, dark: DEFAULT_EMAIL_THEME.dark };
+
+  describe.each(Object.entries(palettes))('in %s', (_, colors) => {
+    it.each(HUES)('reads %s text at WCAG AA on the background and on its own surface', (hue) => {
+      const text = textColorOf(hue, colors);
+      expect(contrast(text, colors.background)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(text, surfaceColorOf(hue, colors))).toBeGreaterThanOrEqual(4.5);
+    });
   });
 });
