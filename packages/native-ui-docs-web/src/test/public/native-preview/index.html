@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Native preview stand-in</title>
+  </head>
+  <body>
+    <!-- Stands in for the Expo web export: it mounts in #root, and the demo named in the query decides what it posts. -->
+    <div id="root"></div>
+    <script type="module">
+      const demo = new URLSearchParams(location.search).get('demo');
+      const post = (message) => parent.postMessage(message, location.origin);
+      const root = document.getElementById('root');
+
+      if (demo === 'button-demo') post({ type: 'zui:native-preview-height', height: 148 });
+      if (demo === 'silent-demo') root.textContent = 'Not drawn yet';
+
+      if (demo === 'icon-gallery-demo') {
+        const received = document.createElement('ol');
+        received.setAttribute('aria-label', 'Received');
+        const pick = document.createElement('button');
+        pick.textContent = 'arrow-up';
+        pick.addEventListener('click', () => post({ type: 'zui:icon-gallery:pick', name: 'lucide-arrow-up-icon' }));
+        root.append(received, pick);
+        addEventListener('message', (event) => {
+          if (event.source !== parent) return;
+          const item = document.createElement('li');
+          item.textContent = JSON.stringify(event.data);
+          received.append(item);
+        });
+        post({ type: 'zui:native-preview-height', height: 560 });
+        post({ type: 'zui:icon-gallery:ready' });
+      }
+    </script>
+  </body>
+</html>

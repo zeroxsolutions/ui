@@ -1,32 +1,8 @@
-import { vi } from 'vitest';
-
 /**
- * The browser APIs jsdom lacks that the components under test call as they mount, added only where
- * jsdom has none, so a spec that stubs one itself still wins. next-themes reads `matchMedia`, here
- * matching nothing, which is a desktop in its light scheme; the icon gallery's install panel brings
- * itself into view with `scrollIntoView` on a pick.
+ * Node 25 and later define a `localStorage` of their own, empty unless Node is given `--localstorage-file`, and
+ * vitest 4's jsdom environment copies no window key the global already holds, so jsdom's storage never reaches a
+ * spec. The remembered engine and style read it as they render. Vitest 5's jsdom environment installs it itself,
+ * so this goes with that bump.
  */
-if (typeof Element !== 'undefined') {
-  Element.prototype.scrollIntoView ??= () => undefined;
-}
-
-if (typeof window !== 'undefined') {
-  window.matchMedia ??= (media: string) =>
-    ({
-      matches: false,
-      media,
-      onchange: null,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-      addListener: () => undefined,
-      removeListener: () => undefined,
-      dispatchEvent: () => false,
-    }) as MediaQueryList;
-}
-
-/**
- * No spec here asserts highlighting, and a code block imports Shiki only once it has mounted: a spec
- * that ends first tears the environment down under that import, which fails the run as an unhandled
- * rejection. The block then shows its code unhighlighted, as it does until Shiki answers.
- */
-vi.mock('@/registry/bases/base-ui/lib/shiki', () => ({ highlightToLines: async () => null }));
+const { jsdom } = globalThis as unknown as { jsdom?: { window: Window } };
+if (jsdom) Object.defineProperty(globalThis, 'localStorage', { value: jsdom.window.localStorage, configurable: true });
