@@ -132,12 +132,12 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
           if (clickable) onInsert(preset.id);
         }}
         {...handlers}
-        className="cn-editor-menu-item hover:bg-accent hover:text-accent-foreground cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
+        className="cn-editor-menu-item cn-editor-preset-item cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
       >
-        <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
+        <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-tile">
           <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} sized active={active} />
         </ItemMedia>
-        <ItemContent className="gap-0.5">
+        <ItemContent className="cn-editor-menu-content">
           <ItemTitle>{preset.label}</ItemTitle>
           {preset.description !== null && (
             <ItemDescription className="line-clamp-2">{preset.description}</ItemDescription>
@@ -184,38 +184,40 @@ function EditorPresetsPanel({ editor, presets, messages, className }: EditorPres
       <CardHeader>
         <CardTitle id={titleId}>{text.title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-col gap-2">
-        {searchable && (
-          <InputGroup>
-            <label htmlFor={searchId} className="sr-only">
-              {text.search}
-            </label>
-            <InputGroupInput
-              id={searchId}
-              type="search"
-              placeholder={text.search}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            <InputGroupAddon>
-              <SearchIcon aria-hidden size={16} />
-            </InputGroupAddon>
-          </InputGroup>
-        )}
-        {shown.length === 0 ? (
-          <Empty className="min-h-0 gap-1 border-0 p-6">
-            <EmptyDescription>{text.empty}</EmptyDescription>
-          </Empty>
-        ) : (
-          <div role="list" aria-labelledby={titleId} data-slot="editor-presets-panel-list" className="flex flex-col">
-            {shown.map((row) => (
-              <EditorPresetsPanelItem key={row.preset.id} row={row} notAtCaretId={notAtCaretId} onInsert={insert} />
-            ))}
-          </div>
-        )}
-        <span id={notAtCaretId} hidden>
-          {text.notAtCaret}
-        </span>
+      <CardContent className="flex min-h-0 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          {searchable && (
+            <InputGroup>
+              <label htmlFor={searchId} className="sr-only">
+                {text.search}
+              </label>
+              <InputGroupInput
+                id={searchId}
+                type="search"
+                placeholder={text.search}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              <InputGroupAddon>
+                <SearchIcon aria-hidden size={16} />
+              </InputGroupAddon>
+            </InputGroup>
+          )}
+          {shown.length === 0 ? (
+            <Empty className="cn-editor-menu-empty min-h-0">
+              <EmptyDescription>{text.empty}</EmptyDescription>
+            </Empty>
+          ) : (
+            <div role="list" aria-labelledby={titleId} data-slot="editor-presets-panel-list" className="flex flex-col">
+              {shown.map((row) => (
+                <EditorPresetsPanelItem key={row.preset.id} row={row} notAtCaretId={notAtCaretId} onInsert={insert} />
+              ))}
+            </div>
+          )}
+          <span id={notAtCaretId} hidden>
+            {text.notAtCaret}
+          </span>
+        </div>
       </CardContent>
     </Card>
   );

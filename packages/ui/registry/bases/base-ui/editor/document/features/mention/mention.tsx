@@ -29,12 +29,7 @@ const escapeHtml = (value: string): string =>
  */
 function MentionPill({ id, label, contentEditable }: { id: string; label: string; contentEditable?: boolean }) {
   return (
-    <Badge
-      data-slot="mention"
-      data-mention-id={id}
-      contentEditable={contentEditable}
-      className="bg-primary/10 text-primary h-auto py-0 text-[length:inherit]"
-    >
+    <Badge data-slot="mention" data-mention-id={id} contentEditable={contentEditable} className="cn-editor-token">
       @{label || id}
     </Badge>
   );

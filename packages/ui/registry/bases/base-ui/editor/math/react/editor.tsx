@@ -71,11 +71,11 @@ export function MathEditor({
               <TabsTrigger value="source">Source</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
-            <TabsContent value="source" className="min-h-0 flex-1 p-2 pt-0">
-              {codePane}
+            <TabsContent value="source" className="min-h-0 flex-1">
+              <div className="h-full px-2 pb-2">{codePane}</div>
             </TabsContent>
-            <TabsContent value="preview" className="min-h-0 flex-1 p-2 pt-0">
-              {preview}
+            <TabsContent value="preview" className="min-h-0 flex-1">
+              <div className="h-full px-2 pb-2">{preview}</div>
             </TabsContent>
           </Tabs>
         ) : (

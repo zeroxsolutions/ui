@@ -688,7 +688,7 @@ export function EmailEditor({
       onKeyDownCapture={keyDown}
     >
       {renderer ? (
-        <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)} className="gap-3">
+        <Tabs value={tab} onValueChange={(value: 'edit' | 'preview') => setTab(value)}>
           <div data-slot="email-editor-bar" className="flex items-center gap-3">
             {/* The editor is out of sight on the Preview tab, so its toolbar is too. */}
             {!previewing && toolbar}

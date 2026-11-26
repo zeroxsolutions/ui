@@ -291,12 +291,12 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
         initialFocus={false}
         data-slot="trigger-menu"
         data-token-kind={token.kind}
-        className="w-64 gap-0 p-0"
+        className="cn-editor-menu w-64"
       >
         <ScrollArea className="flex max-h-72 flex-col *:data-[slot=scroll-area-viewport]:max-h-72">
           <div ref={listRef} className="p-1">
             {ordered.length === 0 ? (
-              <Empty className="min-h-0 gap-1 border-0 p-6">
+              <Empty className="cn-editor-menu-empty min-h-0">
                 <EmptyDescription>{token.emptyText ?? 'No matches'}</EmptyDescription>
               </Empty>
             ) : (
@@ -313,17 +313,20 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     // Keep the editor focused so the range survives the click.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => select(option)}
-                    className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
+                    className="cn-editor-menu-item cursor-pointer"
                   >
-                    {(option.icon as ReactNode) && (
-                      <ItemMedia
-                        variant="icon"
-                        className={cn('cn-editor-menu-media', token.menuMediaClassName ?? 'text-muted-foreground')}
-                      >
-                        {option.icon as ReactNode}
-                      </ItemMedia>
-                    )}
-                    <ItemContent className="gap-0.5">
+                    {(option.icon as ReactNode) &&
+                      // A token's own media class draws its icon in a box, in place of the bare glyph.
+                      (token.menuMediaClassName === undefined ? (
+                        <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-glyph">
+                          {option.icon as ReactNode}
+                        </ItemMedia>
+                      ) : (
+                        <ItemMedia variant="icon" className={cn('cn-editor-menu-media', token.menuMediaClassName)}>
+                          {option.icon as ReactNode}
+                        </ItemMedia>
+                      ))}
+                    <ItemContent className="cn-editor-menu-content">
                       <ItemTitle>{option.label}</ItemTitle>
                       {option.description && (
                         <ItemDescription className="line-clamp-1">{option.description}</ItemDescription>

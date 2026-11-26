@@ -83,16 +83,7 @@ function CodeInput({
  * `InputOTPGroup` only for a grouping neither pattern draws.
  */
 function CodeInputSlot({ className, ...props }: React.ComponentProps<typeof InputOTPSlot>): React.ReactNode {
-  return (
-    <InputOTPSlot
-      data-slot="code-input-slot"
-      className={cn(
-        'h-12 flex-1 text-lg font-semibold data-[active=true]:border-l [&:has(+[data-active=true])]:border-r-0',
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <InputOTPSlot data-slot="code-input-slot" className={cn('cn-code-input-slot flex-1', className)} {...props} />;
 }
 
 export { CodeInput, CodeInputSlot };

@@ -40,7 +40,7 @@ export function MathPalette({ onInsert, trigger, nativeButton = true, className 
   return (
     <Popover>
       <PopoverTrigger render={trigger} nativeButton={nativeButton} />
-      <PopoverContent align="start" className={cn('w-72 p-0', className)}>
+      <PopoverContent align="start" className={cn('cn-editor-menu w-72', className)}>
         <Command>
           <CommandInput placeholder="Search symbols..." />
           <CommandList>

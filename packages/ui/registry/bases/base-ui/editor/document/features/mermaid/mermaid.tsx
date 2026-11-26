@@ -103,7 +103,7 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
       onPointerDown={(event) => event.stopPropagation()}
       className={cn('my-4', selected && 'ring-ring ring-2')}
     >
-      <Tabs defaultValue={initialTab} className="gap-0">
+      <Tabs defaultValue={initialTab} className="contents">
         <CollapsibleCardHeader>
           <CollapsibleCardTitle>
             <MermaidTypeIcon className="shrink-0" />
@@ -127,7 +127,7 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
         <CollapsibleCardContent keepMounted>
           <Separator />
           <TabsContent value="view">
-            <DiagramPreview source={attrs.source} className="rounded-none shadow-none ring-0" />
+            <DiagramPreview source={attrs.source} variant="flush" />
           </TabsContent>
           <TabsContent value="edit">
             <CodeMirrorPane

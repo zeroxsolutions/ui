@@ -5,7 +5,7 @@ import * as React from 'react';
 import { CircleCheckIcon, type CircleCheckIconHandle } from '@/registry/bases/base-ui/icons/lucide/circle-check-icon';
 import { CircleIcon, type CircleIconHandle } from '@/registry/bases/base-ui/icons/lucide/circle-icon';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
-import { Card } from '@/registry/bases/base-ui/ui/card';
+import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { Progress, ProgressLabel, ProgressValue } from '@/registry/bases/base-ui/ui/progress';
 
 /** How strong the password is, from the caller's own check. */
@@ -70,14 +70,14 @@ function PasswordStrengthMeter({
 }: PasswordStrengthMeterProps): React.ReactNode {
   const strength = usePasswordStrength();
   return (
-    <>
+    <CardContent>
       <Progress
         data-slot="password-strength-meter"
         value={PASSWORD_STRENGTH_STEP[strength]}
         min={0}
         max={PASSWORD_STRENGTH_STEPS}
         getAriaValueText={() => valueText}
-        className={cn('px-(--card-spacing)', className)}
+        className={className}
         {...props}
       >
         <ProgressLabel>{children}</ProgressLabel>
@@ -87,18 +87,16 @@ function PasswordStrengthMeter({
       <span role="status" aria-live="polite" className="sr-only">
         {valueText}
       </span>
-    </>
+    </CardContent>
   );
 }
 
 /** The list of requirements, one `PasswordStrengthRequirement` each. */
 function PasswordStrengthRequirements({ className, ...props }: React.ComponentProps<'ul'>): React.ReactNode {
   return (
-    <ul
-      data-slot="password-strength-requirements"
-      className={cn('flex flex-col gap-1 px-(--card-spacing)', className)}
-      {...props}
-    />
+    <CardContent>
+      <ul data-slot="password-strength-requirements" className={cn('flex flex-col gap-1', className)} {...props} />
+    </CardContent>
   );
 }
 

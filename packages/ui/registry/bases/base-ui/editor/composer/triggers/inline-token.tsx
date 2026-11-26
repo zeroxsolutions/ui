@@ -83,7 +83,7 @@ export function inlineToken(spec: InlineTokenSpec): InlineToken {
         data-token-kind={kind}
         data-token-id={attrs.id}
         contentEditable={contentEditable}
-        className={cn('bg-primary/10 text-primary h-auto text-[length:inherit]', spec.accentClass)}
+        className={cn('cn-editor-token', spec.accentClass)}
       >
         {tokenText(spec, attrs)}
       </Badge>

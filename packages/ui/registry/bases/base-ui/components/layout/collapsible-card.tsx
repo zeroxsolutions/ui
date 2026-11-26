@@ -55,7 +55,7 @@ function CollapsibleCardHeader({ className, ...props }: ComponentProps<'div'>): 
     <div
       data-slot="collapsible-card-header"
       className={cn(
-        'cn-collapsible-card-header flex items-center gap-1.5 group-data-[variant=plain]/collapsible-card:px-2.5 has-data-[slot=collapsible-card-actions]:justify-between',
+        'cn-collapsible-card-header flex items-center gap-1.5 has-data-[slot=collapsible-card-actions]:justify-between',
         className,
       )}
       {...props}
@@ -152,10 +152,7 @@ function CollapsibleCardContent({ className, ...props }: ComponentProps<typeof C
   return (
     <CollapsibleContent
       data-slot="collapsible-card-content"
-      className={cn(
-        'overflow-hidden group-data-[variant=default]/collapsible-card:border-t group-data-[variant=muted]/collapsible-card:border-t',
-        className,
-      )}
+      className={cn('cn-collapsible-card-content overflow-hidden', className)}
       {...props}
     />
   );

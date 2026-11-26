@@ -385,7 +385,7 @@ export function Editor({
             }}
             // The gutter beside the grip is laid out for this size, whatever size the style draws. It sits on
             // the text surface, whose cursor is the I-beam, so it names its own cursor as the grip names grab.
-            className="text-muted-foreground fixed z-40 size-6 cursor-pointer opacity-55 hover:opacity-100"
+            className="cn-editor-control-muted fixed z-40 size-6 cursor-pointer opacity-55 hover:opacity-100"
             style={{ top: plus.top, left: plus.left - 22 }}
           >
             <PlusIcon ref={plusRef} size={16} aria-hidden />

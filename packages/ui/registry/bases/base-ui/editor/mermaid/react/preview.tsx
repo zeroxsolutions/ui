@@ -9,6 +9,7 @@ import {
   type RefAttributes,
   type WheelEvent as ReactWheelEvent,
 } from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { Workflow } from 'lucide-react';
 import { useAnimatedIcon, type AnimatedIconHandle } from '@/registry/bases/base-ui/hooks/use-animated-icon';
 import { MaximizeIcon } from '@/registry/bases/base-ui/icons/lucide/maximize-icon';
@@ -65,12 +66,20 @@ function ZoomButton({
 
 const clamp = (value: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, value));
 
-export interface DiagramCanvasProps {
+const diagramCanvasVariants = cva('bg-card relative flex h-full min-h-48 flex-col overflow-hidden', {
+  variants: {
+    // `flush` draws no surface of its own, for a canvas set inside one, such as a card's body.
+    variant: { card: 'cn-editor-diagram', flush: '' },
+  },
+  defaultVariants: { variant: 'card' },
+});
+
+export interface DiagramCanvasProps extends VariantProps<typeof diagramCanvasVariants> {
   state: MermaidRenderState;
   className?: string;
 }
 
-export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
+export function DiagramCanvas({ state, variant, className }: DiagramCanvasProps) {
   const { svg, status, error, line } = state;
   const [transform, setTransform] = useState<Transform>(IDENTITY);
 
@@ -170,10 +179,7 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
   const reset = useCallback(() => setTransform(IDENTITY), []);
 
   return (
-    <div
-      data-slot="diagram-canvas"
-      className={cn('cn-editor-diagram bg-card relative flex h-full min-h-48 flex-col overflow-hidden', className)}
-    >
+    <div data-slot="diagram-canvas" className={cn(diagramCanvasVariants({ variant }), className)}>
       <div
         ref={viewportRef}
         className="relative flex-1 touch-none overflow-hidden"
@@ -227,13 +233,13 @@ export function DiagramCanvas({ state, className }: DiagramCanvasProps) {
   );
 }
 
-export interface DiagramPreviewProps {
+export interface DiagramPreviewProps extends VariantProps<typeof diagramCanvasVariants> {
   source: string;
   className?: string;
 }
 
 /** Self-contained preview: owns the shared render hook. Used by the block. */
-export function DiagramPreview({ source, className }: DiagramPreviewProps) {
+export function DiagramPreview({ source, variant, className }: DiagramPreviewProps) {
   const state = useMermaidRender(source);
-  return <DiagramCanvas state={state} className={className} />;
+  return <DiagramCanvas state={state} variant={variant} className={className} />;
 }
