@@ -50,7 +50,9 @@ const items: SlashItem[] = Array.from({ length: 16 }, (_, at) => ({
 
 const popup = page.getByTestId('slash-menu');
 const viewport = popup.getByTestId('scroll-area-viewport');
-const row = (title: string) => popup.getByTestId('item').filter({ hasText: new RegExp(`^${title}A block$`) });
+/** The option titled `title`; given `selected`, only while the list marks it selected, or not. */
+const row = (title: string, selected?: boolean) =>
+  popup.getByRole('option', { name: new RegExp(`^${title}(?!\\d)`), ...(selected === undefined ? {} : { selected }) });
 
 /** Resolves once the list has finished the scroll the keys started, which the browser reports after answering it. */
 function scrollEnded(): Promise<void> {
@@ -65,7 +67,7 @@ describe('SlashMenu with more items than it holds', () => {
 
     await userEvent.keyboard('{ArrowUp}');
 
-    await expect.element(row('Item 15')).toHaveAttribute('data-highlighted');
+    await expect.element(row('Item 15', true)).toBeInTheDocument();
     await expect.element(row('Item 15')).toBeInViewport({ ratio: 1 });
   });
 
@@ -83,7 +85,7 @@ describe('SlashMenu with more items than it holds', () => {
     await userEvent.keyboard('{ArrowUp}');
     await ended;
 
-    await expect.element(row('Item 15')).toHaveAttribute('data-highlighted');
+    await expect.element(row('Item 15', true)).toBeInTheDocument();
   });
 
   it('highlights the option the pointer moves onto', async () => {
@@ -92,8 +94,8 @@ describe('SlashMenu with more items than it holds', () => {
     await userEvent.hover(popup.getByText('Item 1', { exact: true }));
     await userEvent.hover(popup.getByText('Item 2', { exact: true }));
 
-    await expect.element(row('Item 2')).toHaveAttribute('data-highlighted');
-    await expect.element(row('Item 0')).not.toHaveAttribute('data-highlighted');
+    await expect.element(row('Item 2', true)).toBeInTheDocument();
+    await expect.element(row('Item 0', false)).toBeInTheDocument();
   });
 
   it('keeps its left edge when its list scrolls after the trigger highlight moved the caret', async () => {

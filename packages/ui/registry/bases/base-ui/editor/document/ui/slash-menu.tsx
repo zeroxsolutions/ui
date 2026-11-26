@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import { Empty, EmptyDescription } from '@/registry/bases/base-ui/ui/empty';
 import { Popover } from '@/registry/bases/base-ui/ui/popover';
@@ -35,6 +35,8 @@ export interface SlashMenuProps {
   placeholder?: string;
   /** What the menu says when no item matches the query. Defaults to `No matching blocks`. */
   emptyText?: string;
+  /** The list's accessible name. Defaults to `Blocks`. */
+  label?: string;
 }
 
 export function SlashMenu({
@@ -42,7 +44,9 @@ export function SlashMenu({
   items,
   placeholder = 'Type to search',
   emptyText = 'No matching blocks',
+  label = 'Blocks',
 }: SlashMenuProps) {
+  const listId = useId();
   const [active, setActive] = useState<TriggerQuery | null>(null);
   const [point, setPoint] = useState<CaretRect | null>(null);
   const [index, setIndex] = useState(0);
@@ -207,15 +211,17 @@ export function SlashMenu({
         className="cn-editor-menu w-72"
       >
         <ScrollArea className="flex max-h-80 flex-col *:data-[slot=scroll-area-viewport]:max-h-80">
-          <div ref={listRef} className="p-1">
+          <div ref={listRef} role="listbox" aria-label={label} className="p-1">
             {ordered.length === 0 ? (
               <Empty className="cn-editor-menu-empty min-h-0">
                 <EmptyDescription>{emptyText}</EmptyDescription>
               </Empty>
             ) : (
-              groups.map(([heading, groupItems]) => (
-                <div key={heading} className="pb-1">
-                  <div className="cn-combobox-label">{heading}</div>
+              groups.map(([heading, groupItems], groupIndex) => (
+                <div key={heading} role="group" aria-labelledby={`${listId}-${groupIndex}`} className="pb-1">
+                  <div id={`${listId}-${groupIndex}`} className="cn-combobox-label">
+                    {heading}
+                  </div>
                   {groupItems.map((item) => {
                     const position = ordered.indexOf(item);
                     const highlighted = position === index;
@@ -223,6 +229,8 @@ export function SlashMenu({
                       <Item
                         key={item.id}
                         size="sm"
+                        role="option"
+                        aria-selected={highlighted}
                         data-highlighted={highlighted || undefined}
                         // The browser fires mouseenter on a cursor that stays still while the list opens or
                         // scrolls under it, which would take the highlight from the keys; only a move does.
