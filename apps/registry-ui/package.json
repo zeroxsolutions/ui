@@ -66,6 +66,7 @@
         "inputs": [
           "default",
           "^default",
+          "{workspaceRoot}/tools/check-asset-sizes.sh",
           {
             "runtime": "pwd"
           }
@@ -76,7 +77,7 @@
         "cache": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild"
+          "command": "rm -rf .open-next && next build && opennextjs-cloudflare build --skipNextBuild && ../../tools/check-asset-sizes.sh"
         }
       },
       "wrangler:dev": {
