@@ -27,7 +27,7 @@ function recordingIcon(name: string): ComponentType {
   handles.set(name, handle);
   return forwardRef<unknown>(function RecordingIcon(_props, ref) {
     useImperativeHandle(ref, () => handle);
-    return <svg data-testid={name} width={24} height={24} />;
+    return <svg data-slot={name} width={24} height={24} />;
   }) as unknown as ComponentType;
 }
 

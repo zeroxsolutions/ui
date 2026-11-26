@@ -44,6 +44,9 @@ export default defineConfig({
             headless: true,
             provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
             instances: [{ browser: 'chromium' }],
+            // Every registry part carries a `data-slot`, so `getByTestId('<slot>')` finds a part with no role,
+            // text or label.
+            locators: { testIdAttribute: 'data-slot' },
           },
         },
       },
