@@ -58,6 +58,7 @@ pnpm dlx shadcn@latest add separator toggle-group tooltip @zui/editor-layout @zu
 
 ```css
 .document-editor [data-slot='section'] {
+  --layout-bleed: 0px;
   padding: 1rem;
   background-color: var(--section-surface, transparent);
 }
@@ -71,9 +72,6 @@ pnpm dlx shadcn@latest add separator toggle-group tooltip @zui/editor-layout @zu
   padding: 1.5rem;
 }
 
-.document-editor .ProseMirror[contenteditable='true'] {
-  --section-bleed: 3rem;
-}
 .document-editor [data-slot='section'][data-width='wide'] {
   margin-inline: calc(var(--section-bleed, 0px) / -2);
 }
@@ -178,14 +176,19 @@ function PageEditor({ content }: { content: DocJSON }) {
 ```
 
 `section` adds the `section` block, which holds any block but another section, columns and cards among them, and
-sits in no column. Its slash item is "Section", and its command `insertSection` adds one holding an empty line; the
-slash menu does not offer it inside a section or a column.
+sits only at the top of the document: a page is a run of sections and blocks. Its slash item is "Section", which
+runs the standard kit's `insertSection`: it adds one holding an empty line after the block holding the caret, and
+the slash menu does not offer it inside a section, a column, a callout, a toggle, a quote, a list or a table. A
+section pasted or dropped there lands at the top.
 
 Its floating toolbar sets its background, its padding and its width, through the standard kit's `setSectionLayout`.
 The background is `none`, `muted`, `primary`, `accent` or one of the eight hues, drawn from the theme's tokens so it
 follows light and dark mode; the padding is `none`, `small`, `medium` (the default) or `large`; the width is
 `content` (the default), `wide` or `full`. A wide or a full section reaches into the room the surface leaves beside
-the text, `--section-bleed`: the editable editor's gutter, none in the Viewer unless its host sets one.
+the text, `--section-bleed`, which the Document Editor's styles set to the editable editor's gutter; the Viewer has
+none unless its host sets one. A full width image, video, embed or card in a section stops at the section's
+padding, whatever the section's width. [Editor Layout](/docs/editor/editor-layout) shows a section with the other
+blocks' layout.
 
 `messages` takes the toolbar's words, `LayoutWords`, and `widths` narrows the widths it offers: the email editor's
 section offers `content` and `wide`. HTML keeps the section whole; Markdown has no section, so it writes its blocks

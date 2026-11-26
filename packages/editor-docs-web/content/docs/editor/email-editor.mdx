@@ -35,7 +35,7 @@ pnpm add @codemirror/autocomplete @codemirror/state @codemirror/view @tiptap/rea
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add badge button combobox field input label popover tabs tooltip utils @zui/block-library @zui/block-presets @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-layout @zui/editor-section @zui/editor-table @zui/editor-uploads @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
+pnpm dlx shadcn@latest add badge button combobox field input label popover tabs tooltip utils @zui/block-library @zui/block-presets @zui/chat-input @zui/document-editor @zui/editor-button @zui/editor-callout @zui/editor-card @zui/editor-code-block @zui/editor-columns @zui/editor-image @zui/editor-section @zui/editor-table @zui/editor-uploads @zui/lucide-at-sign-icon @zui/lucide-blocks-icon @zui/lucide-braces-icon @zui/lucide-chevrons-up-down-icon @zui/lucide-eye-icon @zui/lucide-heading-2-icon @zui/lucide-id-card-icon @zui/lucide-image-icon @zui/lucide-layout-grid-icon @zui/lucide-layout-panel-top-icon @zui/lucide-link-icon @zui/lucide-mailbox-icon @zui/lucide-mouse-pointer-click-icon @zui/lucide-pencil-line-icon @zui/lucide-plus-icon @zui/lucide-settings-icon @zui/lucide-table-icon @zui/lucide-text-align-start-icon @zui/lucide-text-quote-icon @zui/lucide-trash-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -332,6 +332,21 @@ drawn at the editor's own width, so under 600px the default layout goes full-ble
 around its card, and in the theme around the editor: inside a `.dark` scope its `prefers-color-scheme: dark`
 rules apply, and a theme switched later redraws it. Pick a device and the dark theme on the bar above the demo
 to see both.
+
+## Text styling
+
+<ComponentPreview name="email-editor-text-styling-demo" />
+
+The bubble aligns the selection's paragraphs to the start, the centre or the end, and colours its text and its
+background from the same tokens as the [Document Editor](/docs/editor/document-editor#text-styling); the block
+menu's Turn into makes a paragraph Lead or Small text. There is no justify, which mail clients draw unevenly.
+The wire stores a paragraph's `align` as `left`, `center` or `right` and its `size` as `lead` or `small`, and a
+coloured run in the text as `{color=red}...{/color}` or `{bg=amber}...{/bg}`. The renderer draws each hue from the
+theme's `colors.hues`, and `accent` from `colors.accent`, in the light palette and the dark one; a product that
+names none gets the defaults.
+
+An image is aligned and resized in the email too, columns are weighed and a section is set on a background,
+within what an email can draw: [Editor Layout](/docs/editor/editor-layout#in-an-email) shows it.
 
 ## Library blocks
 

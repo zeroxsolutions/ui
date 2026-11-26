@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/block-library @zui/editor-layout @zui/lucide-bookmark-icon
+pnpm dlx shadcn@latest add @zui/block-library @zui/lucide-bookmark-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -90,6 +90,10 @@ slash item is "Bookmark". The author pastes an address into the empty block, and
 preview, once. Fetch the page on your server, which decides what it may reach; `/api/link-preview` above stands
 for that route. Until `readLink` answers, and when it throws, the bookmark shows the address alone. Without
 `readLink` it always does.
+
+Selected, the bookmark shows the block toolbar, which aligns it to the start, the centre or the end of the line; it
+keeps its own width, with no handle and no full width. [Editor Layout](/docs/editor/editor-layout) describes the
+model.
 
 HTML writes the bookmark as a link holding its title, description, address and image, with its fields in
 `data-block-attrs`, so it reads back whole. Markdown writes the same HTML on one line. Only a web or mail address

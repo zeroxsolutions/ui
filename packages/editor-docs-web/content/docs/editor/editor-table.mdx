@@ -150,6 +150,8 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `table` adds tables of header and body cells, with columns that resize by dragging and cells that select as a range. Its slash item is "Table" and its command `insertTable` inserts a table of two rows and two columns.
 
+A column's width is stored as its share of the table, `columnWidths`, never in pixels. Dragging a border, or its arrow keys, moves it by a twentieth of the table, and no column gets narrower than its cell's padding and one letter where the table is drawn. A table stored, imported or pasted with pixel `colwidth`s opens with the same proportions as shares. The table's toolbar holds Full width, which reaches past the text to the editor's edges; the email editor offers none. [Editor Layout](/docs/editor/editor-layout) describes the model.
+
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx

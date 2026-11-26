@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core zod
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add input @zui/block-library @zui/editor-layout @zui/lucide-frame-icon
+pnpm dlx shadcn@latest add input @zui/block-library @zui/lucide-frame-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -81,6 +81,8 @@ function NotesEditor({ content }: { content: DocJSON }) {
 ```
 
 `embed` adds the `embed` block, which draws its `url` in a responsive frame once one is set and asks for a URL while it is empty. Its slash item is "Embed" and its command `insertEmbed` takes a `url` and an optional `title`. The embedded page is not trusted: restrict which hosts a URL may name before you store it.
+
+Selected, the frame shows the block toolbar, which aligns it to the start, the centre or the end and makes it full width, and a handle on each side drags its width as a share of the line; [Editor Layout](/docs/editor/editor-layout) describes the model.
 
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 

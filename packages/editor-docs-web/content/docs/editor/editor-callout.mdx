@@ -112,6 +112,8 @@ function NotesEditor({ content }: { content: DocJSON }) {
 
 `Callout` adds the `callout` block, a bordered box with an icon and room for further blocks, in the variants `note`, `info`, `success`, `warning` and `danger`. Its slash item is "Callout" and its command `insertCallout` takes an optional `variant`, `info` by default.
 
+The text in a callout, as in a quote or a list, takes the standard kit's text styling: the bubble aligns its paragraphs and colours its words, and Turn into makes a paragraph Lead or Small text, as [Document Editor](/docs/editor/document-editor#text-styling) shows.
+
 Run the command on the editor that `Editor` hands to `onReady`, as [Document Editor](/docs/editor/document-editor) shows:
 
 ```tsx

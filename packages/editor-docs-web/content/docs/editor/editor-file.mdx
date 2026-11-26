@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/block-library @zui/editor-layout @zui/editor-uploads @zui/lucide-file-text-icon
+pnpm dlx shadcn@latest add @zui/block-library @zui/editor-uploads @zui/lucide-file-text-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -106,5 +106,9 @@ editor.run('insertBlock:file', {
 ```
 
 HTML writes the file as a `download` link with its name and size. Markdown writes the same HTML on one line.
+
+Selected, the file's row shows the block toolbar, which aligns it to the start, the centre or the end of the line; it
+keeps its own width, with no handle and no full width. [Editor Layout](/docs/editor/editor-layout) describes the
+model.
 
 The `Viewer` draws the same block, with the same feature in its `features`, wherever a stored document is only read.

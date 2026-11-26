@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add @zui/block-library @zui/editor-layout @zui/editor-uploads @zui/lucide-audio-lines-icon @zui/lucide-clapperboard-icon
+pnpm dlx shadcn@latest add @zui/block-library @zui/editor-uploads @zui/lucide-audio-lines-icon @zui/lucide-clapperboard-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -84,6 +84,10 @@ function NotesEditor({ content }: { content: DocJSON }) {
 items are "Video" and "Audio", which set `kind`. The author pastes the file's link into the empty block and
 writes the caption under the player. A video's `poster` is the image it shows before it plays. Only a web
 address is loaded.
+
+Selected, a player shows the block toolbar, which aligns it to the start, the centre or the end and makes it full
+width, and a handle on each side drags its width as a share of the line; [Editor Layout](/docs/editor/editor-layout)
+describes the model. `layoutWords` names the toolbar and the handles in the host's words.
 
 Give `media` your upload, as `media({ upload })`, and the empty block gets an Upload tab beside its link, taking a
 video in a video block and a sound in an audio block; a video or audio file pasted or dropped into the editor

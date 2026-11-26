@@ -1,6 +1,6 @@
 ---
 title: Editor Layout
-description: "The layout controls the editors' blocks share: a block's floating toolbar, its alignment and full width toggles, the width handles dragged on each side, the props a view and the Viewer draw a layout with, and the layout's words."
+description: 'How blocks are laid out in the Document Editor and the email editor: the layout model of tokens and fractions, what each block offers, what an email can draw, and the controls the blocks share to set it.'
 ---
 
 <ComponentPreview name="editor-layout-demo" />
@@ -65,6 +65,12 @@ pnpm dlx shadcn@latest add popover toggle toggle-group tooltip @zui/document-edi
 
 <ComponentSource
   name="editor-layout"
+  file="registry/bases/base-ui/editor/document/layout/history-keys.ts"
+  title="components/editor/document/layout/history-keys.ts"
+/>
+
+<ComponentSource
+  name="editor-layout"
   file="registry/bases/base-ui/editor/document/layout/resize-handles.tsx"
   title="components/editor/document/layout/resize-handles.tsx"
 />
@@ -83,11 +89,72 @@ pnpm dlx shadcn@latest add popover toggle toggle-group tooltip @zui/document-edi
 
 </CodeTabs>
 
+## The layout model
+
+A document stores a layout as tokens and fractions, never as pixels or colours, so the Document Editor, the
+Viewer, an exported HTML file and a sent email draw the same document the same way.
+
+| Key                              | Values                                                                | On                                               |
+| -------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
+| `align`                          | `start`, `center`, `end`                                              | image, video, audio, embed, card, bookmark, file |
+| `width`                          | a share of the line from `0.25` to `1`, in steps of `0.05`, or `full` | image, video, audio, embed, card                 |
+| `spaceBefore`, `spaceAfter`      | `none`, `small`, `medium`, `large`                                    | every block                                      |
+| `ratio`, `valign`                | a whole weight from 1 to 12 per lane; `top`, `center`, `bottom`       | columns                                          |
+| `columnWidths`                   | a share of the table per column, from `0.05`                          | table                                            |
+| `background`, `padding`, `width` | a colour token; `none` to `large`; `content`, `wide`, `full`          | section                                          |
+
+A `full` width reaches past the text to the editor's edges: the editable surface's gutter, where the grip sits. In
+a lane or a section a full width block stops at the lane's or the section's own edges. A layout also holds a
+`responsive` key, a layout per breakpoint, which `validate` checks and no surface draws yet.
+
+## Laying out a page
+
+<ComponentPreview name="editor-layout-document-demo" />
+
+- An image, a video or an audio player, an embed or a card shows a toolbar when selected: three alignments and Full width, and a
+  handle on each side that drags its width. See [Editor Image](/docs/editor/editor-image).
+- A bookmark or a file aligns only; it keeps the width of its content.
+- [Columns](/docs/editor/editor-columns) are weighed by dragging the line between two lanes, which lands on a
+  twelfth of the row, and its arrow keys step between quarters, thirds and the half; their toolbar adds and removes a lane, from two to four, and holds the lanes at
+  the top, the middle or the bottom of the tallest. Under 40rem the lanes stack.
+- A [table](/docs/editor/editor-table) takes its column widths from the borders dragged between its columns,
+  and a Full width toggle. A column is never narrower than its cell's padding and one letter.
+- A [section](/docs/editor/editor-section) sets blocks on a background, inside a padding, at the content's
+  width, wider, or the editor's full width. It holds any block but a section, and sits only at the top of the
+  document, never in a lane, a callout, a quote, a list or a table: a page is a run of sections and blocks.
+
+Each change is one undo step. A drag changes the document once, on release, and Escape during the drag puts the
+block back as it was.
+
+## In an email
+
+<ComponentPreview name="editor-layout-email-demo" />
+
+The email editor offers only what the email's renderer draws in Gmail, Apple Mail and Outlook:
+
+- No `full` width and no `full` section: an email's blocks sit inside its card, and Outlook pushes the card wider
+  rather than draw a block past it. A section is `content` or `wide`, which reaches the card's inner edges.
+- An image is at most the card's content width, 566px, and its width is a share of that width.
+- A card takes no layout: the email draws it at the card's width, and the wire stores none for it.
+- The wire keeps its own alignment names, `left`, `center` and `right`; the editor reads `start` and `end` as
+  `left` and `right`.
+
+An export of a Document to an email turns what the email cannot draw into what it can: a `full` image into `1`, a
+`full` section into `wide`. `validate` reports a stored one as `attributes-invalid`.
+
+## Widths stored before
+
+A document stored before the layout model opens as it was drawn and writes the new values on its next edit:
+
+- A Document image's pixel `width` reads as a share of the 720px content width, so `360` opens as `0.5`.
+- An email image's whole pixel `width`, from 1 to 566, reads as a share of 566.
+- A table's pixel `colwidth`s read as shares of their sum, on load, on import and on a paste alike.
+- Each width is kept from a quarter to the whole and rounded to `0.05`; a table column from `0.05`.
+
 ## Usage
 
-A block's layout is stored as tokens and fractions: `align` is `start`, `center` or `end`, `width` a share of
-the line from `0.25` to `1` or `full`. The standard kit declares them on every block, with the commands that set
-them, such as `setBlockLayout`. A block's view draws them with `layoutProps`, as its Viewer codec does, so both
+The standard kit declares the layout keys of [the model](#the-layout-model) on every block, with the commands
+that set them, such as `setBlockLayout`. A block's view draws them with `layoutProps`, as its Viewer codec does, so both
 draw the same:
 
 ```tsx
@@ -146,6 +213,7 @@ the card's content width, 566px.
 ## The toolbar
 
 The toolbar shows above a block that is selected or holds the caret, and opening it leaves the focus in the text.
+It draws nothing while a block is dragged by its grip, so it never covers the place a block is dropped.
 Tab from a selected block, or Alt+F10 from its text, moves into it; the arrow keys move between its controls and
 Escape goes back to the text.
 

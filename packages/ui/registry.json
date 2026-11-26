@@ -2763,7 +2763,7 @@
       "name": "editor-image",
       "type": "registry:component",
       "title": "Editor Image",
-      "description": "A block image with alt text and an optional width, edited in a popover, and uploaded through the host's upload where it gives one.",
+      "description": "A block image with alt text, aligned and resized in place, edited in a popover, and uploaded through the host's upload where it gives one.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/button",
@@ -2855,6 +2855,77 @@
           "path": "registry/bases/base-ui/examples/editor-layout-demo.tsx",
           "type": "registry:example",
           "target": "@components/editor-layout-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-layout-document-demo",
+      "type": "registry:example",
+      "title": "Editor Layout Document Demo",
+      "description": "A page laid out in the Document Editor: a resized, centred image, columns weighed two thirds to one third, a table with column widths and a wide section holding a card.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": [
+        "@zui/document-editor",
+        "@zui/editor-card",
+        "@zui/editor-columns",
+        "@zui/editor-image",
+        "@zui/editor-section",
+        "@zui/editor-table"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-layout-document-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-layout-document-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-layout-email-demo",
+      "type": "registry:example",
+      "title": "Editor Layout Email Demo",
+      "description": "An email laid out in the email editor: a resized, centred image, columns weighed two thirds to one third and a wide section, with its preview.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/email-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-layout-email-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-layout-email-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "document-editor-text-styling-demo",
+      "type": "registry:example",
+      "title": "Document Editor Text Styling Demo",
+      "description": "Text in the Document Editor: centred, justified and end-aligned lines, lead and small paragraphs, and text and background colours.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/document-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/document-editor-text-styling-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/document-editor-text-styling-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "email-editor-text-styling-demo",
+      "type": "registry:example",
+      "title": "Email Editor Text Styling Demo",
+      "description": "Text in the email editor: aligned lines, lead and small paragraphs, and text and background colours, with its preview.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core"],
+      "registryDependencies": ["@zui/email-editor"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/email-editor-text-styling-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/email-editor-text-styling-demo.tsx"
         }
       ]
     },
@@ -3361,7 +3432,7 @@
       "name": "editor-layout",
       "type": "registry:component",
       "title": "Editor Layout",
-      "description": "The layout controls the editors' blocks share: a block's floating toolbar, its alignment and full width toggles, the width handles dragged on each side, the props a view and the Viewer draw a layout with, and the layout's words.",
+      "description": "How blocks are laid out in the Document Editor and the email editor: the layout model of tokens and fractions, what each block offers, what an email can draw, and the controls the blocks share to set it.",
       "categories": ["editor"],
       "registryDependencies": [
         "@shadcn/popover",

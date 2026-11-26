@@ -190,6 +190,13 @@ function NotesEditor({ content }: { content: DocJSON }) {
 columns against each other, as whole numbers from 1 to 12, and `insertColumns` writes equal weights. Below 40rem the
 columns stack.
 
+With the caret in a lane, the columns show their floating toolbar. Dragging the line between two lanes weighs them,
+landing on a twelfth of the row, and that line is a slider whose arrow keys step between quarters, thirds and the
+half. The toolbar adds a lane, up to 4, and removes the last one, down to 2, moving its blocks into the lane before
+it; it also holds the lanes at the top, the middle or the bottom of the tallest (`valign`). Each change is one undo
+step, through the standard kit's `setColumnsLayout`. No line is drawn while the lanes stack.
+[Editor Layout](/docs/editor/editor-layout) shows columns with the other blocks' layout.
+
 HTML keeps the columns whole. Markdown has no columns, so it writes each column's blocks in order, and they read
 back as blocks in a row. `columnContent` narrows what a column holds; the email editor's holds no columns.
 

@@ -390,6 +390,26 @@ import { Viewer } from '@/components/editor/document/react/viewer';
 `ViewerLive` renders the same document through the live editor with editing off, for the reading
 interactions a static render cannot give.
 
+## Text styling
+
+<ComponentPreview name="document-editor-text-styling-demo" />
+
+The standard kit styles text from tokens, never from a free size or colour:
+
+- **Alignment.** The bubble's align group sets start, centre, end or justify on every paragraph and heading the
+  selection touches, in a quote or a list too.
+- **Colour.** The bubble's colour menu sets a text colour and a background from `default`, `muted`, `primary`,
+  `accent` and eight hues: `red`, `orange`, `amber`, `green`, `teal`, `blue`, `violet` and `pink`. Default takes
+  a colour away. Each hue draws from the theme's `--hue-<name>` variable, and a background from
+  `--hue-<name>-surface`, both set for light and dark mode, so a coloured word follows the theme.
+- **Lead and small.** The block menu's Turn into makes a paragraph Lead, larger than the text around it, or Small
+  text, and Text turns it back into a plain paragraph.
+
+HTML carries each of them, as `data-text-align` and `data-size` on a block and `<span data-color>` or
+`<span data-bg>` around a run; Markdown keeps the text and drops the styling. Pasted HTML keeps a `text-align`
+and a colour named as one of the hues, such as `color: teal`, and drops any other colour. The
+[Editor Layout](/docs/editor/editor-layout) page lays out the blocks themselves.
+
 ## API reference
 
 ### Editor
