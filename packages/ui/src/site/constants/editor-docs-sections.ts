@@ -30,6 +30,7 @@ export const editorDocsSections: readonly { title: string; pages: readonly strin
       'editor-embed',
       'editor-file',
       'editor-image',
+      'editor-layout',
       'editor-link',
       'editor-math',
       'editor-media',

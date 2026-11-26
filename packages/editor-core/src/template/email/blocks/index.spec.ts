@@ -175,6 +175,27 @@ describe('the default blocks', () => {
     }
   });
 
+  it.each([
+    'paragraph',
+    'button',
+    'code',
+    'list',
+    'callout',
+    'divider',
+    'columns',
+    'html',
+    'heading',
+    'quote',
+    'image',
+    'table',
+    'section',
+  ] as const)('read spaceBefore on a %s, keeping a valid one and dropping one outside the set', (type) => {
+    const base = type === 'columns' ? { ratio: [1, 1] } : {};
+    expect(defaultBlocks[type].readAttributes({ ...base, spaceBefore: 'none' })).toMatchObject({ spaceBefore: 'none' });
+    expect(defaultBlocks[type].readAttributes({ ...base, spaceBefore: 'huge' }).spaceBefore).toBeUndefined();
+    expect(defaultBlocks[type].attributes.safeParse({ ...base, spaceBefore: 'large' }).success).toBe(true);
+  });
+
   it('require a columns ratio of two to four weights of at most twelve', () => {
     const ratio = (value: unknown): boolean => defaultBlocks.columns.attributes.safeParse({ ratio: value }).success;
     expect(ratio([1, 1])).toBe(true);

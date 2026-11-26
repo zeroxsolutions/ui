@@ -30,6 +30,8 @@ export const DOCUMENT_MARKS: ReadonlySet<string> = new Set([
   'subscript',
   'superscript',
   'textStyle',
+  'textColor',
+  'textBackground',
 ]);
 
 /**
@@ -64,6 +66,7 @@ const DOCUMENT_NODES: ReadonlySet<string> = new Set([
   'button',
   'columns',
   'column',
+  'section',
   'mathBlock',
   'mathInline',
   'variable',

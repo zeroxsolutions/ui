@@ -1,4 +1,17 @@
-import { Extension, InputRule, Mark, Node, markInputRule, mergeAttributes, nodeInputRule } from '@tiptap/core';
+import {
+  callOrReturn,
+  Extension,
+  flattenExtensions,
+  getExtensionField,
+  InputRule,
+  Mark,
+  Node,
+  markInputRule,
+  mergeAttributes,
+  nodeInputRule,
+  type AnyExtension,
+  type Editor,
+} from '@tiptap/core';
 import type { Plugin } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 import { facadeFor } from '../engine/facade-registry.js';
@@ -36,12 +49,46 @@ const Paragraph = Node.create({
 
 const Text = Node.create({ name: 'text', group: 'inline' });
 
+/**
+ * The group a content expression may name for every block node of the editor but the section: what a section and a
+ * lane hold, so neither holds a section. No feature can add a group to another feature's node, since a node's own
+ * `group` replaces what another extension adds to its schema, so the compiler spells the group out by name.
+ */
+const SECTION_BLOCK = /\bsectionBlock\b/g;
+/** The section's node name, which `sectionBlock` leaves out. */
+const SECTION_NODE = 'section';
+
+function groupsOf(extension: AnyExtension, editor: Editor): string[] {
+  const context = { name: extension.name, options: extension.options, storage: extension.storage, editor };
+  const group = callOrReturn(getExtensionField<string | (() => string)>(extension, 'group', context));
+  return typeof group === 'string' ? group.split(/\s+/) : [];
+}
+
+/**
+ * `content` with `sectionBlock` spelled as the editor's block nodes but the section, read when the schema is built;
+ * a schema built with no editor reads it as `block`.
+ */
+function contentOf(content: string | undefined): string | undefined | ((this: { editor?: Editor }) => string) {
+  if (content === undefined || !content.match(SECTION_BLOCK)) return content;
+  return function sectionContent(this: { editor?: Editor }): string {
+    const editor = this.editor;
+    if (!editor) return content.replace(SECTION_BLOCK, 'block');
+    const names = new Set(
+      flattenExtensions(editor.options.extensions)
+        .filter((extension) => extension.type === 'node' && extension.name !== SECTION_NODE)
+        .filter((extension) => groupsOf(extension, editor).includes('block'))
+        .map((extension) => extension.name),
+    );
+    return content.replace(SECTION_BLOCK, `(${[...names].join(' | ')})`);
+  };
+}
+
 function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
   const tag = spec.htmlTag ?? 'div';
   return Node.create({
     name: spec.name,
     group: spec.group,
-    content: spec.content,
+    content: contentOf(spec.content),
     marks: spec.marks,
     inline: spec.group === 'inline',
     atom: spec.atom,

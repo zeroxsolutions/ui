@@ -3,17 +3,22 @@
  * carries the classes a stylesheet styles it by. Values are filled when a node is made, through the reader
  * its factory was given, and escaped when it is written.
  */
+import type { ColorToken, VAlign } from '../../layout/index.js';
 import { escapeHtml } from '../../variables/interpolate.js';
 
 /** One class name, or several, a falsy entry left out, so a render can write `active && 'zx-x'`. */
 export type ClassList = string | readonly (string | false | null | undefined)[];
 
-/** A run of filled text, bold and italic as its markup said. */
+/** A run of filled text, bold, italic and coloured as its markup said. */
 export interface TextRunText {
   readonly kind: 'text';
   readonly text: string;
   readonly bold: boolean;
   readonly italic: boolean;
+  /** The text's colour token; absent for the default colour. */
+  readonly color?: ColorToken;
+  /** The colour token behind the text; absent for none. */
+  readonly background?: ColorToken;
 }
 
 /** A link whose href passed the link check; a refused one is read as its label's runs alone. */
@@ -38,7 +43,13 @@ export interface ColumnNode {
 
 export type EmailNode =
   | { readonly kind: 'section'; readonly classes: readonly string[]; readonly children: readonly EmailNode[] }
-  | { readonly kind: 'columns'; readonly classes: readonly string[]; readonly columns: readonly ColumnNode[] }
+  | {
+      readonly kind: 'columns';
+      readonly classes: readonly string[];
+      readonly columns: readonly ColumnNode[];
+      /** Where each lane's blocks sit against the tallest lane; at the top when absent. */
+      readonly valign?: VAlign;
+    }
   | ColumnNode
   | {
       readonly kind: 'text';
@@ -84,6 +95,8 @@ export type EmailNode =
       readonly classes: readonly string[];
       readonly header: boolean;
       readonly rows: readonly (readonly (readonly TextRun[])[])[];
+      /** Each column's share of the table, one per cell of a row; the cells share it evenly when absent. */
+      readonly columnWidths?: readonly number[];
     }
   /** Linked images in a row, as social icons are drawn; an item whose image or link is refused is left out. */
   | {
@@ -375,8 +388,8 @@ type TextSource =
 export interface EmailPrimitives {
   /** A full-width row: in a stack of blocks its own row, elsewhere a table of one cell. */
   section(options: Classed, children: Children): EmailNode;
-  /** Lanes side by side, which stack on a narrow screen. */
-  columns(options: Classed, columns: readonly ColumnNode[]): EmailNode;
+  /** Lanes side by side, which stack on a narrow screen; `valign` places each lane's blocks, at the top when absent. */
+  columns(options: Classed & { readonly valign?: VAlign }, columns: readonly ColumnNode[]): EmailNode;
   /** One lane; `weight` is its share against its siblings', 1 when absent. */
   column(options: Classed & { readonly weight?: number }, children: Children): ColumnNode;
   text(options: Classed & TextSource & { readonly textEnd?: TextEnd }): EmailNode;
@@ -391,8 +404,17 @@ export interface EmailPrimitives {
   /** Each item is inline markup. */
   list(options: Classed & { readonly items: readonly string[]; readonly ordered?: boolean }): EmailNode;
   code(options: Classed & { readonly text: string }): EmailNode;
-  /** A data table; each cell is inline markup, and `header` draws the first row as headers. */
-  table(options: Classed & { readonly rows: readonly (readonly string[])[]; readonly header?: boolean }): EmailNode;
+  /**
+   * A data table; each cell is inline markup, and `header` draws the first row as headers. `columnWidths` gives each
+   * column's share, read against their sum, one per cell of a row; another count is ignored.
+   */
+  table(
+    options: Classed & {
+      readonly rows: readonly (readonly string[])[];
+      readonly header?: boolean;
+      readonly columnWidths?: readonly number[];
+    },
+  ): EmailNode;
   /**
    * Linked images side by side, each `size` px square, as social icons are drawn. An item whose image or link is
    * refused is left out; its text arm is a `alt: href` line per item.
@@ -466,7 +488,12 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       classes: classesOf(options.class),
       children: present(children),
     }),
-    columns: (options, columns) => ({ kind: 'columns', classes: classesOf(options.class, 'zx-columns'), columns }),
+    columns: (options, columns) => ({
+      kind: 'columns',
+      classes: classesOf(options.class, 'zx-columns'),
+      columns,
+      ...(options.valign === undefined ? {} : { valign: options.valign }),
+    }),
     column: (options, children) => ({
       kind: 'column',
       classes: classesOf(options.class),
@@ -521,6 +548,7 @@ export function createPrimitives(reader: PrimitiveReader): EmailPrimitives {
       classes: classesOf(options.class, 'zx-table'),
       header: options.header ?? false,
       rows: options.rows.map((row) => row.map((cell) => reader.runs(cell))),
+      ...(options.columnWidths === undefined ? {} : { columnWidths: options.columnWidths }),
     }),
     icons: (options) => ({
       kind: 'icons',

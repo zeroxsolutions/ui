@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { parseInlineMarkup } from '../../markup/inline-markup.js';
 import { defineBlockType } from '../block.js';
-import { BLOCK_TEXT_MAX_LENGTH, readOr, spaceAfter } from './shared.js';
+import { BLOCK_TEXT_MAX_LENGTH, readOr, spaceAfter, spaceBefore } from './shared.js';
 
 /** The most rows and columns a table holds: a timetable or a price list, never a spreadsheet. */
 export const TABLE_MAX_ROWS = 20;
@@ -13,8 +13,11 @@ const cell = z
   .max(BLOCK_TEXT_MAX_LENGTH)
   .refine((text) => parseInlineMarkup(text).ok, { message: 'malformed inline markup' });
 
+/** Each column's share of the table's width, the narrowest a twentieth; the drawn widths are read against their sum. */
+const columnWidths = z.array(z.number().min(0.05).max(1)).min(1).max(TABLE_MAX_COLUMNS);
+
 const attributes = z
-  .object({ header: z.boolean().optional(), spaceAfter: z.enum(['small', 'medium', 'large']).optional() })
+  .object({ header: z.boolean().optional(), columnWidths: columnWidths.optional(), spaceBefore, spaceAfter })
   .strict();
 const content = z
   .object({
@@ -27,7 +30,9 @@ const content = z
   .strict();
 const lenientAttributes = z.object({
   header: z.boolean().optional().catch(undefined),
-  spaceAfter: z.enum(['small', 'medium', 'large']).optional().catch(undefined),
+  columnWidths: columnWidths.optional().catch(undefined),
+  spaceBefore: spaceBefore.catch(undefined),
+  spaceAfter: spaceAfter.catch(undefined),
 });
 const lenientContent = z.object({
   rows: z
@@ -66,7 +71,10 @@ export const table = defineBlockType({
   },
   render({ attributes: a, content: c }, { h }) {
     const rows = drawnRows(c.rows);
-    return rows.length === 0 ? [] : h.table({ header: a.header ?? false, rows });
+    if (rows.length === 0) return [];
+    const widths =
+      a.columnWidths !== undefined && a.columnWidths.length === rows[0].length ? a.columnWidths : undefined;
+    return h.table({ header: a.header ?? false, rows, ...(widths === undefined ? {} : { columnWidths: widths }) });
   },
   sample: {
     attributes: { header: true },

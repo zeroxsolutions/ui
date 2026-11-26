@@ -31,13 +31,23 @@ import {
 } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockIdentity, type BlockIdentityOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import {
+  CONTENT_WIDTH,
   defaultBlocks,
+  emailAlignOf,
+  layoutAlignOf,
   libraryBlocks,
+  type Align,
   type DefaultBlockType,
   type LibraryBlockType,
 } from '@zeroxsolutions/editor-core/template/email/index';
 import {
-  EMAIL_GLOBAL_ATTRIBUTES,
+  ALIGNS as LAYOUT_ALIGNS,
+  LAYOUT_NODES,
+  TEXT_ALIGN_NODES,
+  type LayoutAlign,
+} from '@zeroxsolutions/editor-core/template/layout/index';
+import {
+  EMAIL_LAYOUT_ATTRIBUTES,
   EMAIL_KINDS,
   type EditorProfile,
   type EmailBlockKind,
@@ -113,6 +123,7 @@ export const EMAIL_KIND_NODES: Readonly<Record<EmailBlockKind, string>> = {
   hero: 'hero',
   card: 'card',
   legalFooter: 'legalFooter',
+  section: 'section',
 };
 
 /**
@@ -154,6 +165,39 @@ const BLOCK_ATTRIBUTES: Readonly<Record<string, readonly EmailBlockAttribute[]>>
   image: ['align', 'spaceAfter'],
   table: ['spaceAfter'],
 };
+
+/**
+ * The blocks whose Align aligns their text: a paragraph's and a heading's own lines, and the lines a quote, a list
+ * or a callout holds, each as `textAlign`. Every other block's Align places the block itself, as the layout's
+ * `align`.
+ */
+const TEXT_ALIGNED: ReadonlySet<string> = new Set(['paragraph', 'heading', 'blockquote', 'bulletList', 'callout']);
+
+const isTextLine = (node: ProseMirrorNode): boolean => (TEXT_ALIGN_NODES as readonly string[]).includes(node.type.name);
+
+/** The lines whose alignment a block's Align sets and reads: the block itself where it is one, else those it holds. */
+function alignedLines(node: ProseMirrorNode, pos: number): { node: ProseMirrorNode; pos: number }[] {
+  if (isTextLine(node)) return [{ node, pos }];
+  const lines: { node: ProseMirrorNode; pos: number }[] = [];
+  node.descendants((child, offset) => {
+    if (isTextLine(child)) lines.push({ node: child, pos: pos + 1 + offset });
+    return !isTextLine(child);
+  });
+  return lines;
+}
+
+/** The wire's name of a stored alignment: the layout's names, or the wire's own a document written before them holds. */
+function wireAlignOf(value: unknown): Align | undefined {
+  if (value === 'left' || value === 'right') return value;
+  if (value === 'justify') return 'left';
+  return (LAYOUT_ALIGNS as readonly unknown[]).includes(value) ? emailAlignOf(value as LayoutAlign) : undefined;
+}
+
+/** What the block menu's Align reads on `node`: its first line's alignment on a block of text, else its own. */
+function blockAlign(node: ProseMirrorNode): Align | undefined {
+  if (!TEXT_ALIGNED.has(node.type.name)) return wireAlignOf(node.attrs.align);
+  return wireAlignOf(alignedLines(node, 0)[0]?.node.attrs.textAlign);
+}
 
 /** The attributes a node stores as a number, which the block menu offers as text. */
 const NUMBER_ATTRIBUTES: ReadonlySet<EmailBlockAttribute> = new Set(['level']);
@@ -213,6 +257,7 @@ const KIND_SLASH_ITEMS: Readonly<Record<EmailBlockKind, string>> = {
   hero: 'email-block-hero',
   card: 'email-block-card',
   legalFooter: 'email-block-legalFooter',
+  section: 'email-section',
 };
 
 /** The library's blocks the kit offers, each as a product's block is offered, and the icon its slash item shows. */
@@ -338,6 +383,7 @@ const NEW_BLOCKS: Readonly<Record<Exclude<EmailBlockKind, 'paragraph' | LibraryB
       { type: 'tableRow', content: [tableCell('tableCell'), tableCell('tableCell')] },
     ],
   }),
+  section: () => ({ type: 'section', content: [{ type: 'paragraph' }] }),
 };
 
 export interface EmailKitOptions extends BlockIdentityOptions {
@@ -500,24 +546,51 @@ function validAttributes(type: string, attrs: Record<string, string>): boolean {
 
 const DATA_NAMES: Readonly<Record<string, string>> = { align: 'align', spaceAfter: 'space-after', tone: 'tone' };
 
+/** The nodes whose own specs declare their attributes, so no global attribute repeats one. */
+const OWN_SPEC_NODES: ReadonlySet<string> = new Set(['button', 'columns', 'emailHtml', 'section']);
+
+const dataName = (attribute: string): string =>
+  DATA_NAMES[attribute] ?? attribute.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
 const dataAttribute = (attribute: string) => ({
   default: null,
-  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${DATA_NAMES[attribute]}`),
+  parseHTML: (element: HTMLElement) => element.getAttribute(`data-${dataName(attribute)}`),
   renderHTML: (attrs: Record<string, unknown>) =>
-    attrs[attribute] ? { [`data-${DATA_NAMES[attribute]}`]: attrs[attribute] } : {},
+    attrs[attribute] ? { [`data-${dataName(attribute)}`]: attrs[attribute] } : {},
 });
 
 // The stored text, or the stored block, an import keeps beside the nodes; a copy must not carry it to another block.
 const sourceAttribute = { default: null, rendered: false, keepOnSplit: false, parseHTML: () => null };
 
-/** The attributes each document node carries for the email, as global attributes on the document's own nodes. */
+/**
+ * Whether `blockLayout` declares `name` on `type`, as it reads `LAYOUT_NODES` and `TEXT_ALIGN_NODES`: the layout's
+ * keys, a line's `textAlign`, a paragraph's `size` and a table's `columnWidths`.
+ */
+function declaredByLayout(type: string, name: string): boolean {
+  return (
+    ((LAYOUT_NODES as Readonly<Record<string, readonly string[]>>)[type] ?? []).includes(name) ||
+    (name === 'textAlign' && (TEXT_ALIGN_NODES as readonly string[]).includes(type)) ||
+    (name === 'size' && type === 'paragraph') ||
+    (name === 'columnWidths' && type === 'table')
+  );
+}
+
+/**
+ * The email's own attributes on the document's nodes, as global attributes: a paragraph's tone, a code block's
+ * alignment, the stored text or block an import keeps. The layout's, `blockLayout` declares.
+ */
 function emailGlobalAttributes() {
-  return Object.entries(EMAIL_GLOBAL_ATTRIBUTES).map(([type, names]) => ({
-    types: [type],
-    attributes: Object.fromEntries(
-      names.map((name) => [name, name === 'source' || name === 'stored' ? sourceAttribute : dataAttribute(name)]),
-    ),
-  }));
+  return Object.entries(EMAIL_LAYOUT_ATTRIBUTES)
+    .filter(([type]) => !OWN_SPEC_NODES.has(type))
+    .map(([type, names]) => ({
+      types: [type],
+      attributes: Object.fromEntries(
+        names
+          .filter((name) => !declaredByLayout(type, name))
+          .map((name) => [name, name === 'source' || name === 'stored' ? sourceAttribute : dataAttribute(name)]),
+      ),
+    }))
+    .filter(({ attributes }) => Object.keys(attributes).length > 0);
 }
 
 /**
@@ -637,6 +710,11 @@ function emailEngine(context: KitContext, carried: ReadonlySet<string>, rules: r
     },
     addGlobalAttributes: () => emailGlobalAttributes(),
     addProseMirrorPlugins: () => [
+      // A block's width is a share of the card's content width, as the email draws it, wherever the editor is wider.
+      new Plugin({
+        key: new PluginKey('emailContentWidth'),
+        props: { attributes: { style: `--layout-container: ${CONTENT_WIDTH}px` } },
+      }),
       admittedBlocks(context.admitted, carried),
       cellLines(),
       laneWidths(),
@@ -684,10 +762,10 @@ export function emailKit(
   const extraBlocks = extraNodes.map((node) => node.name);
   // A lane holds no block of lanes, as it holds no columns block.
   const laneBlocks = extraNodes.filter((node) => !/\bcolumn\b/.test(node.content ?? '')).map((node) => node.name);
-  // Every kind but columns, whatever the profile allows, so a stored lane opens; adding is narrowed below.
+  // Every kind but columns and the section, whatever the profile allows, so a stored lane opens; adding is narrowed below.
   const laneContent = `(${[
     ...new Set([
-      ...EMAIL_KINDS.filter((kind) => kind !== 'columns').map((kind) => EMAIL_KIND_NODES[kind]),
+      ...EMAIL_KINDS.filter((kind) => kind !== 'columns' && kind !== 'section').map((kind) => EMAIL_KIND_NODES[kind]),
       ...Object.keys(FOLDED_BLOCKS),
       'emailUnknown',
       ...laneBlocks,
@@ -781,6 +859,14 @@ export function emailKit(
           const { engine, block } = target;
           const tr = engine.state.tr;
           for (const [name, value] of Object.entries(attrs)) {
+            if (name === 'align') {
+              const align = layoutAlignOf(value as Align);
+              if (!TEXT_ALIGNED.has(block.node.type.name)) tr.setNodeAttribute(block.pos, 'align', align);
+              else
+                for (const line of alignedLines(block.node, block.pos))
+                  tr.setNodeAttribute(line.pos, 'textAlign', align);
+              continue;
+            }
             const stored = NUMBER_ATTRIBUTES.has(name as EmailBlockAttribute) ? Number(value) : value;
             tr.setNodeAttribute(block.pos, name, stored);
           }
@@ -833,7 +919,12 @@ export function emailKit(
 
   // The document's own block menu, Turn into narrowed to the email's kinds, joins the email's below.
   const standard: EditorFeature = {
-    ...standardKit({ placeholder: options.placeholder ?? messages().emptyLine, trailingNode: false }),
+    ...standardKit({
+      placeholder: options.placeholder ?? messages().emptyLine,
+      trailingNode: false,
+      // Refuses what an email cannot draw: a full width, justified text, a full section.
+      layout: { email: true },
+    }),
     blockMenu: [],
   };
 
@@ -954,7 +1045,11 @@ function emailBlockMenuItems(
       group: words.attributes[attribute],
       command: 'setBlockAttributes',
       args: { attrs: { [attribute]: value } },
-      active: () => String(block.node.attrs[attribute] ?? ATTRIBUTE_DEFAULTS[attribute]) === value,
+      active: () =>
+        String(
+          (attribute === 'align' ? blockAlign(block.node) : block.node.attrs[attribute]) ??
+            ATTRIBUTE_DEFAULTS[attribute],
+        ) === value,
       disabledReason: own,
     })),
   );

@@ -6,16 +6,17 @@ import {
   BUTTON_HREF_MAX_LENGTH,
   CONTENT_WIDTH,
   IMAGE_START,
+  imageWidth,
   LINK_START,
   readOr,
   spaceAfter,
+  spaceBefore,
 } from './shared.js';
 
 /** The longest alt text and caption: a sentence or two, never a body. */
 export const IMAGE_TEXT_MAX_LENGTH = 500;
 
-const width = z.number().int().min(1).max(CONTENT_WIDTH);
-const attributes = z.object({ align, spaceAfter, width: width.optional() }).strict();
+const attributes = z.object({ align, spaceBefore, spaceAfter, width: imageWidth.optional() }).strict();
 const content = z
   .object({
     src: address(IMAGE_START, BUTTON_HREF_MAX_LENGTH),
@@ -30,8 +31,9 @@ const content = z
   .strict();
 const lenientAttributes = z.object({
   align: align.catch(undefined),
+  spaceBefore: spaceBefore.catch(undefined),
   spaceAfter: spaceAfter.catch(undefined),
-  width: width.optional().catch(undefined),
+  width: imageWidth.optional().catch(undefined),
 });
 const lenientContent = z.object({
   src: z.string().catch(''),
@@ -39,6 +41,15 @@ const lenientContent = z.object({
   caption: z.string().catch(''),
   href: z.string().catch(''),
 });
+
+/**
+ * The px an image is drawn at: a fraction of the width it sits in, a legacy pixel width as stored, or the card's
+ * content width when it names none; never wider than the content width, which Outlook would push the card past.
+ */
+function drawnWidth(width: number | undefined, available: number): number {
+  if (width === undefined) return CONTENT_WIDTH;
+  return Math.min(width <= 1 ? Math.round(width * available) : width, CONTENT_WIDTH);
+}
 
 /**
  * A hosted image, its alt text read where images are off, optionally linked and captioned. It is drawn at its
@@ -61,14 +72,14 @@ export const image = defineBlockType({
       ...(source.caption === undefined || source.caption === '' ? {} : { caption: await translateOne(source.caption) }),
     };
   },
-  render({ attributes: a, content: c }, { h }) {
+  render({ attributes: a, content: c }, { h, available }) {
     const caption = c.caption ?? '';
     return [
       h.image({
         class: 'zx-image-fluid',
         src: c.src,
         alt: c.alt,
-        width: Math.min(a.width ?? CONTENT_WIDTH, CONTENT_WIDTH),
+        width: drawnWidth(a.width, available),
         ...(c.href ? { href: c.href } : {}),
       }),
       caption !== '' && h.text({ class: ['zx-caption', 'zx-tone-muted'], text: caption }),

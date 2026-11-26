@@ -1311,6 +1311,136 @@
         ".document-editor .ProseMirror > :last-child": {
           "margin-bottom": "0"
         },
+        ".document-editor [style*='--layout-width']": {
+          "width": "calc(var(--layout-width) * var(--layout-container, 100%))",
+          "max-width": "100%"
+        },
+        ".document-editor [data-slot='column']": {
+          "--layout-container": "100%"
+        },
+        ".document-editor [style*='--layout-width'][data-align='center']": {
+          "margin-inline": "auto"
+        },
+        ".document-editor [style*='--layout-width'][data-align='end']": {
+          "margin-inline-start": "auto"
+        },
+        ".document-editor .ProseMirror [data-align='start']": {
+          "text-align": "start"
+        },
+        ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
+          "text-align": "left"
+        },
+        ".document-editor .ProseMirror [data-align='center'], .document-editor .ProseMirror [data-align='center'] p": {
+          "text-align": "center"
+        },
+        ".document-editor .ProseMirror [data-align='end']": {
+          "text-align": "end"
+        },
+        ".document-editor .ProseMirror [data-align='right'], .document-editor .ProseMirror [data-align='right'] p": {
+          "text-align": "right"
+        },
+        ".document-editor [data-text-align='start']": {
+          "text-align": "start"
+        },
+        ".document-editor [data-text-align='center']": {
+          "text-align": "center"
+        },
+        ".document-editor [data-text-align='end']": {
+          "text-align": "end"
+        },
+        ".document-editor [data-text-align='justify']": {
+          "text-align": "justify"
+        },
+        ".document-editor .ProseMirror [data-space-before='none'], .document-editor > [data-space-before='none']": {
+          "margin-top": "0"
+        },
+        ".document-editor .ProseMirror [data-space-before='small'], .document-editor > [data-space-before='small']": {
+          "margin-top": "0.5rem"
+        },
+        ".document-editor .ProseMirror [data-space-before='medium'], .document-editor > [data-space-before='medium']": {
+          "margin-top": "1rem"
+        },
+        ".document-editor .ProseMirror [data-space-before='large'], .document-editor > [data-space-before='large']": {
+          "margin-top": "2rem"
+        },
+        ".document-editor .ProseMirror [data-space-after='none'], .document-editor > [data-space-after='none']": {
+          "margin-bottom": "0"
+        },
+        ".document-editor .ProseMirror [data-space-after='small'], .document-editor > [data-space-after='small']": {
+          "margin-bottom": "0.5rem"
+        },
+        ".document-editor .ProseMirror [data-space-after='medium'], .document-editor > [data-space-after='medium']": {
+          "margin-bottom": "1rem"
+        },
+        ".document-editor .ProseMirror [data-space-after='large'], .document-editor > [data-space-after='large']": {
+          "margin-bottom": "2rem"
+        },
+        ".document-editor [data-color='muted']": {
+          "color": "var(--muted-foreground)"
+        },
+        ".document-editor [data-color='primary']": {
+          "color": "var(--primary)"
+        },
+        ".document-editor [data-color='accent']": {
+          "color": "var(--accent-foreground)"
+        },
+        ".document-editor [data-color='red']": {
+          "color": "var(--hue-red)"
+        },
+        ".document-editor [data-color='orange']": {
+          "color": "var(--hue-orange)"
+        },
+        ".document-editor [data-color='amber']": {
+          "color": "var(--hue-amber)"
+        },
+        ".document-editor [data-color='green']": {
+          "color": "var(--hue-green)"
+        },
+        ".document-editor [data-color='teal']": {
+          "color": "var(--hue-teal)"
+        },
+        ".document-editor [data-color='blue']": {
+          "color": "var(--hue-blue)"
+        },
+        ".document-editor [data-color='violet']": {
+          "color": "var(--hue-violet)"
+        },
+        ".document-editor [data-color='pink']": {
+          "color": "var(--hue-pink)"
+        },
+        ".document-editor [data-bg='muted']": {
+          "background-color": "var(--muted)"
+        },
+        ".document-editor [data-bg='primary']": {
+          "background-color": "color-mix(in oklab, var(--primary) 15%, transparent)"
+        },
+        ".document-editor [data-bg='accent']": {
+          "background-color": "var(--accent)"
+        },
+        ".document-editor [data-bg='red']": {
+          "background-color": "var(--hue-red-surface)"
+        },
+        ".document-editor [data-bg='orange']": {
+          "background-color": "var(--hue-orange-surface)"
+        },
+        ".document-editor [data-bg='amber']": {
+          "background-color": "var(--hue-amber-surface)"
+        },
+        ".document-editor [data-bg='green']": {
+          "background-color": "var(--hue-green-surface)"
+        },
+        ".document-editor [data-bg='teal']": {
+          "background-color": "var(--hue-teal-surface)"
+        },
+        ".document-editor [data-bg='blue']": {
+          "background-color": "var(--hue-blue-surface)"
+        },
+        ".document-editor [data-bg='violet']": {
+          "background-color": "var(--hue-violet-surface)"
+        },
+        ".document-editor [data-bg='pink']": {
+          "background-color": "var(--hue-pink-surface)"
+        },
         "@layer components": {
           ".document-editor .ProseMirror": {
             "outline": "none"
@@ -1416,6 +1546,62 @@
               "display": "none !important"
             }
           }
+        }
+      },
+      "cssVars": {
+        "theme": {
+          "color-hue-amber": "var(--hue-amber)",
+          "color-hue-amber-surface": "var(--hue-amber-surface)",
+          "color-hue-blue": "var(--hue-blue)",
+          "color-hue-blue-surface": "var(--hue-blue-surface)",
+          "color-hue-green": "var(--hue-green)",
+          "color-hue-green-surface": "var(--hue-green-surface)",
+          "color-hue-orange": "var(--hue-orange)",
+          "color-hue-orange-surface": "var(--hue-orange-surface)",
+          "color-hue-pink": "var(--hue-pink)",
+          "color-hue-pink-surface": "var(--hue-pink-surface)",
+          "color-hue-red": "var(--hue-red)",
+          "color-hue-red-surface": "var(--hue-red-surface)",
+          "color-hue-teal": "var(--hue-teal)",
+          "color-hue-teal-surface": "var(--hue-teal-surface)",
+          "color-hue-violet": "var(--hue-violet)",
+          "color-hue-violet-surface": "var(--hue-violet-surface)"
+        },
+        "light": {
+          "hue-amber": "oklch(0.666 0.179 58.318)",
+          "hue-amber-surface": "oklch(0.962 0.059 95.617)",
+          "hue-blue": "oklch(0.546 0.245 262.881)",
+          "hue-blue-surface": "oklch(0.932 0.032 255.585)",
+          "hue-green": "oklch(0.627 0.194 149.214)",
+          "hue-green-surface": "oklch(0.962 0.044 156.743)",
+          "hue-orange": "oklch(0.646 0.222 41.116)",
+          "hue-orange-surface": "oklch(0.954 0.038 75.164)",
+          "hue-pink": "oklch(0.592 0.249 0.584)",
+          "hue-pink-surface": "oklch(0.948 0.028 342.258)",
+          "hue-red": "oklch(0.577 0.245 27.325)",
+          "hue-red-surface": "oklch(0.936 0.032 17.717)",
+          "hue-teal": "oklch(0.6 0.118 184.704)",
+          "hue-teal-surface": "oklch(0.953 0.051 180.801)",
+          "hue-violet": "oklch(0.541 0.281 293.009)",
+          "hue-violet-surface": "oklch(0.943 0.029 294.588)"
+        },
+        "dark": {
+          "hue-amber": "oklch(0.828 0.189 84.429)",
+          "hue-amber-surface": "oklch(0.279 0.077 45.635)",
+          "hue-blue": "oklch(0.707 0.165 254.624)",
+          "hue-blue-surface": "oklch(0.282 0.091 267.935)",
+          "hue-green": "oklch(0.792 0.209 151.711)",
+          "hue-green-surface": "oklch(0.266 0.065 152.934)",
+          "hue-orange": "oklch(0.75 0.183 55.934)",
+          "hue-orange-surface": "oklch(0.266 0.079 36.259)",
+          "hue-pink": "oklch(0.718 0.202 349.761)",
+          "hue-pink-surface": "oklch(0.284 0.109 3.907)",
+          "hue-red": "oklch(0.704 0.191 22.216)",
+          "hue-red-surface": "oklch(0.258 0.092 26.042)",
+          "hue-teal": "oklch(0.777 0.152 181.912)",
+          "hue-teal-surface": "oklch(0.277 0.046 192.524)",
+          "hue-violet": "oklch(0.702 0.183 293.541)",
+          "hue-violet-surface": "oklch(0.283 0.141 291.089)"
         }
       }
     },
@@ -2546,6 +2732,7 @@
         "@shadcn/input",
         "@shadcn/popover",
         "@zui/document-editor",
+        "@zui/editor-layout",
         "@zui/editor-uploads",
         "@zui/lucide-image-icon"
       ],
@@ -2613,6 +2800,22 @@
           "path": "registry/bases/base-ui/examples/editor-uploads-demo.tsx",
           "type": "registry:example",
           "target": "@components/editor-uploads-demo.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-layout-demo",
+      "type": "registry:example",
+      "title": "Editor Layout Demo",
+      "description": "A block of the Document Editor laid out with the layout kit: its floating toolbar aligns it and makes it full width, and its handles resize it by drag or by the arrow keys.",
+      "categories": ["examples"],
+      "dependencies": ["@zeroxsolutions/editor-core", "zod"],
+      "registryDependencies": ["@zui/document-editor", "@zui/editor-layout"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/examples/editor-layout-demo.tsx",
+          "type": "registry:example",
+          "target": "@components/editor-layout-demo.tsx"
         }
       ]
     },
@@ -3044,6 +3247,62 @@
           "path": "registry/bases/base-ui/editor/document/uploads/simulated-upload.ts",
           "type": "registry:component",
           "target": "@components/editor/document/uploads/simulated-upload.ts"
+        }
+      ],
+      "dependencies": ["@zeroxsolutions/editor-core"]
+    },
+    {
+      "name": "editor-layout",
+      "type": "registry:component",
+      "title": "Editor Layout",
+      "description": "The layout controls the editors' blocks share: a block's floating toolbar, its alignment and full width toggles, the width handles dragged on each side, the props a view and the Viewer draw a layout with, and the layout's words.",
+      "categories": ["editor"],
+      "registryDependencies": [
+        "@shadcn/popover",
+        "@shadcn/toggle",
+        "@shadcn/toggle-group",
+        "@shadcn/tooltip",
+        "@zui/document-editor",
+        "@zui/lucide-maximize-2-icon",
+        "@zui/lucide-text-align-center-icon",
+        "@zui/lucide-text-align-end-icon",
+        "@zui/lucide-text-align-start-icon"
+      ],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/index.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/index.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/align-control.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/align-control.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/block-toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/block-toolbar.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/layout-props.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/layout-props.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/layout-words.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/layout-words.ts"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/resize-handles.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/resize-handles.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/width-toggle.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/width-toggle.tsx"
         }
       ],
       "dependencies": ["@zeroxsolutions/editor-core"]
@@ -3870,6 +4129,7 @@
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
+        "@zui/editor-layout",
         "@zui/editor-table",
         "@zui/editor-uploads",
         "@zui/lucide-at-sign-icon",
@@ -4056,26 +4316,8 @@
         "zod"
       ],
       "css": {
-        ".document-editor .ProseMirror [data-align='left'], .document-editor .ProseMirror [data-align='left'] p": {
-          "text-align": "left"
-        },
-        ".document-editor .ProseMirror [data-align='center'], .document-editor .ProseMirror [data-align='center'] p": {
-          "text-align": "center"
-        },
-        ".document-editor .ProseMirror [data-align='right'], .document-editor .ProseMirror [data-align='right'] p": {
-          "text-align": "right"
-        },
         ".document-editor .ProseMirror [data-tone='muted']": {
           "color": "var(--muted-foreground)"
-        },
-        ".document-editor .ProseMirror [data-space-after='small']": {
-          "margin-bottom": "0.5rem"
-        },
-        ".document-editor .ProseMirror [data-space-after='medium']": {
-          "margin-bottom": "1rem"
-        },
-        ".document-editor .ProseMirror [data-space-after='large']": {
-          "margin-bottom": "2rem"
         },
         ".variable-text-field .ProseMirror, .variable-text-field .ProseMirror[contenteditable='true']": {
           "outline": "none",

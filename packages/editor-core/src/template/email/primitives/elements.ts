@@ -1,3 +1,4 @@
+import type { VAlign } from '../../layout/index.js';
 import type { ColumnNode, EmailNode, TextRun } from './nodes.js';
 
 /** One element of the email as it is written: its tag, its structural attributes and the classes it is styled by. */
@@ -52,23 +53,89 @@ function runs(list: readonly TextRun[]): ElementChild[] {
     let drawn: ElementChild = { text: run.text };
     if (run.italic) drawn = element('em', [], [drawn]);
     if (run.bold) drawn = element('strong', [], [drawn]);
-    return drawn;
+    const paint = [
+      ...(run.color === undefined || run.color === 'default' ? [] : [`zx-color-${run.color}`]),
+      ...(run.background === undefined || run.background === 'default' ? [] : [`zx-bg-${run.background}`]),
+    ];
+    return paint.length === 0 ? drawn : element('span', paint, [drawn]);
   });
 }
 
-function lanes(columns: readonly ColumnNode[]): EmailElement[] {
+/** The `valign` a table cell takes for each vertical alignment, which Outlook reads where it reads no CSS. */
+const CELL_VALIGN = { top: 'top', center: 'middle', bottom: 'bottom' } as const satisfies Record<VAlign, string>;
+
+function lanes(columns: readonly ColumnNode[], valign?: VAlign): EmailElement[] {
   const total = columns.reduce((sum, column) => sum + column.weight, 0);
   return columns.map((column, index) =>
     element(
       'td',
-      [...column.classes, 'zx-lane', ...(index === columns.length - 1 ? ['zx-lane-last'] : [])],
+      [
+        ...column.classes,
+        'zx-lane',
+        ...(index === columns.length - 1 ? ['zx-lane-last'] : []),
+        ...(valign === undefined ? [] : [`zx-valign-${valign}`]),
+      ],
       [stack([], column.children)],
       [
         ['width', `${total === 0 ? 0 : Math.round((column.weight / total) * 100)}%`],
-        ['valign', 'top'],
+        ['valign', CELL_VALIGN[valign ?? 'top']],
       ],
     ),
   );
+}
+
+/** Whether `node` is a wide section's row, which the card draws outside its padding. */
+function isWideRow(node: EmailNode): boolean {
+  return node.kind === 'section' && node.classes.includes('zx-section-wide');
+}
+
+/**
+ * The card's children in runs: each run of rows drawn inside the card's padding, and each wide section's row,
+ * lifted out of its region into a region of its own, drawn without it.
+ */
+function cardRuns(children: readonly EmailNode[]): { readonly wide: boolean; readonly nodes: EmailNode[] }[] {
+  const runs: { wide: boolean; nodes: EmailNode[] }[] = [{ wide: false, nodes: [] }];
+  const padded = (node: EmailNode): void => {
+    const last = runs[runs.length - 1];
+    if (last.wide) runs.push({ wide: false, nodes: [node] });
+    else last.nodes.push(node);
+  };
+  for (const child of children) {
+    if (child.kind !== 'region' || !child.children.some(isWideRow)) {
+      padded(child);
+      continue;
+    }
+    let rows: EmailNode[] = [];
+    const flush = (): void => {
+      if (rows.length > 0) padded({ ...child, children: rows });
+      rows = [];
+    };
+    for (const row of child.children) {
+      if (!isWideRow(row)) {
+        rows.push(row);
+        continue;
+      }
+      flush();
+      runs.push({ wide: true, nodes: [{ ...child, children: [row] }] });
+    }
+    flush();
+  }
+  return runs.filter((run) => run.nodes.length > 0);
+}
+
+/** The card's inner rows: one padded cell, or, around a wide section, padded runs flush against it. */
+function cardRows(children: readonly EmailNode[]): EmailElement[] {
+  const runs = cardRuns(children);
+  if (!runs.some((run) => run.wide)) return [row(element('td', ['zx-inner'], [stack([], children)]))];
+  return runs.map((run, index) => {
+    if (run.wide) return row(element('td', ['zx-inner-wide'], [stack([], run.nodes)]));
+    const classes = [
+      'zx-inner',
+      ...(runs[index + 1]?.wide === true ? ['zx-inner-flush-bottom'] : []),
+      ...(runs[index - 1]?.wide === true ? ['zx-inner-flush-top'] : []),
+    ];
+    return row(element('td', classes, [stack([], run.nodes)]));
+  });
 }
 
 /** The elements one node is drawn as, outside a stack. */
@@ -77,7 +144,7 @@ function flow(node: EmailNode): ElementChild[] {
     case 'section':
       return [element('table', [], [row(element('td', node.classes, expandNodes(node.children, 'flow')))], FULL_TABLE)];
     case 'columns':
-      return [element('table', node.classes, [element('tr', [], lanes(node.columns))], FULL_TABLE)];
+      return [element('table', node.classes, [element('tr', [], lanes(node.columns, node.valign))], FULL_TABLE)];
     case 'column':
       return lanes([node]);
     case 'text':
@@ -113,14 +180,19 @@ function flow(node: EmailNode): ElementChild[] {
       return [element('div', node.classes, [{ text: node.text }])];
     case 'table': {
       if (node.rows.length === 0) return [];
+      const shares = node.columnWidths;
+      const sum = shares?.reduce((total, share) => total + share, 0) ?? 0;
+      const widths =
+        shares === undefined || sum <= 0 ? null : shares.map((share) => `${Math.round((share / sum) * 100)}%`);
       // A data table, so no presentation role: a screen reader reads its cells by row and header.
       const rows = node.rows.map((cells, index) => {
         const head = node.header && index === 0;
         return element(
           'tr',
           [],
-          cells.map((cell) =>
+          cells.map((cell, column) =>
             element(head ? 'th' : 'td', ['zx-table-cell', ...(head ? ['zx-table-head'] : [])], runs(cell), [
+              ...(index === 0 && widths !== null ? [['width', widths[column]] as const] : []),
               ...(head ? [['scope', 'col'] as const] : []),
               ['align', 'left'],
               ['valign', 'top'],
@@ -194,7 +266,7 @@ function flow(node: EmailNode): ElementChild[] {
                 ['zx-outer'],
                 [
                   { raw: OUTLOOK_OPEN },
-                  element('table', node.classes, [row(element('td', ['zx-inner'], [stack([], node.children)]))], TABLE),
+                  element('table', node.classes, cardRows(node.children), TABLE),
                   { raw: OUTLOOK_CLOSE },
                 ],
                 [['align', 'center']],

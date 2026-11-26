@@ -8,6 +8,7 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
+import { blockLayout, type BlockLayoutOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
 import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
 import { TaskItemView } from './task-item-view';
@@ -31,6 +32,12 @@ export interface StandardKitOptions {
    * stores every block turns it off, since the kept line would export as an empty block.
    */
   trailingNode?: boolean;
+  /**
+   * The block layout every block takes, its text and background colour marks and their commands
+   * (`setBlockLayout`, `setTextAlign`, ...), as `blockLayout` declares them; `{}` when absent. The email kit passes
+   * `{ email: true }`; `false` leaves the layout out, for a host that declares it itself.
+   */
+  layout?: BlockLayoutOptions | false;
 }
 
 /**
@@ -46,9 +53,11 @@ export interface StandardKitOptions {
  * link features own those).
  */
 export function standardKit(options: StandardKitOptions = {}): EditorFeature {
-  const { placeholder = "Type '/' for commands...", dragHandle = true, trailingNode = true } = options;
+  const { placeholder = "Type '/' for commands...", dragHandle = true, trailingNode = true, layout = {} } = options;
+  const layoutFeature = layout === false ? null : blockLayout(layout);
   return defineFeature({
     id: 'standard',
+    ...(layoutFeature ? { commands: layoutFeature.commands } : {}),
     codecs: standardNodeCodecs,
     markCodecs: standardMarkCodecs,
     slash: standardSlashItems,
@@ -83,6 +92,7 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
             node.type.name === 'heading' ? `Heading ${node.attrs.level as number}` : placeholder,
         }),
         ...(dragHandle ? [GlobalDragHandle.configure({ dragHandleWidth: DRAG_HANDLE_WIDTH_PX })] : []),
+        ...(layoutFeature?.advanced?.engineExtensions ?? []),
       ],
     },
   });

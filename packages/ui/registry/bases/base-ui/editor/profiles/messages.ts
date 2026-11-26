@@ -1,6 +1,7 @@
 import type { EmailBlockKind, ProblemKind, ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
 import type { RenderProblem, RenderProblemKind } from '@zeroxsolutions/editor-core/template/email/index';
 import { DEFAULT_IMAGE_WORDS, type ImageWords } from '../document/features/image/image';
+import { DEFAULT_LAYOUT_WORDS, type LayoutWords } from '../document/layout/layout-words';
 import { DEFAULT_UPLOAD_MESSAGES, type UploadMessages } from '../document/uploads/upload';
 
 /** The attributes the email block menu sets. */
@@ -130,6 +131,8 @@ export interface ProfileEditorMessages {
   uploads: UploadMessages;
   /** The image block's words: its popover's button and fields, and an image with no address. */
   imageBlock: ImageWords;
+  /** The layout controls' words: a block's toolbar, alignment and width handles, a text's colours and styles. */
+  layout: LayoutWords;
   /** Names the control that opens a block's settings, such as a number it takes. */
   blockSettings: string;
   /** A spacer's size, shown as the pointer rests on it: the size's name and its height in px. */
@@ -237,6 +240,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
       title: 'Legal footer',
       description: 'Who sends this and why, the address and an unsubscribe link',
     },
+    section: { title: 'Section', description: 'Blocks set together on a background' },
   },
   bold: 'Bold',
   italic: 'Italic',
@@ -285,6 +289,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
       : 'The image must load from https://, http:// or a link variable',
   uploads: DEFAULT_UPLOAD_MESSAGES,
   imageBlock: DEFAULT_IMAGE_WORDS,
+  layout: DEFAULT_LAYOUT_WORDS,
   blockSettings: 'Block settings',
   spacerSize: (size, px) => `${size}, ${px}px`,
   itemRow: (field, position) => `${field} ${position}`,

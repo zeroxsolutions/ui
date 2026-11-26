@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { align, BUTTON_HREF_MAX_LENGTH, BUTTON_LABEL_MAX_LENGTH, readOr, spaceAfter } from './shared.js';
+import { align, BUTTON_HREF_MAX_LENGTH, BUTTON_LABEL_MAX_LENGTH, readOr, spaceAfter, spaceBefore } from './shared.js';
 
-const attributes = z.object({ align, spaceAfter, width: z.enum(['inline', 'full']).optional() }).strict();
+const attributes = z.object({ align, spaceBefore, spaceAfter, width: z.enum(['inline', 'full']).optional() }).strict();
 const content = z
   .object({
     label: z.string().min(1).max(BUTTON_LABEL_MAX_LENGTH),

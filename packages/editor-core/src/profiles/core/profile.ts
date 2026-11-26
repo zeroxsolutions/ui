@@ -27,6 +27,7 @@ export const EMAIL_KINDS: readonly EmailBlockKind[] = [
   'hero',
   'card',
   'legalFooter',
+  'section',
 ];
 
 /** What a mail-layout region (header, footer) may hold; a product's footer region may carry the legal footer. */

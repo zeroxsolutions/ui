@@ -1,7 +1,7 @@
 import { NodeSelection } from '@tiptap/pm/state';
 import { z } from 'zod';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { Editor } from '../../advanced.js';
+import { Extension, type Editor } from '../../advanced.js';
 import { createDocumentEditor } from '../create-document-editor.js';
 import type { EditorFeature, IEditor, NodeJSON } from '../types/index.js';
 
@@ -36,6 +36,19 @@ const lists: EditorFeature = {
   ],
 };
 
+// Stands in for a text alignment a feature adds to the document's lines, as the block layout does.
+const aligned: EditorFeature = {
+  id: 'aligned',
+  advanced: {
+    engineExtensions: [
+      Extension.create({
+        name: 'aligned',
+        addGlobalAttributes: () => [{ types: ['paragraph'], attributes: { textAlign: { default: null } } }],
+      }),
+    ],
+  },
+};
+
 function noteBlock(text: string, id: string, key: string): NodeJSON {
   return { type: 'note', attrs: { id, key }, content: [{ type: 'text', text }] };
 }
@@ -52,7 +65,7 @@ function mountSelecting(content: NodeJSON[], index: number, item?: number): IEdi
   const element = document.createElement('div');
   document.body.append(element);
   const editor = createDocumentEditor({
-    features: [note, person, lists],
+    features: [note, person, lists, aligned],
     content: { type: 'doc', content },
     element,
     onEngine: (raw) => {
@@ -178,5 +191,35 @@ describe('turnBlockInto on a block of no text', () => {
     expect(editor.can('turnBlockInto', { name: 'paragraph' })).toBe(false);
     expect(editor.run('turnBlockInto', { name: 'paragraph' })).toBe(false);
     expect(shapeOf(editor)).toEqual(['image:', 'paragraph:a']);
+  });
+});
+
+describe('turnBlockInto on an aligned line', () => {
+  const centred = (text: string): NodeJSON => ({ ...paragraph(text), attrs: { textAlign: 'center' } });
+  const alignOf = (line: NodeJSON | undefined) => line?.attrs?.textAlign;
+
+  it('keeps the alignment on the line inside the list it becomes', () => {
+    const editor = mountSelecting([centred('a')], 0);
+    expect(editor.run('turnBlockInto', { name: 'bulletList' })).toBe(true);
+    const list = editor.getJSON().content?.[0];
+    expect(list?.type).toBe('bulletList');
+    expect(alignOf(list?.content?.[0]?.content?.[0])).toBe('center');
+  });
+
+  it('keeps the alignment of each line of a list turned into paragraphs', () => {
+    const editor = mountSelecting(
+      [
+        {
+          type: 'bulletList',
+          content: [
+            { type: 'listItem', content: [centred('a')] },
+            { type: 'listItem', content: [paragraph('b')] },
+          ],
+        },
+      ],
+      0,
+    );
+    expect(editor.run('turnBlockInto', { name: 'paragraph' })).toBe(true);
+    expect((editor.getJSON().content ?? []).map(alignOf)).toEqual(['center', null]);
   });
 });

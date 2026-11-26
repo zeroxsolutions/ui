@@ -59,7 +59,7 @@ const escapedMarkdown = (value: string): string =>
 /** The stored label as text; a stored value of another kind draws as no label. */
 const labelOf = (attrs: ButtonAttrs): string => (typeof attrs.label === 'string' ? attrs.label : '');
 
-const ALIGNS = ['left', 'center', 'right'] as const;
+const ALIGNS = ['start', 'left', 'center', 'end', 'right'] as const;
 const SPACES = ['small', 'medium', 'large'] as const;
 const WIDTHS = ['inline', 'full'] as const;
 

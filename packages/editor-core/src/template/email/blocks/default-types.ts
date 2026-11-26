@@ -20,4 +20,5 @@ export const DEFAULT_BLOCK_TYPES = [
   'hero',
   'card',
   'legalFooter',
+  'section',
 ] as const;

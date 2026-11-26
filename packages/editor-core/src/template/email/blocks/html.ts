@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { blockText, readOr, spaceAfter } from './shared.js';
+import { blockText, readOr, spaceAfter, spaceBefore } from './shared.js';
 
-const attributes = z.object({ spaceAfter }).strict();
+const attributes = z.object({ spaceBefore, spaceAfter }).strict();
 const content = z.object({ html: blockText }).strict();
 const lenientContent = z.object({ html: z.string().catch('') });
 

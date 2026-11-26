@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { align, inlineText, LIST_MAX_ITEMS, readOr, spaceAfter } from './shared.js';
+import { align, inlineText, LIST_MAX_ITEMS, readOr, spaceAfter, spaceBefore } from './shared.js';
 
-const attributes = z.object({ align, spaceAfter }).strict();
+const attributes = z.object({ align, spaceBefore, spaceAfter }).strict();
 const content = z.object({ items: z.array(inlineText).min(1).max(LIST_MAX_ITEMS) }).strict();
 const lenientContent = z.object({ items: z.array(z.string()).catch([]) });
 

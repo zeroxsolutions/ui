@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { align, inlineText, readOr, spaceAfter } from './shared.js';
+import { PARAGRAPH_SIZES } from '../../layout/index.js';
+import { align, inlineText, readOr, spaceAfter, spaceBefore } from './shared.js';
 
 const TONES = ['default', 'muted'] as const;
 
-const attributes = z.object({ align, spaceAfter, tone: z.enum(TONES).optional() }).strict();
+const attributes = z
+  .object({ align, spaceBefore, spaceAfter, tone: z.enum(TONES).optional(), size: z.enum(PARAGRAPH_SIZES).optional() })
+  .strict();
 const content = z.object({ text: inlineText }).strict();
 const lenientContent = z.object({ text: z.string().catch('') });
 
@@ -21,7 +24,7 @@ export const paragraph = defineBlockType({
     return { text: await translateOne(source.text) };
   },
   render({ attributes: a, content: c }, { h }) {
-    return h.text({ class: `zx-tone-${a.tone ?? 'default'}`, markup: c.text });
+    return h.text({ class: [`zx-tone-${a.tone ?? 'default'}`, a.size && `zx-text-${a.size}`], markup: c.text });
   },
   sample: { attributes: {}, content: { text: 'Hi {{name}},' }, variableTypes: { name: 'string' } },
 });

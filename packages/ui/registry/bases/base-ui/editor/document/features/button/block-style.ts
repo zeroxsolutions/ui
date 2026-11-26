@@ -1,11 +1,24 @@
 /** The attributes a button or a columns block draws its place from; each is absent on a block that does not set it. */
 export interface BlockStyle {
-  align?: 'left' | 'center' | 'right' | null;
+  /** The layout's names, or the email wire's `left` and `right`, which a block written before them holds. */
+  align?: 'start' | 'left' | 'center' | 'end' | 'right' | null;
   spaceAfter?: 'small' | 'medium' | 'large' | null;
 }
 
-const ALIGN_CLASSES = { left: 'text-left', center: 'text-center', right: 'text-right' } as const;
-const JUSTIFY_CLASSES = { left: 'justify-start', center: 'justify-center', right: 'justify-end' } as const;
+const ALIGN_CLASSES = {
+  start: 'text-start',
+  left: 'text-left',
+  center: 'text-center',
+  end: 'text-end',
+  right: 'text-right',
+} as const;
+const JUSTIFY_CLASSES = {
+  start: 'justify-start',
+  left: 'justify-start',
+  center: 'justify-center',
+  end: 'justify-end',
+  right: 'justify-end',
+} as const;
 const SPACE_CLASSES = { small: 'mb-2', medium: 'mb-4', large: 'mb-8' } as const;
 
 /** The classes a block's `align` and `spaceAfter` read as; `medium` is the house default space. */

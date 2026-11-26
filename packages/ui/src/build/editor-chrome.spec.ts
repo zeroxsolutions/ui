@@ -90,6 +90,10 @@ const PIECES: Record<string, string[]> = {
   'document/ui/rect-popover.tsx': ['cn-popover-content', 'cn-popover-content-logical'],
   'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar'],
   'document/ui/bubble-menu.tsx': ['cn-editor-toolbar'],
+  'document/layout/block-toolbar.tsx': ['cn-editor-toolbar', '<RectPopover'],
+  'document/layout/align-control.tsx': ['<ToggleGroup', '<ToggleGroupItem', '<Tooltip'],
+  'document/layout/width-toggle.tsx': ['<Toggle', '<Tooltip'],
+  'document/layout/resize-handles.tsx': ['cn-editor-handle'],
   'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media', 'cn-combobox-label'],
   'document/ui/chrome-icon.tsx': ['cn-editor-icon'],
   'document/features/image/image.tsx': ['cn-editor-block', 'cn-field-description'],
@@ -204,6 +208,22 @@ describe("the editor's chrome", () => {
     // The svg is held to the size with `!`, as a toggle's or a menu row's own rule would otherwise size it.
     expect((map['cn-editor-icon'] ?? '').split(/\s+/).sort()).toEqual([size, `[&_svg]:${size}!`].sort());
   });
+
+  it.each(STYLES)(
+    "draws a width handle with cn-button's radius and focus ring at its default height, in %s",
+    (style) => {
+      const map = styleMapOf(ROOT, style);
+      const handle = (map['cn-editor-handle'] ?? '').split(/\s+/);
+      expect(PROPERTIES.radius(plain(map['cn-editor-handle'] ?? ''))).toEqual(
+        PROPERTIES.radius(plain(map['cn-button'])),
+      );
+      const ring = map['cn-button'].split(/\s+/).filter((name) => name.startsWith('focus-visible:'));
+      expect(ring.length).toBeGreaterThan(0);
+      expect(handle).toEqual(expect.arrayContaining(ring));
+      const height = (classes: string) => classes.split(/\s+/).filter((name) => /^h-[0-9.]+$/.test(name));
+      expect(height(map['cn-editor-handle'] ?? '')).toEqual(height(map['cn-button-size-default']));
+    },
+  );
 
   it.each(STYLES)('sets a caption in the type of cn-badge, in %s', (style) => {
     const map = styleMapOf(ROOT, style);

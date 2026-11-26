@@ -23,6 +23,7 @@ import {
   type UploadRequest,
   type UploadTaker,
 } from '../../uploads/index';
+import { layoutProps } from '../../layout/layout-props';
 
 /**
  * A block image — a pure custom node (no engine extension): declarative
@@ -114,18 +115,22 @@ function ImageFigure({
   empty: string;
   children?: ReactNode;
 }): ReactNode {
+  // A share of the line, which the layout's rules draw; a width above 1 is the pixels a document stored before them.
+  const share = width !== null && width > 0 && width <= 1 ? width : null;
   const drawn = (
     <img
       src={src}
       alt={alt}
       title={title}
       data-dimmed={dimmed || undefined}
-      className="cn-editor-block data-dimmed:bg-muted h-auto max-w-full border data-dimmed:min-h-24 data-dimmed:min-w-48 data-dimmed:opacity-50"
-      style={{ width: width ? `${width}px` : undefined }}
+      data-share={share !== null || undefined}
+      className="cn-editor-block data-dimmed:bg-muted h-auto max-w-full border data-dimmed:min-h-24 data-dimmed:min-w-48 data-dimmed:opacity-50 data-share:w-full"
+      style={{ width: share === null && width ? `${width}px` : undefined }}
     />
   );
   return (
     <figure
+      {...layoutProps({ width: share })}
       data-slot="image"
       data-selected={selected}
       data-empty={!src || undefined}

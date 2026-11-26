@@ -8,7 +8,7 @@ const FOLDED = new Set(['orderedList', 'taskList']);
 /** The document blocks the export carries as the kind each is, where the profile holds that kind. */
 const CARRIED_AS: Readonly<Record<string, string>> = { heading: 'heading', blockquote: 'quote' };
 /** The document blocks the export writes as the kind each is, which a profile without it cannot hold. */
-const WRITTEN_AS: Readonly<Record<string, string>> = { image: 'image', table: 'table' };
+const WRITTEN_AS: Readonly<Record<string, string>> = { image: 'image', table: 'table', section: 'section' };
 
 function isLone(children: readonly NodeJSON[] | undefined, type: string): boolean {
   return children === undefined || children.length === 0 || (children.length === 1 && children[0].type === type);
@@ -29,15 +29,28 @@ function isCarried(node: NodeJSON, kinds: ReadonlySet<string>): boolean {
   return true;
 }
 
+/** Whether `node`'s text, or its first line's, is justified, which the export writes as left-aligned. */
+function justified(node: NodeJSON): boolean {
+  if (node.type === 'paragraph' || node.type === 'heading') return node.attrs?.textAlign === 'justify';
+  if (node.type === 'blockquote' || node.type === 'callout') return justified(node.content?.[0] ?? { type: '' });
+  if (node.type === 'bulletList') return justified(node.content?.[0]?.content?.[0] ?? { type: '' });
+  return false;
+}
+
 function problemsIn(blocks: readonly NodeJSON[], kinds: ReadonlySet<string>, problems: ProfileProblem[]): void {
   for (const node of blocks) {
+    const { id, key } = node.attrs ?? {};
+    const block = typeof id === 'string' ? id : typeof key === 'string' ? key : null;
     if (node.type === 'columns') {
       for (const lane of node.content ?? []) problemsIn(lane.content ?? [], kinds, problems);
       continue;
     }
+    if (justified(node)) problems.push({ kind: 'attributes-invalid', block, field: 'align' });
+    if (node.type === 'section' && kinds.has('section')) {
+      problemsIn(node.content ?? [], kinds, problems);
+      continue;
+    }
     if (isCarried(node, kinds)) continue;
-    const { id, key } = node.attrs ?? {};
-    const block = typeof id === 'string' ? id : typeof key === 'string' ? key : null;
     problems.push({ kind: 'block-not-carried', block });
   }
 }
@@ -47,7 +60,9 @@ function problemsIn(blocks: readonly NodeJSON[], kinds: ReadonlySet<string>, pro
  * loses structure from, or that the profile cannot hold: a heading or a blockquote where `kinds` lack `heading`
  * or `quote`, an image or a table where they lack `image` or `table`, a table whose cell holds more than one
  * paragraph or another block, an ordered or task list, a list item holding more than one paragraph or a nested
- * list, and a callout holding more than one paragraph. Without `kinds`, every email kind is carried. Their text is kept; the problem is for the author to see, never a refusal.
+ * list, and a callout holding more than one paragraph; and, as `attributes-invalid` on `align`, justified text, which
+ * the export writes as left-aligned. Without `kinds`, every email kind is carried. Their text is kept; the problem is
+ * for the author to see, never a refusal.
  */
 export function docProblems(doc: DocJSON, options: EmailExportOptions = {}): ProfileProblem[] {
   const problems: ProfileProblem[] = [];

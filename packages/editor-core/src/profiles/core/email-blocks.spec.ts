@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DocJSON, NodeCodec, NodeJSON } from '../../document/core/types/index.js';
 import { sameBlockContent } from '../../template/email/index.js';
+import { docProblems } from './doc-problems.js';
 import { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
 import { MAIL_LAYOUT_KINDS } from './profile.js';
 import { TRAVEL_DEFAULT_BLOCKS } from './fixtures/travel-defaults.fixture.js';
@@ -300,5 +301,75 @@ describe('email blocks', () => {
       const blocks = [block({ type: 'callout', content: { text: '_**a**_' } })];
       expect(toEmailBlocks(fromEmailBlocks(blocks))).toEqual(blocks);
     });
+  });
+});
+
+describe('layout the email cannot draw', () => {
+  it('exports justified text as left, and reports it', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', attrs: { key: 'j', textAlign: 'justify' }, content: [{ type: 'text', text: 'x' }] },
+      ],
+    };
+    expect(toEmailBlocks(doc)[0].attributes).toEqual({ align: 'left' });
+    expect(docProblems(doc)).toEqual([{ kind: 'attributes-invalid', block: 'j', field: 'align' }]);
+  });
+
+  it('exports a full width image as 1 and a full section as wide', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a', width: 'full' } },
+        {
+          type: 'section',
+          attrs: { width: 'full' },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }],
+        },
+      ],
+    };
+    expect(toEmailBlocks(doc).map((block) => block.attributes)).toEqual([{ width: 1 }, { width: 'wide' }]);
+  });
+
+  it('holds no px and no hex in an export', () => {
+    const doc: DocJSON = {
+      type: 'doc',
+      content: [
+        { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a', width: 360, align: 'center' } },
+        {
+          type: 'table',
+          attrs: { colwidth: [100, 300] },
+          content: [
+            {
+              type: 'tableRow',
+              content: [
+                {
+                  type: 'tableCell',
+                  attrs: { colwidth: [100] },
+                  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a' }] }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'x',
+              marks: [
+                { type: 'textColor', attrs: { token: 'teal' } },
+                { type: 'textBackground', attrs: { token: 'amber' } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const exported = JSON.stringify(toEmailBlocks(doc));
+    expect(exported).not.toMatch(/\d+px/);
+    expect(exported).not.toMatch(/#[0-9a-f]{3,8}/i);
+    expect(toEmailBlocks(doc)[0].attributes).toEqual({ align: 'center', width: 0.5 });
   });
 });

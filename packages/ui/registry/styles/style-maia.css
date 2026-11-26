@@ -339,4 +339,9 @@
   .cn-editor-inline-field {
     @apply hover:bg-muted/50 focus-within:bg-muted/50 focus-within:ring-0;
   }
+
+  /* cn-button's radius and focus ring at cn-button-size-default's height, a block's width handle */
+  .cn-editor-handle {
+    @apply focus-visible:border-ring focus-visible:ring-ring/50 border-background bg-foreground/60 hover:bg-foreground data-dragging:bg-foreground h-9 w-2 rounded-4xl border focus-visible:ring-[3px];
+  }
 }

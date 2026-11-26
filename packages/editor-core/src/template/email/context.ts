@@ -6,7 +6,9 @@ import { VARIABLE_TOKEN, variableTokens } from '../variables/variable-tokens.js'
 import type { Variables } from '../variables/variables.js';
 import type { RenderContext, RenderedBlock, RenderProblem } from './block.js';
 import type { Region } from './region.js';
-import type { EmailTheme } from './theme.js';
+import { CONTENT_WIDTH } from './blocks/shared.js';
+import { surfaceColorOf, textColorOf } from './css/base-stylesheet.js';
+import { resolveEmailTheme, type EmailTheme } from './theme.js';
 import { createPrimitives, type EmailNode, type TextRun, type TextRunText } from './primitives/nodes.js';
 
 /** What one render shares across its blocks; `problems` collects as the blocks render. */
@@ -37,7 +39,9 @@ export function createRenderContext(
   blockId: string | null,
   lane: (index: number) => readonly EmailNode[],
   laneCount = 0,
+  available = CONTENT_WIDTH,
 ): RenderContext {
+  const colors = resolveEmailTheme(state.theme).colors;
   const report = (kind: RenderProblem['kind'], name?: string): void => {
     state.problems.push({
       blockId,
@@ -64,12 +68,7 @@ export function createRenderContext(
     reportMissing(template);
     const parsed = parseInlineMarkup(template);
     if (!parsed.ok) return template === '' ? [] : [{ kind: 'text', text: fill(template), bold: false, italic: false }];
-    const filled = (run: InlineText): TextRunText => ({
-      kind: 'text',
-      text: fill(run.text),
-      bold: run.bold,
-      italic: run.italic,
-    });
+    const filled = (run: InlineText): TextRunText => ({ ...run, text: fill(run.text) });
     return parsed.runs.flatMap((run): TextRun[] => {
       if (run.kind === 'text') return [filled(run)];
       const label = run.label.map(filled);
@@ -81,12 +80,25 @@ export function createRenderContext(
     let html = escapeHtml(run.text);
     if (run.italic) html = `<em>${html}</em>`;
     if (run.bold) html = `<strong>${html}</strong>`;
+    const classes = [
+      ...(run.color === undefined || run.color === 'default'
+        ? []
+        : [[`zx-color-${run.color}`, `color:${textColorOf(run.color, colors)};`]]),
+      ...(run.background === undefined || run.background === 'default'
+        ? []
+        : [[`zx-bg-${run.background}`, `background:${surfaceColorOf(run.background, colors)};`]]),
+    ];
+    if (classes.length > 0) {
+      const names = classes.map(([name]) => name).join(' ');
+      html = `<span class="${names}" style="${classes.map(([, style]) => style).join('')}">${html}</span>`;
+    }
     return { html, text: run.text };
   };
   const context: RenderContext = {
     theme: state.theme,
     locale: state.locale,
     region: state.region,
+    available,
     html(template): string {
       reportMissing(template);
       return escapeHtml(interpolate(template, state.variables, 'text'));

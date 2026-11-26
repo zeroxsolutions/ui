@@ -23,11 +23,17 @@ const ATOMS = [
   '{{u}}',
   '{{a}}',
   '({{u}})',
+  '{color=red}',
+  '{/color}',
+  '{bg=amber}',
+  '{/bg}',
+  '\\{',
 ];
 const WRAPPERS: readonly (readonly [string, string])[] = [
   ['**[', ']({{u}})**'],
   ['_[', ']({{u}})_'],
   ['**_[', ']({{u}})_**'],
+  ['{color=blue}[', ']({{u}}){/color}'],
 ];
 
 /** Mulberry32: the same seed draws the same sequence on every run, so a failing input is found again. */
@@ -41,7 +47,7 @@ function seeded(seed: number): () => number {
   };
 }
 
-/** `count` short sources built from markers, braces, escapes, tokens and links, a third of them wrapped in a marked link. */
+/** `count` short sources built from markers, colour markers, braces, escapes, tokens and links, a third of them wrapped in a marked link. */
 export function markupSamples(count: number, seed = 20261120): string[] {
   const next = seeded(seed);
   const pick = <T>(items: readonly T[]): T => items[Math.floor(next() * items.length)];
