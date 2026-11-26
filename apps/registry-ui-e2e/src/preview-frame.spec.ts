@@ -1,5 +1,4 @@
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
 
 for (const [device, width] of [
   ['Tablet', 768],
@@ -11,7 +10,8 @@ for (const [device, width] of [
       .getByRole('group', { name: 'Device' })
       .first()
       .getByRole('button', { name: device, exact: true });
-    await hydrated(toggle);
+    // The toolbar's theme toggle is disabled until the preview has hydrated.
+    await expect(page.getByRole('button', { name: 'Toggle preview theme' }).first()).toBeEnabled();
 
     await toggle.click();
 

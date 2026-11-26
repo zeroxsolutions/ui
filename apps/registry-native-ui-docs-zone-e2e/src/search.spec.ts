@@ -1,10 +1,10 @@
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 test("a native page's search finds native text and keeps the page's engine", async ({ page }) => {
   await page.goto('/native/components/uniwind/button');
 
-  await hydrated(page.getByRole('button', { name: 'Search documentation' }).first());
+  await waitForHydration(page);
   await page.keyboard.press('ControlOrMeta+k');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('combobox').fill('nativeID');

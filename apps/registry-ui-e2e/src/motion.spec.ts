@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 // WebKit and Firefox under Playwright do not grant clipboard-write permission the way Chromium does,
 // so the real API is replaced with one that records what it was called with on `window`.
@@ -30,7 +30,7 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   // 1. A sidebar navigation crossfades the docs column.
   await page.goto('/docs/components/base/collapsible-card');
   const tagInputLink = page.getByRole('navigation', { name: 'Docs' }).getByRole('link', { name: 'Tag Input' });
-  await hydrated(tagInputLink);
+  await waitForHydration(page);
   await tagInputLink.click();
   await expect(page).toHaveURL(/\/docs\/components\/base\/tag-input$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Tag Input' })).toBeVisible();
@@ -38,7 +38,6 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   // 2. The TOC marker slides to the entry a click sends the URL hash to.
   const toc = page.getByRole('navigation', { name: 'On this page' });
   const apiReferenceLink = toc.getByRole('link', { name: 'API reference' });
-  await hydrated(apiReferenceLink);
   await apiReferenceLink.click();
   await expect(page).toHaveURL(/#api-reference$/);
   await expect(apiReferenceLink).toHaveAttribute('aria-current', 'location');
@@ -47,7 +46,6 @@ async function drivesEveryDocsMotionToItsEndState(page: Page): Promise<void> {
   const main = page.getByRole('main');
   const viewCode = main.getByRole('button', { name: 'View code' }).first();
   const fullSource = main.getByText('function TagInputDemo');
-  await hydrated(viewCode);
   await viewCode.click();
   await expect(fullSource).toBeVisible();
   await main.getByRole('button', { name: 'Toggle content', exact: true }).first().click();

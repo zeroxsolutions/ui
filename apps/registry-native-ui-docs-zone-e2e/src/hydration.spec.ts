@@ -18,6 +18,10 @@ for (const path of PAGES) {
 
     await page.goto(path);
     await waitForHydration(page);
+    // The picker draws what only the browser reads, the URL's style, inside a boundary that may hydrate after the
+    // page; a press on it hydrates it first.
+    await page.getByRole('button', { name: /^Style/ }).click();
+    await expect(page.getByRole('menu')).toBeVisible();
 
     expect(errors.filter((error) => HYDRATION_ERROR.test(error))).toEqual([]);
   });

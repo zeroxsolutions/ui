@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 import { DRAWN, frame, inside } from './test/native-preview';
 
 const BUTTON = '/native/components/nativewind/button';
@@ -23,16 +23,15 @@ const UNIWIND_PROJECT_ID = projectIdOf('native-preview-uniwind');
 
 /** Picks `style` from the header's picker. */
 async function pickStyle(page: Page, style: string): Promise<void> {
-  const picker = page.getByRole('button', { name: /^Style/ });
-  await hydrated(picker);
-  await picker.click();
+  await waitForHydration(page);
+  await page.getByRole('button', { name: /^Style/ }).click();
   await page.getByRole('menuitem', { name: style }).click();
 }
 
 /** Picks `platform` from the first preview's platform picker. */
 async function pickPlatform(page: Page, platform: string): Promise<void> {
   const picker = page.getByRole('combobox', { name: 'Platform' });
-  await hydrated(picker);
+  await waitForHydration(page);
   await picker.click();
   await page.getByRole('option', { name: platform }).click();
 }

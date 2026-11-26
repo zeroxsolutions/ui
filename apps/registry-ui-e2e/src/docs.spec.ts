@@ -1,6 +1,6 @@
 import { expectDocumentLoadsAcrossZones } from './test/cross-zone-links';
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 /** Whether `pathname` is a page this app serves, `/docs/editor` and under it being the editor zone's. */
 function isRegistryUiPage(pathname: string): boolean {
@@ -32,7 +32,7 @@ test.describe('on a phone-width header', () => {
     await page.goto('/docs');
 
     const menu = page.getByRole('button', { name: 'Menu', exact: true }).filter({ visible: true });
-    await hydrated(menu);
+    await waitForHydration(page);
     await menu.click();
     const links = page.getByRole('dialog').getByRole('link');
     await expect(links.first()).toBeVisible();

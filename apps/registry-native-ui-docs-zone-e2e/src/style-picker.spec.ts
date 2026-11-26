@@ -1,7 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 const BUTTON = '/native/components/nativewind/button';
 
@@ -11,7 +11,7 @@ function picker(page: Page): Locator {
 
 /** Picks `style` from the header's picker. */
 async function pickStyle(page: Page, style: string): Promise<void> {
-  await hydrated(picker(page));
+  await waitForHydration(page);
   await picker(page).click();
   await page.getByRole('menuitem', { name: style }).click();
 }
@@ -56,7 +56,7 @@ test.describe('at phone width', () => {
   async function openMenu(page: Page): Promise<Locator> {
     const sheet = page.getByRole('dialog', { name: 'Menu' });
     const menu = page.getByRole('button', { name: 'Menu' });
-    await hydrated(menu);
+    await waitForHydration(page);
     await menu.click();
     await expect(sheet).toBeVisible();
     return sheet;

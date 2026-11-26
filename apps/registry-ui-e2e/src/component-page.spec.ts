@@ -1,5 +1,5 @@
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 test('a component page previews the item, shows its source, and pages on', async ({ page }) => {
   await page.goto('/docs/components/base/status-indicator');
@@ -7,7 +7,7 @@ test('a component page previews the item, shows its source, and pages on', async
   await expect(page.getByText('Connecting').first()).toBeVisible();
 
   const viewCode = page.getByRole('button', { name: 'View code' }).first();
-  await hydrated(viewCode);
+  await waitForHydration(page);
   await viewCode.click();
   await expect(page.getByText('function StatusIndicatorDemo')).toBeVisible();
 

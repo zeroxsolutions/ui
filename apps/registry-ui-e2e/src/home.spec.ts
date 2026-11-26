@@ -1,5 +1,5 @@
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
 const ITEMS = ['Chat Message', 'Code Card', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
@@ -23,7 +23,7 @@ test('/ says what the registry is, shows its items live, and links on', async ({
   const main = page.getByRole('main');
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Composed React components for shadcn, on Base UI.');
   const copyButton = main.getByRole('button', { name: 'Copy code' }).first();
-  await hydrated(copyButton);
+  await waitForHydration(page);
   await copyButton.click();
   await expect.poll(() => page.evaluate('window.__copiedText')).toBe(INSTALL_COMMAND);
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();

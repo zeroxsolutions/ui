@@ -9,6 +9,8 @@ function picker(page: Page) {
 
 test('a web page opens in the style its URL names', async ({ page }) => {
   await page.goto('/docs/components/base/collapsible-card?style=vega');
+  // The page's inline script names the style before it hydrates; the picker keeps naming it once it has.
+  await waitForHydration(page);
 
   await expect(picker(page)).toHaveAccessibleName('Style Vega');
 });
@@ -17,6 +19,7 @@ test('a page with no style in its URL opens in the one last picked', async ({ pa
   // As text, since the spec compiles without the DOM's types; it runs in the page before its own scripts.
   await page.addInitScript("localStorage.setItem('zui:style:web', 'lyra')");
   await page.goto('/docs/components/base/collapsible-card');
+  await waitForHydration(page);
 
   await expect(picker(page)).toHaveAccessibleName('Style Lyra');
 });

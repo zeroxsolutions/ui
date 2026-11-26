@@ -23,5 +23,5 @@ test("a component preview's full page button opens its demo alone", async ({ pag
   await expect(view.getByRole('navigation', { name: 'Docs' })).toHaveCount(0);
   // The 404 page has no Docs navigation either, so the page's status and title are what tell them apart.
   expect((await request.get('/view/ai-provider-picker-demo')).status()).toBe(200);
-  await expect(view).toHaveTitle(/^ai-provider-picker-demo/);
+  await expect(view).toHaveTitle(/^AI Provider Picker demo/);
 });

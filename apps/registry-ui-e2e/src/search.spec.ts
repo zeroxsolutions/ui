@@ -1,11 +1,11 @@
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
+import { waitForHydration } from './test/hydrated';
 
-/** Opens the command menu from its shortcut, which listens once the header's search trigger has hydrated. */
+/** Opens the command menu from its shortcut, which listens once the page has hydrated. */
 async function openSearch(page: Page): Promise<void> {
-  await hydrated(page.getByRole('button', { name: 'Search documentation' }).first());
+  await waitForHydration(page);
   await page.keyboard.press('ControlOrMeta+k');
   await expect(page.getByRole('dialog')).toBeVisible();
 }
@@ -52,7 +52,7 @@ test.describe('on a phone-width header', () => {
     await page.goto('/docs');
 
     const trigger = page.getByRole('button', { name: 'Search documentation' }).filter({ visible: true });
-    await hydrated(trigger);
+    await waitForHydration(page);
     await trigger.click();
     await expect(page.getByRole('dialog')).toBeVisible();
   });

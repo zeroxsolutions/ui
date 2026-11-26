@@ -1,5 +1,4 @@
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
 
 test.use({ colorScheme: 'dark' });
 
@@ -11,11 +10,18 @@ test('with a dark colour scheme and the app bundles blocked, a page loads dark',
   await expect(page.locator('html')).toHaveClass(/\bdark\b/);
 });
 
+test("with the app bundles blocked, the header's theme switch is disabled", async ({ page }) => {
+  // Nothing hydrates, so the switch cannot know the theme it switches from.
+  await page.route('**/_next/static/**/*.js', (route) => route.abort());
+  await page.goto('/docs');
+
+  await expect(page.getByRole('banner').getByRole('button', { name: 'Toggle theme' })).toBeDisabled();
+});
+
 test('a click on the theme switch turns the page light', async ({ page }) => {
   await page.goto('/docs');
   const toggle = page.getByRole('button', { name: 'Toggle theme' });
   await expect(page.locator('html')).toHaveClass(/\bdark\b/);
-  await hydrated(toggle);
 
   await toggle.click();
 

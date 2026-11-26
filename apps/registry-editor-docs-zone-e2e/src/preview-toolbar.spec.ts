@@ -1,7 +1,6 @@
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
-import { hydrated } from './test/hydrated';
 
 const DEMO = 'email-editor-demo';
 
@@ -19,7 +18,6 @@ function darkTheme(page: Page) {
 async function openPreview(page: Page): Promise<void> {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/docs/editor/email-editor');
-  await hydrated(device(page, 'Mobile'));
   await expect(darkTheme(page)).toBeEnabled();
 }
 
