@@ -58,8 +58,17 @@ export interface UploadRequest {
   readonly messages: UploadMessages;
   /** Whether the file is drawn from a local address while it uploads, as an image is. */
   readonly preview: boolean;
-  /** The attributes written on the block once `url` answers, read from its attributes then. */
-  land(attrs: Readonly<Record<string, unknown>>, url: string, file: File): Record<string, unknown>;
+  /** The attributes written on the block once `url` answers, read from its attributes then and the slot it fills. */
+  land(attrs: Readonly<Record<string, unknown>>, url: string, file: File, slot: string): Record<string, unknown>;
+  /**
+   * Where `slot` is once the block's attributes change from `before` to `after`, as an item's place shifts when
+   * one before it is removed; null where what it fills is gone, which ends the upload. The slot stays when absent.
+   */
+  follow?(
+    before: Readonly<Record<string, unknown>>,
+    after: Readonly<Record<string, unknown>>,
+    slot: string,
+  ): string | null;
   /** What is wrong with an answered address, as a typed one is checked; the upload fails with the first. */
   problems?(url: string): readonly string[];
 }
@@ -191,12 +200,12 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
   };
 
   const land = (record: UploadRecord, url: string): void => {
-    const { pos, file } = record.entry;
+    const { pos, file, slot } = record.entry;
     const node = engine.isDestroyed ? null : engine.state.doc.nodeAt(pos);
     release(record, false);
     if (!node) return;
     const tr = engine.state.tr;
-    for (const [name, value] of Object.entries(record.request.land(node.attrs, url, file))) {
+    for (const [name, value] of Object.entries(record.request.land(node.attrs, url, file, slot))) {
       tr.setNodeAttribute(pos, name, value);
     }
     // Its own undo step, whatever the author typed just before it landed.
@@ -339,9 +348,17 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
         const replaced = start.deleted && tr.getMeta('uiEvent') !== undefined;
         // A drag deletes the node and inserts that same node where it drops.
         const next = inPlace && !replaced ? start.pos : movedTo(after, old);
-        if (next === undefined) lost.push(record);
-        else if (next !== pos) {
-          record.entry = { ...record.entry, pos: next };
+        const attrs = next === undefined ? undefined : after.nodeAt(next)?.attrs;
+        const { follow } = record.request;
+        const slot =
+          attrs === undefined
+            ? null
+            : follow && attrs !== old.attrs
+              ? follow(old.attrs, attrs, record.entry.slot)
+              : record.entry.slot;
+        if (next === undefined || slot === null) lost.push(record);
+        else if (next !== pos || slot !== record.entry.slot) {
+          record.entry = { ...record.entry, pos: next, slot };
           moved = true;
         }
       }

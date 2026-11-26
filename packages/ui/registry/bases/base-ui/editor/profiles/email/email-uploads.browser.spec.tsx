@@ -246,4 +246,48 @@ describe('uploads in the email editor', () => {
 
     await vi.waitFor(() => expect(contentOf(probe, 'image')).toMatchObject({ src: 'https://i.test/drop.png' }));
   });
+
+  it('keeps a social icon uploading in its own link when another link before it is removed', async () => {
+    const { upload, calls } = heldUpload();
+    const two = block('socialLinks', {
+      links: [
+        { label: 'Site', icon: '', href: 'https://x.test' },
+        { label: 'Blog', icon: '', href: 'https://blog.test' },
+      ],
+    });
+    const probe = await mount([two], upload);
+    await userEvent.click(page.getByRole('button', { name: 'Blog' }));
+    await userEvent.upload(fileInput(), pngFile('blog.png'));
+    await waitForCalls(calls, 1);
+    await userEvent.keyboard('{Escape}');
+
+    await userEvent.click(page.getByRole('button', { name: 'Site' }));
+    await userEvent.click(page.getByRole('button', { name: 'Remove' }));
+    await vi.waitFor(() => expect((contentOf(probe, 'socialLinks') as { links: unknown[] }).links).toHaveLength(1));
+    calls[0].answer('https://i.test/blog.png');
+
+    await vi.waitFor(() =>
+      expect(contentOf(probe, 'socialLinks')).toEqual({
+        links: [{ label: 'Blog', icon: 'https://i.test/blog.png', href: 'https://blog.test' }],
+      }),
+    );
+    expect(calls[0].signal.aborted).toBe(false);
+  });
+
+  it('ends a social icon upload whose link an undo takes away', async () => {
+    const { upload, calls } = heldUpload();
+    const probe = await mount([text, social], upload);
+    await userEvent.click(page.getByRole('button', { name: 'Add to Links' }));
+    await userEvent.click(page.getByRole('tab', { name: 'Upload' }));
+    await userEvent.upload(fileInput(), pngFile('new.png'));
+    await waitForCalls(calls, 1);
+    await userEvent.keyboard('{Escape}');
+
+    await userEvent.click(await findElement('.ProseMirror p', 'Hello'));
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
+
+    await vi.waitFor(() => expect((contentOf(probe, 'socialLinks') as { links: unknown[] }).links).toHaveLength(1));
+    await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
+    expect((contentOf(probe, 'socialLinks') as { links: unknown[] }).links).toHaveLength(1);
+  });
 });

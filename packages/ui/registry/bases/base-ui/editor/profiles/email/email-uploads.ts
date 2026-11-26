@@ -14,6 +14,7 @@ export function emailImageUploadRequest(
   editor: IEditor | null,
   secure: boolean,
   land: UploadRequest['land'],
+  follow?: UploadRequest['follow'],
 ): UploadRequest | null {
   const context = editor ? contextOf(editor)?.context : undefined;
   if (!context?.uploads) return null;
@@ -25,6 +26,7 @@ export function emailImageUploadRequest(
     messages: messages.uploads,
     preview: true,
     land,
+    ...(follow ? { follow } : {}),
     problems: (url) => emailAddressProblems(url, 'image', secure, context.declarations(), messages),
   };
 }
@@ -36,8 +38,9 @@ export function useEmailImageUpload(
   slot: string,
   secure: boolean,
   land: UploadRequest['land'],
+  follow?: UploadRequest['follow'],
 ): BlockUploadControl | null {
-  const request = emailImageUploadRequest(editor, secure, land);
+  const request = emailImageUploadRequest(editor, secure, land, follow);
   const upload = useBlockUpload(place, slot, request);
   return upload && request ? { upload, messages: request.messages } : null;
 }

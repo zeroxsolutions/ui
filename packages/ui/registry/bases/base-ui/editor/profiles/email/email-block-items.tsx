@@ -20,7 +20,6 @@ import type { BlockEditorField, BlockEditorItems } from '@zeroxsolutions/editor-
 import { DEFAULT_PROFILE_MESSAGES } from '../messages';
 import { VariableTextField } from '../variables/variable-text-field';
 import { UploadStatus } from '../../document/uploads/upload-status';
-import { uploadStoreOf } from '../../document/uploads/upload-store';
 import { UploadTabs } from '../../document/uploads/upload-tabs';
 import { useUploadEntry, type BlockPlace } from '../../document/uploads/use-block-upload';
 import { emailAddressProblems } from './email-address-popover';
@@ -95,11 +94,12 @@ function EmailBlockItemField({
     place,
     itemSlot(items, index, field.name),
     secure,
-    (attrs, url) => ({
+    (attrs, url, _file, slot) => ({
       [items.name]: emailBlockItemsOf(items, attrs[items.name]).map((item, place) =>
-        place === index ? { ...item, [field.name]: url } : item,
+        place === itemIndexOf(slot) ? { ...item, [field.name]: url } : item,
       ),
     }),
+    (before, after, slot) => followItem(items, field.name, before, after, slot),
   );
   const entry = upload?.upload.entry ?? null;
   const id = useId();
@@ -164,6 +164,38 @@ function EmailBlockItemField({
 /** The upload slot of `field` of the item at `index` of `items`. */
 function itemSlot(items: BlockEditorItems, index: number, field: string): string {
   return `${items.name}.${index}.${field}`;
+}
+
+/** The place of the item an upload slot names. */
+function itemIndexOf(slot: string): number {
+  return Number(slot.split('.')[1]);
+}
+
+/**
+ * Where the item an upload fills is once the items change: in place while their count stays, as an edit keeps
+ * it; else the item that holds what it held besides the uploading field, the nearest where several do; null
+ * where none does, as when it was removed or an undo took it away.
+ */
+function followItem(
+  items: BlockEditorItems,
+  field: string,
+  before: Readonly<Record<string, unknown>>,
+  after: Readonly<Record<string, unknown>>,
+  slot: string,
+): string | null {
+  if (before[items.name] === after[items.name]) return slot;
+  const index = itemIndexOf(slot);
+  const old = emailBlockItemsOf(items, before[items.name]);
+  const now = emailBlockItemsOf(items, after[items.name]);
+  const item = old[index];
+  if (!item) return null;
+  if (now.length === old.length) return now[index] ? slot : null;
+  const matches = now.flatMap((other, at) =>
+    items.fields.every(({ name }) => name === field || other[name] === item[name]) ? [at] : [],
+  );
+  if (matches.length === 0) return null;
+  const nearest = matches.reduce((best, at) => (Math.abs(at - index) < Math.abs(best - index) ? at : best));
+  return itemSlot(items, nearest, field);
 }
 
 /** An item's face: its image, the file uploading into it drawn faint, or its text. */
@@ -241,15 +273,6 @@ export function EmailBlockItems({
   const messages = (editor && contextOf(editor)?.context.messages()) ?? DEFAULT_PROFILE_MESSAGES;
   const text = items.fields.find((field) => field.kind === 'plainText');
   const empty = (): EmailBlockItem => Object.fromEntries(items.fields.map(({ name }) => [name, '']));
-  // An upload lands at its item's place; a removal shifts the places after it, so their uploads stop.
-  const cancelUploadsFrom = (index: number): void => {
-    const store = place && uploadStoreOf(place.editor);
-    const pos = place?.getPos();
-    for (const upload of store?.entries() ?? []) {
-      const [name, at] = upload.slot.split('.');
-      if (upload.pos === pos && name === items.name && Number(at) >= index) store?.cancel(upload.id);
-    }
-  };
   const nameOf = (entry: EmailBlockItem, index: number) =>
     (text && entry[text.name]) || messages.itemRow(label, index + 1);
 
@@ -350,7 +373,6 @@ export function EmailBlockItems({
                         onClick={() => {
                           removed.current = true;
                           setOpenAt(null);
-                          cancelUploadsFrom(index);
                           onValueChange(entries.filter((_item, place) => place !== index));
                         }}
                       />
