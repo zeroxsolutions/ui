@@ -1,7 +1,8 @@
-import { afterAll, beforeAll, expect, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, expect, vi } from 'vitest';
 import { cdp } from 'vitest/browser';
 
 import { drawingsOver } from '../src/test/drawings-over';
+import { mouse } from './pointer';
 
 /** How long a control's icon is watched for a play; longer than the slowest icon takes to leave its rest drawing. */
 const WATCH_MS = 600;
@@ -19,6 +20,11 @@ export function playMotion(): void {
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) throw new Error('motion is still reduced');
     });
     await new Promise((resolve) => requestAnimationFrame(resolve));
+  });
+  // The pointer rests where the last case left it, and a control drawn under it takes the pointer's enter before its
+  // icon is drawn, so a hover would not be a change; it is moved past the page's far corner first.
+  beforeEach(async () => {
+    await mouse('move', { x: innerWidth - 1, y: innerHeight - 1 });
   });
   afterAll(async () => {
     await cdp().send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
