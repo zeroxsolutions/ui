@@ -134,22 +134,27 @@ The email editor offers only what the email's renderer draws in Gmail, Apple Mai
 
 - No `full` width and no `full` section: an email's blocks sit inside its card, and Outlook pushes the card wider
   rather than draw a block past it. A section is `content` or `wide`, which reaches the card's inner edges.
-- An image is at most the card's content width, 566px, and its width is a share of that width.
+- An image's width is a share of what it sits in: the card's content width, 566px, a lane, or a section inside its
+  padding (566px, or 598px for a `wide` one, less the padding at each side). It is never drawn wider than that.
 - A card takes no layout: the email draws it at the card's width, and the wire stores none for it.
 - The wire keeps its own alignment names, `left`, `center` and `right`; the editor reads `start` and `end` as
   `left` and `right`.
 
-An export of a Document to an email turns what the email cannot draw into what it can: a `full` image into `1`, a
-`full` section into `wide`. `validate` reports a stored one as `attributes-invalid`.
+An export of a Document to an email turns what the email cannot draw into what it can: a `full` image into no width,
+which the email draws at the width the image sits in, and a `full` section into `wide`. `validate` reports a stored
+one as `attributes-invalid`.
 
 ## Widths stored before
 
 A document stored before the layout model opens as it was drawn and writes the new values on its next edit:
 
 - A Document image's pixel `width` reads as a share of the 720px content width, so `360` opens as `0.5`.
-- An email image's whole pixel `width`, from 1 to 566, reads as a share of 566.
+- An email image's whole pixel `width`, from 1 to 566, stays in pixels: the email editor draws it at its pixels,
+  never wider than where it sits, and saves it back unchanged until the author sets a width, which is written as a
+  share. A stored `1` is one pixel; the email writes the whole width as no width.
 - A table's pixel `colwidth`s read as shares of their sum, on load, on import and on a paste alike.
-- Each width is kept from a quarter to the whole and rounded to `0.05`; a table column from `0.05`.
+- Each width read from pixels is kept from a quarter to the whole and rounded to `0.05`; a table column from
+  `0.05`. A stored share off that step, such as `0.333`, is kept as it is.
 
 ## Usage
 
@@ -208,7 +213,8 @@ A handle is dragged with a mouse, a pen or a finger. The block draws each width 
 of 5%, and the document changes once, on release, as one undo step; Escape during the drag puts the width back
 with no change. A focused handle is a slider: the arrow keys step the width by 5%, Home takes it to 25% and End to
 the whole line. A centred block grows on both sides as one edge is dragged. In the email editor the whole line is
-the card's content width, 566px.
+what the image sits in, as the email draws it: the card's content width, 566px, a lane, or a section inside its
+padding.
 
 ## The toolbar
 
@@ -216,6 +222,11 @@ The toolbar shows above a block that is selected or holds the caret, and opening
 It draws nothing while a block is dragged by its grip, so it never covers the place a block is dropped.
 Tab from a selected block, or Alt+F10 from its text, moves into it; the arrow keys move between its controls and
 Escape goes back to the text.
+
+Where blocks sit inside each other, as columns in a section, only the innermost block's toolbar shows. Alt+F10 from
+the text moves into that toolbar; Alt+F10 again, from inside a toolbar, moves out to the next enclosing block's
+toolbar, which shows in its place, and from the outermost back to the innermost. So the section around a lane is
+reached from the lane's text with Alt+F10 pressed twice.
 
 ## Words
 

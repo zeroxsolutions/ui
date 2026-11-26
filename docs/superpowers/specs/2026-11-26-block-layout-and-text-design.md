@@ -93,6 +93,14 @@ The owner asked to proceed; these were settled by the writer and are open to the
    (its `validate`) together, as for the block library (call 5 there), so no older checker meets the new
    shapes. Email image widths stored as whole pixels (1 to 566) read as a fraction of 566; new ones are written
    as fractions.
+   Revised 2026-11-26, after review: a pixel width read as a share changed old mails (48px opened at 142px, and a
+   share of 566 drew wrong in a lane). A stored whole pixel width now stays in pixels: the email editor holds it as
+   the image's `pixelWidth`, draws it at its pixels, saves it back byte for byte, and writes a share only once the
+   author sets a width; a stored share off the 0.05 step, such as 0.333, is kept as stored. `width: 1` is one
+   pixel, as the old schema and the old editor's typed "Width (px)" stored it (a 1px image is a tracking pixel);
+   a share is below 1, and the whole width is written as no width. Every image, a hero's and a card's included,
+   is drawn at most at the width it sits in: 566px, a lane, or a section inside its padding (598px for `wide`), so
+   an image in a wide section with no padding may be 598px.
 3. **Colours are a fixed set, products set their values.** Tokens: `default`, `muted`, `primary`, `accent`
    and eight hues `red`, `orange`, `amber`, `green`, `teal`, `blue`, `violet`, `pink`. The Document Editor maps
    them to the registry theme's CSS variables (adding the hue variables to the styles' theme); `EmailTheme`
@@ -101,6 +109,11 @@ The owner asked to proceed; these were settled by the writer and are open to the
    same set.
 4. **Inline colour in email text** is a new inline-markup form, `{color=<token>}text{/color}` (and
    `{bg=<token>}...{/bg}`), escaped like the rest; older-format checks and translation checks learn it.
+   Revised 2026-11-26, after review: old text holding a literal `{color=red}` was refused as malformed. A colour
+   marker now reads as one only where it pairs: a known colour opened and later closed, not inside its own kind.
+   Any other reads as the literal text it was. A backslash escapes such a brace only where the brace would pair
+   without it, so an old `\{color=red}` keeps its backslash. A marker still only ever draws a class from the
+   closed set, so text never reaches the markup.
 5. **The email button keeps its own `width: inline | full`** (fill the card); it is not a media block. Only
    image, video, embed and card take the layout `width`, and in the email editor only the image, the email's one
    media block: the email's card block carries no layout on the wire, so the email editor draws a card at the
@@ -109,3 +122,15 @@ The owner asked to proceed; these were settled by the writer and are open to the
    layout, and the smallest change is to offer none rather than grow the wire.
 6. **Document table widths** are stored as fractions; pixel widths the current resizable table stored read as
    fractions of the table's width on load.
+7. **A locked or required block's layout** (2026-11-26, after review). Each layout command (`setBlockLayout`,
+   `setSectionLayout`, `setColumnsLayout`, `setTableLayout`, `setTextAlign`, `setParagraphSize`) asks the host's
+   `changeable`, the block menu's rule, and is refused where the block menu refuses a change; its control is
+   hidden there. Text and background colour stay allowed in locked structure and on a required block: the lock
+   lets text change, and a colour is a mark on the text, as bold is, not a change to a block.
+8. **Nested blocks' toolbars** (2026-11-26, after review). Where blocks sit inside each other, as columns in a
+   section, only the innermost block's toolbar shows. Alt+F10 from the text enters it; Alt+F10 again moves out to
+   the next enclosing block's toolbar, and from the outermost back to the innermost, so every block stays reachable
+   by keyboard with no extra control.
+9. **A section below the top** (2026-11-26, after review). A section in a lane, a section, a callout, a list, a
+   cell, a quote or a toggle, from HTML, a host's JSON or a load, is read as the blocks it holds, in its place, in
+   the editor and the Viewer alike; the document is never refused whole.

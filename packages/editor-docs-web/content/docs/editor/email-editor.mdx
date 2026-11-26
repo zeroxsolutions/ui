@@ -354,7 +354,7 @@ within what an email can draw: [Editor Layout](/docs/editor/editor-layout#in-an-
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `heading`     | a title at level 1, 2 or 3, level 2 when it names none                                                                                                    |
 | `quote`       | words set off by a rule at their left, in the muted colour                                                                                                |
-| `image`       | a hosted `https:` image, its required alt text, a caption and a link, at most 566px wide                                                                  |
+| `image`       | a hosted `https:` image, its required alt text, a caption and a link, never wider than where it sits                                                      |
 | `table`       | rows of short text, the first one headers where `header` is set, at most 20 rows of 6 columns                                                             |
 | `hero`        | a wide image and its alt text, a heading, text, and a button, left or centred                                                                             |
 | `card`        | the hero's fields in a frame                                                                                                                              |
@@ -363,8 +363,9 @@ within what an email can draw: [Editor Layout](/docs/editor/editor-layout#in-an-
 | `legalFooter` | who sends the mail, why the reader gets it, the required postal address, and the required unsubscribe link, worded by `unsubscribeLabel`, left or centred |
 
 A hero's and a card's button is drawn only with both its label and its link, and the write check refuses one
-without the other. An image is drawn at its width, at most 566px, the card's width less its border and
-padding, since Outlook on Windows reads no `max-width` and would push the card wider. A hero, a card and the social links take `https:` images only. A lane holds no hero or
+without the other. An image, a hero's and a card's image are drawn at most at the width they sit in (566px, the
+card's width less its border and padding, a lane's width, or a section's inside its padding), since Outlook on
+Windows reads no `max-width` and would push the card wider. A hero, a card and the social links take `https:` images only. A lane holds no hero or
 card, which are drawn at the card's whole width. The card is also a block for the Document Editor: `card` from
 `@zeroxsolutions/editor-core/blocks/index` is one definition for both editors. The email editor holds it already,
 so it goes in neither `emailProfile`'s `blocks` nor the editor's, which throw for it. In a table cell the editor keeps
