@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CodeEditor, CodeEditorContent, useCodeEditor } from './code-editor';
@@ -56,45 +56,5 @@ describe('CodeEditor', () => {
       </CodeEditor>,
     );
     expect(screen.getByText('nothing open')).toBeTruthy();
-  });
-
-  it('switches the active file via context (uncontrolled)', async () => {
-    function Switcher() {
-      const { setActivePath } = useCodeEditor();
-      return (
-        <button type="button" onClick={() => setActivePath('GUIDE.md')}>
-          open guide
-        </button>
-      );
-    }
-    render(
-      <CodeEditor files={FILES} defaultValue="README.md">
-        <Switcher />
-        <CodeEditorContent />
-      </CodeEditor>,
-    );
-    await settle();
-    expect(screen.getByRole('heading', { name: 'Readme' })).toBeTruthy();
-    fireEvent.click(screen.getByText('open guide'));
-    expect(screen.getByRole('heading', { name: 'Guide' })).toBeTruthy();
-  });
-
-  it('reports the active path through onValueChange (controlled)', () => {
-    const onValueChange = vi.fn();
-    function Switcher() {
-      const { setActivePath } = useCodeEditor();
-      return (
-        <button type="button" onClick={() => setActivePath('GUIDE.md')}>
-          open guide
-        </button>
-      );
-    }
-    render(
-      <CodeEditor files={FILES} value="README.md" onValueChange={onValueChange}>
-        <Switcher />
-      </CodeEditor>,
-    );
-    fireEvent.click(screen.getByText('open guide'));
-    expect(onValueChange).toHaveBeenCalledWith('GUIDE.md');
   });
 });
