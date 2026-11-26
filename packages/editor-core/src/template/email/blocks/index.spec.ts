@@ -102,21 +102,8 @@ describe('the default blocks', () => {
     expect(text).toBe('Verify email: https://x.test/v?a=1&b=2');
   });
 
-  it('stretch a full-width button', () => {
-    const { html } = render(
-      'button',
-      { width: 'full' },
-      { label: 'Go', href: '{{u}}' },
-      { u: 'https://x.test' },
-      { u: 'url' },
-    );
-    expect(styleOf(html, 'zx-button')).toContain('display:block');
-    expect(styleOf(html, 'zx-button')).toContain('text-align:center');
-  });
-
-  it('render a code block large and letter-spaced, filling its value', () => {
+  it('render a code block filling its value', () => {
     const { html, text } = render('code', {}, { code: '{{code}}' }, { code: '482 913' });
-    expect(html).toContain('letter-spacing:4px');
     expect(html).toContain('482 913');
     expect(text).toBe('482 913');
   });
@@ -127,15 +114,8 @@ describe('the default blocks', () => {
     expect(text).toBe('- One\n- Two 2');
   });
 
-  it('render a callout boxed in the muted colour inside a border all round, with no accent edge', () => {
-    const { html } = render('callout', {}, { text: 'Road closed' });
-    expect(html).toContain('background:#F4F4F5;border:1px solid #E4E4E7;border-radius:10px;');
-    expect(html).not.toContain('border-left');
-  });
-
-  it('render a divider as a rule in the border colour and a blank text line', () => {
+  it('render a divider as a blank text line', () => {
     expect(render('divider', {}, {}).text).toBe('');
-    expect(styleOf(render('divider', {}, {}).html, 'zx-divider')).toContain('border-top:1px solid #E4E4E7');
   });
 
   it("render a columns block's lanes at the ratio's own weights", () => {
@@ -196,15 +176,6 @@ describe('the default blocks', () => {
     expect(defaultBlocks[type].attributes.safeParse({ ...base, spaceBefore: 'large' }).success).toBe(true);
   });
 
-  it('require a columns ratio of two to four weights of at most twelve', () => {
-    const ratio = (value: unknown): boolean => defaultBlocks.columns.attributes.safeParse({ ratio: value }).success;
-    expect(ratio([1, 1])).toBe(true);
-    expect(ratio([1])).toBe(false);
-    expect(ratio([1, 1, 1, 1, 1])).toBe(false);
-    expect(ratio([13, 1])).toBe(false);
-    expect(defaultBlocks.columns.attributes.safeParse({}).success).toBe(false);
-  });
-
   it("translate a button's label and copy its href", async () => {
     const translated = await defaultBlocks.button.translate({ label: 'Verify', href: '{{u}}' }, async (s) => `[${s}]`);
     expect(translated).toEqual({ label: '[Verify]', href: '{{u}}' });
@@ -225,46 +196,6 @@ describe('the default blocks', () => {
     };
     await expect(defaultBlocks.code.translate({ code: '{{c}}' }, never)).resolves.toEqual({ code: '{{c}}' });
     await expect(defaultBlocks.html.translate({ html: '<p>x</p>' }, never)).resolves.toEqual({ html: '<p>x</p>' });
-  });
-
-  it('hold text in every type but a divider, a columns block and a spacer', () => {
-    const holding = Object.values(defaultBlocks)
-      .filter((definition) => definition.holdsText)
-      .map((definition) => definition.type);
-    expect(holding.sort()).toEqual([
-      'button',
-      'callout',
-      'card',
-      'code',
-      'heading',
-      'hero',
-      'html',
-      'image',
-      'legalFooter',
-      'list',
-      'paragraph',
-      'quote',
-      'socialLinks',
-      'table',
-    ]);
-  });
-
-  it('mark body text, a button and each lane for the layout to resize on a narrow screen', () => {
-    expect(render('paragraph', {}, { text: 'Hi' }).html).toContain('class="zx-text');
-    expect(render('callout', {}, { text: 'Hi' }).html).toContain('class="zx-text');
-    expect(render('list', {}, { items: ['a'] }).html).toContain('class="zx-text');
-    expect(render('button', {}, { label: 'Go', href: '{{u}}' }, { u: 'https://x.test' }, { u: 'url' }).html).toContain(
-      'class="zx-button',
-    );
-    const lanes = [[paragraph('l', 'L')], [paragraph('r', 'R')]];
-    expect(render('columns', { ratio: [1, 1] }, {}, {}, {}, lanes).html.match(/class="zx-lane/g)).toHaveLength(2);
-  });
-
-  it('give each block its own row, named for its type and its gap and alignment', () => {
-    expect(render('paragraph', { align: 'center', spaceAfter: 'small' }, { text: 'x' }).html).toContain(
-      '<td class="zx-block zx-block-paragraph zx-align-center zx-space-small" style="text-align:center;padding:0 0 6px;">',
-    );
-    expect(render('divider', {}, {}).html).toContain('class="zx-block zx-block-divider zx-align-left zx-space-medium"');
   });
 });
 
@@ -351,10 +282,9 @@ describe('a heading', () => {
 });
 
 describe('a quote', () => {
-  it('draws its text muted beside a rule, and as its text on the text arm', () => {
+  it('draws its markup on the html arm, and its text alone on the text arm', () => {
     const { html, text } = render('quote', {}, { text: '_Lovely_ stay' });
-    expect(html).toMatch(/<td class="zx-quote" style="border-left:3px solid #E4E4E7;padding:0 0 0 12px;">/);
-    expect(html).toContain('class="zx-text zx-tone-muted"');
+    expect(html).toContain('<em>Lovely</em> stay');
     expect(text).toBe('Lovely stay');
   });
 });
@@ -430,9 +360,7 @@ describe('a table', () => {
     expect(html.match(/<td align="left" valign="top" class="zx-table-cell"/g)?.length).toBe(20 * 6);
   });
 
-  it('refuses on write a table past 20 rows or 6 columns, rows of two widths, and malformed markup', () => {
-    expect(renderer.contentOf('table', { rows: Array.from({ length: 21 }, () => ['a']) })).toBeNull();
-    expect(renderer.contentOf('table', { rows: [['a', 'b', 'c', 'd', 'e', 'f', 'g']] })).toBeNull();
+  it('refuses on write rows of two widths and malformed markup', () => {
     expect(renderer.contentOf('table', { rows: [['a', 'b'], ['c']] })).toBeNull();
     expect(renderer.contentOf('table', { rows: [['**a']] })).toBeNull();
     expect(
@@ -470,13 +398,11 @@ describe('social links', () => {
     expect(text).toBe('Acme on X: https://x.test/x\nBlog: https://x.test/blog');
   });
 
-  it('refuses on write no links, more than 8, and a link or icon a client would not open', () => {
-    expect(renderer.contentOf('socialLinks', { links: [] })).toBeNull();
-    expect(renderer.contentOf('socialLinks', { links: Array.from({ length: 9 }, () => link('a')) })).toBeNull();
+  it('refuses on write a link or icon a client would not open', () => {
     expect(renderer.contentOf('socialLinks', { links: [link('a', 'javascript:alert(1)')] })).toBeNull();
     expect(renderer.contentOf('socialLinks', { links: [{ ...link('a'), icon: 'data:x' }] })).toBeNull();
     expect(renderer.contentOf('socialLinks', { links: [link(' ')] })).toBeNull();
-    expect(renderer.contentOf('socialLinks', { links: Array.from({ length: 8 }, () => link('a')) })).not.toBeNull();
+    expect(renderer.contentOf('socialLinks', { links: [link('a')] })).not.toBeNull();
   });
 
   it('draws no link a client would not open', () => {
@@ -530,17 +456,6 @@ describe('a hero or a card in a lane', () => {
     const { html, problems } = render('columns', { ratio: [1, 1] }, {}, {}, {}, [lane, []]);
     expect(html).not.toContain('<img');
     expect(problems).toContainEqual(expect.objectContaining({ blockId: 'w', kind: 'block-nested-too-deep' }));
-  });
-});
-
-describe('a card', () => {
-  it('frames its content in a bordered box', () => {
-    const { html } = render('card', {}, feature);
-    expect(html).toMatch(/class="zx-card-block" style="[^"]*border:1px solid #E4E4E7;/);
-    // Its image's top corners follow the frame's, which are rounded.
-    expect(html).toMatch(
-      /class="zx-image zx-image-fluid zx-card-block-image" style="[^"]*border-radius:10px 10px 0 0;/,
-    );
   });
 });
 

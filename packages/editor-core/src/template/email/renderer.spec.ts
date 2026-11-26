@@ -19,7 +19,7 @@ import {
   type RenderedEmail,
   type RenderEmailInput,
 } from './renderer.js';
-import { EmailThemeInvalid } from './theme.js';
+import { DEFAULT_EMAIL_THEME, EmailThemeInvalid } from './theme.js';
 
 const itinerary = defineBlockType({
   type: 'itinerary',
@@ -170,7 +170,7 @@ describe('createEmailRenderer', () => {
 
   it('draws with the ZUI palette, light and dark, when it is given no theme', () => {
     const { html } = createEmailRenderer().render(input([paragraph('p1', 'x')]));
-    expect(html).toContain('color:#09090B;');
+    expect(html).toContain(`color:${DEFAULT_EMAIL_THEME.colors.foreground};`);
     expect(html).toContain('<meta name="color-scheme" content="light dark">');
   });
 

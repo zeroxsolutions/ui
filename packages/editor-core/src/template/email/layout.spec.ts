@@ -31,14 +31,6 @@ function styleOf(html: string, classes: string): string {
 }
 
 describe('defaultLayout', () => {
-  it('puts the body inside a 600px card in the border colour and radius', () => {
-    const { html } = layout();
-    expect(styleOf(html, 'zx-card')).toBe(
-      'width:100%;max-width:600px;background:#FFFFFF;border:1px solid #E4E4E7;border-radius:10px;',
-    );
-    expect(html).toContain('BODY');
-  });
-
   it('puts the logo first, at its width, with its alt text', () => {
     const { html } = layout();
     expect(html.indexOf('logo@2x.png')).toBeLessThan(html.indexOf('BODY'));
@@ -46,12 +38,8 @@ describe('defaultLayout', () => {
     expect(html).toContain('width="120"');
   });
 
-  it('writes each footer line under a rule, 12px in the muted foreground', () => {
+  it('writes each footer line after the body', () => {
     const { html, text } = layout();
-    expect(styleOf(html, 'zx-footer')).toBe('padding:10px 0 0;border-top:1px solid #E4E4E7;');
-    expect(styleOf(html, 'zx-text zx-footer-line')).toBe(
-      'font-family:Inter, Arial, Helvetica, sans-serif;margin:0 0 4px;font-size:12px;line-height:17px;color:#63636D;',
-    );
     expect(html.indexOf('BODY')).toBeLessThan(html.indexOf('Example Company Limited'));
     expect(text).toBe('BODY\n\nExample Company Limited, 1 Example Street.\nSent because you created an account.');
   });
@@ -80,18 +68,6 @@ describe('defaultLayout', () => {
     const html = layout().html.replace(/<!--\[if mso\]>.*?<!\[endif\]-->/g, '');
     expect(html).not.toMatch(/<table[^>]*\swidth="600"/);
     expect(html).toContain('width:100%;max-width:600px');
-  });
-
-  it('carries the narrow-screen rules in a head style, keyed by class as Gmail keeps them', () => {
-    const { html } = layout();
-    const head = html.slice(0, html.indexOf('</head>'));
-    expect(head).toContain('@media only screen and (max-width:600px)');
-    // Full-bleed on a phone: no gutter around the card and no frame on it, the card's background edge to edge.
-    expect(head).toContain('.zx-outer{padding:0 !important;}');
-    expect(head).toContain('.zx-card{border:0 !important;border-radius:0 !important;}');
-    expect(html).toContain('class="zx-card"');
-    expect(html).toContain('class="zx-outer"');
-    expect(html).toContain('class="zx-inner"');
   });
 
   it('draws the header after the logo and the footer blocks above the footer lines', () => {

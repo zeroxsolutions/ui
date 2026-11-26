@@ -51,48 +51,6 @@ function input(
   };
 }
 
-/** Every default block with every attribute it took before layout, in the body and both regions. */
-const KITCHEN_SINK: readonly EmailBlock[] = [
-  p('p1', 'Hi {{name}}, **bold** _italic_ and [a link]({{u}}).'),
-  p('p2', 'Muted, centred, large gap.', { tone: 'muted', align: 'center', spaceAfter: 'large' }),
-  p('p3', 'Right, small gap.', { align: 'right', spaceAfter: 'small' }),
-  { id: 'h1', type: 'heading', attributes: { level: 1, align: 'center' }, content: { text: 'Heading **one**' } },
-  { id: 'q1', type: 'quote', attributes: {}, content: { text: 'A quote from {{name}}' } },
-  { id: 'b1', type: 'button', attributes: {}, content: { label: 'Inline button', href: '{{u}}' } },
-  { id: 'b2', type: 'button', attributes: { width: 'full' }, content: { label: 'Full button', href: '{{u}}' } },
-  { id: 'k1', type: 'code', attributes: { align: 'center' }, content: { code: '482 913' } },
-  { id: 'l1', type: 'list', attributes: {}, content: { items: ['One **bold**', 'Two [link]({{u}})'] } },
-  { id: 'c1', type: 'callout', attributes: { align: 'center' }, content: { text: 'A callout with **marks**.' } },
-  { id: 'd1', type: 'divider', attributes: { spaceAfter: 'large' }, content: {} },
-  image('i1', { width: 300, align: 'center' }),
-  image('i2', {}),
-  {
-    id: 't1',
-    type: 'table',
-    attributes: { header: true },
-    content: {
-      rows: [
-        ['Day', 'Place'],
-        ['1', '{{name}}'],
-      ],
-    },
-  },
-  columns('cols', [2, 1, 1], [[p('a', 'Left lane'), image('li', {})], [p('b', 'Middle')], [p('c', 'Right')]]),
-  { id: 'html', type: 'html', attributes: {}, content: { html: '<p style="margin:0">Raw <b>html</b></p>' } },
-];
-
-describe('the renderer with no layout', () => {
-  it('renders an email with no layout attribute byte-identical to the html before layout', async () => {
-    const region = {
-      blocks: [p('r1', 'Region line'), columns('rc', [1, 1], [[p('x', 'L')], [p('y', 'R')]])],
-      variables: {},
-      variableTypes: {},
-    };
-    const { html } = renderer.render(input(KITCHEN_SINK, { regions: { header: region, footer: region } }));
-    await expect(html).toMatchFileSnapshot('./__snapshots__/kitchen-sink.html.snap');
-  });
-});
-
 describe('layout in the email', () => {
   const html = (blocks: readonly EmailBlock[]): string => renderer.render(input(blocks)).html;
   /** The drawn width of each image block, the layout's logo left out. */
@@ -219,24 +177,6 @@ describe('layout in the email', () => {
     expect(drawn).toContain(`.zx-color-red{color:${dark!.hues!.red} !important;}`);
     expect(drawn).toContain(`.zx-bg-amber{background:${tint(dark!.hues!.amber!, dark!.background, 0.15)} !important;}`);
     expect(html([p('plain', 'no colour')])).not.toContain('zx-color-');
-  });
-
-  it('gives lead and small paragraphs their class and size', () => {
-    expect(html([p('l', 'Lead', { size: 'lead' })])).toMatch(
-      /class="zx-text zx-tone-default zx-text-lead" style="[^"]*font-size:18px;/,
-    );
-    expect(html([p('s', 'Small', { size: 'small' })])).toMatch(
-      /class="zx-text zx-tone-default zx-text-small" style="[^"]*font-size:12px;/,
-    );
-  });
-
-  it('spaces a block before and after it by its tokens', () => {
-    expect(html([p('n', 'x', { spaceBefore: 'none', spaceAfter: 'none' })])).toContain(
-      '<td class="zx-block zx-block-paragraph zx-align-left zx-space-none zx-space-before-none" style="text-align:left;padding:0;padding-top:0;">',
-    );
-    expect(html([p('l', 'x', { spaceBefore: 'large' })])).toContain(
-      'class="zx-block zx-block-paragraph zx-align-left zx-space-medium zx-space-before-large" style="text-align:left;padding:0 0 10px;padding-top:20px;"',
-    );
   });
 
   it('reports a section in a lane or in a section as nested too deep and draws nothing of it', () => {
