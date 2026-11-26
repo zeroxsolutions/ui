@@ -35,12 +35,12 @@ const KEPT: Record<string, string> = {
   'editor/document/react/editor.tsx: <Button> size-6': 'the gutter geometry placed by script around it',
 };
 
-/** Each `.tsx` source under `directory`; a spec is none. */
+/** Each `.ts` and `.tsx` source under `directory`; a spec is none. */
 function sources(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) return sources(path);
-    return entry.name.endsWith('.tsx') && !entry.name.endsWith('.spec.tsx') ? [path] : [];
+    return /\.tsx?$/.test(entry.name) && !/\.(spec|test|d)\.tsx?$/.test(entry.name) ? [path] : [];
   });
 }
 
@@ -347,6 +347,14 @@ function overrides(path: string): string[] {
             if (slot) report(`${element} ${slot}`, name, property);
           }
         }
+      }
+    }
+    // A class handed through a field such as `menuMediaClassName` lands on a part the item composes, past the
+    // style's slot for it, and no element here shows which part; any style-decided class there is an override.
+    if (ts.isPropertyAssignment(node) && /.ClassName$/.test(node.name.getText())) {
+      for (const name of classStrings(node.initializer).flatMap((text) => text.split(/\s+/).filter(Boolean))) {
+        const property = decided(name);
+        if (property) report(node.name.getText(), name, property);
       }
     }
     ts.forEachChild(node, visit);

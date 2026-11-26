@@ -316,13 +316,19 @@ export function TriggerMenu({ editor, token }: TriggerMenuProps) {
                     className="cn-editor-menu-item cursor-pointer"
                   >
                     {(option.icon as ReactNode) &&
-                      // A token's own media class draws its icon in a box, in place of the bare glyph.
-                      (token.menuMediaClassName === undefined ? (
-                        <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-glyph">
+                      // Each branch writes its slot whole, so the installing project's style is written into it.
+                      (token.menuMedia === 'tile' ? (
+                        <ItemMedia
+                          variant="icon"
+                          className={cn('cn-editor-menu-media cn-editor-menu-tile', token.menuMediaClassName)}
+                        >
                           {option.icon as ReactNode}
                         </ItemMedia>
                       ) : (
-                        <ItemMedia variant="icon" className={cn('cn-editor-menu-media', token.menuMediaClassName)}>
+                        <ItemMedia
+                          variant="icon"
+                          className={cn('cn-editor-menu-media cn-editor-menu-glyph', token.menuMediaClassName)}
+                        >
                           {option.icon as ReactNode}
                         </ItemMedia>
                       ))}
