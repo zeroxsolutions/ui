@@ -141,7 +141,7 @@ export function EmailAddressPopover({
           describedBy={field.describedBy}
           autoFocus={!field.disabled}
           messages={messages}
-          className="cn-input data-disabled:bg-input/50 h-auto min-h-8"
+          className="cn-input cn-editor-input h-auto min-h-8"
         />
       )}
       choices={(apply) =>

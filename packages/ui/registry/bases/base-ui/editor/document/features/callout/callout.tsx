@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { FluentEmoji } from '@zeroxsolutions/fluent-emoji';
 import { InfoIcon } from '@/registry/bases/base-ui/icons/lucide/info-icon';
+import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeJSON, NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -56,11 +57,7 @@ const ALERT_TO_VARIANT: Record<string, Variant> = {
  */
 function CalloutShell({ variant, children }: { variant: Variant; children: ReactNode }) {
   return (
-    <div
-      data-slot="callout"
-      data-callout={variant}
-      className="cn-alert my-4 flex items-start gap-3 text-[length:inherit]"
-    >
+    <div data-slot="callout" data-callout={variant} className={cn('cn-alert cn-editor-callout my-4 flex items-start')}>
       <FluentEmoji
         glyph={ICON[variant]}
         name={variant}

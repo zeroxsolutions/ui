@@ -31,7 +31,7 @@ export function ProblemMarker({
               data-mark-id={id}
               aria-label={label}
               aria-describedby={id}
-              className="text-destructive"
+              className="cn-editor-problem"
             >
               <CircleAlertIcon aria-hidden />
             </Button>

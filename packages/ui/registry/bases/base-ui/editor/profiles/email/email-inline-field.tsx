@@ -58,10 +58,7 @@ export function EmailInlineField({
         readOnly={readOnly}
         messages={context?.messages() ?? DEFAULT_PROFILE_MESSAGES}
         // The text's own type, with a faint wash on hover and focus in place of an input's ring.
-        className={cn(
-          'cn-editor-inline -mx-1 px-1 hover:bg-muted/50 focus-within:bg-muted/50 focus-within:ring-0',
-          className,
-        )}
+        className={cn('cn-editor-inline cn-editor-inline-field -mx-1 px-1', className)}
       />
     </span>
   );

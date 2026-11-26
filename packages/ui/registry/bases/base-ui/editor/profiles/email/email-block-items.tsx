@@ -386,7 +386,7 @@ export function EmailBlockItems({
             </Tooltip>
             <PopoverContent
               align="start"
-              className="w-80 gap-3"
+              className="w-80"
               data-slot="email-block-item-popover"
               aria-label={messages.itemRow(label, index + 1)}
               finalFocus={() => (removed.current ? (add.current ?? false) : true)}
@@ -451,7 +451,7 @@ export function EmailBlockItems({
                 size="icon-sm"
                 aria-label={messages.addItemTo(label)}
                 disabled={!restructure || entries.length >= items.max}
-                className="text-muted-foreground"
+                className="cn-editor-control-muted"
                 onClick={() => {
                   removed.current = false;
                   onValueChange([...entries, empty()]);

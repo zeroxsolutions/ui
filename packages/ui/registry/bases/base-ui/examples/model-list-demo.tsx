@@ -42,7 +42,7 @@ function ModelListDemo(): ReactNode {
   const [models, setModels] = useState(INITIAL_MODELS);
 
   return (
-    <Card className="h-72 w-full gap-0 py-0">
+    <Card className="h-72 w-full">
       <ModelList>
         <ModelListHeader>
           <ModelListTitle>Model list</ModelListTitle>

@@ -85,7 +85,7 @@ export function EditorToolbar({ editor, items, end, disabled = false, className 
       role="toolbar"
       data-slot="editor-toolbar"
       aria-disabled={disabled || undefined}
-      className={cn('cn-editor-toolbar flex flex-wrap items-center gap-0.5 bg-popover', className)}
+      className={cn('cn-editor-toolbar flex flex-wrap items-center bg-popover', className)}
       onFocus={focus}
       onKeyDown={keyDown}
     >

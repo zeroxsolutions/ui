@@ -79,12 +79,7 @@ function PasswordStrengthMeter({ children, valueText, className, ...props }: Pas
           {valueText}
         </Text>
       </View>
-      <Progress
-        aria-label={children}
-        value={PASSWORD_STRENGTH_FILL[strength]}
-        getValueLabel={() => valueText}
-        className="h-1"
-      />
+      <Progress aria-label={children} value={PASSWORD_STRENGTH_FILL[strength]} getValueLabel={() => valueText} />
     </CardContent>
   );
 }

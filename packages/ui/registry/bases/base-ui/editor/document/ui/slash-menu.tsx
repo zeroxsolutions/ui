@@ -204,12 +204,12 @@ export function SlashMenu({
         // The editor owns the caret; the popover must not steal focus on open.
         initialFocus={false}
         data-slot="slash-menu"
-        className="w-72 gap-0 p-0"
+        className="cn-editor-menu w-72"
       >
         <ScrollArea className="flex max-h-80 flex-col *:data-[slot=scroll-area-viewport]:max-h-80">
           <div ref={listRef} className="p-1">
             {ordered.length === 0 ? (
-              <Empty className="min-h-0 gap-1 border-0 p-6">
+              <Empty className="cn-editor-menu-empty min-h-0">
                 <EmptyDescription>{emptyText}</EmptyDescription>
               </Empty>
             ) : (
@@ -230,12 +230,12 @@ export function SlashMenu({
                         // Keep the editor focused so the selection/range survives the click.
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => select(item)}
-                        className="cn-editor-menu-item data-highlighted:bg-accent data-highlighted:text-accent-foreground cursor-pointer"
+                        className="cn-editor-menu-item cursor-pointer"
                       >
-                        <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
+                        <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-tile">
                           <ChromeIcon icon={item.icon} sized active={highlighted} />
                         </ItemMedia>
-                        <ItemContent className="gap-0.5">
+                        <ItemContent className="cn-editor-menu-content">
                           <ItemTitle>{item.title}</ItemTitle>
                           {item.description && (
                             <ItemDescription className="line-clamp-1">{item.description}</ItemDescription>

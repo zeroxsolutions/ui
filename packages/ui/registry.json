@@ -2321,7 +2321,7 @@
       "title": "Editor Callout",
       "description": "A highlighted block that sets a note apart in one of five variants: note, info, success, warning or danger.",
       "categories": ["editor"],
-      "registryDependencies": ["@zui/document-editor", "@zui/lucide-info-icon"],
+      "registryDependencies": ["@shadcn/utils", "@zui/document-editor", "@zui/lucide-info-icon"],
       "files": [
         {
           "path": "registry/bases/base-ui/editor/document/features/callout/index.ts",
@@ -3648,7 +3648,7 @@
           "target": "@hooks/use-animated-icon.ts"
         }
       ],
-      "dependencies": ["@zeroxsolutions/editor-core", "lucide-react"]
+      "dependencies": ["@zeroxsolutions/editor-core", "class-variance-authority", "lucide-react"]
     },
     {
       "name": "mermaid-editor-demo",

@@ -50,7 +50,7 @@ function ChatSuggestionItem({
   return (
     <Item
       size="sm"
-      className={cn('enabled:hover:bg-muted text-left', className)}
+      className={cn('cn-chat-suggestion-item text-left', className)}
       render={
         <button
           type="button"

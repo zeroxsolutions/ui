@@ -360,7 +360,7 @@ export function CardView({
               // A button with no label or no link is not drawn outside the editor; it is an outline to fill in.
               className={cn(
                 buttonVariants({ variant: unsent ? 'outline' : buttonVariant, size: 'sm' }),
-                unsent && 'text-muted-foreground border-dashed',
+                'cn-editor-control-unset',
               )}
             >
               <Text
@@ -384,7 +384,7 @@ export function CardView({
                   size="icon-sm"
                   aria-label={words.buttonHref}
                   data-state={fields.buttonHref === '' ? 'empty' : 'set'}
-                  className="data-[state=empty]:text-muted-foreground"
+                  className="cn-editor-control-unset"
                 >
                   <LinkIcon size={16} aria-hidden />
                 </Button>

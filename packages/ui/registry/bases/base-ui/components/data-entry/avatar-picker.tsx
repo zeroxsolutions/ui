@@ -330,9 +330,7 @@ function AvatarPickerUploadContent({
             onFile(file);
           }}
         />
-        <Empty className="group-data-dragging/avatar-picker-upload:border-primary group-data-dragging/avatar-picker-upload:bg-muted/50 border border-transparent">
-          {children}
-        </Empty>
+        <Empty className="cn-avatar-picker-drop">{children}</Empty>
       </TabsContent>
     </AvatarPickerUploadContext.Provider>
   );

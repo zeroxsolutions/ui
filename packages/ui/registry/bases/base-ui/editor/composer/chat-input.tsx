@@ -121,7 +121,7 @@ export function ChatInput({ triggers, placeholder = 'Message...', onSubmit, onRe
 
   return (
     <>
-      <InputGroup className={cn('h-auto min-h-9 items-center gap-1.5 px-2 py-1.5', className)}>
+      <InputGroup className={cn('cn-editor-composer items-center', className)}>
         <div
           ref={wrapperRef}
           data-slot="input-group-control"
@@ -129,7 +129,7 @@ export function ChatInput({ triggers, placeholder = 'Message...', onSubmit, onRe
         >
           <EditorContent editor={engine as never} />
         </div>
-        <InputGroupAddon align="inline-end" className="py-0 pr-0">
+        <InputGroupAddon align="inline-end" className="cn-editor-composer-addon">
           <ChromeControl
             icon={ArrowUpIcon}
             render={(control) => (

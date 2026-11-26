@@ -93,7 +93,7 @@ function ButtonLinkPopover({ href, onHrefChange }: { href: string; onHrefChange(
             </Button>
           }
         />
-        <PopoverContent align="start" className="w-72 gap-3">
+        <PopoverContent align="start" className="w-72">
           <Field>
             <FieldLabel htmlFor={id}>Link</FieldLabel>
             <Input

@@ -85,8 +85,8 @@ function CodeInput({
 function CodeInputSlot({ className, textClassName, ...props }: ComponentProps<typeof InputOTPSlot>): ReactNode {
   return (
     <InputOTPSlot
-      className={cn('size-12 flex-1', className)}
-      textClassName={cn('text-lg font-sans-semibold', textClassName)}
+      className={cn('cn-code-input-slot flex-1', className)}
+      textClassName={cn('cn-code-input-slot/text', textClassName)}
       {...props}
     />
   );

@@ -23,6 +23,7 @@ export {
 export type {
   TriggerArchetype,
   TriggerGate,
+  TriggerMenuMedia,
   TriggerMultiplicity,
   TriggerOption,
   TriggerQueryField,

@@ -76,7 +76,7 @@ function ToggleHeadingView({
         className="absolute top-0 left-0 flex items-center"
         style={headingHeight === null ? undefined : { height: headingHeight }}
       >
-        <span className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground flex size-6 shrink-0 cursor-pointer items-center justify-center select-none">
+        <span className="cn-button cn-button-variant-ghost cn-button-size-icon-xs cn-editor-control-muted flex shrink-0 cursor-pointer items-center justify-center select-none">
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}
@@ -146,7 +146,7 @@ function ToggleHeadingDetails({ open, children }: { open: boolean; children: [Re
         {...marker.handlers}
         className="flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden"
       >
-        <span className="cn-button cn-button-variant-ghost cn-button-size-icon-sm text-muted-foreground flex size-6 shrink-0 items-center justify-center select-none">
+        <span className="cn-button cn-button-variant-ghost cn-button-size-icon-xs cn-editor-control-muted flex shrink-0 items-center justify-center select-none">
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}

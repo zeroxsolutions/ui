@@ -132,12 +132,12 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
           if (clickable) onInsert(preset.id);
         }}
         {...handlers}
-        className="cn-editor-menu-item hover:bg-accent hover:text-accent-foreground cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
+        className="cn-editor-menu-item cn-editor-preset-item cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
       >
-        <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
+        <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-tile">
           <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} sized active={active} />
         </ItemMedia>
-        <ItemContent className="gap-0.5">
+        <ItemContent className="cn-editor-menu-content">
           <ItemTitle>{preset.label}</ItemTitle>
           {preset.description !== null && (
             <ItemDescription className="line-clamp-2">{preset.description}</ItemDescription>
@@ -203,7 +203,7 @@ function EditorPresetsPanel({ editor, presets, messages, className }: EditorPres
           </InputGroup>
         )}
         {shown.length === 0 ? (
-          <Empty className="min-h-0 gap-1 border-0 p-6">
+          <Empty className="cn-editor-menu-empty min-h-0">
             <EmptyDescription>{text.empty}</EmptyDescription>
           </Empty>
         ) : (
