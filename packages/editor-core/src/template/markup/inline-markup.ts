@@ -1,9 +1,10 @@
 /**
- * The inline markup a text field may carry: `**bold**`, `_italic_` and `[label](href)`, the href any text
- * that may hold `{{name}}` tokens. A field stays
+ * The inline markup a text field may carry: `**bold**`, `_italic_`, `[label](href)`, the href any text
+ * that may hold `{{name}}` tokens, and `{color=<token>}text{/color}` and `{bg=<token>}text{/bg}`. A field stays
  * a string, so the markup is a grammar over it that a template validates, a renderer draws and a
  * translation is checked against.
  */
+import { COLOR_TOKENS, type ColorToken } from '../layout/index.js';
 import { VARIABLE_TOKEN, variableTokens } from '../variables/variable-tokens.js';
 
 export interface InlineText {
@@ -11,6 +12,10 @@ export interface InlineText {
   readonly text: string;
   readonly bold: boolean;
   readonly italic: boolean;
+  /** The text's colour; absent for the default colour, which no marker names. */
+  readonly color?: ColorToken;
+  /** The colour behind the text; absent for none. */
+  readonly background?: ColorToken;
 }
 
 /** A link; `href` is the target as written, tokens unfilled, escapes resolved, and may be empty. */
@@ -29,7 +34,10 @@ export type InlineMarkupProblem =
   | 'link-unclosed'
   | 'link-target-missing'
   | 'link-label-empty'
-  | 'link-nested';
+  | 'link-nested'
+  | 'color-unclosed'
+  | 'color-token-unknown'
+  | 'color-nested';
 
 export type ParsedInlineMarkup =
   | { readonly ok: true; readonly runs: readonly InlineRun[] }
@@ -44,6 +52,42 @@ interface DraftText extends InlineText {
 
 type DraftRun = DraftText | { readonly kind: 'link'; readonly href: string; readonly label: readonly DraftText[] };
 
+/** The colour and background a run is painted in. */
+interface Paint {
+  readonly color?: ColorToken;
+  readonly background?: ColorToken;
+}
+
+/** A colour marker's field in a run, by the name the marker spells. */
+const PAINT_FIELDS = { color: 'color', bg: 'background' } as const satisfies Record<string, keyof Paint>;
+type PaintMarker = keyof typeof PAINT_FIELDS;
+
+/** The colours a marker may name: every token but `default`, which is the absence of a marker. */
+const MARKER_COLORS: readonly string[] = COLOR_TOKENS.filter((token) => token !== 'default');
+
+/**
+ * `{color=<word>}`, `{bg=<word>}`, `{/color}` or `{/bg}` exactly, sticky. Any other `{` is literal text, so a
+ * brace an older string spells (`{b}`, `{ color=red }`) reads as it always did.
+ */
+const PAINT_MARKER_HERE = /\{(?:(color|bg)=([a-z]+)|\/(color|bg))\}/y;
+
+interface PaintMarkerAt {
+  readonly marker: PaintMarker;
+  /** The colour an opening marker names, as written; absent on a closing one. */
+  readonly token?: string;
+  readonly length: number;
+}
+
+function paintMarkerAt(source: string, index: number): PaintMarkerAt | undefined {
+  PAINT_MARKER_HERE.lastIndex = index;
+  const match = PAINT_MARKER_HERE.exec(source);
+  if (match === null) return undefined;
+  const opening = match[1] as PaintMarker | undefined;
+  return opening === undefined
+    ? { marker: match[3] as PaintMarker, length: match[0].length }
+    : { marker: opening, token: match[2], length: match[0].length };
+}
+
 interface Seen {
   readonly tokens: Set<number>;
   readonly markers: number[];
@@ -57,10 +101,19 @@ const ESCAPABLE = '*_[]\\';
 /** What a `\\` escapes inside an href: the `)` that would end it, and itself. Every other character there is literal. */
 const HREF_ESCAPABLE = ')\\';
 
+function sameLook(left: InlineText, right: InlineText): boolean {
+  return (
+    left.bold === right.bold &&
+    left.italic === right.italic &&
+    left.color === right.color &&
+    left.background === right.background
+  );
+}
+
 /** Adds a text run, joining it to the one before when their marks match, so merged runs print and parse back unchanged. */
 function pushText<T extends DraftRun>(runs: (DraftText | T)[], run: DraftText): void {
   const last = runs.at(-1);
-  if (last?.kind === 'text' && last.bold === run.bold && last.italic === run.italic) {
+  if (last?.kind === 'text' && sameLook(last, run)) {
     runs[runs.length - 1] = { ...last, text: last.text + run.text, at: [...last.at, ...run.at] };
   } else {
     runs.push(run);
@@ -76,9 +129,13 @@ function tokenAt(source: string, index: number): string | undefined {
   return TOKEN_HERE.exec(source)?.[0];
 }
 
-/** Whether a `\\` at `index` escapes the character after it; a `\\` that ends the source is text. */
+/**
+ * Whether a `\\` at `index` escapes the character after it: a marker character, or a `{` that opens a colour
+ * marker. A `\\` that ends the source, or comes before any other character, is text.
+ */
 function escapedAt(source: string, index: number): boolean {
-  return source[index] === '\\' && index + 1 < source.length && ESCAPABLE.includes(source[index + 1]);
+  if (source[index] !== '\\' || index + 1 >= source.length) return false;
+  return ESCAPABLE.includes(source[index + 1]) || paintMarkerAt(source, index + 1) !== undefined;
 }
 
 /** The index of the `]` that closes a label opened before `from`, or the refusal that stops the search. */
@@ -115,20 +172,32 @@ function hrefAt(source: string, from: number, base: number): { href: string; end
   return refuse('link-unclosed', base + from);
 }
 
+/** A colour marker opened in this parse: the colour it names and where it opened. */
+interface OpenPaint {
+  readonly token: ColorToken;
+  readonly offset: number;
+}
+
 /**
  * Whole-string parse; `base` is where `source` starts in the string the caller was given, for offsets.
- * `seen` collects the offset of every token read whole and of every marker.
+ * `seen` collects the offset of every token read whole and of every marker. `outer` is the paint a link's
+ * label sits in, which a marker in the label may not open again.
  */
-function parseRuns(source: string, base: number, seen: Seen): ParsedDraft {
+function parseRuns(source: string, base: number, seen: Seen, outer: Paint = {}): ParsedDraft {
   const runs: DraftRun[] = [];
   let buffer = '';
   let at: number[] = [];
   let bold = -1;
   let italic = -1;
+  const paint: Partial<Record<PaintMarker, OpenPaint>> = {};
 
+  const painted = (): Paint => ({
+    ...(paint.color === undefined ? {} : { color: paint.color.token }),
+    ...(paint.bg === undefined ? {} : { background: paint.bg.token }),
+  });
   const flush = (): void => {
     if (buffer === '') return;
-    pushText(runs, { kind: 'text', text: buffer, bold: bold >= 0, italic: italic >= 0, at });
+    pushText(runs, { kind: 'text', text: buffer, bold: bold >= 0, italic: italic >= 0, ...painted(), at });
     buffer = '';
     at = [];
   };
@@ -141,7 +210,22 @@ function parseRuns(source: string, base: number, seen: Seen): ParsedDraft {
   while (index < source.length) {
     const char = source[index];
     const token = tokenAt(source, index);
-    if (token) {
+    const marker = token ? undefined : paintMarkerAt(source, index);
+    if (marker) {
+      flush();
+      seen.markers.push(base + index);
+      if (marker.token === undefined) {
+        if (paint[marker.marker] === undefined) return refuse('color-unclosed', base + index);
+        delete paint[marker.marker];
+      } else {
+        if (!MARKER_COLORS.includes(marker.token)) return refuse('color-token-unknown', base + index);
+        if (paint[marker.marker] !== undefined || outer[PAINT_FIELDS[marker.marker]] !== undefined) {
+          return refuse('color-nested', base + index);
+        }
+        paint[marker.marker] = { token: marker.token as ColorToken, offset: base + index };
+      }
+      index += marker.length;
+    } else if (token) {
       seen.tokens.add(base + index);
       take(token, base + index);
       index += token.length;
@@ -161,16 +245,16 @@ function parseRuns(source: string, base: number, seen: Seen): ParsedDraft {
     } else if (char === '[') {
       const end = labelEnd(source, index + 1, base);
       if (typeof end !== 'number') return end;
-      const label = parseRuns(source.slice(index + 1, end), base + index + 1, seen);
+      const label = parseRuns(source.slice(index + 1, end), base + index + 1, seen, { ...outer, ...painted() });
       if (!label.ok) return label;
       if (label.runs.length === 0) return refuse('link-label-empty', base + index);
       const target = hrefAt(source, end + 1, base);
       if ('ok' in target) return target;
       flush();
-      // A mark opened around the link belongs to the label, the one place a link's text lives.
+      // A mark or a colour opened around the link belongs to the label, the one place a link's text lives.
       const folded: DraftText[] = [];
       for (const run of label.runs as readonly DraftText[]) {
-        pushText(folded, { ...run, bold: run.bold || bold >= 0, italic: run.italic || italic >= 0 });
+        pushText(folded, { ...run, bold: run.bold || bold >= 0, italic: run.italic || italic >= 0, ...painted() });
       }
       runs.push({ kind: 'link', href: target.href, label: folded });
       index = target.end;
@@ -183,6 +267,8 @@ function parseRuns(source: string, base: number, seen: Seen): ParsedDraft {
 
   const open = [bold, italic].filter((offset) => offset >= 0);
   if (open.length > 0) return refuse('marker-unclosed', Math.min(...open));
+  const openPaint = [paint.color, paint.bg].flatMap((opened) => (opened === undefined ? [] : [opened.offset]));
+  if (openPaint.length > 0) return refuse('color-unclosed', Math.min(...openPaint));
   return { ok: true, runs };
 }
 
@@ -201,7 +287,14 @@ function joinedToken(runs: readonly DraftRun[], tokens: Set<number>): number | u
 }
 
 function published(run: DraftText): InlineText {
-  return { kind: 'text', text: run.text, bold: run.bold, italic: run.italic };
+  return {
+    kind: 'text',
+    text: run.text,
+    bold: run.bold,
+    italic: run.italic,
+    ...(run.color === undefined ? {} : { color: run.color }),
+    ...(run.background === undefined ? {} : { background: run.background }),
+  };
 }
 
 /** The parse without the print-back check: every rule but `marker-ambiguous`. */
@@ -237,7 +330,10 @@ export function parseInlineMarkup(source: string): ParsedInlineMarkup {
   return { ok: true, runs };
 }
 
-/** Text with its markers escaped, a `{{name}}` token left whole so the `_` inside it is not escaped. */
+/**
+ * Text with its markers escaped, and each `{` that would open a colour marker, a `{{name}}` token left whole so
+ * the `_` inside it is not escaped.
+ */
 function escapeText(text: string): string {
   let out = '';
   let index = 0;
@@ -247,7 +343,8 @@ function escapeText(text: string): string {
       out += token;
       index += token.length;
     } else {
-      out += ESCAPABLE.includes(text[index]) ? `\\${text[index]}` : text[index];
+      const escaped = ESCAPABLE.includes(text[index]) || paintMarkerAt(text, index) !== undefined;
+      out += escaped ? `\\${text[index]}` : text[index];
       index += 1;
     }
   }
@@ -286,13 +383,72 @@ function turnTo(open: Mark[], wanted: readonly Mark[]): string {
   return out;
 }
 
-/** Text runs, each with the marks it carries beyond `outer`, which are already on around them. */
-function printTexts(runs: readonly InlineText[], open: Mark[], outer: readonly Mark[]): string {
+/** What a print has open: the marks in the order they opened, and the paint. Updated in place. */
+interface Printing {
+  readonly marks: Mark[];
+  color?: ColorToken;
+  background?: ColorToken;
+}
+
+/**
+ * The markers that turn the paint open in `printing` into `wanted`. Colour markers nest, a background outside a
+ * colour, and the marks open inside both, so a change closes the marks and every colour marker inside the one that
+ * changed; the caller's next `turnTo` reopens the marks.
+ */
+function paintTo(printing: Printing, wanted: Paint): string {
+  const background = printing.background !== wanted.background;
+  const color = printing.color !== wanted.color || (background && printing.color !== undefined);
+  if (!background && !color) return '';
+  let out = turnTo(printing.marks, []);
+  if (color && printing.color !== undefined) {
+    out += '{/color}';
+    printing.color = undefined;
+  }
+  if (background && printing.background !== undefined) {
+    out += '{/bg}';
+    printing.background = undefined;
+  }
+  if (printing.background !== wanted.background && wanted.background !== undefined) {
+    out += `{bg=${wanted.background}}`;
+    printing.background = wanted.background;
+  }
+  if (printing.color !== wanted.color && wanted.color !== undefined) {
+    out += `{color=${wanted.color}}`;
+    printing.color = wanted.color;
+  }
+  return out;
+}
+
+/** The markers that close everything `printing` has open. */
+function closeAll(printing: Printing): string {
+  return turnTo(printing.marks, []) + paintTo(printing, {});
+}
+
+/** The paint every run of `label` carries, which prints around the link. */
+function sharedPaint(label: readonly InlineText[]): Paint {
+  const first = label[0];
+  const color = first !== undefined && label.every((part) => part.color === first.color) ? first.color : undefined;
+  const background =
+    first !== undefined && label.every((part) => part.background === first.background) ? first.background : undefined;
+  return { ...(color === undefined ? {} : { color }), ...(background === undefined ? {} : { background }) };
+}
+
+/** Text runs, each with the marks and paint it carries beyond `outer` and `outerPaint`, already on around them. */
+function printTexts(
+  runs: readonly InlineText[],
+  printing: Printing,
+  outer: readonly Mark[],
+  outerPaint: Paint,
+): string {
   let out = '';
   for (const run of runs) {
     if (run.text === '') continue;
+    out += paintTo(printing, {
+      ...(run.color === outerPaint.color ? {} : { color: run.color }),
+      ...(run.background === outerPaint.background ? {} : { background: run.background }),
+    });
     out += turnTo(
-      open,
+      printing.marks,
       MARKS.filter((mark) => run[mark] && !outer.includes(mark)),
     );
     out += escapeText(run.text);
@@ -307,19 +463,20 @@ function printTexts(runs: readonly InlineText[], open: Mark[], outer: readonly M
  * the parser refuses or reads differently, so a caller should parse what it prints.
  */
 export function printInlineMarkup(runs: readonly InlineRun[]): string {
-  const open: Mark[] = [];
+  const printing: Printing = { marks: [] };
   let out = '';
   for (const run of runs) {
     if (run.kind === 'text') {
-      out += printTexts([run], open, []);
+      out += printTexts([run], printing, [], {});
       continue;
     }
     const outer = MARKS.filter((mark) => run.label.every((part) => part[mark]));
-    const inside: Mark[] = [];
-    const label = printTexts(run.label, inside, outer) + turnTo(inside, []);
-    out += `${turnTo(open, outer)}[${label}](${escapeHref(run.href)})`;
+    const outerPaint = sharedPaint(run.label);
+    const inside: Printing = { marks: [] };
+    const label = printTexts(run.label, inside, outer, outerPaint) + closeAll(inside);
+    out += `${paintTo(printing, outerPaint)}${turnTo(printing.marks, outer)}[${label}](${escapeHref(run.href)})`;
   }
-  return out + turnTo(open, []);
+  return out + closeAll(printing);
 }
 
 function plainRuns(runs: readonly InlineRun[]): string {
@@ -333,7 +490,7 @@ export function plainInlineText(source: string): string {
 }
 
 /**
- * One entry per bold span, italic span and link, or undefined when `source` is malformed. A span is
+ * One entry per bold span, italic span, colour span and link, or undefined when `source` is malformed. A span is
  * counted where its mark turns on along the flat text, a link's label included, so a span that wraps a
  * link or a word counts once however the runs inside it split. A link is entered by the tokens its href
  * spells, not its fixed text, so a translation may point it at a page in its own language.
@@ -344,20 +501,26 @@ function marks(source: string): string | undefined {
   const entries: string[] = [];
   let bold = false;
   let italic = false;
+  let color: ColorToken | undefined;
+  let background: ColorToken | undefined;
   for (const run of parsed.runs) {
     if (run.kind === 'link') entries.push(`link:${variableTokens(run.href).join(' ')}`);
     for (const text of run.kind === 'text' ? [run] : run.label) {
       if (text.bold && !bold) entries.push('bold');
       if (text.italic && !italic) entries.push('italic');
+      if (text.color !== undefined && text.color !== color) entries.push(`color:${text.color}`);
+      if (text.background !== undefined && text.background !== background) entries.push(`bg:${text.background}`);
       bold = text.bold;
       italic = text.italic;
+      color = text.color;
+      background = text.background;
     }
   }
   return entries.sort().join('\n');
 }
 
 /**
- * Whether `translation` carries the bold spans, italic spans and links `source` does, each link with the
+ * Whether `translation` carries the bold spans, italic spans, colour spans and links `source` does, each link with the
  * tokens its href spells; their order within a text is not compared, and a malformed side is never the
  * same. A list compares item by item, in order, and must have as many items; a string compares as a list
  * of one. Pass only marked text, never a whole block's content: a button label, code or html is plain, and

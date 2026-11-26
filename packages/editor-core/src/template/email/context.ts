@@ -64,12 +64,7 @@ export function createRenderContext(
     reportMissing(template);
     const parsed = parseInlineMarkup(template);
     if (!parsed.ok) return template === '' ? [] : [{ kind: 'text', text: fill(template), bold: false, italic: false }];
-    const filled = (run: InlineText): TextRunText => ({
-      kind: 'text',
-      text: fill(run.text),
-      bold: run.bold,
-      italic: run.italic,
-    });
+    const filled = (run: InlineText): TextRunText => ({ ...run, text: fill(run.text) });
     return parsed.runs.flatMap((run): TextRun[] => {
       if (run.kind === 'text') return [filled(run)];
       const label = run.label.map(filled);

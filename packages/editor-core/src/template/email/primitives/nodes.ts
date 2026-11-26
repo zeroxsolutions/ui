@@ -3,17 +3,22 @@
  * carries the classes a stylesheet styles it by. Values are filled when a node is made, through the reader
  * its factory was given, and escaped when it is written.
  */
+import type { ColorToken } from '../../layout/index.js';
 import { escapeHtml } from '../../variables/interpolate.js';
 
 /** One class name, or several, a falsy entry left out, so a render can write `active && 'zx-x'`. */
 export type ClassList = string | readonly (string | false | null | undefined)[];
 
-/** A run of filled text, bold and italic as its markup said. */
+/** A run of filled text, bold, italic and coloured as its markup said. */
 export interface TextRunText {
   readonly kind: 'text';
   readonly text: string;
   readonly bold: boolean;
   readonly italic: boolean;
+  /** The text's colour token; absent for the default colour. */
+  readonly color?: ColorToken;
+  /** The colour token behind the text; absent for none. */
+  readonly background?: ColorToken;
 }
 
 /** A link whose href passed the link check; a refused one is read as its label's runs alone. */
