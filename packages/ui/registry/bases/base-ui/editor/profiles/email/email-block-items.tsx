@@ -17,7 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/bases/base-u
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import type { BlockEditorField, BlockEditorItems } from '@zeroxsolutions/editor-core/template/email/index';
-import { DEFAULT_PROFILE_MESSAGES } from '../messages';
+import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { VariableTextField } from '../variables/variable-text-field';
 import { UploadStatus } from '../../document/uploads/upload-status';
 import { UploadTabs } from '../../document/uploads/upload-tabs';
@@ -200,6 +200,50 @@ function followItem(
   return itemSlot(items, nearest, field);
 }
 
+/**
+ * An item drawn with no popover, in a read-only editor or outside one. In an editor it tells how an upload into
+ * its image stands, which it has no popover to show: in words a screen reader announces, and as its title.
+ */
+function EmailBlockItemStill({
+  place,
+  items,
+  index,
+  entry,
+  size,
+  name,
+  messages,
+}: {
+  place: BlockPlace | null;
+  items: BlockEditorItems;
+  index: number;
+  entry: EmailBlockItem;
+  size: number;
+  name: string;
+  messages: ProfileEditorMessages;
+}): ReactNode {
+  const image = items.fields.find((field) => field.kind === 'imageUrl');
+  const uploading = useUploadEntry(image ? place : null, image ? itemSlot(items, index, image.name) : '');
+  const status =
+    uploading === null
+      ? undefined
+      : uploading.phase === 'uploading'
+        ? messages.uploads.uploading(uploading.file.name)
+        : uploading.message;
+  return (
+    <span data-slot="email-block-item" title={status} className="inline-flex">
+      <span role="img" aria-label={name}>
+        <EmailBlockItemFace place={place} items={items} index={index} entry={entry} size={size} />
+      </span>
+      {/* Drawn from the start, so a screen reader announces each change of it. */}
+      {place !== null && image && (
+        <span role="status" className="sr-only">
+          {status}
+        </span>
+      )}
+    </span>
+  );
+}
+
 /** An item's face: its image, the file uploading into it drawn faint, or its text. */
 function EmailBlockItemFace({
   place,
@@ -293,9 +337,16 @@ export function EmailBlockItems({
     >
       {entries.map((entry, index) =>
         editor === null || readOnly ? (
-          <span key={index} data-slot="email-block-item" aria-label={nameOf(entry, index)} role="img">
-            <EmailBlockItemFace place={place} items={items} index={index} entry={entry} size={size} />
-          </span>
+          <EmailBlockItemStill
+            key={index}
+            place={place}
+            items={items}
+            index={index}
+            entry={entry}
+            size={size}
+            name={nameOf(entry, index)}
+            messages={messages}
+          />
         ) : (
           <Popover
             // An item has no identity of its own; its place is what the author sees and edits.

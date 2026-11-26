@@ -301,6 +301,25 @@ describe('uploads in the email editor', () => {
     expect(calls[0].signal.aborted).toBe(false);
   });
 
+  it('tells how a social icon upload stands in a read-only editor', async () => {
+    const { upload, calls } = heldUpload();
+    const probe = await mount([social], upload);
+    await userEvent.click(page.getByRole('button', { name: 'Site' }));
+    await userEvent.upload(fileInput(), pngFile('site.png'));
+    await waitForCalls(calls, 1);
+    await userEvent.keyboard('{Escape}');
+
+    probe.editor?.setEditable(false);
+
+    await expect.element(page.getByRole('status')).toHaveTextContent('Uploading site.png');
+    await expect.element(page.getByRole('img', { name: 'Site' })).toBeVisible();
+    expect(document.querySelector('[data-slot=email-block-item][title]')?.getAttribute('title')).toBe(
+      'Uploading site.png',
+    );
+    calls[0].fail();
+    await expect.element(page.getByRole('status')).toHaveTextContent('The upload failed');
+  });
+
   it('ends a social icon upload whose link an undo takes away', async () => {
     const { upload, calls } = heldUpload();
     const probe = await mount([text, social], upload);
