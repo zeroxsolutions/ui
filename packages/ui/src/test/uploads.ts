@@ -1,4 +1,4 @@
-import { cdp, page, server, type Locator } from 'vitest/browser';
+import { cdp, page, server, userEvent, type Locator } from 'vitest/browser';
 import { centreOf } from '../../test/pointer';
 import type { EditorUpload } from '../../registry/bases/base-ui/editor/document/uploads/upload';
 
@@ -32,11 +32,27 @@ export function pngFile(name = 'cat.png', bytes = 4): File {
   return new File([new Uint8Array(bytes)], name, { type: 'image/png' });
 }
 
+const ONE_PIXEL_PNG = Uint8Array.from(
+  atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='),
+  (character) => character.charCodeAt(0),
+);
+
+/**
+ * Copies an image, as another app does, and pastes it where the caret is, through the browser's own paste. The page
+ * reads one file the browser names `image.png`. `data` puts more types beside it on the clipboard, such as
+ * `text/html`, which the clipboard carries as text.
+ */
+export async function pasteImage(data: Record<string, string> = {}): Promise<void> {
+  const types: Record<string, Blob> = { 'image/png': new Blob([ONE_PIXEL_PNG], { type: 'image/png' }) };
+  for (const [type, value] of Object.entries(data)) types[type] = new Blob([value], { type });
+  await navigator.clipboard.write([new ClipboardItem(types)]);
+  await userEvent.paste();
+}
+
 /**
  * Fires the paste event a paste of `files` would raise in `target`, with `data` as the clipboard's other types,
- * such as `text/html`. Nothing the browser's input reaches can put a file on the clipboard: the spec's frame has
- * no clipboard-write permission, and a copy takes a selection, never a file. So the event is fired by script,
- * and a case using it says so in its name. The event is answered, so a spec reads whether the editor handled it.
+ * such as `text/html`. The browser's clipboard carries text, HTML and PNG only, so a paste of any other file, such
+ * as a PDF or a video, is fired by script, and a case using it says so in its name. The event is answered, so a spec reads whether the editor handled it.
  */
 export function firePastedFiles(
   target: Element,
