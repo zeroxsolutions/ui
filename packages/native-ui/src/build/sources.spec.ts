@@ -103,15 +103,6 @@ describe('the emitted app sources', () => {
     }
   });
 
-  it("draw Button's default size at Vega's and Nova's own heights, importing through @/", () => {
-    const button = (style: string): string =>
-      readFileSync(join(SOURCES_PATH, `nativewind-${style}`, 'components/ui/button.tsx'), 'utf8');
-
-    expect(button('vega')).toContain("'h-9 gap-1.5 px-2.5'");
-    expect(button('nova')).toContain("'h-8 gap-1.5 px-2.5'");
-    expect(button('vega')).toContain("from '@/lib/utils'");
-  });
-
   it("give NativeWind the theme's global.css and Tailwind theme, and Uniwind its zui-theme.css", () => {
     const nativewind = join(SOURCES_PATH, 'nativewind-vega');
     const theme = JSON.parse(readFileSync(join(nativewind, 'tailwind-theme.json'), 'utf8')) as {

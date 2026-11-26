@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { FormDemo } from './form-demo';
 
 // Upstream ships form with no files; its page binds Field to react-hook-form's Controller, which this demo
@@ -6,12 +6,12 @@ import { FormDemo } from './form-demo';
 describe('FormDemo', () => {
   const title = () => screen.getByLabelText('Bug Title');
   const description = () => screen.getByLabelText('Description');
-  const submit = () => act(async () => fireEvent.press(screen.getByRole('button', { name: 'Submit' })));
+  const submit = () => userEvent.press(screen.getByRole('button', { name: 'Submit' }));
 
   it("shows each field's error, and marks it invalid, when the report is submitted too short", async () => {
     await render(<FormDemo />);
 
-    await fireEvent.changeText(title(), 'Bug');
+    await userEvent.type(title(), 'Bug');
     await submit();
 
     expect(screen.getByText('Bug title must be at least 5 characters.')).toBeOnTheScreen();
@@ -23,8 +23,8 @@ describe('FormDemo', () => {
     await render(<FormDemo />);
     await submit();
 
-    await fireEvent.changeText(title(), 'Login button broken');
-    await fireEvent.changeText(description(), 'Pressing it on a phone does nothing at all.');
+    await userEvent.type(title(), 'Login button broken');
+    await userEvent.type(description(), 'Pressing it on a phone does nothing at all.');
     await submit();
 
     expect(screen.queryByText('Bug title must be at least 5 characters.')).toBeNull();
@@ -35,7 +35,7 @@ describe('FormDemo', () => {
   it('counts the characters of the description as it is typed', async () => {
     await render(<FormDemo />);
 
-    await fireEvent.changeText(description(), 'Twelve chars');
+    await userEvent.type(description(), 'Twelve chars');
 
     expect(screen.getByText('12/100 characters')).toBeOnTheScreen();
   });

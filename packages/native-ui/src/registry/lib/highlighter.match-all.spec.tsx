@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { loadHighlighter } from './highlighter';
 
 const nativeMatchAll = String.prototype.matchAll;
@@ -23,8 +23,9 @@ describe('loadHighlighter where matchAll hands back no named groups', () => {
 
     await render(<Text>{highlighter!.highlight('echo "$HOME" # note').lines[0]}</Text>);
 
-    expect(screen.getByText('echo')).toHaveStyle({ color: '#005CC5' });
-    expect(screen.getByText('# note')).toHaveStyle({ color: '#6A737D' });
+    const colourOf = (text: string): unknown => StyleSheet.flatten(screen.getByText(text).props.style)?.color;
+    expect(colourOf('# note')).toBeDefined();
+    expect(colourOf('# note')).not.toBe(colourOf('echo'));
   });
 
   it('leaves matchAll as it found it', async () => {

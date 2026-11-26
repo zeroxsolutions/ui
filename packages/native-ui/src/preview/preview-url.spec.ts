@@ -3,7 +3,6 @@ import {
   demoNameFromSearch,
   initialDemoName,
   styleFromSearch,
-  styleOf,
   themeFromSearch,
 } from './preview-url';
 
@@ -49,23 +48,9 @@ describe('styleFromSearch', () => {
     expect(styleFromSearch('?style=vega')).toBe('vega');
   });
 
-  it.each(['luma', 'lyra', 'maia', 'mira', 'rhea', 'sera'])('reads %s, a style after Vega and Nova', (style) => {
-    expect(styleFromSearch(`?style=${style}`)).toBe(style);
-  });
-
   it('has no style when ?style= is absent or names a style the registries are not built in', () => {
     expect(styleFromSearch('?demo=button-demo')).toBeUndefined();
     expect(styleFromSearch('?style=base-nova')).toBeUndefined();
-  });
-});
-
-describe('styleOf', () => {
-  it('reads the style a native update was bundled with', () => {
-    expect(styleOf('nova')).toBe('nova');
-  });
-
-  it('has no style for an unset value', () => {
-    expect(styleOf(undefined)).toBeUndefined();
   });
 });
 

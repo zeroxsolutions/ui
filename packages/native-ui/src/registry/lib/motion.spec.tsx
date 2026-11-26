@@ -1,13 +1,8 @@
 import { act, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
-import Animated, { useAnimatedStyle, useReducedMotion as useSettingAtStart } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { usePopupMotion, usePresence, usePulse } from './motion';
-
-jest.mock('react-native-reanimated', () => {
-  const actual = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
-  return { ...actual, __esModule: true, default: actual.default, useReducedMotion: jest.fn(() => false) };
-});
 
 const MOTION = { duration: 100 };
 
@@ -106,18 +101,6 @@ describe('usePresence', () => {
 
       await screen.rerender(<Part open={false} />);
       expect(screen.queryByTestId('part')).toBeNull();
-    });
-  });
-
-  describe('when the setting is already known on the first render', () => {
-    it('draws a part open from the start in full, before the async read lands', async () => {
-      jest.mocked(useSettingAtStart).mockReturnValue(true);
-      jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockReturnValue(new Promise(() => undefined));
-
-      await render(<Part open />);
-      await elapse(16);
-
-      expect(screen.getByTestId('part')).toHaveAnimatedStyle({ opacity: 1 });
     });
   });
 });

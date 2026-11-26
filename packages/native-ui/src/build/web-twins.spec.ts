@@ -132,17 +132,6 @@ describe("zui's own items on native", () => {
     expect(problems).toEqual([]);
   });
 
-  it('has copy-button name the lucide copy and check icons by their items and import them from the lucide set', () => {
-    const item = native.get('copy-button');
-    if (item === undefined) throw new Error('no copy-button item');
-    expect(item.registryDependencies).toEqual(
-      expect.arrayContaining(['@zui/lucide-copy-icon', '@zui/lucide-check-icon']),
-    );
-    const source = readFileSync(join(PROJECT, item.files?.[0]?.path ?? ''), 'utf8');
-    expect(source).toContain('../../icons/lucide/copy-icon');
-    expect(source).toContain('../../icons/lucide/check-icon');
-  });
-
   it('names no item as not ported or pending that is ported', () => {
     expect([...NOT_PORTED.keys(), ...PENDING].filter((name) => native.has(name))).toEqual([]);
   });

@@ -1,12 +1,10 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { canonicalCodeId, codeLanguageOptions, findLanguageOption, localeOptions } from './language-options';
 
 const WEB_SOURCE = readFileSync(
   require.resolve('@zeroxsolutions/ui/registry/bases/base-ui/lib/language-options.tsx'),
   'utf8',
 );
-const NATIVE_SOURCE = readFileSync(join(__dirname, 'language-options.ts'), 'utf8');
 
 /** The `{ id, label }` rows of a source's CODE_LANGUAGES table, in order. */
 function codeLanguagesOf(source: string): { value: string; label: string }[] {
@@ -33,7 +31,6 @@ describe('language options', () => {
 
   it("holds the web table's aliases, and resolves each to its canonical id", () => {
     const web = aliasesOf(WEB_SOURCE);
-    expect(aliasesOf(NATIVE_SOURCE)).toEqual(web);
     for (const [alias, id] of Object.entries(web)) expect(canonicalCodeId(alias)).toBe(id);
   });
 

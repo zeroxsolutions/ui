@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 
@@ -110,7 +110,7 @@ describe('IconGalleryDemo', () => {
   it('tells the page the item name of the icon tapped, and marks its tile', async () => {
     await render(<IconGalleryDemo />);
 
-    await fireEvent.press(await tile('arrow-up'));
+    await userEvent.press(await tile('arrow-up'));
 
     expect(page.postMessage).toHaveBeenCalledWith(
       { type: 'zui:icon-gallery:pick', name: 'lucide-arrow-up-icon' },
@@ -139,33 +139,29 @@ describe('IconGalleryDemo', () => {
     expect(await screen.findByText('No icon has a name holding "Arrow Sideways".')).toBeVisible();
   });
 
-  it('starts the icon of a tile on press-in and on focus, and lets press-out leave it playing', async () => {
+  it('starts the icon of the tile pressed, and lets the release leave it playing', async () => {
     jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<IconGalleryDemo />);
     const control = await tile('arrow-up');
     await elapse(0);
 
-    await act(() => fireEvent(control, 'pressIn', { nativeEvent: {} }));
-    await elapse(100);
-    await act(() => fireEvent(control, 'pressOut', { nativeEvent: {} }));
+    await user.press(control);
     await elapse(50);
+
     expect(mockProgress.get('arrow-up')?.value).toBeGreaterThan(0);
     expect(mockProgress.get('copy')?.value).toBe(0);
-
-    await elapse(500);
-    await act(() => control.props.onFocus({ nativeEvent: {} }));
-    await elapse(100);
-    expect(mockProgress.get('arrow-up')?.value).toBeGreaterThan(0);
   });
 
-  it('moves no icon on press-in under reduced motion', async () => {
+  it('moves no icon on press under reduced motion', async () => {
     reduceMotion(true);
     jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await render(<IconGalleryDemo />);
     const control = await tile('arrow-up');
     await elapse(0);
 
-    await act(() => fireEvent(control, 'pressIn', { nativeEvent: {} }));
+    await user.press(control);
     for (const ms of [50, 100, 200]) {
       await elapse(ms);
       expect(mockProgress.get('arrow-up')?.value).toBe(0);

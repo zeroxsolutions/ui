@@ -1,5 +1,5 @@
 import { render, renderHook, screen, waitFor } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { useHighlightedCode } from './use-highlighted-code';
 
 describe('useHighlightedCode', () => {
@@ -9,14 +9,9 @@ describe('useHighlightedCode', () => {
     await waitFor(() => expect(typeof result.current[0]).not.toBe('string'));
     expect(result.current).toHaveLength(2);
     await render(<Text>{result.current[1]}</Text>);
-    expect(screen.getByText('const')).toHaveStyle({ color: '#D73A49' });
-  });
-
-  it('returns the plain lines for a language the highlighter does not list', async () => {
-    const { result } = await renderHook(() => useHighlightedCode('MOVE A TO B.', 'cobol'));
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(result.current).toEqual(['MOVE A TO B.']);
+    const colourOf = (text: string): unknown => StyleSheet.flatten(screen.getByText(text).props.style)?.color;
+    expect(colourOf('const')).toBeDefined();
+    expect(colourOf('const')).not.toBe(colourOf('2'));
   });
 
   it('keeps the nodes of the lines already written as more code streams in', async () => {

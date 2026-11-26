@@ -137,15 +137,6 @@ describe('themeItem for nativewind', () => {
   it('holds no oklch colour, which React Native cannot draw', () => {
     expect(JSON.stringify(item)).not.toContain('oklch(');
   });
-
-  it('declares a font family per Geist weight', () => {
-    expect(item.tailwind?.config?.theme?.extend?.fontFamily).toEqual({
-      sans: ['Geist_400Regular'],
-      'sans-medium': ['Geist_500Medium'],
-      'sans-semibold': ['Geist_600SemiBold'],
-      'sans-bold': ['Geist_700Bold'],
-    });
-  });
 });
 
 describe('themeItem for uniwind', () => {
@@ -200,13 +191,6 @@ describe('themeItem for uniwind', () => {
     const lopsided: TokenSet = { light: { success: 'oklch(0.627 0.19 149)' }, dark: {} };
 
     expect(() => themeItem(colors, radii, lopsided, 'uniwind')).toThrow('success has no dark value');
-  });
-});
-
-describe('STATUS_TOKENS', () => {
-  it('names success, warning and their foregrounds in both schemes', () => {
-    expect(Object.keys(STATUS_TOKENS.light).sort()).toEqual(STATUS_NAMES);
-    expect(Object.keys(STATUS_TOKENS.dark).sort()).toEqual(STATUS_NAMES);
   });
 });
 

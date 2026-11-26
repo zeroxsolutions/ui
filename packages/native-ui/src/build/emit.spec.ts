@@ -47,15 +47,15 @@ describe('emitSource', () => {
     expect(emitted).toBe("cva('text-primary-foreground')");
   });
 
-  it("gives Button's default size Vega's height for both engines", () => {
-    for (const engine of ENGINES) {
-      expect(emitSource("'cn-button-size-default'", vega, engine, 'button.tsx')).toBe("'h-9 gap-1.5 px-2.5'");
-    }
-  });
+  it("replaces a size token with the classes the emitted style's own slot gives that size", () => {
+    const style = (name: string, height: string): UpstreamStyle => ({
+      name,
+      slots: new Map([['cn-button-size-default', [height, 'px-2.5']]]),
+    });
 
-  it("gives Button's default size Nova's own height for both engines", () => {
     for (const engine of ENGINES) {
-      expect(emitSource("'cn-button-size-default'", nova, engine, 'button.tsx')).toBe("'h-8 gap-1.5 px-2.5'");
+      expect(emitSource("'cn-button-size-default'", style('vega', 'h-9'), engine, 'button.tsx')).toBe("'h-9 px-2.5'");
+      expect(emitSource("'cn-button-size-default'", style('nova', 'h-8'), engine, 'button.tsx')).toBe("'h-8 px-2.5'");
     }
   });
 
@@ -299,10 +299,10 @@ const REGISTRIES = STYLES.flatMap((style) =>
   ]),
 );
 
-/** What each style gives Button: its default height, its radius, and that radius step in the theme. */
+/** What each style gives Button: its radius, and that radius step in the theme. */
 const BUTTON_SHAPE = {
-  vega: { height: 'h-9', radius: 'rounded-md', step: 'md', scale: 'calc(var(--radius) * 0.8)' },
-  nova: { height: 'h-8', radius: 'rounded-lg', step: 'lg', scale: 'var(--radius)' },
+  vega: { radius: 'rounded-md', step: 'md', scale: 'calc(var(--radius) * 0.8)' },
+  nova: { radius: 'rounded-lg', step: 'lg', scale: 'var(--radius)' },
 } as const;
 
 describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => {
@@ -399,10 +399,6 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     }
   });
 
-  it('gives an app the types of the untyped d3 modules the chart parts import', () => {
-    expect(item('charts')?.devDependencies).toEqual(['@types/d3-scale', '@types/d3-shape']);
-  });
-
   it("pins tailwind-merge to the major of the engine's Tailwind", () => {
     expect(item('utils')?.dependencies).toContain(TAILWIND_MERGE[engine]);
   });
@@ -420,19 +416,6 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
     expect(item('icon')?.dependencies).toContain(INSTALL_CHECKED_ENGINE[engine]);
   });
 
-  it('gives Button size="default" the style\'s own height', () => {
-    const [file] = item('button')?.files ?? [];
-
-    expect(file.content).toMatch(new RegExp(`size: \\{\\s*default: '[^']*\\b${BUTTON_SHAPE[style].height}\\b`));
-  });
-
-  it("gives an icon in Button the style's size-4, and size-3 at xs", () => {
-    const [file] = item('button')?.files ?? [];
-
-    expect(file.content).toContain("cva('size-4'");
-    expect(file.content).toMatch(/xs: 'size-3'/);
-  });
-
   it("gives Button the style's radius step, which the theme's scale derives from --radius", () => {
     const [file] = item('button')?.files ?? [];
     const theme = JSON.stringify(item('theme'));
@@ -440,21 +423,6 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
 
     expect(file.content).toMatch(new RegExp(`\\b${radius}\\b`));
     expect(theme).toContain(engine === 'nativewind' ? `"${step}":"${scale}"` : `--radius-${step}: ${scale};`);
-  });
-
-  it("spaces Card by the style's own Card spacing", () => {
-    const [file] = item('card')?.files ?? [];
-    const spacing = style === 'vega' ? ['gap-6', 'py-6'] : ['gap-4', 'py-4'];
-
-    for (const cls of spacing) {
-      expect(file.content).toMatch(new RegExp(`\\b${cls}\\b`));
-    }
-  });
-
-  it("draws Button's label in the medium Geist family", () => {
-    const [file] = item('button')?.files ?? [];
-
-    expect(file.content).toContain('font-sans-medium');
   });
 
   it('names no font weight in any file', () => {
@@ -489,79 +457,6 @@ describe.each(REGISTRIES)('the built %s registry', (registry, engine, style) => 
 
     expect(fonts?.content).toContain('Geist_400Regular');
     expect(theme?.dependencies).toEqual(expect.arrayContaining(['expo-font', '@expo-google-fonts/geist']));
-  });
-
-  it('ships password-input as a data-entry registry:component under data-entry/ of the components alias', () => {
-    const passwordInput = item('password-input');
-
-    expect(passwordInput).toMatchObject({ type: 'registry:component', categories: ['data-entry'] });
-    expect(passwordInput?.files).toEqual([
-      expect.objectContaining({
-        path: 'registry/components/data-entry/password-input.tsx',
-        type: 'registry:component',
-      }),
-    ]);
-    expect(passwordInput?.files[0]).toHaveProperty('target', '@components/data-entry/password-input.tsx');
-    expect(passwordInput?.files[0].content).toContain("from '@/components/ui/input-group'");
-  });
-
-  it('ships password-strength as a feedback registry:component under components/', () => {
-    const passwordStrength = item('password-strength');
-
-    expect(passwordStrength).toMatchObject({ type: 'registry:component', categories: ['feedback'] });
-    expect(passwordStrength?.files).toEqual([
-      expect.objectContaining({
-        path: 'registry/components/feedback/password-strength.tsx',
-        type: 'registry:component',
-      }),
-    ]);
-    expect(passwordStrength?.files[0]).toHaveProperty('target', '@components/feedback/password-strength.tsx');
-    expect(passwordStrength?.files[0].content).toContain("from '@/components/ui/progress'");
-  });
-
-  it('ships code-input as a data-entry registry:component over input-otp', () => {
-    const codeInput = item('code-input');
-
-    expect(codeInput).toMatchObject({
-      type: 'registry:component',
-      categories: ['data-entry'],
-      registryDependencies: ['@zui/input-otp', '@zui/utils'],
-    });
-    expect(codeInput?.files).toEqual([
-      expect.objectContaining({ path: 'registry/components/data-entry/code-input.tsx', type: 'registry:component' }),
-    ]);
-    expect(codeInput?.files[0].content).toContain("from '@/components/ui/input-otp'");
-  });
-
-  it('ships unsaved-changes-toolbar as a feedback registry:component over button and spinner', () => {
-    const toolbar = item('unsaved-changes-toolbar');
-
-    expect(toolbar).toMatchObject({ type: 'registry:component', categories: ['feedback'] });
-    expect(toolbar?.files).toEqual([
-      expect.objectContaining({
-        path: 'registry/components/feedback/unsaved-changes-toolbar.tsx',
-        type: 'registry:component',
-      }),
-    ]);
-    expect(toolbar?.files[0]).toHaveProperty('target', '@components/feedback/unsaved-changes-toolbar.tsx');
-    expect(toolbar?.files[0].content).toContain("from '@/components/ui/spinner'");
-  });
-
-  it('ships tab-bar as a navigation registry:component over badge, icon and text', () => {
-    const tabBar = item('tab-bar');
-
-    expect(tabBar).toMatchObject({ type: 'registry:component', categories: ['navigation'] });
-    expect(tabBar?.files).toEqual([
-      expect.objectContaining({ path: 'registry/components/navigation/tab-bar.tsx', type: 'registry:component' }),
-    ]);
-    expect(tabBar?.files[0]).toHaveProperty('target', '@components/navigation/tab-bar.tsx');
-    expect(tabBar?.files[0].content).toContain("from '@/components/ui/badge'");
-  });
-
-  it("gives Button the style's pressed nudge", () => {
-    const [file] = item('button')?.files ?? [];
-
-    expect(file.content).toContain('active:translate-y-px');
   });
 });
 

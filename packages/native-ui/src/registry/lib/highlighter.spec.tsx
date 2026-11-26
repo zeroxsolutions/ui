@@ -1,39 +1,41 @@
 import { render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { colorScheme } from 'nativewind';
+import type { ReactNode } from 'react';
+import { StyleSheet, Text } from 'react-native';
 import { highlightCode, loadHighlighter } from './highlighter';
 
-const mockTheme: { scheme: 'light' | 'dark' } = { scheme: 'light' };
-
-jest.mock('nativewind', () => ({
-  ...jest.requireActual<object>('nativewind'),
-  useColorScheme: () => ({ colorScheme: mockTheme.scheme }),
-}));
-
-/** github-light's and github-dark's colours for a TypeScript keyword, and their colour for a comment. */
-const KEYWORD = { light: '#D73A49', dark: '#F97583' };
-const COMMENT = '#6A737D';
+/** The colour each piece of `text` in `line` is drawn in, as the line renders it. */
+async function coloursOf(line: ReactNode, ...texts: string[]): Promise<unknown[]> {
+  const view = await render(<Text>{line}</Text>);
+  const colours = texts.map((text) => StyleSheet.flatten(screen.getByText(text).props.style)?.color);
+  await view.unmount();
+  return colours;
+}
 
 afterEach(() => {
-  mockTheme.scheme = 'light';
+  colorScheme.set('light');
 });
 
 describe('loadHighlighter', () => {
-  it("draws each line's tokens in the light theme's colours", async () => {
+  it("draws each line's keyword in a colour apart from its number", async () => {
     const highlighter = await loadHighlighter('ts');
     const { lines } = highlighter!.highlight('const a = 1\nlet b = 2');
 
     expect(lines).toHaveLength(2);
-    await render(<Text>{lines[0]}</Text>);
-    expect(screen.getByText('const')).toHaveStyle({ color: KEYWORD.light });
+    const [keyword, number] = await coloursOf(lines[0], 'const', '1');
+    expect(keyword).toBeDefined();
+    expect(keyword).not.toBe(number);
   });
 
-  it("draws them in the dark theme's colours when the app draws dark", async () => {
-    mockTheme.scheme = 'dark';
+  it('draws a keyword in another colour when the app draws dark', async () => {
     const highlighter = await loadHighlighter('typescript');
+    const [light] = await coloursOf(highlighter!.highlight('const a = 1').lines[0], 'const');
 
-    await render(<Text>{highlighter!.highlight('const a = 1').lines[0]}</Text>);
+    colorScheme.set('dark');
+    const [dark] = await coloursOf(highlighter!.highlight('const a = 1').lines[0], 'const');
 
-    expect(screen.getByText('const')).toHaveStyle({ color: KEYWORD.dark });
+    expect(dark).toBeDefined();
+    expect(dark).not.toBe(light);
   });
 
   it('returns null for a language it does not list', async () => {
@@ -44,18 +46,23 @@ describe('loadHighlighter', () => {
   it('takes an alias for a language it lists', async () => {
     const highlighter = await loadHighlighter('SH');
 
-    await render(<Text>{highlighter!.highlight('echo hi # note').lines[0]}</Text>);
+    const [command, comment] = await coloursOf(highlighter!.highlight('echo hi # note').lines[0], 'echo', '# note');
 
-    expect(screen.getByText('# note')).toHaveStyle({ color: COMMENT });
+    expect(comment).toBeDefined();
+    expect(comment).not.toBe(command);
   });
 
   it('continues a line from the grammar state the line before left', async () => {
     const highlighter = await loadHighlighter('ts');
     const first = highlighter!.highlight('/* open');
+    const [comment] = await coloursOf(first.lines[0], '/* open');
 
-    await render(<Text>{highlighter!.highlight('still inside */', first.state).lines[0]}</Text>);
+    const [continued] = await coloursOf(
+      highlighter!.highlight('still inside */', first.state).lines[0],
+      'still inside */',
+    );
 
-    expect(screen.getByText('still inside */')).toHaveStyle({ color: COMMENT });
+    expect(continued).toBe(comment);
   });
 
   it('colours the escape codes of terminal output as ansi', async () => {

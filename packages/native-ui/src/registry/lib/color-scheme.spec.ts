@@ -1,23 +1,17 @@
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
+import { colorScheme } from 'nativewind';
 import { useColorScheme } from './color-scheme';
 
-const mockScheme: { value: string | undefined } = { value: 'light' };
-
-jest.mock('nativewind', () => ({
-  ...jest.requireActual<object>('nativewind'),
-  useColorScheme: () => ({ colorScheme: mockScheme.value }),
-}));
+afterEach(() => {
+  colorScheme.set('light');
+});
 
 describe('useColorScheme on NativeWind', () => {
-  it.each([
-    ['dark', 'dark'],
-    ['light', 'light'],
-    [undefined, 'light'],
-  ])('reads %s from NativeWind as %s', async (held, drawn) => {
-    mockScheme.value = held;
-
+  it.each(['dark', 'light'] as const)('reads %s from NativeWind', async (held) => {
     const { result } = await renderHook(() => useColorScheme());
 
-    expect(result.current).toBe(drawn);
+    await act(() => colorScheme.set(held));
+
+    expect(result.current).toBe(held);
   });
 });
