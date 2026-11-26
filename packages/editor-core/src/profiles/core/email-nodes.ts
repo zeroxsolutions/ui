@@ -127,10 +127,10 @@ export const buttonNodeSpec: NodeSpec = block(
 /**
  * The Document Editor's columns and the column each lane is: `ratio` weighs the columns against each other, absent
  * for equal ones, and `valign` places each lane's blocks against the tallest, at the top when absent. A column is in
- * no group, so only a columns block holds one. `columnContent` names what a column holds, any block when absent; the
- * email profile narrows it so a column never holds another columns block.
+ * no group, so only a columns block holds one. `columnContent` names what a column holds, any block but a section
+ * when absent; the email profile narrows it so a column never holds another columns block.
  */
-export function columnsNodeSpecs(columnContent = 'block+'): NodeSpec[] {
+export function columnsNodeSpecs(columnContent = 'sectionBlock+'): NodeSpec[] {
   return [
     // Any count, so a stored block of too few or too many lanes still opens and shows its problem.
     block(
@@ -144,8 +144,9 @@ export function columnsNodeSpecs(columnContent = 'block+'): NodeSpec[] {
 
 /**
  * Both editors' section: blocks on a background, inside a padding, at the content's width, the page's or the
- * viewport's. `sectionContent` names what it holds; the default is the `sectionBlock` group, which `blockLayout()`
- * gives every block node but the section, so a section never holds a section. The email draws no `full` width.
+ * viewport's. `sectionContent` names what it holds; the default, `sectionBlock+`, is every block node of the editor
+ * but the section, which the feature compiler spells out, so a section never holds a section. The email draws no
+ * `full` width.
  */
 export function sectionNodeSpecs(sectionContent = 'sectionBlock+'): NodeSpec[] {
   return [
