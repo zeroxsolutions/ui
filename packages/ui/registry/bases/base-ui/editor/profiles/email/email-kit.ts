@@ -951,6 +951,7 @@ export function emailKit(
     {
       ...image({
         words: () => messages().imageBlock,
+        layoutWords: () => messages().layout,
         ...(options.uploads
           ? {
               upload: options.uploads.upload,

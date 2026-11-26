@@ -34,7 +34,7 @@ const lantern =
 const content: DocJSON = {
   type: 'doc',
   content: [
-    paragraph('Select the image to edit its alt text and width, or upload another on its Upload tab.'),
+    paragraph('Select the image to align or resize it, or open Edit to change its alt text or upload another.'),
     { type: 'image', attrs: { src: lantern, alt: 'A red paper lantern on an amber wall', title: '', width: null } },
   ],
 };

@@ -46,9 +46,10 @@ describe('bookmark', () => {
     expect(viewed({}).querySelector('[data-slot=bookmark]')).toBeNull();
   });
 
-  it('round-trips through HTML with the Viewer features', () => {
+  it('round-trips through HTML with its layout, with the Viewer features', () => {
     const registry = createCodecRegistry(features);
-    const doc = docOf({ url: 'https://example.com', title: 'Ex' });
+    const doc = docOf({ url: 'https://example.com', title: 'Ex', align: 'end' });
+    expect(serialize(doc, 'html', registry)).toContain('data-align="end"');
     expect(importHTML(serialize(doc, 'html', registry), registry).doc).toEqual(doc);
   });
 });

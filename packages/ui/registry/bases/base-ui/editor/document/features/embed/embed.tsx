@@ -1,8 +1,17 @@
+import type { ReactNode } from 'react';
 import { FrameIcon } from '@/registry/bases/base-ui/icons/lucide/frame-icon';
 import { Input } from '@/registry/bases/base-ui/ui/input';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
+import {
+  layoutDataAttributes,
+  layoutFromElement,
+  type LayoutAttributes,
+} from '@zeroxsolutions/editor-core/document/layout/index';
+import { blockLayoutAttrs } from '../../blocks/block-layout-attrs';
+import { BlockLayoutFrame, type BlockLayoutPlace } from '../../blocks/block-layout-frame';
+import { layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
 
 /**
  * An embed block — a block **atom** that renders an external URL as a responsive
@@ -10,6 +19,8 @@ import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/in
  * input while the block is empty and editable. The two-way HTML codec round-trips
  * through `<div data-embed>` / `<iframe>`; Markdown has no embed primitive, so
  * Markdown export degrades to a plain link line and Markdown import declines.
+ * Its `align` and `width` are the block layout's, drawn in its frame with the
+ * layout toolbar and width handles in the editor, and carried as `data-*` in HTML.
  * Engine-free, mirroring the `callout`/`toggle` worked examples.
  *
  * Security: the embedded origin is untrusted — iframe `sandbox`/`allow` policy
@@ -18,6 +29,7 @@ import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/in
 const embedAttrs = z.object({
   url: z.string().default(''),
   title: z.string().default(''),
+  ...blockLayoutAttrs('embed'),
 });
 type EmbedAttrs = z.infer<typeof embedAttrs>;
 
@@ -39,9 +51,34 @@ function EmbedFrame({ url, title }: { url: string; title: string }) {
   );
 }
 
-export function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedAttrs>) {
+/** An embed's frame in its layout: placed and sized, with the editor's controls where `place` is given. */
+function EmbedLayout({
+  attrs,
+  place,
+  words,
+}: {
+  attrs: Partial<EmbedAttrs>;
+  place: BlockLayoutPlace | null;
+  words: LayoutWords;
+}): ReactNode {
+  return (
+    <BlockLayoutFrame align={attrs.align} width={attrs.width} resizable fit={false} place={place} words={words}>
+      <EmbedFrame url={attrs.url ?? ''} title={attrs.title ?? ''} />
+    </BlockLayoutFrame>
+  );
+}
+
+export function EmbedView({
+  attrs,
+  updateAttrs,
+  editable,
+  editor,
+  getPos,
+  words = layoutWordsOf(undefined),
+}: NodeViewProps<EmbedAttrs> & { words?: LayoutWords }) {
   if (attrs.url) {
-    return <EmbedFrame url={attrs.url} title={attrs.title} />;
+    // A view drawn without its editor, as a spec draws one, has nothing to lay the embed out in.
+    return <EmbedLayout attrs={attrs} place={editable && editor ? { editor, getPos } : null} words={words} />;
   }
   if (!editable) {
     // Empty embed in the read-only Viewer: render nothing interactive.
@@ -68,7 +105,7 @@ export function EmbedView({ attrs, updateAttrs, editable }: NodeViewProps<EmbedA
   );
 }
 
-const embedCodec: NodeCodec<EmbedAttrs> = {
+const embedCodecOf = (words: () => LayoutWords): NodeCodec<EmbedAttrs> => ({
   node: 'embed',
   // Markdown has no embed primitive → degrade to a plain link line.
   toMarkdown: (node) => {
@@ -79,35 +116,49 @@ const embedCodec: NodeCodec<EmbedAttrs> = {
   toHTML: (node) => {
     const url = node.attrs?.url ?? '';
     const title = node.attrs?.title ?? '';
-    return `<div data-embed data-url="${escapeHtml(url)}"><iframe src="${escapeHtml(
+    const layout = Object.entries(
+      layoutDataAttributes({ align: node.attrs?.align, width: node.attrs?.width } as LayoutAttributes),
+    )
+      .map(([name, value]) => ` ${name}="${escapeHtml(value)}"`)
+      .join('');
+    return `<div data-embed data-url="${escapeHtml(url)}"${layout}><iframe src="${escapeHtml(
       url,
     )}" title="${escapeHtml(title)}"></iframe></div>`;
   },
   toReact: (node) => {
-    const attrs = node.attrs ?? { url: '', title: '' };
     // SSR-safe: a plain iframe, no engine and no browser-only APIs.
-    return <EmbedFrame url={attrs.url} title={attrs.title} />;
+    return <EmbedLayout attrs={node.attrs ?? {}} place={null} words={words()} />;
   },
   fromHTML: (element) => {
     const isEmbed = element.hasAttribute('data-embed') || element.tagName === 'IFRAME';
     if (!isEmbed) return null;
+    const { align, width } = layoutFromElement(element);
     return {
       type: 'embed',
       attrs: {
+        ...(align === undefined ? {} : { align }),
+        ...(width === undefined ? {} : { width }),
         url:
           element.getAttribute('data-url') ??
           element.querySelector('iframe')?.getAttribute('src') ??
           element.getAttribute('src') ??
           '',
-        title: element.getAttribute('data-title') ?? '',
+        title: element.getAttribute('data-title') ?? element.querySelector('iframe')?.getAttribute('title') ?? '',
       },
     };
   },
   // We deliberately don't reconstruct an embed from a Markdown link.
   fromMarkdown: () => null,
-};
+});
 
-export function embed(): EditorFeature {
+export interface EmbedOptions {
+  /** The words of its layout toolbar and width handles, over the English; a getter is read each time it draws. */
+  layoutWords?: Partial<LayoutWords> | (() => LayoutWords);
+}
+
+export function embed(options: EmbedOptions = {}): EditorFeature {
+  const words = (): LayoutWords => layoutWordsOf(options.layoutWords);
+  const render = (props: NodeViewProps<EmbedAttrs>) => <EmbedView {...props} words={words()} />;
   return defineFeature({
     id: 'embed',
     nodes: [
@@ -118,10 +169,10 @@ export function embed(): EditorFeature {
         selectable: true,
         draggable: true,
         attrs: embedAttrs,
-        render: EmbedView,
+        render,
       },
     ],
-    codecs: [embedCodec as NodeCodec],
+    codecs: [embedCodecOf(words) as NodeCodec],
     commands: {
       insertEmbed: {
         args: z.object({ url: z.string(), title: z.string().optional() }),

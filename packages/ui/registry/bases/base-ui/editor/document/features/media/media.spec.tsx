@@ -52,9 +52,10 @@ describe('media', () => {
     ]);
   });
 
-  it('round-trips through HTML with the Viewer features', () => {
+  it('round-trips through HTML with its layout, with the Viewer features', () => {
     const registry = createCodecRegistry(features);
-    const doc = docOf({ src: 'https://c.test/a.mp3', kind: 'audio', caption: 'Rain' });
+    const doc = docOf({ src: 'https://c.test/a.mp3', kind: 'audio', caption: 'Rain', align: 'end', width: 'full' });
+    expect(serialize(doc, 'html', registry)).toContain('data-align="end" data-width="full"');
     expect(importHTML(serialize(doc, 'html', registry), registry).doc).toEqual(doc);
   });
 });

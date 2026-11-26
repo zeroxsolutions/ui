@@ -36,9 +36,10 @@ describe('file', () => {
     expect(row.hasAttribute('href')).toBe(false);
   });
 
-  it('round-trips through HTML with the Viewer features', () => {
+  it('round-trips through HTML with its layout, with the Viewer features', () => {
     const registry = createCodecRegistry(features);
-    const doc = docOf({ name: 'a.pdf', href: 'https://f.test/a.pdf', size: 10 });
+    const doc = docOf({ name: 'a.pdf', href: 'https://f.test/a.pdf', size: 10, align: 'center' });
+    expect(serialize(doc, 'html', registry)).toContain('data-align="center"');
     expect(importHTML(serialize(doc, 'html', registry), registry).doc).toEqual(doc);
   });
 });
