@@ -6,7 +6,17 @@ import { expect, test } from './test/fixtures';
  */
 const ABORTED_PREFETCH = /\?_rsc=\S+ due to access control checks/;
 
-test('every component page renders its heading and preview, and throws nothing', async ({ page, request }) => {
+/**
+ * What WebKit reports when the next goto cancels a chunk the page was still loading after its load event. Chromium and
+ * Firefox report nothing for it, so a chunk that fails on its own still fails the case there.
+ */
+const ABORTED_CHUNK = /^Failed to load chunk /;
+
+test('every component page renders its heading and preview, and throws nothing', async ({
+  page,
+  request,
+  browserName,
+}) => {
   // Each page is prerendered, but 60 of them across a cold worker outrun the default deadline.
   test.setTimeout(270_000);
   const response = await request.get('/r/styles/base-nova/registry.json');
@@ -21,11 +31,13 @@ test('every component page renders its heading and preview, and throws nothing',
   expect(components.length).toBeGreaterThan(0);
 
   const errors: string[] = [];
+  const navigationNoise = (message: string): boolean =>
+    ABORTED_PREFETCH.test(message) || (browserName === 'webkit' && ABORTED_CHUNK.test(message));
   page.on('pageerror', (error) => {
-    if (!ABORTED_PREFETCH.test(error.message)) errors.push(`${page.url()}: ${error.message}`);
+    if (!navigationNoise(error.message)) errors.push(`${page.url()}: ${error.message}`);
   });
   page.on('console', (message) => {
-    if (message.type() === 'error' && !ABORTED_PREFETCH.test(message.text())) {
+    if (message.type() === 'error' && !navigationNoise(message.text())) {
       errors.push(`${page.url()}: ${message.text()}`);
     }
   });
