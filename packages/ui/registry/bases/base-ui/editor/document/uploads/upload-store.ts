@@ -7,6 +7,7 @@ import {
   Plugin,
   PluginKey,
   Slice,
+  undo,
   type Editor,
   type EngineHandle,
   type ProseMirrorNode,
@@ -31,7 +32,7 @@ interface UploadEntryBase {
   readonly file: File;
   /** A local address of the file the editor draws while it uploads, never stored; null for a file not drawn. */
   readonly preview: string | null;
-  /** Whether a paste or a drop made the block for it, so a cancel takes the block away again. */
+  /** Whether a paste or a drop made the block for it, so a cancel puts back what was there before. */
   readonly created: boolean;
 }
 
@@ -116,12 +117,22 @@ export interface UploadStore {
   retry(id: number): void;
 }
 
+/** One paste or drop that made blocks for files. */
+interface Take {
+  /** How many blocks it made. */
+  readonly blocks: number;
+  /** The document right after it; the editor still holds it while nothing has changed since. */
+  after: ProseMirrorNode | null;
+}
+
 interface UploadRecord {
   entry: UploadEntry;
   request: UploadRequest;
   controller: AbortController | null;
   /** The transaction that inserted the block, whose positions the entry already has. */
   since: object | null;
+  /** The paste or drop that made the block, and what the block took the place of; null for a block the author made. */
+  made: { readonly take: Take; readonly replaced: Slice } | null;
 }
 
 interface UploadStoreInternals extends UploadStore {
@@ -303,6 +314,7 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
         request,
         controller: null,
         since: null,
+        made: null,
       };
       records.set(record.entry.id, record);
       run(record);
@@ -312,12 +324,15 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
       const record = records.get(id);
       if (!record) return;
       release(record, true);
-      if (!record.entry.created || engine.isDestroyed) return;
+      if (!record.made || engine.isDestroyed) return;
       const { pos } = record.entry;
       const node = engine.state.doc.nodeAt(pos);
       if (!node) return;
-      // The block came with the paste or the drop; it goes as if neither had made it, leaving no step to redo.
-      engine.view.dispatch(engine.state.tr.delete(pos, pos + node.nodeSize).setMeta('addToHistory', false));
+      const { take, replaced } = record.made;
+      // The block came with the paste or the drop. Untouched since, and alone in it, the paste or the drop is undone.
+      if (take.blocks === 1 && take.after === engine.state.doc && undo(engine.state, engine.view.dispatch)) return;
+      // Otherwise what it replaced comes back in its place, a step the author can undo.
+      engine.view.dispatch(engine.state.tr.replace(pos, pos + node.nodeSize, replaced));
     },
     retry(id) {
       const record = records.get(id);
@@ -387,13 +402,15 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
       };
       // Marked as the author's paste or drop, so an upload into a block it replaces ends.
       const tr = engine.state.tr.setMeta('uiEvent', at === null ? 'paste' : 'drop');
-      const made: { node: ProseMirrorNode; taker: UploadTaker; file: File }[] = [];
+      const made: { node: ProseMirrorNode; taker: UploadTaker; file: File; replaced: Slice }[] = [];
       let point = at;
       for (const file of files) {
         const taker = best(file);
         const node = taker?.node(engine, file);
         if (!taker || !node) continue;
+        let replaced = Slice.empty;
         if (point === null) {
+          replaced = tr.selection.content();
           tr.replaceSelectionWith(node, false);
           // The next file goes after this one rather than replacing it, as the selection now picks it.
           const at = positionOf(tr.doc, node);
@@ -403,11 +420,12 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
           tr.insert(spot, node);
           point = spot + node.nodeSize;
         }
-        made.push({ node, taker, file });
+        made.push({ node, taker, file, replaced });
       }
       if (made.length === 0) return false;
+      const take: Take = { blocks: made.length, after: null };
       const fresh: UploadRecord[] = [];
-      for (const { node, taker, file } of made) {
+      for (const { node, taker, file, replaced } of made) {
         const pos = positionOf(tr.doc, node);
         if (pos === undefined) continue;
         const request = taker.request(file);
@@ -417,12 +435,15 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
           request,
           controller: null,
           since: tr,
+          made: { take, replaced },
         };
         records.set(record.entry.id, record);
         fresh.push(record);
       }
       const before = engine.state.doc;
-      engine.view.dispatch(tr.scrollIntoView());
+      // An undo step of its own, so undoing it on cancel keeps what the author typed just before.
+      engine.view.dispatch(closeHistory(tr.scrollIntoView()));
+      take.after = engine.state.doc;
       for (const record of fresh) record.since = null;
       // A record left where a new block now stands, such as a failed one, would be found before the new one.
       for (const record of [...records.values()]) {

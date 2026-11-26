@@ -18,6 +18,17 @@ const withImage: DocJSON = {
   ],
 };
 
+const notes: DocJSON = {
+  type: 'doc',
+  content: [
+    { type: 'paragraph', content: [{ type: 'text', text: 'Trip' }] },
+    { type: 'paragraph', content: [{ type: 'text', text: 'Notes' }] },
+  ],
+};
+
+const imagesOf = (editor: IEditor): unknown[] =>
+  editor.getJSON().content?.filter((node) => node.type === 'image') ?? [];
+
 const srcOf = (editor: IEditor): unknown => editor.getJSON().content?.find((node) => node.type === 'image')?.attrs?.src;
 
 /** What the editor hands out: its JSON and its HTML export, where no local address may ever appear. */
@@ -190,6 +201,53 @@ describe('the image block with uploads', () => {
 
     await vi.waitFor(() => expect(editor.getJSON().content?.filter((node) => node.type === 'image')).toHaveLength(1));
     expect(calls[0].signal.aborted).toBe(true);
+  });
+
+  it('puts back the text a pasted file replaced when its upload is cancelled', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], notes);
+    await userEvent.click(await findElement('.ProseMirror p', 'Notes'));
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+
+    pasteFiles(await findElement('.ProseMirror'), [pngFile()]);
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+    expect(editor.getText()).not.toContain('Notes');
+    await userEvent.click(page.getByRole('button', { name: 'Cancel upload' }));
+
+    await vi.waitFor(() => expect(editor.getText()).toContain('Notes'));
+    expect(editor.getText()).toContain('Trip');
+    expect(imagesOf(editor)).toHaveLength(0);
+    expect(calls[0].signal.aborted).toBe(true);
+  });
+
+  it('keeps what the author typed just before a pasted file whose upload is cancelled', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], notes);
+    await userEvent.click(await findElement('.ProseMirror p', 'Trip'));
+    await userEvent.keyboard('{End} plans');
+
+    pasteFiles(await findElement('.ProseMirror'), [pngFile()]);
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+    await userEvent.click(page.getByRole('button', { name: 'Cancel upload' }));
+
+    await vi.waitFor(() => expect(imagesOf(editor)).toHaveLength(0));
+    expect(editor.getText()).toContain('Trip plans');
+  });
+
+  it('puts back the text a pasted file replaced, and keeps what was written since, on cancel', async () => {
+    const { upload, calls } = heldUpload();
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], notes);
+    await userEvent.dblClick(await findElement('.ProseMirror p', 'Notes'));
+
+    pasteFiles(await findElement('.ProseMirror'), [pngFile()]);
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+    await userEvent.click(await findElement('.ProseMirror p', 'Trip'));
+    await userEvent.keyboard('{End} plans');
+    await userEvent.click(page.getByRole('button', { name: 'Cancel upload' }));
+
+    await vi.waitFor(() => expect(imagesOf(editor)).toHaveLength(0));
+    expect(editor.getText()).toContain('Trip plans');
+    expect(editor.getText()).toContain('Notes');
   });
 
   it('ends its upload when the author types an address instead, which stays', async () => {
