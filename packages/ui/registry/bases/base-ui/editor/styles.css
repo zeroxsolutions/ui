@@ -205,6 +205,21 @@
   margin-bottom: 0;
 }
 
+/* A callout's last block sits flush with its padding. The body's own reset reaches a block's node view, and a
+ * button draws its `spaceAfter` on its row inside the view. */
+.document-editor
+  :where(
+    [data-slot='callout']
+      > div
+      > [data-node-view-content]
+      > [data-node-view-content-react]
+      > :last-child
+      > [data-node-view-wrapper]
+      > *
+  ) {
+  margin-bottom: 0;
+}
+
 /* The variable text field: one line of text and variable chips, which a block of a document may hold, so it
  * drops the document's gutter, its outline and its paragraph margin. Unlayered, as the gutter is in
  * `@layer components` and the typography plugin's margin in a later layer. */

@@ -2338,6 +2338,9 @@
         ".document-editor [data-slot='callout'] > img": {
           "margin-bottom": "0"
         },
+        ".document-editor :where( [data-slot='callout'] > div > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
+          "margin-bottom": "0"
+        },
         "@layer components": {
           ".document-editor [data-slot='callout']": {
             "border-color": "var(--border)",
