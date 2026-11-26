@@ -36,6 +36,7 @@ export const editorDocsSections: readonly { title: string; pages: readonly strin
       'editor-media',
       'editor-mention',
       'editor-mermaid',
+      'editor-section',
       'editor-table',
       'editor-table-of-contents',
       'editor-toggle',
