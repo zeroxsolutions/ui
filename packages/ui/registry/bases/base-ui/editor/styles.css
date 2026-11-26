@@ -417,6 +417,108 @@
 }
 
 /* MARK: layout - section */
+/* A section's background, from `--section-surface` below, and its padding, its default medium, as the email draws
+ * it. Unlayered, to beat the typography plugin's own margins. */
+.document-editor [data-slot='section'] {
+  padding: 1rem;
+  background-color: var(--section-surface, transparent);
+}
+.document-editor [data-slot='section'][data-padding='none'] {
+  padding: 0;
+}
+.document-editor [data-slot='section'][data-padding='small'] {
+  padding: 0.5rem;
+}
+.document-editor [data-slot='section'][data-padding='large'] {
+  padding: 1.5rem;
+}
+
+/* A section reaches past the text by `--section-bleed`, the room the surface leaves beside it: the editable
+ * editor's gutter, none in the Viewer unless its host gives some. A wide section takes half of it, a full one all
+ * of it. */
+.document-editor .ProseMirror[contenteditable='true'] {
+  --section-bleed: 3rem;
+}
+.document-editor [data-slot='section'][data-width='wide'] {
+  margin-inline: calc(var(--section-bleed, 0px) / -2);
+}
+.document-editor [data-slot='section'][data-width='full'] {
+  margin-inline: calc(var(--section-bleed, 0px) * -1);
+}
+
+/* An editable section with no background shows its bounds, which the Viewer does not draw. */
+.document-editor
+  .ProseMirror[contenteditable='true']
+  [data-slot='section']:is(:not([data-background]), [data-background='none']) {
+  outline: 1px dashed var(--border);
+}
+
+/* A section's first and last block sit flush with its padding, as a lane's do. */
+.document-editor [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > :first-child,
+.document-editor
+  [data-slot='section']
+  > [data-node-view-content]
+  > [data-node-view-content-react]
+  > [data-slot='email-block-row']:first-child
+  + * {
+  margin-top: 0;
+}
+.document-editor
+  :where(
+    [data-slot='section'] > [data-node-view-content] > [data-node-view-content-react] > :last-child,
+    [data-slot='section']
+      > [data-node-view-content]
+      > [data-node-view-content-react]
+      > :last-child
+      > [data-node-view-wrapper]
+      > *
+  ) {
+  margin-bottom: 0;
+}
+
+/* A section's background, and its swatch in the toolbar, which draws outside the editor: the surfaces a run's
+ * background takes, from the theme's tokens and its hue variables, so each follows light and dark mode. */
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='muted'] {
+  --section-surface: var(--muted);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='primary'] {
+  --section-surface: color-mix(in oklab, var(--primary) 15%, var(--background));
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='accent'] {
+  --section-surface: var(--accent);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='red'] {
+  --section-surface: var(--hue-red-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='orange'] {
+  --section-surface: var(--hue-orange-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='amber'] {
+  --section-surface: var(--hue-amber-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='green'] {
+  --section-surface: var(--hue-green-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='teal'] {
+  --section-surface: var(--hue-teal-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='blue'] {
+  --section-surface: var(--hue-blue-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='violet'] {
+  --section-surface: var(--hue-violet-surface);
+}
+:is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='pink'] {
+  --section-surface: var(--hue-pink-surface);
+}
+/* A swatch: a dot of the section's background, ringed so a pale one shows on the toolbar; none is the ring, struck. */
+[data-slot='section-swatch'] {
+  fill: var(--section-surface, transparent);
+  stroke: var(--border);
+}
+[data-slot='section-swatch'] line {
+  stroke: var(--muted-foreground);
+}
 
 /* MARK: layout - text */
 

@@ -47,13 +47,20 @@ function idOf(node: EngineNode): string | undefined {
   return typeof node.attrs.id === 'string' ? node.attrs.id : undefined;
 }
 
-/** The top-level blocks and the blocks directly inside a lane, in document order; a list item is content. */
+/**
+ * The top-level blocks and the blocks directly inside a lane or a section, in document order; a list item is
+ * content. A section is a container of blocks itself, where a columns block holds containers.
+ */
 function blocksOf(doc: EngineNode): Block[] {
   const blocks: Block[] = [];
   const visit = (parent: EngineNode, contentStart: number) => {
     parent.forEach((child, offset) => {
       const pos = contentStart + offset;
       if (carriesKey(child)) blocks.push({ node: child, pos });
+      if (child.type.spec.container) {
+        visit(child, pos + 1);
+        return;
+      }
       child.forEach((lane, laneOffset) => {
         if (lane.type.spec.container) visit(lane, pos + 1 + laneOffset + 1);
       });
@@ -135,9 +142,11 @@ function keyOpeningContent(content: unknown, schema: EngineSchema): unknown {
   const taken = new Set<string>();
   const keyed = (node: NodeJSON): NodeJSON => {
     const spec = schema.nodes[node.type]?.spec.attrs;
-    const lanes = node.content?.map((child) =>
-      schema.nodes[child.type]?.spec.container ? { ...child, content: child.content?.map(keyed) } : child,
-    );
+    const lanes = schema.nodes[node.type]?.spec.container
+      ? node.content?.map(keyed)
+      : node.content?.map((child) =>
+          schema.nodes[child.type]?.spec.container ? { ...child, content: child.content?.map(keyed) } : child,
+        );
     const next = lanes ? { ...node, content: lanes } : { ...node };
     if (!spec || !('key' in spec)) return next;
     const key = next.attrs?.key;
