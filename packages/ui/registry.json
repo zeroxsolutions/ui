@@ -1127,6 +1127,7 @@
         "@tiptap/react",
         "@tiptap/starter-kit",
         "@zeroxsolutions/editor-core@^0.2.0",
+        "class-variance-authority",
         "tiptap-extension-global-drag-handle@0.1.18"
       ],
       "devDependencies": ["@tailwindcss/typography"],
@@ -3078,7 +3079,6 @@
         "@shadcn/card",
         "@shadcn/separator",
         "@shadcn/tabs",
-        "@shadcn/utils",
         "@zui/code-card",
         "@zui/collapsible-card",
         "@zui/copy-button",
