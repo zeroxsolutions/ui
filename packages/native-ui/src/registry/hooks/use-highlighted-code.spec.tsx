@@ -14,6 +14,16 @@ describe('useHighlightedCode', () => {
     expect(colourOf('const')).not.toBe(colourOf('2'));
   });
 
+  it('returns the plain lines of a language the highlighter does not list, once the highlighter has loaded', async () => {
+    const { result } = await renderHook(() => ({
+      cobol: useHighlightedCode('MOVE A TO B.\nSTOP RUN.\n', 'cobol'),
+      ts: useHighlightedCode('const a = 1', 'ts'),
+    }));
+
+    await waitFor(() => expect(typeof result.current.ts[0]).not.toBe('string'));
+    expect(result.current.cobol).toEqual(['MOVE A TO B.', 'STOP RUN.']);
+  });
+
   it('keeps the nodes of the lines already written as more code streams in', async () => {
     const { result, rerender } = await renderHook(({ code }: { code: string }) => useHighlightedCode(code, 'ts'), {
       initialProps: { code: 'const a = 1\nconst b' },
