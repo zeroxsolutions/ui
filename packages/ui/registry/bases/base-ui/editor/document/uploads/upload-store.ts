@@ -124,7 +124,11 @@ interface UploadStoreInternals extends UploadStore {
 
 type TransactionLike = {
   readonly docChanged: boolean;
-  readonly mapping: { map(pos: number, assoc?: number): number };
+  readonly mapping: {
+    map(pos: number, assoc?: number): number;
+    mapResult(pos: number, assoc?: number): { readonly pos: number; readonly deleted: boolean };
+  };
+  getMeta(key: string): unknown;
 };
 
 /** A web address, the only kind an upload's answer is stored as. */
@@ -140,6 +144,16 @@ function positionOf(doc: ProseMirrorNode, node: ProseMirrorNode): number | undef
     return found === undefined;
   });
   return found;
+}
+
+/** Where `node` itself sits in `doc`, as a drag puts the dragged node; undefined unless it sits in one place. */
+function movedTo(doc: ProseMirrorNode, node: ProseMirrorNode): number | undefined {
+  const found: number[] = [];
+  doc.descendants((child, pos) => {
+    if (child === node) found.push(pos);
+    return found.length < 2;
+  });
+  return found.length === 1 ? found[0] : undefined;
 }
 
 function createUploadStore(engine: Editor): UploadStoreInternals {
@@ -170,6 +184,8 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
   const fail = (record: UploadRecord, message: string, retryable: boolean): void => {
     const { progress: _progress, ...rest } = record.entry as UploadEntryBase & { progress?: unknown };
     record.entry = { ...rest, phase: 'failed', message, retryable };
+    // The failed run stops, so nothing it reports later reaches a retry.
+    record.controller?.abort();
     record.controller = null;
     changed();
   };
@@ -208,7 +224,7 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
         signal: controller.signal,
         onProgress: (fraction) => {
           if (!current() || record.entry.phase !== 'uploading') return;
-          const progress = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
+          const progress = Number.isNaN(fraction) ? 0 : Math.min(1, Math.max(0, fraction));
           record.entry = { ...record.entry, progress };
           changed();
         },
@@ -314,12 +330,18 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
           continue;
         }
         // The node's start and end, each kept on the node's side; a deleted node maps to an empty range.
-        const from = tr.mapping.map(pos, 1);
+        const start = tr.mapping.mapResult(pos, 1);
         const to = tr.mapping.map(pos + old.nodeSize, -1);
-        const now = after.nodeAt(from);
-        if (!now || now.type !== old.type || from + now.nodeSize !== to) lost.push(record);
-        else if (from !== pos) {
-          record.entry = { ...record.entry, pos: from };
+        const now = after.nodeAt(start.pos);
+        const inPlace = now !== null && now.type === old.type && start.pos + now.nodeSize === to;
+        // A node changed in place by its attributes is replaced as a paste over it is; only the paste, a drop or a
+        // cut is the author's, so only they end the upload.
+        const replaced = start.deleted && tr.getMeta('uiEvent') !== undefined;
+        // A drag deletes the node and inserts that same node where it drops.
+        const next = inPlace && !replaced ? start.pos : movedTo(after, old);
+        if (next === undefined) lost.push(record);
+        else if (next !== pos) {
+          record.entry = { ...record.entry, pos: next };
           moved = true;
         }
       }
@@ -345,7 +367,8 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
         }
         return top;
       };
-      const tr = engine.state.tr;
+      // Marked as the author's paste or drop, so an upload into a block it replaces ends.
+      const tr = engine.state.tr.setMeta('uiEvent', at === null ? 'paste' : 'drop');
       const made: { node: ProseMirrorNode; taker: UploadTaker; file: File }[] = [];
       let point = at;
       for (const file of files) {
@@ -383,6 +406,10 @@ function createUploadStore(engine: Editor): UploadStoreInternals {
       const before = engine.state.doc;
       engine.view.dispatch(tr.scrollIntoView());
       for (const record of fresh) record.since = null;
+      // A record left where a new block now stands, such as a failed one, would be found before the new one.
+      for (const record of [...records.values()]) {
+        if (!fresh.includes(record) && fresh.some((made) => made.entry.pos === record.entry.pos)) release(record, true);
+      }
       // The editor refused the blocks, as a locked email does.
       if (engine.state.doc === before) {
         for (const record of fresh) release(record, false);

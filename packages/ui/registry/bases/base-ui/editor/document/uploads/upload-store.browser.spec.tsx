@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
+import { Extension, type Editor } from '@zeroxsolutions/editor-core/document/advanced';
 import { defineFeature, type DocJSON, type IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { findElement, mountDocumentEditor } from '../../../../../../src/test/document-editor';
 import { standardKit } from '../features/standard/index';
@@ -8,11 +9,36 @@ import { heldUpload } from '../../../../../../src/test/uploads';
 import { DEFAULT_UPLOAD_MESSAGES, type EditorUpload } from './upload';
 import { uploadsExtension, uploadStoreOf, type UploadRequest, type UploadStore } from './upload-store';
 
+// The engine behind the editor a spec mounted, so a spec can make the change a drag or a paste makes.
+let engine: Editor | null = null;
+
 const picture = defineFeature({
   id: 'picture',
-  nodes: [{ name: 'picture', group: 'block', atom: true, attrs: z.object({ src: z.string().default('') }) }],
-  advanced: { engineExtensions: [uploadsExtension('picture', null)] },
+  nodes: [
+    {
+      name: 'picture',
+      group: 'block',
+      atom: true,
+      attrs: z.object({ src: z.string().default(''), alt: z.string().default('') }),
+    },
+  ],
+  advanced: {
+    engineExtensions: [
+      uploadsExtension('picture', null),
+      Extension.create({
+        name: 'pictureSpecEngine',
+        onBeforeCreate() {
+          engine = this.editor;
+        },
+      }),
+    ],
+  },
 });
+
+function engineOf(): Editor {
+  if (!engine) throw new Error('no editor is mounted');
+  return engine;
+}
 
 const doc: DocJSON = {
   type: 'doc',
@@ -186,5 +212,77 @@ describe('the upload store', () => {
       expect(store.find(PICTURE_AT, 'src')).toMatchObject({ phase: 'failed', message: 'Use https://' }),
     );
     expect(srcOf(editor)).toBe('https://cdn.test/old.png');
+  });
+
+  it('keeps an upload whose block is dragged elsewhere, and lands it in the moved block', async () => {
+    const { editor, store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    // A drag deletes the block and inserts the same node where it drops, in one transaction.
+    const current = engineOf();
+    const node = current.state.doc.nodeAt(PICTURE_AT)!;
+    const tr = current.state.tr.delete(PICTURE_AT, PICTURE_AT + node.nodeSize).insert(0, node);
+    current.view.dispatch(tr.setMeta('uiEvent', 'drop'));
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() =>
+      expect(editor.getJSON().content?.[0]).toMatchObject({ attrs: { src: 'https://cdn.test/cat.png' } }),
+    );
+    expect(calls[0].signal.aborted).toBe(false);
+  });
+
+  it('drops an upload whose block a paste replaces, leaving the pasted block as it came', async () => {
+    const { editor, store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    const current = engineOf();
+    const pasted = current.schema.nodes.picture.create({ src: 'https://cdn.test/pasted.png' });
+    current.view.dispatch(current.state.tr.replaceWith(PICTURE_AT, PICTURE_AT + 1, pasted).setMeta('uiEvent', 'paste'));
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() => expect(calls[0].signal.aborted).toBe(true));
+    expect(srcOf(editor)).toBe('https://cdn.test/pasted.png');
+    expect(store.entries()).toEqual([]);
+  });
+
+  it('keeps an upload while the author changes its block in place', async () => {
+    const { editor, store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    const current = engineOf();
+    current.view.dispatch(
+      current.state.tr.setNodeMarkup(PICTURE_AT, undefined, { src: 'https://cdn.test/old.png', alt: 'Bay' }),
+    );
+    calls[0].answer('https://cdn.test/cat.png');
+
+    await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
+  });
+
+  it('reads an endless progress as full and a progress that is no number as none', async () => {
+    const { store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+
+    calls[0].progress(Infinity);
+    await vi.waitFor(() => expect(store.find(PICTURE_AT, 'src')).toMatchObject({ progress: 1 }));
+    calls[0].progress(Number.NaN);
+    await vi.waitFor(() => expect(store.find(PICTURE_AT, 'src')).toMatchObject({ progress: 0 }));
+  });
+
+  it('stops a failed run, so its late progress does not reach the retry', async () => {
+    const { store } = await mount();
+    const { upload, calls } = heldUpload();
+    store.start(PICTURE_AT, 'src', png(), requestOf(upload));
+    calls[0].fail();
+    await vi.waitFor(() => expect(store.find(PICTURE_AT, 'src')).toMatchObject({ phase: 'failed' }));
+
+    store.retry(store.entries()[0].id);
+    calls[0].progress(0.9);
+
+    expect(calls[0].signal.aborted).toBe(true);
+    await vi.waitFor(() => expect(store.find(PICTURE_AT, 'src')).toMatchObject({ phase: 'uploading', progress: null }));
   });
 });
