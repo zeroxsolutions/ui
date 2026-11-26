@@ -6565,6 +6565,21 @@
       ]
     },
     {
+      "name": "lucide-text-align-justify-icon",
+      "type": "registry:ui",
+      "title": "Text Align Justify Icon",
+      "description": "An animated text align justify icon, adapted from lucide-animated, whose middle and bottom lines shrink from the right, and back when a control starts it, hidden from screen readers and still under reduced motion.",
+      "dependencies": ["react-native-reanimated", "react-native-svg"],
+      "registryDependencies": ["@zui/icon-motion"],
+      "files": [
+        {
+          "path": "src/registry/icons/lucide/text-align-justify-icon.tsx",
+          "type": "registry:ui",
+          "target": "@components/general/lucide/text-align-justify-icon.tsx"
+        }
+      ]
+    },
+    {
       "name": "lucide-text-align-start-icon",
       "type": "registry:ui",
       "title": "Text Align Start Icon",
