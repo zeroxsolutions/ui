@@ -557,10 +557,34 @@ describe('validate sections and layout on the email wire', () => {
 
   it.each([
     ['a legacy pixel width', 283],
+    ['a legacy pixel width under a quarter of the card', 48],
+    ['a legacy width of one pixel', 1],
     ['a fraction', 0.5],
+    ['a fraction off the drag step', 0.333],
   ])('takes an image width as %s', (_case, width) => {
     expect(validate([image({ width })], profile)).toEqual([]);
   });
+
+  it.each([
+    ['fewer widths than columns', [['a', 'b', 'c']], [0.5, 0.5]],
+    ['more widths than columns', [['a', 'b']], [0.25, 0.25, 0.5]],
+    ['widths that do not make the whole', [['a', 'b']], [0.3, 0.3]],
+  ])('refuses a table with %s', (_case, rows, columnWidths) => {
+    const table = block('table', { rows }, { attributes: { columnWidths } });
+    expect(validate([table], profile)).toEqual([{ kind: 'attributes-invalid', block: 'k1', field: 'columnWidths' }]);
+  });
+
+  it('takes table widths that make the whole within rounding', () => {
+    const table = block('table', { rows: [['a', 'b', 'c']] }, { attributes: { columnWidths: [0.33, 0.33, 0.33] } });
+    expect(validate([table], profile)).toEqual([]);
+  });
+
+  it.each(['{color=red} alert', 'set {bg=x} here', 'a {/color} b', '{color=magenta}x{/color}'])(
+    'takes text an older editor wrote with a literal brace: %j',
+    (text) => {
+      expect(validate([paragraph(text)], profile)).toEqual([]);
+    },
+  );
 
   it('takes the new attributes', () => {
     const document = [

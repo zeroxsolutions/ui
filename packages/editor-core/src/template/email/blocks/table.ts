@@ -16,6 +16,22 @@ const cell = z
 /** Each column's share of the table's width, the narrowest a twentieth; the drawn widths are read against their sum. */
 const columnWidths = z.array(z.number().min(0.05).max(1)).min(1).max(TABLE_MAX_COLUMNS);
 
+/** How far a table's column widths may sum from the whole: shares rounded to a twentieth each miss it by a little. */
+const COLUMN_WIDTHS_SLACK = 0.05;
+
+/**
+ * `widths` where they fit a table of `columns` columns: one share per column, together the whole within
+ * `COLUMN_WIDTHS_SLACK`; else undefined, and the table draws its columns equal. `validate` refuses what this drops.
+ */
+export function tableColumnWidths(
+  widths: readonly number[] | undefined,
+  columns: number,
+): readonly number[] | undefined {
+  if (widths === undefined || widths.length !== columns) return undefined;
+  const total = widths.reduce((sum, width) => sum + width, 0);
+  return Math.abs(total - 1) <= COLUMN_WIDTHS_SLACK ? widths : undefined;
+}
+
 const attributes = z
   .object({ header: z.boolean().optional(), columnWidths: columnWidths.optional(), spaceBefore, spaceAfter })
   .strict();
@@ -72,9 +88,8 @@ export const table = defineBlockType({
   render({ attributes: a, content: c }, { h }) {
     const rows = drawnRows(c.rows);
     if (rows.length === 0) return [];
-    const widths =
-      a.columnWidths !== undefined && a.columnWidths.length === rows[0].length ? a.columnWidths : undefined;
-    return h.table({ header: a.header ?? false, rows, ...(widths === undefined ? {} : { columnWidths: widths }) });
+    const widths = tableColumnWidths(a.columnWidths, rows[0].length);
+    return h.table({ header: a.header ?? false, rows, ...(widths === undefined ? {} : { columnWidths: [...widths] }) });
   },
   sample: {
     attributes: { header: true },

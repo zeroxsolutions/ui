@@ -8,7 +8,7 @@ import {
   type LibraryBlockType,
 } from '../../template/email/blocks/index.js';
 import { IMAGE_TEXT_MAX_LENGTH } from '../../template/email/blocks/image.js';
-import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS } from '../../template/email/blocks/table.js';
+import { TABLE_MAX_COLUMNS, TABLE_MAX_ROWS, tableColumnWidths } from '../../template/email/blocks/table.js';
 import type { Nesting } from '../../template/email/block.js';
 import { EMAIL_KINDS } from './profile.js';
 import { measureSmsBody, strayBraceOffset } from './sms-text.js';
@@ -171,6 +171,23 @@ function checkTable(walk: Walk, content: Record<string, unknown>, id: string): v
       checkTokens(walk, { ...where, item }, cell);
     }
   });
+}
+
+/**
+ * A table's `columnWidths` that the renderer would not draw, as `attributes-invalid`: a count other than the first
+ * row's, or shares that do not make the whole. Widths of the wrong shape are `checkAttributes`' to report.
+ */
+function checkColumnWidths(walk: Walk, block: EditorEmailBlock, content: Record<string, unknown>, id: string): void {
+  const widths = isRecord(block.attributes) ? block.attributes.columnWidths : undefined;
+  const rows: unknown = content.rows;
+  const first: unknown = Array.isArray(rows) ? rows[0] : undefined;
+  if (!Array.isArray(widths) || !widths.every((width) => typeof width === 'number') || !Array.isArray(first)) return;
+  const reported = walk.problems.some(
+    (problem) => problem.kind === 'attributes-invalid' && problem.block === id && problem.field === 'columnWidths',
+  );
+  if (!reported && tableColumnWidths(widths as number[], first.length) === undefined) {
+    walk.problems.push({ kind: 'attributes-invalid', block: id, field: 'columnWidths' });
+  }
 }
 
 /**
@@ -444,6 +461,7 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, nesting: Nesting): void
       break;
     case 'table':
       checkTable(walk, content, id);
+      checkColumnWidths(walk, block, content, id);
       break;
     default: {
       const own = ownEditorOf(walk, block.type);
