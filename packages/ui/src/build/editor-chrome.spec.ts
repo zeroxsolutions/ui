@@ -88,7 +88,7 @@ const FOCUS: [editor: string, component: string, variant: (name: string) => stri
 /** Which slots, or which design-system component, each piece of the editor's chrome draws with. */
 const PIECES: Record<string, string[]> = {
   'document/ui/rect-popover.tsx': ['cn-popover-content', 'cn-popover-content-logical'],
-  'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar'],
+  'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar', 'cn-editor-toolbar-separator'],
   'document/ui/bubble-menu.tsx': ['cn-editor-toolbar'],
   'document/layout/block-toolbar.tsx': ['cn-editor-toolbar', '<RectPopover'],
   'document/layout/align-control.tsx': ['<ToggleGroup', '<ToggleGroupItem', '<Tooltip'],
@@ -121,6 +121,8 @@ const PIECES: Record<string, string[]> = {
   'mermaid/react/preview.tsx': ['cn-editor-diagram'],
   'document/features/embed/embed.tsx': ['cn-editor-block'],
   'document/features/columns/columns.tsx': ['cn-editor-lane'],
+  'document/features/columns/columns-toolbar.tsx': ['cn-editor-toolbar-separator'],
+  'document/features/section/section.tsx': ['cn-editor-toolbar-separator'],
   'document/features/card/card.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description'],
   'document/uploads/upload-tabs.tsx': ['cn-editor-block', 'cn-field-description'],
   'profiles/email/email-block-feature.tsx': ['cn-editor-block', 'cn-editor-control', 'cn-field-description', '<Label'],
@@ -224,6 +226,24 @@ describe("the editor's chrome", () => {
       expect(height(map['cn-editor-handle'] ?? '')).toEqual(height(map['cn-button-size-default']));
     },
   );
+
+  it.each(STYLES)("sizes a toolbar's separator in its own slot, in %s", (style) => {
+    const map = styleMapOf(ROOT, style);
+    expect((map['cn-editor-toolbar-separator'] ?? '').split(/\s+/)).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^h-/), expect.stringMatching(/^mx-/)]),
+    );
+  });
+
+  it('passes a separator no size or space of its own, only its slot', () => {
+    const sized = [...sources]
+      .filter(([path]) => !path.endsWith('.css'))
+      .flatMap(([path, source]) =>
+        [...code(source).matchAll(/<Separator[^>]*className="([^"]*)"/g)]
+          .filter(([, classes]) => /(?:^|\s)(?:m[xy]?|h|w|size)-/.test(classes))
+          .map(([tag]) => `${path}: ${tag}`),
+      );
+    expect(sized).toEqual([]);
+  });
 
   it.each(STYLES)('sets a caption in the type of cn-badge, in %s', (style) => {
     const map = styleMapOf(ROOT, style);

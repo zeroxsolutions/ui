@@ -109,7 +109,7 @@ export function ColumnsToolbar({
         disabled={lanes <= LANES_MIN}
         onClick={() => onLanes(lanes - 1)}
       />
-      <Separator orientation="vertical" className="mx-0.5 h-5 data-vertical:self-center" />
+      <Separator orientation="vertical" className="cn-editor-toolbar-separator data-vertical:self-center" />
       <ToggleGroup
         aria-label={words.verticalAlign}
         size="sm"

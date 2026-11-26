@@ -225,6 +225,11 @@
     @apply ring-foreground/10 gap-0.5 rounded-none p-1.5 shadow-md ring-1;
   }
 
+  /* A rule between groups of a toolbar's controls, sized to sit between its toggles */
+  .cn-editor-toolbar-separator {
+    @apply mx-0.5 h-5;
+  }
+
   /* cn-combobox-item's radius, a row of a menu filtered by what is typed */
   .cn-editor-menu-item {
     @apply data-highlighted:bg-accent data-highlighted:text-accent-foreground rounded-none;

@@ -209,7 +209,9 @@ function SectionToolbar({ editor, pos, anchor, attrs, widths, words }: SectionTo
             nameOf={(space) => words.spaces[space]}
             onChange={(padding) => set({ padding })}
           />
-          {widths.length > 1 && <Separator orientation="vertical" className="mx-0.5 h-5 data-vertical:self-center" />}
+          {widths.length > 1 && (
+            <Separator orientation="vertical" className="cn-editor-toolbar-separator data-vertical:self-center" />
+          )}
           {widths.length > 1 && (
             <SectionToolbarGroup<SectionWidth>
               label={words.sectionWidth}

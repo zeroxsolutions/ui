@@ -95,7 +95,9 @@ export function EditorToolbar({ editor, items, end, disabled = false, className 
           const separator = index > 0 && item.id.startsWith('sep');
           return (
             <span key={item.id} className="contents">
-              {separator && <Separator orientation="vertical" className="mx-0.5 h-5 data-vertical:self-center" />}
+              {separator && (
+                <Separator orientation="vertical" className="cn-editor-toolbar-separator data-vertical:self-center" />
+              )}
               <ChromeControl
                 icon={item.icon}
                 fallback={item.title}
@@ -122,7 +124,7 @@ export function EditorToolbar({ editor, items, end, disabled = false, className 
           );
         })}
         {end && items.length > 0 && (
-          <Separator orientation="vertical" className="mx-0.5 h-5 data-vertical:self-center" />
+          <Separator orientation="vertical" className="cn-editor-toolbar-separator data-vertical:self-center" />
         )}
         {end}
       </TooltipProvider>
