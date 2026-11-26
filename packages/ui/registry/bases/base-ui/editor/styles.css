@@ -301,6 +301,28 @@
 /* MARK: layout - section */
 
 /* MARK: layout - text */
+/* A paragraph's style beside the plain one, sized against the text around it, as the email draws its lead (18px)
+ * and small (12px) lines against its 16px text. */
+.document-editor p[data-size='lead'] {
+  font-size: 1.125em;
+  line-height: 1.5556;
+}
+.document-editor p[data-size='small'] {
+  font-size: 0.75em;
+  line-height: 1.4167;
+}
+
+/* A colour menu's swatch: the letter in the token's colour, or on its surface, from the variables the menu sets. */
+[data-slot='color-menu-swatch'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  color: var(--swatch-text, currentColor);
+  background-color: var(--swatch-surface, transparent);
+  font-weight: 600;
+}
 
 /* MARK: email */
 /* The email's own attributes on the document's nodes, which have no view to draw them. */

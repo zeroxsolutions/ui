@@ -1155,7 +1155,14 @@
         "@zui/lucide-strikethrough-icon",
         "@zui/lucide-text-quote-icon",
         "@zui/lucide-trash-icon",
-        "@zui/lucide-underline-icon"
+        "@zui/lucide-underline-icon",
+        "@shadcn/field",
+        "@shadcn/toggle-group",
+        "@zui/lucide-palette-icon",
+        "@zui/lucide-text-align-center-icon",
+        "@zui/lucide-text-align-end-icon",
+        "@zui/lucide-text-align-justify-icon",
+        "@zui/lucide-text-align-start-icon"
       ],
       "files": [
         {
@@ -1222,6 +1229,16 @@
           "path": "registry/bases/base-ui/editor/document/ui/bubble-menu.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/ui/bubble-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/ui/color-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/ui/color-menu.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/layout/layout-words.ts",
+          "type": "registry:component",
+          "target": "@components/editor/document/layout/layout-words.ts"
         },
         {
           "path": "registry/bases/base-ui/editor/document/ui/chrome-icon.tsx",
@@ -1440,6 +1457,24 @@
         },
         ".document-editor [data-bg='pink']": {
           "background-color": "var(--hue-pink-surface)"
+        },
+        ".document-editor p[data-size='lead']": {
+          "font-size": "1.125em",
+          "line-height": "1.5556"
+        },
+        ".document-editor p[data-size='small']": {
+          "font-size": "0.75em",
+          "line-height": "1.4167"
+        },
+        "[data-slot='color-menu-swatch']": {
+          "display": "inline-flex",
+          "align-items": "center",
+          "justify-content": "center",
+          "width": "1.25em",
+          "height": "1.25em",
+          "color": "var(--swatch-text, currentColor)",
+          "background-color": "var(--swatch-surface, transparent)",
+          "font-weight": "600"
         },
         "@layer components": {
           ".document-editor .ProseMirror": {
@@ -3290,11 +3325,6 @@
           "target": "@components/editor/document/layout/layout-props.ts"
         },
         {
-          "path": "registry/bases/base-ui/editor/document/layout/layout-words.ts",
-          "type": "registry:component",
-          "target": "@components/editor/document/layout/layout-words.ts"
-        },
-        {
           "path": "registry/bases/base-ui/editor/document/layout/resize-handles.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/layout/resize-handles.tsx"
@@ -4129,7 +4159,6 @@
         "@zui/editor-code-block",
         "@zui/editor-columns",
         "@zui/editor-image",
-        "@zui/editor-layout",
         "@zui/editor-table",
         "@zui/editor-uploads",
         "@zui/lucide-at-sign-icon",
@@ -10842,6 +10871,21 @@
           "path": "registry/bases/base-ui/icons/lucide/text-align-end-icon.tsx",
           "type": "registry:ui",
           "target": "@components/general/lucide/text-align-end-icon.tsx"
+        }
+      ]
+    },
+    {
+      "name": "lucide-text-align-justify-icon",
+      "type": "registry:ui",
+      "title": "Text Align Justify Icon",
+      "description": "An animated text-align-justify icon, adapted from lucide-animated, that renders phrasing content and stays still under reduced motion.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["@shadcn/utils"],
+      "files": [
+        {
+          "path": "registry/bases/base-ui/icons/lucide/text-align-justify-icon.tsx",
+          "type": "registry:ui",
+          "target": "@components/general/lucide/text-align-justify-icon.tsx"
         }
       ]
     },

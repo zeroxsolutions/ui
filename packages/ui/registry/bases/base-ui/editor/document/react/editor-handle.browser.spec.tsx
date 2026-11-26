@@ -147,7 +147,7 @@ const line = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', t
 async function turnInto(handle: HTMLElement, choice: string) {
   await userEvent.click(handle);
   await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
-  await userEvent.click(page.getByRole('menuitemradio', { name: choice }));
+  await userEvent.click(page.getByRole('menuitemradio', { name: choice, exact: true }));
 }
 
 const types = (editor: IEditor) => (editor.getJSON().content ?? []).map((block) => block.type);
