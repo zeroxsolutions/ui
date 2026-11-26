@@ -107,12 +107,7 @@ describe('text styling in the email editor', () => {
     const choose = async (title: string) => {
       await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
       await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p', 'Hi there')));
-      const grip = await vi.waitFor(() => {
-        const found = document.querySelector<HTMLElement>('.drag-handle');
-        if (!found || found.classList.contains('hide')) throw new Error('the grip is hidden');
-        return found;
-      });
-      await userEvent.click(grip);
+      await userEvent.click(page.getByRole('button', { name: 'Block handle' }));
       await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
       await userEvent.click(page.getByRole('menuitemradio', { name: title, exact: true }));
     };

@@ -101,24 +101,11 @@ async function mount(initial: EditorEmailBlock[], structure?: 'free' | 'locked')
   return probe;
 }
 
-function find(selector: string, text?: string): HTMLElement {
-  const found = [...document.querySelectorAll<HTMLElement>(selector)].find(
-    (element) => text === undefined || element.textContent?.includes(text),
-  );
-  if (!found) throw new Error(`nothing matches ${selector}${text ? ` holding "${text}"` : ''}`);
-  return found;
-}
-
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
 async function openBlockMenu(): Promise<void> {
   await userEvent.hover(page.getByTestId('email-block'));
-  const grip = await vi.waitFor(() => {
-    const found = find('.drag-handle');
-    if (found.classList.contains('hide')) throw new Error('the grip is hidden');
-    return found;
-  });
-  await userEvent.click(grip);
+  await userEvent.click(page.getByRole('button', { name: 'Block handle' }));
   await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
 }
 

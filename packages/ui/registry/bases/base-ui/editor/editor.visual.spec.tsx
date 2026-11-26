@@ -64,10 +64,7 @@ describeVisual('the editors, acted on', [
     render: () => <DocumentEditorDemo />,
     arrange: async () => {
       await userEvent.hover(page.getByText(LEAD, { exact: true }));
-      // The grip is the drag extension's own element, which carries no role, name or test id to find it by.
-      const grip = document.querySelector<HTMLElement>('.drag-handle');
-      if (grip === null) throw new Error('the editor drew no grip');
-      await userEvent.click(page.elementLocator(grip));
+      await userEvent.click(page.getByRole('button', { name: 'Block handle' }));
       await expect.element(page.getByRole('menu', { name: 'Block actions' })).toBeVisible();
       return undefined;
     },

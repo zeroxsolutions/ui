@@ -732,6 +732,7 @@ export function EmailEditor({
             content={initialContent}
             editable={!readOnly}
             blockMenuLabel={text.blockActions}
+            gripLabel={text.blockHandle}
             onReady={(ready) => {
               setEditor(ready);
               onReady?.(ready);

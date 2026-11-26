@@ -138,12 +138,10 @@ async function copyHtml(html: string): Promise<void> {
 async function gripBeside(element: HTMLElement): Promise<HTMLElement> {
   await userEvent.hover(element, { position: { x: 4, y: 4 } });
   return vi.waitFor(() => {
-    const handle = document.querySelector<HTMLElement>('.drag-handle');
+    const handle = page.getByRole('button', { name: 'Block handle' }).query() as HTMLElement | null;
     const top = handle?.getBoundingClientRect().top ?? -1;
     const rect = element.getBoundingClientRect();
-    if (!handle || handle.classList.contains('hide') || top < rect.top - 12 || top > rect.bottom) {
-      throw new Error('the grip is not beside the element');
-    }
+    if (!handle || top < rect.top - 12 || top > rect.bottom) throw new Error('the grip is not beside the element');
     return handle;
   });
 }

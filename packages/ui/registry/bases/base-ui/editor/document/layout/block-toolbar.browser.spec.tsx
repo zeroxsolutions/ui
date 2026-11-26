@@ -154,12 +154,8 @@ describe('BlockToolbar', () => {
     );
     const target = page.getByText('After');
     await userEvent.hover(page.getByTestId('box'), { position: { x: 4, y: 4 } });
-    // The drag extension draws the handle with no role, name or slot, so it is found by the class it gives it.
-    const grip = await vi.waitFor(() => {
-      const found = document.querySelector<HTMLElement>('.drag-handle:not(.hide)');
-      if (!found) throw new Error('the grip is not shown');
-      return found;
-    });
+    const grip = page.getByRole('button', { name: 'Block handle' });
+    await expect.element(grip).toBeVisible();
     // Past the line's text, under the middle of the box, where its toolbar opens below it.
     const line = target.element().getBoundingClientRect();
 

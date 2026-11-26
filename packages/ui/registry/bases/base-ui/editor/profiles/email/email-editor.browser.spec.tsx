@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page, userEvent } from 'vitest/browser';
+import { page, userEvent, type Locator } from 'vitest/browser';
 import type { BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import {
@@ -220,7 +220,9 @@ async function copyHtml(html: string): Promise<void> {
 /** Fakes the timers the editor schedules a validation on, until the case ends. */
 function fakeTimers(): void {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-  onTestFinished(() => vi.useRealTimers());
+  onTestFinished(() => {
+    vi.useRealTimers();
+  });
 }
 
 /** Runs every timer the editor has set, so a validation it scheduled has run before the count is read. */
@@ -237,13 +239,9 @@ function rendered(frame: HTMLIFrameElement): string {
 }
 
 /** Shows the grip of the paragraph holding `text`, or of the block `selector` names, as a pointer over it does. */
-async function gripOf(text: string, selector = '[contenteditable=true] p'): Promise<HTMLElement> {
+async function gripOf(text: string, selector = '[contenteditable=true] p'): Promise<Locator> {
   await userEvent.hover(await vi.waitFor(() => find(selector, text)));
-  return vi.waitFor(() => {
-    const grip = find('.drag-handle');
-    if (grip.classList.contains('hide')) throw new Error('the grip is hidden');
-    return grip;
-  });
+  return page.getByRole('button', { name: 'Block handle' });
 }
 
 /** Opens the block menu from the grip of the paragraph holding `text`, or of the block `selector` names. */
@@ -728,7 +726,7 @@ describe('EmailEditor', () => {
     expect(probe.reported).toEqual([]);
     expect(probe.editor.getText()).toBe('Hello');
     await userEvent.hover(find('[data-editor=document] p', 'Hello'));
-    expect(document.querySelector('.drag-handle:not(.hide)')).toBeNull();
+    await expect.element(page.getByRole('button', { name: 'Block handle' })).not.toBeInTheDocument();
     await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
     await expect.element(page.getByTestId('slash-menu')).not.toBeInTheDocument();
     await expect.element(page.getByRole('toolbar')).not.toBeInTheDocument();

@@ -188,7 +188,7 @@ describe('SmsEditor', () => {
     await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p')));
     await caretAtEnd();
 
-    expect(document.querySelector('.drag-handle')).toBeNull();
+    await expect.element(page.getByRole('button', { name: 'Block handle' })).not.toBeInTheDocument();
     await expect.element(page.getByRole('button', { name: 'Insert block below' })).not.toBeInTheDocument();
   });
 
@@ -300,7 +300,9 @@ describe('SmsEditor', () => {
 
   it('validates once on mount and lists the problem no place holds', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-    onTestFinished(() => vi.useRealTimers());
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
     const probe = await mount('Hi {{a}}');
     await vi.waitFor(() => expect(probe.validated).toHaveLength(1));
     settleTimers();
@@ -356,7 +358,9 @@ describe('SmsEditor', () => {
 
   it('reads the declarations again when the profile changes them, and not when it is rebuilt', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-    onTestFinished(() => vi.useRealTimers());
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
     const probe = await mount('Hi {{a}}');
     await vi.waitFor(() => expect(find('[contenteditable=true] p').textContent).toContain('A'));
 

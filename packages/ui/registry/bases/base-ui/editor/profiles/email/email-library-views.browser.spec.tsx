@@ -197,12 +197,7 @@ describe("the email editor's library blocks", () => {
     const probe = await mount([footer]);
 
     await userEvent.hover(page.getByRole('group', { name: 'Legal footer' }));
-    const grip = await vi.waitFor(() => {
-      const found = document.querySelector<HTMLElement>('.drag-handle');
-      if (!found || found.classList.contains('hide')) throw new Error('the grip is hidden');
-      return found;
-    });
-    await userEvent.click(grip);
+    await userEvent.click(page.getByRole('button', { name: 'Block handle' }));
     await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
     await expect.element(page.getByRole('menuitemradio', { name: 'Left', exact: true })).toBeChecked();
     await userEvent.click(page.getByRole('menuitemradio', { name: 'Center', exact: true }));

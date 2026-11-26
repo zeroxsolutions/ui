@@ -201,14 +201,10 @@ async function caretAfter(text: string): Promise<void> {
 }
 
 /** Shows the grip of the block `selector` names, holding `text`, as a pointer over the block does. */
-async function gripOf(selector: string, text?: string): Promise<HTMLElement> {
+async function gripOf(selector: string, text?: string): Promise<Locator> {
   await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
   await userEvent.hover(await vi.waitFor(() => find(selector, text)));
-  return vi.waitFor(() => {
-    const grip = find('.drag-handle');
-    if (grip.classList.contains('hide')) throw new Error('the grip is hidden');
-    return grip;
-  });
+  return page.getByRole('button', { name: 'Block handle' });
 }
 
 /** Opens the block menu from the grip of the paragraph holding `text`, or of the block `selector` names. */

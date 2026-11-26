@@ -34,6 +34,8 @@ export interface EditorProps {
   onChange?(delta: Delta): void;
   /** The block menu's accessible name, in the host's words. Default: `Block actions`. */
   blockMenuLabel?: string;
+  /** The accessible name of the grip beside a block, which drags it and opens its menu. Default: `Block handle`. */
+  gripLabel?: string;
 }
 
 /** The handles a block draws on itself, which a drag of theirs starts from. */
@@ -50,6 +52,7 @@ export function Editor({
   onReady,
   onChange,
   blockMenuLabel,
+  gripLabel = 'Block handle',
 }: EditorProps) {
   // The raw engine instance — needed only to hand to `@tiptap/react`'s
   // `EditorContent`, which hosts the React node-view portals (without it, custom
@@ -148,6 +151,17 @@ export function Editor({
   // The features are read once on mount (see the note on the build effect), so the items are too.
   const [blockMenuItems] = useState(() => collectUiContributions(features ?? []).blockMenu);
   const press = useRef<{ x: number; y: number } | null>(null);
+  // The handle is the extension's own node, so it is named here, as a button that opens the block menu when one
+  // has items.
+  useEffect(() => {
+    if (!handleEl) return;
+    handleEl.dataset.slot = 'editor-grip';
+    handleEl.setAttribute('role', 'button');
+    handleEl.setAttribute('aria-label', gripLabel);
+    if (blockMenuItems.length === 0) return;
+    handleEl.setAttribute('aria-haspopup', 'menu');
+    handleEl.setAttribute('aria-expanded', String(menu !== null));
+  }, [handleEl, gripLabel, blockMenuItems, menu]);
   useEffect(() => {
     if (!handleEl || blockMenuItems.length === 0) return;
     const onPress = (event: PointerEvent) => {
@@ -252,6 +266,9 @@ export function Editor({
     const sync = () => {
       const rect = handleEl.getBoundingClientRect();
       const hidden = handleEl.classList.contains('hide') || getComputedStyle(handleEl).display === 'none';
+      // The extension hides the grip at opacity 0, which leaves it in the accessibility tree.
+      if (hidden) handleEl.setAttribute('aria-hidden', 'true');
+      else handleEl.removeAttribute('aria-hidden');
       setPlus({ top: rect.top, left: rect.left, hidden });
     };
     sync();

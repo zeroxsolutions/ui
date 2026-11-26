@@ -97,6 +97,8 @@ export interface ProfileEditorMessages {
   /** What a variable picker, or the `{{` menu, says when no declaration matches. */
   noVariables: string;
   blockActions: string;
+  /** The grip beside a block, which drags it and opens the block menu. */
+  blockHandle: string;
   /** The block menu's submenu of the kinds a block can become. */
   turnInto: string;
   /** The block menu's submenu heading of each attribute. */
@@ -253,6 +255,7 @@ export const DEFAULT_PROFILE_MESSAGES: ProfileEditorMessages = {
   findVariable: 'Find a variable',
   noVariables: 'No variables found',
   blockActions: 'Block actions',
+  blockHandle: 'Block handle',
   turnInto: 'Turn into',
   attributes: { align: 'Align', spaceAfter: 'Space after', tone: 'Tone', width: 'Width', level: 'Level' },
   attributeValues: {

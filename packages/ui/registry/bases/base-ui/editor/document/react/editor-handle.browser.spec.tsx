@@ -19,20 +19,14 @@ const content: DocJSON = {
   content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a block' }] }],
 };
 
-/** Mount the real editor and move the pointer over its block, which makes the extension show its handle. */
-/**
- * The block handle, once it is shown. The drag extension draws it as a bare element with no role, name or slot, so
- * it is found by the class the extension gives it.
- */
+/** The block handle, once it is shown. */
 async function shownGrip(): Promise<HTMLElement> {
-  const handle = await vi.waitFor(() => {
-    const found = document.querySelector<HTMLElement>('.drag-handle');
-    if (!found) throw new Error('the editor drew no handle');
-    return found;
-  });
-  await expect.element(page.elementLocator(handle)).toBeVisible();
-  return handle;
+  const handle = page.getByRole('button', { name: 'Block handle' });
+  await expect.element(handle).toBeVisible();
+  return handle.element() as HTMLElement;
 }
+
+/** Mount the real editor and move the pointer over its block, which makes the extension show its handle. */
 
 async function mountWithHandle() {
   await render(
