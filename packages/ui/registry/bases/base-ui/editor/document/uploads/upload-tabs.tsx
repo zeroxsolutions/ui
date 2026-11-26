@@ -103,9 +103,11 @@ function UploadTabs({
   children,
   className,
 }: UploadTabsProps): ReactNode {
+  // The tab it opened on; an address set or cleared while it is open leaves the author on the tab they are in.
+  const [opened] = useState(defaultTab);
   if (upload === null) return children;
   return (
-    <Tabs data-slot="upload-tabs" defaultValue={defaultTab} className={cn('gap-3', className)}>
+    <Tabs data-slot="upload-tabs" defaultValue={opened} className={cn('gap-3', className)}>
       {/* Each panel is drawn at once, so an arrow key shows the tab it reaches, as the tabs pattern does. */}
       <TabsList activateOnFocus className="w-full">
         <TabsTrigger value="upload">{messages.upload}</TabsTrigger>

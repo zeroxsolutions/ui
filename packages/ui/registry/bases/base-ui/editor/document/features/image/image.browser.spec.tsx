@@ -310,6 +310,21 @@ describe('the image block with uploads', () => {
     await vi.waitFor(() => expect(srcOf(editor)).toBe('https://cdn.test/cat.png'));
   });
 
+  it('keeps its open tab when the author clears the address', async () => {
+    const { upload } = heldUpload();
+    const errors = vi.spyOn(console, 'error');
+    const editor = await mountDocumentEditor([standardKit(), image({ upload })], withImage);
+    await openEdit();
+
+    await userEvent.fill(page.getByRole('textbox', { name: 'Image address' }), '');
+    await userEvent.click(page.getByRole('textbox', { name: 'Alt text' }));
+
+    await vi.waitFor(() => expect(srcOf(editor)).toBe(''));
+    await expect.element(page.getByRole('tab', { name: 'Link' })).toHaveAttribute('aria-selected', 'true');
+    expect(errors.mock.calls.flat().join(' ')).not.toMatch(/default value/);
+    errors.mockRestore();
+  });
+
   it('ends its upload when the author types an address instead, which stays', async () => {
     const { upload, calls } = heldUpload();
     const editor = await mountDocumentEditor([standardKit(), image({ upload })], withImage);
