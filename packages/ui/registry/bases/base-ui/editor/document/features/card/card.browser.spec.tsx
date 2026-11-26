@@ -11,6 +11,7 @@ import {
   layoutFrame,
   lineWidth,
   storedLayout,
+  viewerFrame,
 } from '../../../../../../../test/block-layout';
 import { findElement, insertFromSlashMenu, mountDocumentEditor } from '../../../../../../../src/test/document-editor';
 import { fileInput, heldUpload, pngFile } from '../../../../../../../src/test/uploads';
@@ -140,6 +141,14 @@ describe('the card layout', () => {
     await userEvent.click(page.getByText('Trip'));
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(storedLayout(editor, 1).width).toBeNull());
+  });
+
+  it('keeps its text where the Viewer draws it when it is placed but takes the whole line', async () => {
+    const editor = await mountDocumentEditor(features, laidOut({ align: 'center' }));
+    const edited = getComputedStyle(layoutFrame().querySelector('[data-slot=card]') as HTMLElement).textAlign;
+    const viewed = await viewerFrame(editor.getJSON(), features, lineWidth());
+    expect(getComputedStyle(viewed.querySelector('[data-slot=card]') as HTMLElement).textAlign).toBe(edited);
+    expect(edited).toBe('start');
   });
 
   it("Full width bleeds to the editor's edges", async () => {

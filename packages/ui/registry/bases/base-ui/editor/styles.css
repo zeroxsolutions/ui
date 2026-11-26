@@ -296,8 +296,10 @@
 
 /* MARK: layout - media */
 /* A media block's frame (`BlockLayoutFrame`), in the editor and the Viewer. Its own text starts at the start
- * edge, whatever line alignment the editor draws its block's host with, so a caption reads the same in both. */
-.document-editor [data-slot='block-layout'] {
+ * edge, whatever line alignment the editor draws its block's host and its own `data-align` with, so a caption
+ * reads the same in both. */
+.document-editor [data-slot='block-layout'],
+.document-editor .ProseMirror [data-slot='block-layout'][data-align] {
   text-align: start;
 }
 
