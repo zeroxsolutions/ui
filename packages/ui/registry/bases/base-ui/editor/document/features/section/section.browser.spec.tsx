@@ -224,6 +224,34 @@ describe('the section in the Document Editor', () => {
     expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
   });
 
+  it("shows only the innermost block's toolbar, and Alt+F10 steps out to the section's and around", async () => {
+    const editor = await mount({
+      type: 'doc',
+      content: [sectionOf(lanes([line('left')], [line('right')])), line('after')],
+    });
+    const columnsToolbar = page.getByRole('toolbar', { name: DEFAULT_LAYOUT_WORDS.toolbar });
+    const drawnToolbars = () => document.querySelectorAll('[data-slot=block-toolbar]').length;
+    const holdsFocus = (bar: typeof columnsToolbar) => bar.element().contains(document.activeElement);
+    await userEvent.click(holding('.ProseMirror p', 'left'));
+    await expect.element(columnsToolbar).toBeVisible();
+    await vi.waitFor(() => expect(drawnToolbars()).toBe(1));
+
+    await userEvent.keyboard('{Alt>}{F10}{/Alt}');
+    await vi.waitFor(() => expect(holdsFocus(columnsToolbar)).toBe(true));
+
+    await userEvent.keyboard('{Alt>}{F10}{/Alt}');
+    await vi.waitFor(() => expect(holdsFocus(toolbar())).toBe(true));
+    await vi.waitFor(() => expect(drawnToolbars()).toBe(1));
+
+    await userEvent.keyboard('{Alt>}{F10}{/Alt}');
+    await vi.waitFor(() => expect(holdsFocus(columnsToolbar)).toBe(true));
+
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
+    await expect.element(columnsToolbar).toBeVisible();
+    expect(drawnToolbars()).toBe(1);
+  });
+
   it('takes a block dragged into it, and gives one dragged out', async () => {
     await page.viewport(1200, 800);
     const editor = await mount({
