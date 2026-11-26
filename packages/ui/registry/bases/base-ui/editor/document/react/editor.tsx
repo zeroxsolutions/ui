@@ -36,6 +36,9 @@ export interface EditorProps {
   blockMenuLabel?: string;
 }
 
+/** The handles a block draws on itself, which a drag of theirs starts from. */
+const BLOCK_HANDLES = '[data-slot=columns-divider], [data-slot=resize-handle], [data-slot=table-border]';
+
 /** A press on the grip that moves less than this is a click that opens the block menu; more is a drag. */
 const GRIP_CLICK_SLOP_PX = 4;
 
@@ -297,7 +300,7 @@ export function Editor({
   useEffect(() => {
     if (!rootEl || !handleEl) return;
     const overHandle = (event: MouseEvent) => {
-      if ((event.target as Element | null)?.closest?.('.cn-editor-handle')) handleEl.classList.add('hide');
+      if ((event.target as Element | null)?.closest?.(BLOCK_HANDLES)) handleEl.classList.add('hide');
     };
     rootEl.addEventListener('mousemove', overHandle);
     return () => rootEl.removeEventListener('mousemove', overHandle);
