@@ -1,10 +1,23 @@
 import { editorItems as items } from './test/editor-items';
 import { expect, test } from './test/fixtures';
 
+/**
+ * What WebKit logs when leaving a page cancels a link's RSC prefetch it started (`Fetch API cannot load
+ * /docs/editor/...?_rsc=... due to access control checks.`): the navigation the loop makes, not the page.
+ */
+const ABORTED_PREFETCH = /\?_rsc=\S+ due to access control checks/;
+
+/**
+ * What WebKit reports when the next goto cancels a chunk the page was still loading after its load event. Chromium and
+ * Firefox report nothing for it, so a chunk that fails on its own still fails the case there.
+ */
+const ABORTED_CHUNK = /^Failed to load chunk /;
+
 test('every editor page renders its demo on the server, and throws nothing once it runs', async ({
   page,
   request,
   browser,
+  browserName,
 }) => {
   // Each page is prerendered, but every editor page across a cold worker outruns the default deadline.
   test.setTimeout(270_000);
@@ -14,9 +27,13 @@ test('every editor page renders its demo on the server, and throws nothing once 
   const unhydrated = await served.newPage();
 
   const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.message}`));
+  const navigationNoise = (message: string): boolean =>
+    ABORTED_PREFETCH.test(message) || (browserName === 'webkit' && ABORTED_CHUNK.test(message));
+  page.on('pageerror', (error) => {
+    if (!navigationNoise(error.message)) errors.push(`${page.url()}: ${error.message}`);
+  });
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`${page.url()}: ${message.text()}`);
+    if (message.type() === 'error' && !navigationNoise(message.text())) errors.push(`${page.url()}: ${message.text()}`);
   });
 
   for (const { name, title, type } of items) {

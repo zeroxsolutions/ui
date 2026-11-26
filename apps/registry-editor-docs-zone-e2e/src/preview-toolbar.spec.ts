@@ -14,6 +14,14 @@ function darkTheme(page: Page) {
   return page.getByRole('button', { name: 'Toggle preview theme' }).first();
 }
 
+/**
+ * The first preview's editor where the page draws it inline. A later preview on the page draws an editor of the same
+ * name, so a frame drawing the first one is told apart by its title, not by this.
+ */
+function inlineEmailBody(page: Page) {
+  return page.getByRole('textbox', { name: 'Email body' }).first();
+}
+
 /** Opens the email editor's page in the light theme, once its preview's controls have hydrated. */
 async function openPreview(page: Page): Promise<void> {
   await page.emulateMedia({ colorScheme: 'light' });
@@ -39,7 +47,7 @@ test('a preview draws its demo inline at the desktop width in the site theme', a
 
   await expect(device(page, 'Desktop')).toHaveAttribute('aria-pressed', 'true');
   await expect(darkTheme(page)).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
+  await expect(inlineEmailBody(page)).toBeVisible();
   await expect(page.getByTitle(new RegExp(`^${DEMO}, `))).toHaveCount(0);
 });
 
@@ -75,7 +83,7 @@ test("the theme toggle frames the demo dark, leaving the site's stored theme", a
 
   await darkTheme(page).click();
   await expect(page.getByTitle(new RegExp(`^${DEMO}, `))).toHaveCount(0);
-  await expect(page.getByRole('textbox', { name: 'Email body' })).toBeVisible();
+  await expect(inlineEmailBody(page)).toBeVisible();
 });
 
 test('a view page opened alone carries its device and theme controls, and no docs chrome', async ({ page }) => {
