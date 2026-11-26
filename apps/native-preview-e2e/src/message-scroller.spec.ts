@@ -25,10 +25,14 @@ async function askAgain(page: Page): Promise<void> {
 async function restingScroll(thread: Locator): Promise<number> {
   const read = (): Promise<number> =>
     thread.evaluate(
-      (element) =>
+      (element: {
+        scrollTop: number;
+        ownerDocument: { defaultView: { requestAnimationFrame(next: () => void): number } };
+      }) =>
         new Promise<number>((resolve) => {
+          const frame = (next: () => void): number => element.ownerDocument.defaultView.requestAnimationFrame(next);
           const before = element.scrollTop;
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve(before === element.scrollTop ? before : -1)));
+          frame(() => frame(() => resolve(before === element.scrollTop ? before : -1)));
         }),
     );
   let at = -1;
