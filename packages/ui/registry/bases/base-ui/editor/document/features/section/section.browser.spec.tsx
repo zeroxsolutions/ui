@@ -10,8 +10,11 @@ import { DEFAULT_LAYOUT_WORDS, type LayoutWords } from '../../layout/layout-word
 import { Editor } from '../../react/editor';
 import { Viewer } from '../../react/viewer';
 import { SlashMenu } from '../../ui/slash-menu';
+import { callout } from '../callout/index';
 import { columns } from '../columns/index';
 import { standardKit } from '../standard/index';
+import { table } from '../table/index';
+import { toggle } from '../toggle/index';
 import { section } from './section';
 
 /** Words of another catalogue, so a name drawn from the English would show. */
@@ -27,7 +30,14 @@ const words: LayoutWords = {
   sectionWidths: { content: 'Contenu', wide: 'Large', full: 'Pleine' },
 };
 
-const features: EditorFeature[] = [standardKit(), columns(), section({ messages: words })];
+const features: EditorFeature[] = [
+  standardKit(),
+  columns(),
+  callout(),
+  toggle(),
+  table(),
+  section({ messages: words }),
+];
 const contributions = collectUiContributions(features);
 
 const line = (text: string): NodeJSON => ({ type: 'paragraph', content: [{ type: 'text', text }] });
@@ -88,14 +98,22 @@ const slashTitles = () =>
     (item) => item.textContent ?? '',
   );
 
-/** Whether any section of `doc` sits in a section or in a lane. */
+/** Whether any section of `nodes` sits below the top of the document. */
 function nestedSection(nodes: readonly NodeJSON[], inside = false): boolean {
-  return nodes.some(
-    (node) =>
-      (node.type === 'section' && inside) ||
-      nestedSection(node.content ?? [], inside || node.type === 'section' || node.type === 'column'),
-  );
+  return nodes.some((node) => (node.type === 'section' && inside) || nestedSection(node.content ?? [], true));
 }
+
+/** The blocks that hold blocks, each holding `content`, by the name a reader gives them. */
+const holders: Record<string, (content: NodeJSON[]) => NodeJSON> = {
+  callout: (content) => ({ type: 'callout', attrs: { variant: 'info' }, content }),
+  toggle: (content) => ({ type: 'toggle', attrs: { open: true }, content: [line('summary'), ...content] }),
+  quote: (content) => ({ type: 'blockquote', content }),
+  'list item': (content) => ({ type: 'bulletList', content: [{ type: 'listItem', content }] }),
+  'table cell': (content) => ({
+    type: 'table',
+    content: [{ type: 'tableRow', content: [{ type: 'tableCell', content }] }],
+  }),
+};
 
 /** Puts `html` on the clipboard as a reader does: selects it in an editable element and copies. */
 async function copyHtml(html: string): Promise<void> {
@@ -251,6 +269,23 @@ describe('the section in the Document Editor', () => {
       expect(slashTitles().length).toBeGreaterThan(0);
       await userEvent.keyboard('{Escape}');
     }
+  });
+
+  it.each(Object.keys(holders))('offers no section in a %s, nor takes one pasted there', async (name) => {
+    const editor = await mount({
+      type: 'doc',
+      content: [holders[name]!([line('inner'), { type: 'paragraph' }]), line('after')],
+    });
+    await openSlash(document.querySelector<HTMLElement>('.ProseMirror p:empty, .ProseMirror p:has(br:only-child)')!);
+    expect(slashTitles().some((title) => title.startsWith('Section'))).toBe(false);
+    expect(slashTitles().length).toBeGreaterThan(0);
+    await userEvent.keyboard('{Escape}');
+    await copyHtml('<div data-type="section" data-background="red"><p>copied</p></div>');
+    await userEvent.click(holding('.ProseMirror p', 'inner'));
+    await userEvent.keyboard('{End}');
+    await userEvent.paste();
+    await vi.waitFor(() => expect(editor.getText()).toContain('copied'));
+    expect(nestedSection(editor.getJSON().content ?? [])).toBe(false);
   });
 
   it('keeps a section out of a section and a lane when one is pasted there', async () => {

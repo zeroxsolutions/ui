@@ -14,23 +14,25 @@ const OWN_SPEC_NODES = new Set(['paragraph', 'columns', 'section', 'button', 'ta
 const standIns: NodeSpec[] = Object.keys(LAYOUT_NODES)
   .filter((type) => !OWN_SPEC_NODES.has(type))
   .map((name) =>
-    name === 'heading' || name === 'blockquote' || name === 'callout' || name === 'codeBlock'
-      ? { name, group: 'block', content: name === 'heading' || name === 'codeBlock' ? 'inline*' : 'paragraph+' }
-      : name.endsWith('List')
-        ? { name, group: 'block', content: 'listItem+' }
-        : name === 'image'
-          ? { name, group: 'block', atom: true, attrs: z.object({ src: z.string().optional() }) }
-          : { name, group: 'block', atom: true },
+    name === 'heading' || name === 'codeBlock'
+      ? { name, group: 'block', content: 'inline*' }
+      : name === 'blockquote' || name === 'callout' || name === 'toggle'
+        ? { name, group: 'block', content: 'block+' }
+        : name.endsWith('List')
+          ? { name, group: 'block', content: 'listItem+' }
+          : name === 'image'
+            ? { name, group: 'block', atom: true, attrs: z.object({ src: z.string().optional() }) }
+            : { name, group: 'block', atom: true },
   );
 const tableNodes: NodeSpec[] = [
   { name: 'table', group: 'block', content: 'tableRow+' },
   { name: 'tableRow', content: 'tableCell+' },
   {
     name: 'tableCell',
-    content: 'paragraph+',
+    content: 'block+',
     attrs: z.object({ colwidth: z.array(z.number()).nullable().optional() }),
   },
-  { name: 'listItem', content: 'paragraph+' },
+  { name: 'listItem', content: 'paragraph block*' },
 ];
 
 const documentBlocks: EditorFeature = {
@@ -84,6 +86,23 @@ function paste(engine: Editor, html: string): void {
 /** Every node in `nodes`, at any depth, with its depth below the top. */
 function walk(nodes: readonly NodeJSON[], depth = 0): { node: NodeJSON; depth: number }[] {
   return nodes.flatMap((node) => [{ node, depth }, ...walk(node.content ?? [], depth + 1)]);
+}
+
+/** Whether a section sits anywhere but at the top of `doc`. */
+function sectionBelowTop(doc: DocJSON): boolean {
+  return walk(doc.content ?? []).some(({ node, depth }) => node.type === 'section' && depth > 0);
+}
+
+/** Puts the caret at the end of the paragraph holding `value`. */
+function caretIn(engine: Editor, value: string): void {
+  let end: number | undefined;
+  engine.state.doc.descendants((node, pos) => {
+    if (end === undefined && node.type.name === 'paragraph' && node.textContent === value)
+      end = pos + node.nodeSize - 1;
+    return end === undefined;
+  });
+  if (end === undefined) throw new Error(`no paragraph holds ${value}`);
+  engine.commands.setTextSelection(end);
 }
 
 function sectionInSection(doc: DocJSON): boolean {
@@ -379,6 +398,61 @@ describe('blockLayout', () => {
     }
     const lanes = walk(editor.getJSON().content ?? []).filter(({ node }) => node.type === 'column');
     expect(lanes.some((lane) => (lane.node.content ?? []).some((child) => child.type === 'section'))).toBe(false);
+  });
+
+  describe('keeps a section at the top of the document', () => {
+    const inner = paragraph('inner');
+    const holders: Record<string, (content: NodeJSON[]) => NodeJSON> = {
+      callout: (content) => ({ type: 'callout', content }),
+      toggle: (content) => ({ type: 'toggle', content }),
+      quote: (content) => ({ type: 'blockquote', content }),
+      'list item': (content) => ({ type: 'bulletList', content: [{ type: 'listItem', content }] }),
+      'table cell': (content) => ({
+        type: 'table',
+        content: [{ type: 'tableRow', content: [{ type: 'tableCell', content }] }],
+      }),
+      lane: (content) => ({
+        type: 'columns',
+        content: [
+          { type: 'column', content },
+          { type: 'column', content: [paragraph('right')] },
+        ],
+      }),
+      section: (content) => ({ type: 'section', content }),
+    };
+
+    it.each(Object.entries(holders))('refuses one in a %s, by setContent and by paste', (_, holder) => {
+      const { editor, engine } = mount([holder([inner])]);
+      try {
+        editor.setContent({ type: 'doc', content: [holder([{ type: 'section', content: [paragraph('deep')] }])] });
+      } catch {
+        // A refused load leaves the document as it was.
+      }
+      expect(sectionBelowTop(editor.getJSON())).toBe(false);
+      const html = mount([{ type: 'section', content: [paragraph('copied')] }]).engine.getHTML();
+      caretIn(engine, 'inner');
+      paste(engine, html);
+      expect(sectionBelowTop(editor.getJSON())).toBe(false);
+      expect(walk(editor.getJSON().content ?? []).some(({ node }) => node.text?.includes('copied'))).toBe(true);
+    });
+
+    it.each(Object.entries(holders))('offers no section to insert in a %s', (_, holder) => {
+      const { editor, engine } = mount([holder([inner]), paragraph('after')]);
+      caretIn(engine, 'inner');
+      expect(editor.can('insertSection')).toBe(false);
+      expect(editor.run('insertSection')).toBe(false);
+      caretIn(engine, 'after');
+      expect(editor.can('insertSection')).toBe(true);
+    });
+
+    it('inserts one at the top holding an empty line', () => {
+      const { editor, engine } = mount([paragraph('top')]);
+      caretIn(engine, 'top');
+      expect(editor.run('insertSection')).toBe(true);
+      expect(editor.getJSON().content?.map((node) => node.type)).toEqual(['paragraph', 'section']);
+      expect(editor.getJSON().content?.[1]?.content).toMatchObject([{ type: 'paragraph' }]);
+      expect(editor.getJSON().content?.[1]?.content?.[0]?.content).toBeUndefined();
+    });
   });
 
   it('refuses in the email what the email cannot draw', () => {

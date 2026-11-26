@@ -831,7 +831,7 @@ export function emailKit(
     if (kind !== 'paragraph' && cellAt(found.engine.state) !== undefined) return false;
     // A library block's own feature knows where it goes, as a lane holds no hero.
     if (Object.hasOwn(libraryBlocks, kind)) return editor.can(`insertEmailBlock:${kind}`);
-    if (kind === 'section') return !editor.isActive('section') && !editor.isActive('column');
+    if (kind === 'section') return editor.can('insertSection');
     return kind !== 'columns' || laneAt(found.engine.state) === undefined;
   };
   const attributable = (editor: IEditor, attrs: Record<string, string>) => {

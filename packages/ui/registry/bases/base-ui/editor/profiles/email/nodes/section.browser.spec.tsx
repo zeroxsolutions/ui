@@ -149,6 +149,24 @@ describe('the section in the email editor', () => {
     expect(slashTitles()).not.toContain(DEFAULT_PROFILE_MESSAGES.blocks.section.title);
   });
 
+  it('offers no section in a callout, a quote or a list', async () => {
+    const probe = await mount([
+      block({ type: 'callout', content: { text: 'Callout' } }),
+      block({ type: 'quote', content: { text: 'Quote' } }),
+      block({ type: 'list', content: { items: ['Item'] } }),
+      paragraph('After'),
+    ]);
+    for (const text of ['Callout', 'Quote', 'Item']) {
+      await userEvent.click(find('[contenteditable=true] p', text));
+      await userEvent.keyboard('{End}');
+      expect(probe.editor.can('insertEmailBlock', { kind: 'section' })).toBe(false);
+      expect(probe.editor.run('insertEmailBlock', { kind: 'section' })).toBe(false);
+    }
+    await userEvent.click(find('[contenteditable=true] p', 'After'));
+    await userEvent.keyboard('{End}');
+    expect(probe.editor.can('insertEmailBlock', { kind: 'section' })).toBe(true);
+  });
+
   it('draws the section in the preview', async () => {
     await mount([block({ type: 'section', attributes: { background: 'teal' }, lanes: [[paragraph('Inside')]] })]);
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));

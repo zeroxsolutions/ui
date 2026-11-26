@@ -297,14 +297,11 @@ const sectionCodec: ReactNodeCodec = {
   fromMarkdown: () => null,
 };
 
-/** Whether the selection sits where a section may not: in a section or in a lane. */
-const holdsNoSection = (editor: IEditor): boolean => editor.isActive('section') || editor.isActive('column');
-
 /**
  * A section: blocks set together on a background from the theme's tokens, inside a padding, at the content's width,
- * wider, or the editor's full width. It holds any block but a section, and sits in no lane. Its floating toolbar
- * sets its background, padding and width through `setSectionLayout`, which the standard kit's block layout
- * declares. HTML keeps it whole; Markdown, which has no section, writes its blocks in order.
+ * wider, or the editor's full width. It holds any block but a section, and sits only at the top of the document,
+ * never in a lane, a callout, a quote, a list or a table. Its slash item runs `insertSection` and its floating
+ * toolbar `setSectionLayout`, both of which the standard kit's block layout declares. HTML keeps it whole; Markdown, which has no section, writes its blocks in order.
  */
 export function section(options: SectionOptions = {}): EditorFeature {
   const [sectionNode] = sectionNodeSpecs();
@@ -314,14 +311,6 @@ export function section(options: SectionOptions = {}): EditorFeature {
     id: 'section',
     nodes: [{ ...sectionNode, render: sectionView(words, widths) }],
     codecs: [sectionCodec as NodeCodec],
-    commands: {
-      insertSection: {
-        run: (editor) =>
-          !holdsNoSection(editor) &&
-          editor.run('insertContent', { content: { type: 'section', content: [{ type: 'paragraph' }] } }),
-        can: (editor) => !holdsNoSection(editor),
-      },
-    },
     slash: [
       {
         id: 'section',

@@ -78,11 +78,15 @@ strike, code and highlight only.
 
 The owner asked to proceed; these were settled by the writer and are open to the owner's review.
 
-1. **Section nesting.** A section holds any block but a section: columns, hero, card included. A section never
-   sits in a lane or in another section. A page is a run of sections and blocks. In email the section is a
-   top-level row (its own table), so section > columns > lane is two table levels, which Outlook draws; the
-   existing rules (no lanes in a lane, no hero or card in a lane) stay. `validate` and the renderer gain the
-   section rules; the content expressions in both editors say the same.
+1. **Section nesting.** A section holds any block but a section: columns, hero, card included. A section sits
+   only at the top of a document, never in a lane, another section, a callout, a toggle, a quote, a list item or
+   a table cell. A page is a run of sections and blocks. In email the section is a top-level row (its own table),
+   so section > columns > lane is two table levels, which Outlook draws; the existing rules (no lanes in a lane,
+   no hero or card in a lane) stay. `validate` and the renderer gain the section rules; the content expressions
+   in both editors say the same, and both editors offer the section only where the caret's block is one of the
+   document's own.
+   Revised 2026-11-26: the first version kept a section out of lanes and sections only, so one could sit in a
+   callout, a quote, a list item or a table cell; it now sits at the top only.
 2. **The stored email format grows; old names stay.** Email `align` keeps `left | center | right` on the wire
    (the editor maps `start`/`end` to them); `spaceBefore`, `width` fractions, `valign`, section and the text
    colour markers are new. editor-core 0.2.0 is unpublished and a product upgrades its editor and its server

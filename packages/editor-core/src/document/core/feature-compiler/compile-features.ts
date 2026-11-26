@@ -55,6 +55,8 @@ const Text = Node.create({ name: 'text', group: 'inline' });
  * `group` replaces what another extension adds to its schema, so the compiler spells the group out by name.
  */
 const SECTION_BLOCK = /\bsectionBlock\b/g;
+/** The `block` group in a content expression, which an editor holding a section reads as `sectionBlock` below the top. */
+const BLOCK_GROUP = /\bblock\b/g;
 /** The section's node name, which `sectionBlock` leaves out. */
 const SECTION_NODE = 'section';
 
@@ -81,6 +83,32 @@ function contentOf(content: string | undefined): string | undefined | ((this: { 
     );
     return content.replace(SECTION_BLOCK, `(${[...names].join(' | ')})`);
   };
+}
+
+/**
+ * `extension`, and the extensions it adds, with every node but the top one and the section holding `sectionBlock`
+ * where its content names `block`: a section sits only at the top of the document, never in a callout, a quote, a
+ * list item, a table cell or a toggle, whatever feature declared them. The schema then refuses a nested section on
+ * load, and a paste or a drop places one at the top.
+ */
+function keepSectionsAtTop(extension: AnyExtension): AnyExtension {
+  if (extension.type === 'node') {
+    if (extension.name === SECTION_NODE || getExtensionField(extension, 'topNode') === true) return extension;
+    return (extension as Node).extend({
+      content() {
+        const own = callOrReturn(this.parent);
+        if (typeof own !== 'string' || !own.match(BLOCK_GROUP)) return own;
+        const below = contentOf(own.replace(BLOCK_GROUP, 'sectionBlock'));
+        return typeof below === 'function' ? below.call(this) : below;
+      },
+    });
+  }
+  if (getExtensionField(extension, 'addExtensions') === undefined) return extension;
+  return (extension as Extension).extend({
+    addExtensions() {
+      return (this.parent?.() ?? []).map(keepSectionsAtTop);
+    },
+  });
 }
 
 function compileNode(spec: NodeSpec, renderer?: NodeViewRenderer): Node {
@@ -228,7 +256,8 @@ export function compileFeatures(features: EditorFeature[], options: CompileOptio
     compileAdvanced(feature, extensions);
   }
   extensions.push(compileBehavior(features));
-  return extensions as unknown as EngineExtensions;
+  const holdsSection = features.some((feature) => feature.nodes?.some((node) => node.name === SECTION_NODE));
+  return (holdsSection ? extensions.map(keepSectionsAtTop) : extensions) as unknown as EngineExtensions;
 }
 
 /**

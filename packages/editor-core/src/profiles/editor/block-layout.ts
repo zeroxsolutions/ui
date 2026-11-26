@@ -3,7 +3,15 @@
  * background colour marks, the commands that set them, and the reading of pixel widths an older document stored.
  */
 import { z } from 'zod';
-import { CONTENT_LOAD_META, Extension, Mark, Plugin, PluginKey, facadeFor } from '../../document/advanced.js';
+import {
+  CONTENT_LOAD_META,
+  Extension,
+  Mark,
+  Plugin,
+  PluginKey,
+  Selection,
+  facadeFor,
+} from '../../document/advanced.js';
 import type { Editor, EngineHandle } from '../../document/advanced.js';
 import type { EditorFeature, IEditor, NodeJSON } from '../../document/core/types/index.js';
 import {
@@ -470,6 +478,25 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       return true;
     });
 
+  // A section sits only at the top of the document: the caret's line, or the picked block, is one of its children.
+  const insertSection = (dispatch: boolean) => (facade: IEditor) =>
+    apply(facade, dispatch, (state, tr) => {
+      const { section: sectionType, paragraph } = state.schema.nodes;
+      const { selection } = state;
+      const picked = 'node' in selection;
+      const atTop = [selection.$from, selection.$to].every(($pos) => $pos.depth === (picked ? 0 : 1));
+      if (!sectionType || !paragraph || !atTop) return false;
+      const start = picked ? selection.from : selection.$from.before(1);
+      const block = state.doc.nodeAt(start);
+      if (!block) return false;
+      const section = sectionType.create(null, paragraph.create());
+      // An empty line becomes the section; any other block keeps its place, the section following it.
+      const at = block.isTextblock && block.content.size === 0 ? start : start + block.nodeSize;
+      tr.replaceWith(at, at === start ? start + block.nodeSize : at, section);
+      tr.setSelection(Selection.near(tr.doc.resolve(at + 2)));
+      return true;
+    });
+
   return {
     id: 'blockLayout',
     advanced: { engineExtensions: [engineExtension, paintMark('textColor'), paintMark('textBackground')] },
@@ -496,6 +523,11 @@ export function blockLayout(options: BlockLayoutOptions = {}): EditorFeature {
       setColumnsLayout: { args: columnsArgs, run: setColumnsLayout(true), can: setColumnsLayout(false) },
       /** Sets a table's column widths, one share per column of at least a twentieth; null draws them equal. */
       setTableLayout: { args: tableArgs, run: setTableLayout(true), can: setTableLayout(false) },
+      /**
+       * Inserts a section holding an empty line after the block holding the caret, in place of an empty line, with the
+       * caret in it. Refused below the top of the document: in a lane, a section, a callout, a quote, a list or a table.
+       */
+      insertSection: { run: insertSection(true), can: insertSection(false) },
       /** Sets a section's background, padding and width; null clears a key. */
       setSectionLayout: { args: sectionArgs, run: setSectionLayout(true), can: setSectionLayout(false) },
     },
