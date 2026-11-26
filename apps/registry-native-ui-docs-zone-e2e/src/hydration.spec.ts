@@ -1,4 +1,5 @@
 import { expect, test } from './test/fixtures';
+import { waitForHydration } from './test/hydrated';
 
 // A page is rendered once at build, with no query, so a page opened with `?style=` is where what the
 // browser reads first differs from what the server drew.
@@ -16,11 +17,7 @@ for (const path of PAGES) {
     });
 
     await page.goto(path);
-    // The header's picker opens its menu only once the page has hydrated, so a menu shown means hydration ran.
-    await expect(async () => {
-      await page.getByRole('button', { name: /^Style/ }).click();
-      await expect(page.getByRole('menu')).toBeVisible({ timeout: 1_000 });
-    }).toPass();
+    await waitForHydration(page);
 
     expect(errors.filter((error) => HYDRATION_ERROR.test(error))).toEqual([]);
   });

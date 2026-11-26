@@ -1,4 +1,5 @@
 import { expect, test } from './test/fixtures';
+import { registryItemNames } from './test/native-pages';
 
 interface RegistryIndex {
   name: string;
@@ -11,7 +12,7 @@ interface RegistryItem {
   registryDependencies?: string[];
 }
 
-test('serves the react native items for each engine in each style', async ({ request }) => {
+test('serves every item of the native registry for each engine in each style', async ({ request }) => {
   const styles = ['vega', 'luma', 'lyra', 'maia', 'mira', 'nova', 'rhea', 'sera'];
   for (const nativeStyle of styles.flatMap((style) => [`nativewind-${style}`, `uniwind-${style}`])) {
     const root = `/r/styles/${nativeStyle}`;
@@ -19,66 +20,7 @@ test('serves the react native items for each engine in each style', async ({ req
     expect(index.status(), `${root}/registry.json`).toBe(200);
     const registry = (await index.json()) as RegistryIndex;
     expect(registry.name).toBe('zui');
-    expect(registry.items.map(({ name }) => name)).toEqual(
-      expect.arrayContaining([
-        'button',
-        'icon',
-        'text',
-        'switch',
-        'tabs',
-        'spinner',
-        'input-group',
-        'input-otp',
-        'password-input',
-        'code-input',
-        'password-strength',
-        'unsaved-changes-toolbar',
-        'tab-bar',
-        'status-indicator',
-        'unsaved-indicator',
-        'icon-media',
-        'icon-label',
-        'meteors',
-        'animated-grid-pattern',
-        'center',
-        'page-container',
-        'panel-header',
-        'panel-row',
-        'panel-field-group',
-        'collapsible-card',
-        'reasoning-collapsible',
-        'copy-button',
-        'file-type-icon',
-        'font-preview',
-        'image-preview',
-        'permission-card',
-        'ai-provider-card',
-        'model-info-card',
-        'chat-message',
-        'chat-suggestion-item',
-        'floating-toolbar',
-        'editor-tab',
-        'language-toggle-group',
-        'emoji-appearance-toggle-group',
-        'command-menu',
-        'number-field',
-        'tag-input',
-        'language-combobox',
-        'frontmatter-form',
-        'tree-item',
-        'data-table-column-header',
-        'model-list',
-        'resize-handle',
-        'data-table',
-        'code-card',
-        'markdown-view',
-        'file-tree',
-        'emoji-picker',
-        'avatar-picker',
-        'brand-mark',
-        'ai-provider-picker',
-      ]),
-    );
+    expect(registry.items.map(({ name }) => name).sort()).toEqual([...registryItemNames].sort());
 
     const response = await request.get(`${root}/button.json`);
     expect(response.status(), `${root}/button.json`).toBe(200);

@@ -18,11 +18,6 @@ function control(): Element {
   return firstChild(screen.getByTestId('slider'));
 }
 
-/** The track, the control's first child; the range is the track's. */
-function track(): Element {
-  return firstChild(control());
-}
-
 /** The control, sized as a layout pass sizes it. */
 async function laidOut(width: number, height = 16): Promise<Element> {
   await fireEvent(control(), 'layout', { nativeEvent: { layout: { x: 0, y: 0, width, height } } });
@@ -275,7 +270,7 @@ describe('Slider', () => {
 
   it('takes no input and says so when disabled', async () => {
     await render(<Slider testID="slider" defaultValue={50} disabled />);
-    const laid = await laidOut(100);
+    await laidOut(100);
 
     await act(thumbs()[0], 'increment');
 

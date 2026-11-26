@@ -11,7 +11,7 @@ test("a preview's full page button opens its demo alone, with no site chrome", a
   const [view] = await Promise.all([context.waitForEvent('page'), open.click()]);
   await view.waitForLoadState();
   await expect(view).toHaveURL(/\/docs\/editor\/view\/document-editor-demo$/);
-  await expect(view.locator('[data-editor=document] [contenteditable=true]')).toBeVisible();
+  await expect(view.getByRole('heading', { name: 'Weekend in Hoi An' })).toBeEditable();
   await expect(view.getByRole('navigation', { name: 'Docs' })).toHaveCount(0);
 });
 

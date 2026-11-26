@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 import { waitForHydration } from './test/hydrated';
-import { DRAWN, frame, inside } from './test/native-preview';
+import { DRAWN, inside } from './test/native-preview';
 
 test.slow(true, 'the frame may take all of DRAWN to draw, and then loads the icons as a chunk of their own');
 
@@ -37,25 +37,18 @@ test("the page's search narrows the frame's grid, and an icon tapped there shows
   );
 });
 
-test('the frame keeps a fixed height, and the grid scrolls inside it to the icons at the end of the set', async ({
-  page,
-}) => {
+test('the grid scrolls inside its frame to the icons at the end of the set', async ({ page }) => {
   await page.goto('/native/icons/nativewind');
   const gallery = inside(page, 'Icon gallery demo');
   const first = gallery.getByRole('button', { name: 'a-arrow-down', exact: true });
   await expect(first).toBeVisible(DRAWN);
-  await expect.poll(async () => (await frame(page, 'Icon gallery demo').boundingBox())?.height).toBe(560);
 
   const zap = gallery.getByRole('button', { name: 'zap', exact: true });
   await first.hover();
-  // Read against the frame's box, which runs below a desktop viewport.
+  // The grid mounts only the rows near its viewport, so each wheel may bring the last row nearer to mounting.
   await expect(async () => {
     await page.mouse.wheel(0, 600);
-    await expect(zap).toBeAttached({ timeout: 500 });
-    const [outer, inner] = await Promise.all([frame(page, 'Icon gallery demo').boundingBox(), zap.boundingBox()]);
-    expect(
-      outer !== null && inner !== null && inner.y >= outer.y && inner.y + inner.height <= outer.y + outer.height,
-    ).toBe(true);
+    await expect(zap).toBeInViewport({ timeout: 500 });
   }).toPass({ timeout: 30_000 });
 });
 

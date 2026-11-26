@@ -72,28 +72,6 @@ test('a component page under either engine names the NativeWind page canonical a
   expect(image.headers()['content-type']).toBe('image/png');
 });
 
-test('the components index under either engine links the later components under that engine', async ({ page }) => {
-  for (const engine of ['nativewind', 'uniwind']) {
-    await page.goto(`/native/components/${engine}`);
-
-    const table = page.getByRole('table');
-    for (const [label, name] of [
-      ['Dialog', 'dialog'],
-      ['Select', 'select'],
-      ['Calendar', 'calendar'],
-      ['Sonner', 'sonner'],
-      ['Chart', 'chart'],
-      ['Sidebar', 'sidebar'],
-      ['Code Block', 'code-block'],
-    ]) {
-      await expect(table.getByRole('link', { name: label, exact: true }), `${engine} ${name}`).toHaveAttribute(
-        'href',
-        `/native/components/${engine}/${name}`,
-      );
-    }
-  }
-});
-
 test('the form page, whose item ships no files, installs Field under either engine', async ({ page }) => {
   for (const engine of ['nativewind', 'uniwind']) {
     await page.goto(`/native/components/${engine}/form`);

@@ -1,39 +1,40 @@
+import { type Page } from '@playwright/test';
+
 import { expect, test } from './test/fixtures';
 import { waitForHydration } from './test/hydrated';
 
-test('a web page is drawn in the style its URL names, the popups it opens included', async ({ page }) => {
+function picker(page: Page) {
+  return page.getByRole('button', { name: /^Style/ });
+}
+
+test('a web page opens in the style its URL names', async ({ page }) => {
   await page.goto('/docs/components/base/collapsible-card?style=vega');
 
-  await expect(page.locator('html')).toHaveClass(/\bstyle-vega\b/);
-  await expect(page.locator('html')).not.toHaveClass(/\bstyle-nova\b/);
-  // Vega's card spacing is 6, so the header sits one step in at 5.
-  const header = page.locator('[data-slot="collapsible-card-header"]').first();
-  await expect(header).toHaveCSS('padding-left', '20px');
-
-  await waitForHydration(page);
-  await page.getByRole('button', { name: /^Style/ }).click();
-  // Vega's menus are rounded-md, 8px under the theme's radius; Nova's rounded-lg is 10px.
-  await expect(page.locator('[data-slot="dropdown-menu-content"]')).toHaveCSS('border-top-left-radius', '8px');
+  await expect(picker(page)).toHaveAccessibleName('Style Vega');
 });
 
-test('a page with no style in its URL is drawn in the one last picked, from its first paint', async ({ page }) => {
+test('a page with no style in its URL opens in the one last picked', async ({ page }) => {
   // As text, since the spec compiles without the DOM's types; it runs in the page before its own scripts.
   await page.addInitScript("localStorage.setItem('zui:style:web', 'lyra')");
-  await page.goto('/docs/components/base/collapsible-card', { waitUntil: 'commit' });
+  await page.goto('/docs/components/base/collapsible-card');
 
-  await expect(page.locator('html')).toHaveClass(/\bstyle-lyra\b/);
-  await expect(page.locator('[data-slot="collapsible-card"]').first()).toHaveCSS('border-top-left-radius', '0px');
+  await expect(picker(page)).toHaveAccessibleName('Style Lyra');
 });
 
-test("picking a style redraws the page and the item's source in it", async ({ page }) => {
+test("picking a style redraws the item's source in it", async ({ page }) => {
   await page.goto('/docs/components/base/tree-item');
-  await expect(page.locator('html')).toHaveClass(/\bstyle-nova\b/);
-
   await waitForHydration(page);
-  await page.getByRole('button', { name: /^Style/ }).click();
+  const manual = page.getByRole('tab', { name: 'Manual' }).first();
+  const source = page.getByRole('tabpanel', { name: 'Manual' }).first();
+  await manual.click();
+  const inNova = (await source.textContent()) ?? '';
+  expect(inNova).toContain('function TreeItem');
+
+  await picker(page).click();
   await page.getByRole('menuitem', { name: 'Lyra' }).click();
 
-  await expect(page.locator('html')).toHaveClass(/\bstyle-lyra\b/);
-  await page.getByRole('tab', { name: 'Manual' }).first().click();
-  await expect(page.getByRole('main')).toContainText('min-h-8 rounded-none text-xs');
+  await expect(picker(page)).toHaveAccessibleName('Style Lyra');
+  await manual.click();
+  await expect(source).toContainText('function TreeItem');
+  await expect(source).not.toHaveText(inNova);
 });

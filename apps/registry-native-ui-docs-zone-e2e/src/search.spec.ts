@@ -1,13 +1,12 @@
 import { expect, test } from './test/fixtures';
+import { hydrated } from './test/hydrated';
 
 test("a native page's search finds native text and keeps the page's engine", async ({ page }) => {
   await page.goto('/native/components/uniwind/button');
 
-  // The shortcut listens only once the page has hydrated, so it is pressed until the search opens.
-  await expect(async () => {
-    await page.keyboard.press('ControlOrMeta+k');
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1_000 });
-  }).toPass();
+  await hydrated(page.getByRole('button', { name: 'Search documentation' }).first());
+  await page.keyboard.press('ControlOrMeta+k');
+  await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('combobox').fill('nativeID');
   const results = page.getByRole('group', { name: 'Search results' });
   await expect(results.getByRole('option').first()).toBeVisible();

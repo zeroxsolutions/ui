@@ -1,4 +1,5 @@
 import { expect, test } from './test/fixtures';
+import { componentPageSlugs } from './test/native-pages';
 
 test('/native/llms.txt and /native/llms-full.txt carry the native pages at their /native URLs', async ({ request }) => {
   const index = await (await request.get('/native/llms.txt')).text();
@@ -44,19 +45,19 @@ test("a native component page's Markdown is written for its engine, with no JSX 
   expect(theme).not.toContain('`tailwind.config.js` gains');
 });
 
-test('/native/llms.txt lists the later native components, and each answers as Markdown under both engines', async ({
+test('/native/llms.txt lists every native component page, and each answers as Markdown under both engines', async ({
   request,
 }) => {
   const index = await (await request.get('/native/llms.txt')).text();
 
-  for (const name of ['dialog', 'select', 'calendar', 'sonner', 'chart', 'sidebar', 'code-block']) {
-    expect(index, name).toContain(`(/native/components/nativewind/${name})`);
+  for (const slug of componentPageSlugs) {
+    expect(index, slug).toContain(`(/native/components/nativewind/${slug})`);
 
     for (const engine of ['nativewind', 'uniwind']) {
-      const response = await request.get(`/native/components/${engine}/${name}.md`);
+      const response = await request.get(`/native/components/${engine}/${slug}.md`);
 
-      expect(response.status(), `${engine} ${name}`).toBe(200);
-      expect(await response.text(), `${engine} ${name}`).toContain(`(/native/components/${engine}/${name})`);
+      expect(response.status(), `${engine} ${slug}`).toBe(200);
+      expect(await response.text(), `${engine} ${slug}`).toContain(`(/native/components/${engine}/${slug})`);
     }
   }
 });

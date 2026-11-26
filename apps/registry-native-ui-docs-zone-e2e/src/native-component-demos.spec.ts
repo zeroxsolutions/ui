@@ -5,6 +5,10 @@ import { DRAWN, inside } from './test/native-preview';
 
 const COMPONENTS = '/native/components/nativewind';
 
+// These cases need events only a browser raises: a caller's `preventDefault` on a press, and keys other than
+// return and backspace. The component specs' user-event raises neither, so each component's other cases are
+// in packages/native-ui.
+
 test.slow(true, 'a frame may take all of DRAWN to draw, outlasting the default');
 
 test('a chat suggestion whose caller prevents the default keeps its prompt, and another hands its prompt over', async ({
@@ -67,64 +71,16 @@ test('a number field steps on the arrows, and Escape drops the draft and keeps t
   await expect(width).toHaveValue('319');
 });
 
-test('a tag input adds on return and keeps focus, removes the last tag on Backspace, and keeps a tag whose remove its caller prevents', async ({
-  page,
-}) => {
+test('a tag input keeps a tag whose remove its caller prevents', async ({ page }) => {
   await page.goto(`${COMPONENTS}/tag-input`);
   const demo = inside(page, 'Tag input demo');
-  const field = demo.getByRole('textbox', { name: 'Add a tag', exact: true });
 
-  await field.click(DRAWN);
-  await field.fill('web');
-  await field.press('Enter');
-  await expect(demo.getByText('web', { exact: true })).toBeVisible();
-  await expect(field).toHaveValue('');
-  await expect(field).toBeFocused();
-
-  await field.press('Backspace');
-  await expect(demo.getByText('web', { exact: true })).toHaveCount(0);
-  await expect(demo.getByText('ui', { exact: true })).toBeVisible();
-
-  await demo.getByRole('button', { name: 'Remove design', exact: true }).click();
+  await demo.getByRole('button', { name: 'Remove design', exact: true }).click(DRAWN);
   await expect(demo.getByText('Press its X again to remove design', { exact: true })).toBeVisible();
   await expect(demo.getByText('design', { exact: true })).toBeVisible();
 
   await demo.getByRole('button', { name: 'Confirm removing design', exact: true }).click();
   await expect(demo.getByText('design', { exact: true })).toHaveCount(0);
-});
-
-test('an emoji swatch whose artwork the CDN refuses draws the glyph as text', async ({ page }) => {
-  const grinning = String.fromCodePoint(0x1f600);
-  await page.route('https://fluent-emoji.zeroxsolutions.com/**', (route) =>
-    new URL(route.request().url()).pathname.startsWith('/3d/')
-      ? route.fulfill({ status: 404 })
-      : route.fulfill({
-          contentType: 'image/svg+xml',
-          body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect width="1" height="1"/></svg>',
-        }),
-  );
-  await page.goto(`${COMPONENTS}/emoji-appearance-toggle-group`);
-  const demo = inside(page, 'Emoji appearance toggle group demo');
-
-  // Only the 3D artwork is refused, so the one glyph drawn as text is the 3D swatch's.
-  const group = demo.getByRole('radiogroup', { name: 'Emoji style', exact: true });
-  await expect(group.getByText('3D', { exact: true })).toBeVisible(DRAWN);
-  await expect(group.getByText(grinning, { exact: true })).toHaveCount(1);
-});
-
-test('a single-select toggle group reads as radios, the selected one checked', async ({ page }) => {
-  await page.goto(`${COMPONENTS}/toggle-group`);
-  const demo = inside(page, 'Toggle group demo');
-  const left = demo.getByRole('radio', { name: 'Left', exact: true });
-  const center = demo.getByRole('radio', { name: 'Center', exact: true });
-
-  await expect(left).toHaveAttribute('aria-checked', 'true', DRAWN);
-  await expect(center).toHaveAttribute('aria-checked', 'false');
-
-  await center.click();
-
-  await expect(center).toHaveAttribute('aria-checked', 'true');
-  await expect(left).toHaveAttribute('aria-checked', 'false');
 });
 
 test('a file tree moves focus on the arrows, Home and End, opens and closes a folder on Right and Left, selects on Enter and Space, and keeps one row in the tab order', async ({
@@ -186,7 +142,7 @@ test('a file tree moves focus on the arrows, Home and End, opens and closes a fo
   await expect(src).not.toBeFocused();
 });
 
-test('a tree row being renamed keeps its old name on Escape and takes the new one on return', async ({ page }) => {
+test('a tree row being renamed keeps its old name on Escape', async ({ page }) => {
   await page.goto(`${COMPONENTS}/tree-item`);
   const demo = inside(page, 'Tree item demo');
   const field = demo.getByRole('textbox', { name: 'New name for README.md', exact: true });
@@ -198,16 +154,9 @@ test('a tree row being renamed keeps its old name on Escape and takes the new on
   await expect(field).toHaveCount(0);
   await expect(demo.getByText('README.md', { exact: true })).toBeVisible();
   await expect(demo.getByText('NOTES.md', { exact: true })).toHaveCount(0);
-
-  await demo.getByRole('button', { name: 'Rename README.md', exact: true }).click();
-  await field.fill('NOTES.md');
-  await field.press('Enter');
-  await expect(field).toHaveCount(0);
-  await expect(demo.getByText('NOTES.md', { exact: true })).toBeVisible();
-  await expect(demo.getByText('README.md', { exact: true })).toHaveCount(0);
 });
 
-test('a resize handle resizes on a drag past 4px and not under it, by its step on the arrows, and toggles on Enter and a double click', async ({
+test('a resize handle resizes on a drag past 4px and not under it, by its step on the arrows, and toggles on Enter', async ({
   page,
 }) => {
   await page.goto(`${COMPONENTS}/resize-handle`);
@@ -241,8 +190,6 @@ test('a resize handle resizes on a drag past 4px and not under it, by its step o
 
   await page.keyboard.press('Enter');
   await expect(demo.getByText('Panel', { exact: true })).toBeVisible();
-  await handle.dblclick();
-  await expect(demo.getByText('Floating panel (190px)', { exact: true })).toBeVisible();
 });
 
 test('a column menu item whose caller prevents the default keeps the column, and another hides its column', async ({
@@ -262,58 +209,4 @@ test('a column menu item whose caller prevents the default keeps the column, and
   await demo.getByRole('menuitem', { name: 'Hide', exact: true }).click();
   await expect(sizeHeader).toHaveCount(0);
   await expect(nameHeader).toBeVisible();
-});
-
-test('the emoji nav scrolls the list to a category, and a typed search narrows the list and hides the nav', async ({
-  page,
-}) => {
-  await page.goto(`${COMPONENTS}/emoji-picker`);
-  const demo = inside(page, 'Emoji picker demo');
-  const flags = demo.getByRole('radio', { name: 'Flags', exact: true });
-
-  // The list mounts only the rows near the screen, so the last category is not drawn until the nav reaches it.
-  await flags.click(DRAWN);
-  await expect(demo.getByText('Flags', { exact: true })).toBeInViewport();
-  await expect(demo.getByRole('button', { name: 'chequered flag', exact: true })).toBeInViewport();
-
-  await demo.getByRole('textbox', { name: 'Search emoji', exact: true }).fill('pizza');
-  await expect(flags).toHaveCount(0);
-  await demo.getByRole('button', { name: 'pizza', exact: true }).click();
-  await expect(demo.getByText('Picked: \u{1F355}', { exact: true })).toBeVisible();
-
-  await demo.getByRole('textbox', { name: 'Search emoji', exact: true }).fill('no such emoji');
-  await expect(demo.getByText('No emoji found', { exact: true })).toBeVisible();
-});
-
-test('an avatar takes an image picked from the file dialog, and a colour typed as hex', async ({ page }) => {
-  await page.goto(`${COMPONENTS}/avatar-picker`);
-  const demo = inside(page, 'Avatar picker demo');
-
-  await demo.getByRole('button', { name: 'Edit avatar', exact: true }).click(DRAWN);
-  await demo.getByRole('tab', { name: 'Upload', exact: true }).click();
-  const chooser = page.waitForEvent('filechooser');
-  await demo.getByRole('button', { name: 'Choose image', exact: true }).click();
-  // A 1x1 PNG.
-  const png = Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
-    'base64',
-  );
-  await (await chooser).setFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: png });
-  await expect(demo.getByRole('button', { name: 'Replace image', exact: true })).toBeVisible();
-
-  await demo.getByRole('tab', { name: 'Color', exact: true }).click();
-  await demo.getByRole('textbox', { name: 'Custom', exact: true }).fill('#0EA5E9');
-  await expect(demo.getByRole('button', { name: '#0ea5e9', exact: true })).toHaveAttribute('aria-selected', 'true');
-});
-
-test("the AI provider picker draws each provider's mark from the brand-mark CDN", async ({ page }) => {
-  await page.goto(`${COMPONENTS}/ai-provider-picker`);
-  const demo = inside(page, 'Ai provider picker demo');
-
-  await expect(demo.getByRole('button', { name: 'Select OpenAI', exact: true })).toBeVisible(DRAWN);
-  // The marks carry no name of their own beside the card's title, so the file each one loaded is what shows it.
-  const mark = demo.locator('img[src="https://icons.zeroxsolutions.com/brands/avatar/openai.svg"]');
-  await expect(mark).toBeVisible();
-  // A width of 0 is a file the browser has not drawn, or could not.
-  await expect(mark).not.toHaveJSProperty('naturalWidth', 0);
 });

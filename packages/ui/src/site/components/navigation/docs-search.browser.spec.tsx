@@ -108,7 +108,7 @@ const field = () => page.getByRole('combobox');
 const openMenu = () => userEvent.keyboard('{Control>}k{/Control}');
 
 beforeAll(async () => {
-  await worker.start({ quiet: true, onUnhandledRequest: 'bypass' });
+  await worker.start({ quiet: true, onUnhandledFrame: 'bypass' });
 });
 afterEach(() => {
   worker.resetHandlers();

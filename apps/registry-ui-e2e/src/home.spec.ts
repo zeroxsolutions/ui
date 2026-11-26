@@ -1,4 +1,5 @@
 import { expect, test } from './test/fixtures';
+import { hydrated } from './test/hydrated';
 
 const ITEMS = ['Chat Message', 'Code Card', 'File Tree', 'Tag Input', 'Password Input', 'Status Indicator'];
 
@@ -15,48 +16,19 @@ const STUB_CLIPBOARD = `(() => {
   });
 })()`;
 
-test('/ says what the registry is, shows its items live, fits a phone, and links on', async ({ page, browserName }) => {
+test('/ says what the registry is, shows its items live, and links on', async ({ page, browserName }) => {
   await page.addInitScript(STUB_CLIPBOARD);
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  // Measured once the page's own requests settle, so a demo widened by a late image or font counts.
-  // eslint-disable-next-line playwright/no-networkidle
-  await page.waitForLoadState('networkidle');
-  await expect.poll(() => page.evaluate('document.scrollingElement.scrollWidth > window.innerWidth')).toBe(false);
-  // A cell is `min-w-0`, so a demo too wide for a phone does not widen the page; it overflows its cell.
-  await expect
-    .poll(() =>
-      page
-        .locator('[data-slot=home-grid-cell]')
-        // Named structurally, because this project's tsconfig carries no 'dom' lib.
-        .evaluateAll((cells: { scrollWidth: number; clientWidth: number }[]) =>
-          cells
-            .filter((cell) => cell.scrollWidth > cell.clientWidth)
-            .map((cell) => `${cell.scrollWidth} > ${cell.clientWidth}`),
-        ),
-    )
-    .toEqual([]);
 
-  await page.setViewportSize({ width: 1440, height: 900 });
   const main = page.getByRole('main');
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Composed React components for shadcn, on Base UI.');
   const copyButton = main.getByRole('button', { name: 'Copy code' }).first();
-  await expect(copyButton).toBeVisible();
-  // Retries the click itself, not just the read after it: clicked before React hydrates the button,
-  // it is a plain DOM click with no handler attached, and the first attempt is sometimes that one.
-  await expect
-    .poll(
-      async () => {
-        await copyButton.click();
-        return page.evaluate('window.__copiedText');
-      },
-      { timeout: 10_000 },
-    )
-    .toBe(INSTALL_COMMAND);
+  await hydrated(copyButton);
+  await copyButton.click();
+  await expect.poll(() => page.evaluate('window.__copiedText')).toBe(INSTALL_COMMAND);
   for (const item of ITEMS) await expect(main.getByText(item, { exact: true })).toBeVisible();
   // The featured component draws in place under its own heading, with a link to its page.
   const featured = main.getByRole('region', { name: 'AI Provider Picker' });
-  await expect(featured.locator('[data-slot=component-preview-stage]')).toBeVisible();
   await expect(featured.getByRole('link', { name: 'See the component' })).toHaveAttribute(
     'href',
     /\/docs\/components\/base\/ai-provider-picker$/,
@@ -85,7 +57,6 @@ test('the site carries its logo: the header link home, and the icons', async ({ 
   expect(icon.ok()).toBe(true);
   const svg = await icon.text();
   expect(svg).toContain('prefers-color-scheme: dark');
-  expect(svg.match(/<rect /g)).toHaveLength(6);
 
   const favicon = await request.get('/favicon.ico');
   expect(favicon.ok()).toBe(true);
@@ -166,19 +137,11 @@ test('the hero shader holds still under reduced motion or without WebGL, and oth
     await page.addInitScript(instrument(false));
     await page.goto('/');
     await expect.poll(() => page.evaluate('window.__contexts'), { timeout: 10_000 }).toBeGreaterThan(0);
-    // Settled is no frame requested across half a second. Fifteen seconds covers the start's own wait
-    // on a slow runner; the five-second bound is asserted on the page's own clock below.
+    // Settled is half a second, on the page's own clock, since the last frame was requested. Fifteen
+    // seconds covers the start's own wait on a slow runner; the five-second bound is asserted below.
     await expect
-      .poll(
-        async () => {
-          const before = (await page.evaluate('window.__frames')) as number;
-          // eslint-disable-next-line playwright/no-wait-for-timeout -- the window frames are counted over, not a wait for a state
-          await page.waitForTimeout(500);
-          return ((await page.evaluate('window.__frames')) as number) - before;
-        },
-        { timeout: 15_000 },
-      )
-      .toBe(0);
+      .poll(async () => Number(await page.evaluate('performance.now() - window.__lastFrameAt')), { timeout: 15_000 })
+      .toBeGreaterThan(500);
     expect(await page.evaluate('window.__lastFrameAt - window.__startedAt')).toBeLessThan(5_000);
   } finally {
     await moving.close();

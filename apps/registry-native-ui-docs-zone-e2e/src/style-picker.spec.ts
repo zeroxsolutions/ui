@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
 import { expect, test } from './test/fixtures';
+import { hydrated } from './test/hydrated';
 
 const BUTTON = '/native/components/nativewind/button';
 
@@ -8,12 +9,10 @@ function picker(page: Page): Locator {
   return page.getByRole('button', { name: /^Style/ });
 }
 
-/** Picks `style` from the header's picker; the menu opens only once the page has hydrated, so it is clicked until it does. */
+/** Picks `style` from the header's picker. */
 async function pickStyle(page: Page, style: string): Promise<void> {
-  await expect(async () => {
-    await picker(page).click();
-    await expect(page.getByRole('menuitem', { name: style })).toBeVisible({ timeout: 1_000 });
-  }).toPass();
+  await hydrated(picker(page));
+  await picker(page).click();
   await page.getByRole('menuitem', { name: style }).click();
 }
 
@@ -53,13 +52,13 @@ test('the picker writes no ?style= for the default, and a page with none shows t
 test.describe('at phone width', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  /** Opens the menu sheet; its button listens only once the page has hydrated, so it is clicked until the sheet opens. */
+  /** Opens the menu sheet. */
   async function openMenu(page: Page): Promise<Locator> {
     const sheet = page.getByRole('dialog', { name: 'Menu' });
-    await expect(async () => {
-      await page.getByRole('button', { name: 'Menu' }).click();
-      await expect(sheet).toBeVisible({ timeout: 1_000 });
-    }).toPass();
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await hydrated(menu);
+    await menu.click();
+    await expect(sheet).toBeVisible();
     return sheet;
   }
 
