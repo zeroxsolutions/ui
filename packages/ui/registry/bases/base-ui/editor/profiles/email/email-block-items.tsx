@@ -278,7 +278,7 @@ function EmailBlockItemFace({
   if (image) {
     return (
       <span
-        className="text-muted-foreground flex items-center justify-center border border-dashed"
+        className="cn-editor-inline text-muted-foreground flex items-center justify-center border border-dashed"
         style={{ width: size, height: size }}
       >
         <ImageIcon size={Math.round(size / 2)} aria-hidden />
@@ -374,7 +374,7 @@ export function EmailBlockItems({
                         type="button"
                         data-slot="email-block-item"
                         aria-label={nameOf(entry, index)}
-                        className="hover:bg-muted focus-visible:ring-ring/50 p-1 outline-none focus-visible:ring-3"
+                        className="cn-editor-inline cn-editor-control hover:bg-muted p-1 outline-none"
                       />
                     }
                   />

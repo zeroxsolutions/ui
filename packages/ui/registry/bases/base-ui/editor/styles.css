@@ -325,19 +325,32 @@
   }
 
   /* Tables: give cells a visible grid and header emphasis (prose leaves tiptap
-   * tables borderless), plus the column-resize affordance. */
+   * tables borderless), plus the column-resize affordance. The table's corners are
+   * the style's, from the root's `cn-editor-content` slot; a collapsed border model
+   * ignores a radius, so the table draws the outer edge and each cell only the lines
+   * after it. */
   .document-editor table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
     width: 100%;
     margin: 1rem 0;
     overflow: hidden;
   }
   .document-editor th,
   .document-editor td {
-    border: 1px solid var(--border);
+    border: 0 solid var(--border);
+    border-inline-end-width: 1px;
+    border-block-end-width: 1px;
     padding: 0.375rem 0.75rem;
     vertical-align: top;
     position: relative;
+  }
+  .document-editor tr > :last-child {
+    border-inline-end-width: 0;
+  }
+  .document-editor tr:last-child > * {
+    border-block-end-width: 0;
   }
   .document-editor th {
     background: var(--muted);
@@ -426,7 +439,7 @@
     outline-offset: 2px;
   }
   /* A block the grip selected for its menu. An inline atom (a chip) is a span and keeps its own look; an image
-   * keeps the ring above. No radius: the block's own corners are the style's, and the root slot rounds none. A
+   * keeps the ring above. Its corners are the style's block radius, from the root's `cn-editor-content` slot. A
    * button's row spans the line past the button and its Link, so the outline goes round the button instead. */
   .document-editor
     .ProseMirror-selectednode:not(

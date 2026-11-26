@@ -29,7 +29,7 @@ export function EmailSpacerView({ block, values, editor, words, messages }: Emai
       data-slot="email-spacer"
       data-height={height}
       style={{ height: px }}
-      className="group/spacer group-hover/email-block:outline-border [.ProseMirror-selectednode_&]:outline-ring relative outline-1 -outline-offset-1 outline-transparent outline-dashed"
+      className="cn-editor-block group/spacer group-hover/email-block:outline-border [.ProseMirror-selectednode_&]:outline-ring relative outline-1 -outline-offset-1 outline-transparent outline-dashed"
     >
       {editor && (
         <span className="bg-background text-muted-foreground pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 px-1 text-[0.625rem] leading-none opacity-0 group-hover/email-block:opacity-100 [.ProseMirror-selectednode_&]:opacity-100">

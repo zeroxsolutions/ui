@@ -51,12 +51,32 @@ const STANDS_FOR: [editor: string, component: string, properties: Property[]][] 
 /** The engine's own nodes the editor's root rounds, through `cn-editor-content`, as `cn-kbd` is rounded. */
 const ROUNDED_FROM_THE_ROOT = ['[&_.slash-active]:', '[&_mark]:'];
 
+/** The engine's own blocks the editor's root rounds, through `cn-editor-content`, as `cn-alert` is rounded. */
+const BLOCKS_ROUNDED_FROM_THE_ROOT = ['[&_.ProseMirror-selectednode:not(span)]:', '[&_table]:'];
+
+/**
+ * Each focus slot, the design-system slot whose ring it draws, and how that slot's state variants read on the
+ * editor's element: a control the editor draws takes `cn-button`'s as they are, and a field whose focus sits on
+ * the text inside it takes `cn-input`'s on its focus within and its `data-invalid`.
+ */
+const FOCUS: [editor: string, component: string, variant: (name: string) => string | null][] = [
+  ['cn-editor-control', 'cn-button', (name) => (name.startsWith('focus-visible:') ? name : null)],
+  [
+    'cn-editor-field',
+    'cn-input',
+    (name) =>
+      /^(dark:)?(focus-visible|aria-invalid):/.test(name)
+        ? name.replace('focus-visible:', 'focus-within:').replace('aria-invalid:', 'data-invalid:')
+        : null,
+  ],
+];
+
 /** Which slots, or which design-system component, each piece of the editor's chrome draws with. */
 const PIECES: Record<string, string[]> = {
   'document/ui/rect-popover.tsx': ['cn-popover-content', 'cn-popover-content-logical'],
   'document/ui/editor-toolbar.tsx': ['cn-editor-toolbar'],
   'document/ui/bubble-menu.tsx': ['cn-editor-toolbar'],
-  'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
+  'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media', 'cn-combobox-label'],
   'composer/triggers/trigger-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
   'document/features/mention/mention.tsx': ['<Badge'],
   'composer/triggers/inline-token.tsx': ['<Badge'],
@@ -81,6 +101,14 @@ const PIECES: Record<string, string[]> = {
   'mermaid/react/preview.tsx': ['cn-editor-diagram'],
   'document/features/image/image.tsx': ['cn-editor-block'],
   'document/features/embed/embed.tsx': ['cn-editor-block'],
+  'document/features/columns/columns.tsx': ['cn-editor-block'],
+  'document/features/card/card.tsx': ['cn-editor-block', 'cn-editor-control'],
+  'document/uploads/upload-tabs.tsx': ['cn-editor-block'],
+  'profiles/email/email-block-feature.tsx': ['cn-editor-block', 'cn-editor-control'],
+  'profiles/email/email-block-items.tsx': ['cn-editor-inline', 'cn-editor-control'],
+  'profiles/email/email-inline-field.tsx': ['cn-editor-inline'],
+  'profiles/email/email-spacer-view.tsx': ['cn-editor-block'],
+  'profiles/variables/variable-text-field.tsx': ['cn-editor-field'],
   'document/react/viewer.tsx': ['cn-editor-content'],
   'composer/chat-input.tsx': ['cn-editor-content'],
   'composer/chat-message-view.tsx': ['cn-editor-content'],
@@ -132,6 +160,28 @@ describe("the editor's chrome", () => {
       return ours === kbd ? [] : [`${variant} ${ours}, cn-kbd ${kbd}`];
     });
     expect(drift).toEqual([]);
+  });
+
+  it.each(STYLES)('rounds the block it selects and a table as cn-alert, in %s', (style) => {
+    const map = styleMapOf(ROOT, style);
+    const alert = PROPERTIES.radius(plain(map['cn-alert'])).join(' ');
+    const content = (map['cn-editor-content'] ?? '').split(/\s+/);
+    const drift = BLOCKS_ROUNDED_FROM_THE_ROOT.flatMap((variant) => {
+      const drawn = content.filter((name) => name.startsWith(variant)).map((name) => name.slice(variant.length));
+      if (drawn.length === 0) return [`${variant} draws no radius`];
+      const ours = PROPERTIES.radius(drawn).join(' ');
+      return ours === alert ? [] : [`${variant} ${ours}, cn-alert ${alert}`];
+    });
+    expect(drift).toEqual([]);
+  });
+
+  it.each(STYLES)('draws each focus slot as the ring of the design-system slot it stands for, in %s', (style) => {
+    const map = styleMapOf(ROOT, style);
+    for (const [editor, component, variant] of FOCUS) {
+      const theirs = map[component].split(/\s+/).flatMap((name) => variant(name) ?? []);
+      expect(theirs.length, component).toBeGreaterThan(0);
+      expect((map[editor] ?? '').split(/\s+/).sort(), editor).toEqual(theirs.sort());
+    }
   });
 
   it.each(STYLES)('highlights a menu row as cn-combobox-item does, in %s', (style) => {

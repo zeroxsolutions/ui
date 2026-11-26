@@ -93,9 +93,10 @@
   }
 
   /* MARK: Editor */
-  /* cn-kbd's radius, on the trigger highlight and the highlight mark the engine paints */
+  /* cn-kbd's radius on the trigger highlight and the highlight mark the engine paints, and cn-alert's on the
+   * block it selects and on a table */
   .cn-editor-content {
-    @apply [&_.slash-active]:rounded-none [&_mark]:rounded-none;
+    @apply [&_.ProseMirror-selectednode:not(span)]:rounded-none [&_.slash-active]:rounded-none [&_mark]:rounded-none [&_table]:rounded-none;
   }
 
   /* cn-kbd's radius, an inline formula */
@@ -126,5 +127,15 @@
   /* cn-item-media-variant-image's radius, the tile a menu row's icon sits on */
   .cn-editor-menu-media {
     @apply rounded-none;
+  }
+
+  /* cn-button's focus ring, a control the editor draws in a block */
+  .cn-editor-control {
+    @apply focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-2;
+  }
+
+  /* cn-input's focus and invalid ring, a field whose focus sits on the text inside it */
+  .cn-editor-field {
+    @apply focus-within:border-b-ring data-invalid:border-b-destructive dark:data-invalid:border-b-destructive/50;
   }
 }

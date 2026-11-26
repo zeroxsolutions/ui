@@ -223,7 +223,14 @@ export function CardView({
       src={shownImage}
       alt={editable ? '' : fields.alt}
       contentEditable={false}
-      className={cn('w-full data-dimmed:opacity-50', !hero && 'aspect-video object-cover')}
+      // A hero's image is a block of its own; a card's sits flush in the card's top, which rounds it. Here and
+      // below, each branch holding a slot is a `cn()` of its own, as `shadcn add` writes a style's classes for a
+      // slot only into the first string of a `cn()`.
+      className={
+        hero
+          ? cn('cn-editor-block w-full data-dimmed:opacity-50')
+          : 'aspect-video w-full object-cover data-dimmed:opacity-50'
+      }
     />
   );
   const status = uploading && imageUpload && (
@@ -263,7 +270,13 @@ export function CardView({
                   aria-label={words.image}
                   data-slot="card-image-trigger"
                   // An image that has not loaded still leaves a control to open its popover from.
-                  className="focus-visible:ring-ring/50 bg-muted/40 block min-h-12 w-full outline-none focus-visible:ring-3"
+                  className={
+                    hero
+                      ? cn(
+                          'cn-editor-block cn-editor-control bg-muted/40 block min-h-12 w-full overflow-hidden outline-none',
+                        )
+                      : cn('cn-editor-control bg-muted/40 block min-h-12 w-full outline-none')
+                  }
                 >
                   {imageElement}
                 </button>
@@ -272,10 +285,15 @@ export function CardView({
                   type="button"
                   aria-label={words.image}
                   data-slot="card-image-trigger"
-                  className={cn(
-                    'text-muted-foreground hover:bg-muted/50 focus-visible:ring-ring/50 flex w-full items-center justify-center gap-2 border-dashed text-sm outline-none focus-visible:ring-3',
-                    hero ? 'aspect-[3/1] border' : 'aspect-[3/1] border-b',
-                  )}
+                  className={
+                    hero
+                      ? cn(
+                          'cn-editor-block cn-editor-control text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm outline-none',
+                        )
+                      : cn(
+                          'cn-editor-control text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm outline-none',
+                        )
+                  }
                 >
                   <ImageIcon size={16} aria-hidden />
                   {standIn ?? words.imagePlaceholder}
@@ -293,7 +311,15 @@ export function CardView({
       ) : (
         (imageElement || standIn) &&
         (imageElement || (
-          <div className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm">
+          <div
+            className={
+              hero
+                ? cn(
+                    'cn-editor-block text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm',
+                  )
+                : 'text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border-b border-dashed text-sm'
+            }
+          >
             <ImageIcon size={16} aria-hidden />
             {standIn}
           </div>

@@ -224,7 +224,7 @@ function EmailBlockImage({
       />
     ) : (
       variable !== undefined && (
-        <span className="text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
+        <span className="cn-editor-block text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
           <ImageIcon size={16} aria-hidden />
           {variable}
         </span>
@@ -266,7 +266,7 @@ function EmailBlockImage({
             aria-label={label}
             className={cn(
               // An image that has not loaded still leaves a control to open its popover from.
-              'focus-visible:ring-ring/50 bg-muted/40 block min-h-12 w-full outline-none focus-visible:ring-3',
+              'cn-editor-block cn-editor-control bg-muted/40 block min-h-12 w-full outline-none',
               !drawn &&
                 'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
             )}

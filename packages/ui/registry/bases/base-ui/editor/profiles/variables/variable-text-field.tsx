@@ -258,7 +258,7 @@ export function VariableTextField({
       // The ring an input draws on its own focus and invalid state, drawn here because the focus and
       // `aria-invalid` sit on the text inside.
       className={cn(
-        'variable-text-field cn-editor-content min-w-0 transition-[color,box-shadow] data-disabled:cursor-not-allowed data-disabled:opacity-50 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-invalid:border-destructive data-invalid:ring-3 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40',
+        'variable-text-field cn-editor-content cn-editor-field min-w-0 transition-[color,box-shadow] data-disabled:cursor-not-allowed data-disabled:opacity-50',
         className,
       )}
       onKeyDownCapture={keyDown}

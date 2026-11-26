@@ -215,7 +215,7 @@ export function SlashMenu({
             ) : (
               groups.map(([heading, groupItems]) => (
                 <div key={heading} className="pb-1">
-                  <div className="text-muted-foreground px-2 pt-1.5 pb-1 text-xs font-medium">{heading}</div>
+                  <div className="cn-combobox-label">{heading}</div>
                   {groupItems.map((item) => {
                     const position = ordered.indexOf(item);
                     const highlighted = position === index;
