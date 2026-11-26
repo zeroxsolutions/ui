@@ -7,9 +7,22 @@ import {
   type InlineText,
 } from '../../template/index.js';
 import { libraryBlocks, type LibraryBlockType } from '../../template/email/blocks/index.js';
-import { CONTENT_WIDTH } from '../../template/email/blocks/shared.js';
+import { EMAIL_SECTION_WIDTHS } from '../../template/email/blocks/section.js';
+import { CONTENT_WIDTH, emailAlignOf, layoutAlignOf, type Align } from '../../template/email/blocks/shared.js';
+import {
+  ALIGNS,
+  COLOR_TOKENS,
+  DOCUMENT_CONTENT_WIDTH,
+  PARAGRAPH_SIZES,
+  SECTION_BACKGROUNDS,
+  SPACES,
+  snapWidth,
+  VALIGNS,
+  widthFromPixels,
+  type ColorToken,
+  type LayoutAlign,
+} from '../../template/layout/index.js';
 import { emailBlockCodec } from './email-block-codec.js';
-import { EMAIL_GLOBAL_ATTRIBUTES } from './email-nodes.js';
 import { EMAIL_KINDS } from './profile.js';
 import { splitVariables } from './sms-text.js';
 import type { EditorEmailBlock } from './types.js';
@@ -47,6 +60,14 @@ function hrefOf(mark: MarkJSON | undefined): string | undefined {
   return typeof variable === 'string' ? `{{${variable}}}` : undefined;
 }
 
+/** The colour token a `textColor` or `textBackground` mark names; none for `default` or a name outside the set. */
+function paintOf(marks: readonly MarkJSON[], type: 'textColor' | 'textBackground'): ColorToken | undefined {
+  const token = marks.find((mark) => mark.type === type)?.attrs?.token;
+  return typeof token === 'string' && token !== 'default' && (COLOR_TOKENS as readonly string[]).includes(token)
+    ? (token as ColorToken)
+    : undefined;
+}
+
 /** The runs `nodes` spell; consecutive nodes under one href join into one link run. */
 function runsOf(nodes: readonly NodeJSON[]): InlineRun[] {
   const runs: InlineRun[] = [];
@@ -54,11 +75,15 @@ function runsOf(nodes: readonly NodeJSON[]): InlineRun[] {
     const text = inlineText(node);
     if (text === '') continue;
     const marks = node.marks ?? [];
+    const color = paintOf(marks, 'textColor');
+    const background = paintOf(marks, 'textBackground');
     const part: InlineText = {
       kind: 'text',
       text,
       bold: marks.some((mark) => mark.type === 'bold'),
       italic: marks.some((mark) => mark.type === 'italic'),
+      ...(color === undefined ? {} : { color }),
+      ...(background === undefined ? {} : { background }),
     };
     const href = hrefOf(marks.find((mark) => mark.type === 'emailLink'));
     if (href === undefined) {
@@ -79,6 +104,8 @@ function marksOf(part: InlineText, href?: string): MarkJSON[] {
   return [
     ...(part.bold ? [{ type: 'bold' }] : []),
     ...(part.italic ? [{ type: 'italic' }] : []),
+    ...(part.color === undefined ? [] : [{ type: 'textColor', attrs: { token: part.color } }]),
+    ...(part.background === undefined ? [] : [{ type: 'textBackground', attrs: { token: part.background } }]),
     ...(href === undefined ? [] : [{ type: 'emailLink', attrs: { href } }]),
   ];
 }
@@ -127,10 +154,41 @@ function attributesOf(node: NodeJSON): Record<string, unknown> {
   return present(rest);
 }
 
-/** The email attributes a document node carries, by `EMAIL_GLOBAL_ATTRIBUTES`; the rest of its attributes are the document's own. */
-function carriedAttributes(node: NodeJSON): Record<string, unknown> {
-  const names = (EMAIL_GLOBAL_ATTRIBUTES[node.type] ?? []).filter((name) => name !== 'source' && name !== 'stored');
-  return present(Object.fromEntries(names.map((name) => [name, node.attrs?.[name]])));
+/** `value` where it is one of `values`, else undefined. */
+function oneOf<T extends string>(values: readonly T[], value: unknown): T | undefined {
+  return typeof value === 'string' && (values as readonly string[]).includes(value) ? (value as T) : undefined;
+}
+
+/** A document alignment as the wire names it; a document written before the layout names holds the wire's own. */
+function wireAlign(value: unknown): Align | undefined {
+  if (value === 'left' || value === 'right') return value;
+  const align = oneOf(ALIGNS, value);
+  return align === undefined ? undefined : emailAlignOf(align);
+}
+
+/** A text block's alignment on the wire: `justify`, which no email draws, is written as `left`. */
+function wireTextAlign(node: NodeJSON | undefined): Align | undefined {
+  // A text block written before `textAlign` holds its alignment as `align`, in the wire's names.
+  const value = node?.attrs?.textAlign ?? node?.attrs?.align;
+  return value === 'justify' ? 'left' : wireAlign(value);
+}
+
+/** The space before and after a document block, where each is a token. */
+function spacesOf(node: NodeJSON): Record<string, unknown> {
+  return present({
+    spaceBefore: oneOf(SPACES, node.attrs?.spaceBefore),
+    spaceAfter: oneOf(SPACES, node.attrs?.spaceAfter),
+  });
+}
+
+/** The first paragraph or heading in `node`, whose alignment a quote, a list and a callout take on the wire. */
+function firstTextblock(node: NodeJSON): NodeJSON | undefined {
+  return textblocksOf(node)[0];
+}
+
+/** A quote's, a list's or a callout's alignment: its own, from a document written before `textAlign`, or its first line's. */
+function containerAlign(node: NodeJSON): Align | undefined {
+  return wireTextAlign(firstTextblock(node)) ?? wireAlign(node.attrs?.align);
 }
 
 /** The paragraphs of `node`, in order, however deep: a heading, a paragraph and a code block each read as one. */
@@ -152,13 +210,14 @@ function identityOf(node: NodeJSON): Pick<EditorEmailBlock, 'id' | 'key'> {
   return { id: typeof id === 'string' ? id : null, key: str(key) };
 }
 
-function nodeOf(
+/** A default block's node: its identity and the attributes its import names, none copied from the wire as stored. */
+function layoutNodeOf(
   block: EmailBlockJSON,
   type: string,
   rest: Partial<NodeJSON> = {},
-  own: Record<string, unknown> = {},
+  attrs: Record<string, unknown> = {},
 ): NodeJSON {
-  return { type, attrs: { ...block.attributes, id: block.id, key: block.key, ...own }, ...rest };
+  return { type, attrs: { id: block.id, key: block.key, ...attrs }, ...rest };
 }
 
 function plainContent(text: string): NodeJSON[] | undefined {
@@ -277,10 +336,65 @@ function asStored(node: NodeJSON, exported: EditorEmailBlock): EditorEmailBlock 
   return { ...exported, attributes: copy.attributes, content: copy.content };
 }
 
-/** The image's width as an email draws it: a whole number of pixels up to the card's content width, or none. */
-function imageWidth(width: unknown): Record<string, number> {
-  if (typeof width !== 'number' || !Number.isFinite(width) || width < 1) return {};
-  return { width: Math.min(Math.round(width), CONTENT_WIDTH) };
+/**
+ * A document image's width as the wire stores it: a fraction, `full` written as the whole width, which the email
+ * draws at the card's content width, and a Document's legacy pixel width read against the Document's content width.
+ */
+function wireImageWidth(width: unknown): Record<string, number> {
+  if (width === 'full') return { width: 1 };
+  if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) return {};
+  return { width: width <= 1 ? snapWidth(width) : widthFromPixels(width, DOCUMENT_CONTENT_WIDTH) };
+}
+
+/** A wire image's width as the document holds it: a fraction, a legacy whole-pixel width read against the card's. */
+function documentImageWidth(width: unknown): number | null {
+  if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) return null;
+  return width <= 1 ? width : widthFromPixels(width, CONTENT_WIDTH);
+}
+
+/** A section's attributes on the wire: a `full` width, which no email draws, is written as `wide`. */
+function wireSection(node: NodeJSON): Record<string, unknown> {
+  const attrs = node.attrs ?? {};
+  return present({
+    background: oneOf(SECTION_BACKGROUNDS, attrs.background),
+    padding: oneOf(SPACES, attrs.padding),
+    width: attrs.width === 'full' ? 'wide' : oneOf(EMAIL_SECTION_WIDTHS, attrs.width),
+    ...spacesOf(node),
+  });
+}
+
+/** A table's column widths, where each is a share of at least a twentieth. */
+function columnWidthsOf(value: unknown): number[] | undefined {
+  return Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((width) => typeof width === 'number' && width >= 0.05 && width <= 1)
+    ? (value as number[])
+    : undefined;
+}
+
+/** A wire alignment as the document holds it. */
+function documentAlign(value: unknown): LayoutAlign | undefined {
+  const align = oneOf(['left', 'center', 'right'] as const, value);
+  return align === undefined ? undefined : layoutAlignOf(align);
+}
+
+/** The wire's space before and after a block, for its document node. */
+function documentSpaces(block: EmailBlockJSON): Record<string, unknown> {
+  return present({
+    spaceBefore: oneOf(SPACES, block.attributes.spaceBefore),
+    spaceAfter: oneOf(SPACES, block.attributes.spaceAfter),
+  });
+}
+
+/** A paragraph holding `text`, aligned as the wire block holding it was. */
+function alignedParagraph(text: string, align: unknown, attrs: Record<string, unknown> = {}): NodeJSON {
+  const textAlign = documentAlign(align);
+  const all = { ...attrs, ...(textAlign === undefined ? {} : { textAlign }) };
+  return {
+    type: 'paragraph',
+    ...(Object.keys(all).length === 0 ? {} : { attrs: all }),
+    ...withContent(inlineOf(text)),
+  };
 }
 
 const libraryCodecs = new Map<string, NodeCodec>();
@@ -305,7 +419,12 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return {
         ...base,
         type: 'paragraph',
-        attributes,
+        attributes: present({
+          align: wireTextAlign(node),
+          ...spacesOf(node),
+          tone: oneOf(['default', 'muted'] as const, node.attrs?.tone),
+          size: oneOf(PARAGRAPH_SIZES, node.attrs?.size),
+        }),
         content: { text: markupOf(node.content ?? [], node.attrs?.source) },
       };
     case 'heading': {
@@ -316,7 +435,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return asStored(node, {
         ...base,
         type: 'heading',
-        attributes: { level, ...carriedAttributes(node) },
+        attributes: { level, ...present({ align: wireTextAlign(node), ...spacesOf(node) }) },
         content: { text: markupOf(node.content ?? [], node.attrs?.source) },
       });
     }
@@ -332,7 +451,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return {
         ...base,
         type: 'quote',
-        attributes: carriedAttributes(node),
+        attributes: present({ align: containerAlign(node), ...spacesOf(node) }),
         content: { text: joinedMarkup(node, node.attrs?.source) },
       };
     case 'image': {
@@ -340,7 +459,11 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return asStored(node, {
         ...base,
         type: 'image',
-        attributes: { ...carriedAttributes(node), ...imageWidth(node.attrs?.width) },
+        attributes: present({
+          align: wireAlign(node.attrs?.align),
+          ...wireImageWidth(node.attrs?.width),
+          ...spacesOf(node),
+        }),
         content: {
           src: str(src),
           alt: str(alt),
@@ -357,7 +480,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
         type: 'table',
         attributes: {
           ...(header && (rows[0].content ?? []).length > 0 ? { header: true } : {}),
-          ...carriedAttributes(node),
+          ...present({ columnWidths: columnWidthsOf(node.attrs?.columnWidths), ...spacesOf(node) }),
         },
         content: { rows: rowsOf(node) },
       });
@@ -366,7 +489,7 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return {
         ...base,
         type: 'callout',
-        attributes: carriedAttributes(node),
+        attributes: present({ align: containerAlign(node), ...spacesOf(node) }),
         content: { text: joinedMarkup(node, node.attrs?.source) },
       };
     case 'bulletList':
@@ -375,24 +498,50 @@ function exportBlock(node: NodeJSON, codecs: readonly NodeCodec[], kinds: Readon
       return {
         ...base,
         type: 'list',
-        attributes: carriedAttributes(node),
+        attributes: present({ align: containerAlign(node), ...spacesOf(node) }),
         content: { items: (node.content ?? []).map((item) => joinedMarkup(item)) },
       };
     case 'button': {
-      const { label, href } = node.attrs ?? {};
-      return { ...base, type: 'button', attributes, content: present({ label, href }) };
+      const { label, href, width } = node.attrs ?? {};
+      return {
+        ...base,
+        type: 'button',
+        attributes: present({
+          align: wireAlign(node.attrs?.align),
+          ...spacesOf(node),
+          width: oneOf(['inline', 'full'] as const, width),
+        }),
+        content: present({ label, href }),
+      };
     }
     case 'codeBlock':
-      return { ...base, type: 'code', attributes: carriedAttributes(node), content: { code: str(node.attrs?.code) } };
+      return {
+        ...base,
+        type: 'code',
+        attributes: present({ align: wireAlign(node.attrs?.align), ...spacesOf(node) }),
+        content: { code: str(node.attrs?.code) },
+      };
     case 'emailHtml':
-      return { ...base, type: 'html', attributes, content: { html: textOf(node) } };
+      return { ...base, type: 'html', attributes: spacesOf(node), content: { html: textOf(node) } };
     case 'horizontalRule':
-      return { ...base, type: 'divider', attributes: carriedAttributes(node), content: {} };
+      return { ...base, type: 'divider', attributes: spacesOf(node), content: {} };
+    case 'section':
+      return {
+        ...base,
+        type: 'section',
+        attributes: wireSection(node),
+        content: {},
+        lanes: [(node.content ?? []).map((child) => exportBlock(child, codecs, kinds))],
+      };
     case 'columns':
       return {
         ...base,
         type: 'columns',
-        attributes,
+        attributes: present({
+          ratio: node.attrs?.ratio,
+          valign: oneOf(VALIGNS, node.attrs?.valign),
+          ...spacesOf(node),
+        }),
         content: {},
         lanes: (node.content ?? []).map((lane) =>
           (lane.content ?? []).map((child) => exportBlock(child, codecs, kinds)),
@@ -428,42 +577,53 @@ function storedOf(block: EmailBlockJSON): { attributes: unknown; content: unknow
 
 function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJSON {
   const text = str(block.content.text);
+  const align = block.attributes.align;
   switch (block.type) {
-    case 'paragraph':
-      return nodeOf(block, 'paragraph', withContent(inlineOf(text)), { source: text });
+    case 'paragraph': {
+      const textAlign = documentAlign(align);
+      return layoutNodeOf(block, 'paragraph', withContent(inlineOf(text)), {
+        ...(textAlign === undefined ? {} : { textAlign }),
+        ...documentSpaces(block),
+        ...present({ tone: block.attributes.tone, size: oneOf(PARAGRAPH_SIZES, block.attributes.size) }),
+        source: text,
+      });
+    }
     case 'callout':
-      return nodeOf(
+      return layoutNodeOf(
         block,
         'callout',
-        { content: [{ type: 'paragraph', ...withContent(inlineOf(text)) }] },
-        { variant: 'info', source: text },
+        { content: [alignedParagraph(text, align)] },
+        { variant: 'info', ...documentSpaces(block), source: text },
       );
     case 'list': {
       const items = Array.isArray(block.content.items) ? block.content.items : [];
       const content = items.map((item): NodeJSON => ({
         type: 'listItem',
-        content: [{ type: 'paragraph', attrs: { source: str(item) }, ...withContent(inlineOf(str(item))) }],
+        content: [alignedParagraph(str(item), align, { source: str(item) })],
       }));
-      return nodeOf(block, 'bulletList', { content });
+      return layoutNodeOf(block, 'bulletList', { content }, documentSpaces(block));
     }
     case 'heading': {
       const level = block.attributes.level;
-      return nodeOf(block, 'heading', withContent(inlineOf(text)), {
+      const textAlign = documentAlign(align);
+      return layoutNodeOf(block, 'heading', withContent(inlineOf(text)), {
         level: level === 1 || level === 3 ? level : 2,
+        ...(textAlign === undefined ? {} : { textAlign }),
+        ...documentSpaces(block),
         source: text,
         stored: storedOf(block),
       });
     }
     case 'quote':
-      return nodeOf(
+      return layoutNodeOf(
         block,
         'blockquote',
-        { content: [{ type: 'paragraph', ...withContent(inlineOf(text)) }] },
-        { source: text },
+        { content: [alignedParagraph(text, align)] },
+        { ...documentSpaces(block), source: text },
       );
     case 'image': {
       const { src, alt, caption, href } = block.content;
-      return nodeOf(
+      return layoutNodeOf(
         block,
         'image',
         {},
@@ -471,9 +631,11 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
           src: str(src),
           alt: str(alt),
           title: '',
-          width: typeof block.attributes.width === 'number' ? block.attributes.width : null,
+          width: documentImageWidth(block.attributes.width),
           caption: str(caption),
           href: str(href),
+          ...present({ align: documentAlign(align) }),
+          ...documentSpaces(block),
           stored: storedOf(block),
         },
       );
@@ -488,22 +650,76 @@ function importBlock(block: EmailBlockJSON, codecs: readonly NodeCodec[]): NodeJ
           content: [{ type: 'paragraph', attrs: { source: str(cell) }, ...withContent(inlineOf(str(cell))) }],
         })),
       }));
-      return nodeOf(block, 'table', withContent(content), { stored: storedOf(block) });
+      return layoutNodeOf(block, 'table', withContent(content), {
+        ...present({ columnWidths: columnWidthsOf(block.attributes.columnWidths) }),
+        ...documentSpaces(block),
+        stored: storedOf(block),
+      });
     }
     case 'button':
-      return nodeOf(block, 'button', {}, present({ label: block.content.label, href: block.content.href }));
+      return layoutNodeOf(
+        block,
+        'button',
+        {},
+        present({
+          label: block.content.label,
+          href: block.content.href,
+          align: documentAlign(align),
+          ...documentSpaces(block),
+          width: block.attributes.width,
+        }),
+      );
     case 'code':
-      return nodeOf(block, 'codeBlock', {}, { language: 'text', code: str(block.content.code) });
+      return layoutNodeOf(
+        block,
+        'codeBlock',
+        {},
+        {
+          language: 'text',
+          code: str(block.content.code),
+          ...present({ align: documentAlign(align) }),
+          ...documentSpaces(block),
+        },
+      );
     case 'html':
-      return nodeOf(block, 'emailHtml', withContent(plainContent(str(block.content.html))));
+      return layoutNodeOf(
+        block,
+        'emailHtml',
+        withContent(plainContent(str(block.content.html))),
+        documentSpaces(block),
+      );
     case 'divider':
-      return nodeOf(block, 'horizontalRule');
+      return layoutNodeOf(block, 'horizontalRule', {}, documentSpaces(block));
+    case 'section': {
+      const blocks = (block.lanes?.[0] ?? []).map((child) => importBlock(child, codecs));
+      return layoutNodeOf(
+        block,
+        'section',
+        // A section holds at least one block; a stored one of none opens holding an empty paragraph.
+        { content: blocks.length === 0 ? [{ type: 'paragraph' }] : blocks },
+        present({
+          background: oneOf(SECTION_BACKGROUNDS, block.attributes.background),
+          padding: oneOf(SPACES, block.attributes.padding),
+          width: oneOf(EMAIL_SECTION_WIDTHS, block.attributes.width),
+          ...documentSpaces(block),
+        }),
+      );
+    }
     case 'columns': {
       const content = (block.lanes ?? []).map((lane): NodeJSON => ({
         type: 'column',
         content: lane.map((child) => importBlock(child, codecs)),
       }));
-      return nodeOf(block, 'columns', { content });
+      return layoutNodeOf(
+        block,
+        'columns',
+        { content },
+        present({
+          ratio: block.attributes.ratio,
+          valign: oneOf(VALIGNS, block.attributes.valign),
+          ...documentSpaces(block),
+        }),
+      );
     }
     default: {
       const library = libraryCodecOf(block.type)?.fromEmailBlock?.(block);

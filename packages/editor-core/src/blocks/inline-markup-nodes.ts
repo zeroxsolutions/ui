@@ -5,6 +5,7 @@ import {
   type InlineRun,
   type InlineText,
 } from '../template/markup/inline-markup.js';
+import { COLOR_TOKENS, type ColorToken } from '../template/layout/index.js';
 
 /** The document's link mark's address, or undefined for a node it does not mark. */
 function hrefOf(node: NodeJSON): string | undefined {
@@ -12,9 +13,17 @@ function hrefOf(node: NodeJSON): string | undefined {
   return typeof href === 'string' ? href : undefined;
 }
 
+/** The colour token a `textColor` or `textBackground` mark names; none for `default` or a name outside the set. */
+function paintOf(marks: readonly MarkJSON[], type: 'textColor' | 'textBackground'): ColorToken | undefined {
+  const token = marks.find((mark) => mark.type === type)?.attrs?.token;
+  return typeof token === 'string' && token !== 'default' && (COLOR_TOKENS as readonly string[]).includes(token)
+    ? (token as ColorToken)
+    : undefined;
+}
+
 /**
- * A block body's inline nodes as inline markup: bold, italic and links survive, a hard break is a newline, and
- * every other mark and inline node is dropped, since the markup has no way to spell it.
+ * A block body's inline nodes as inline markup: bold, italic, colours and links survive, a hard break is a newline,
+ * and every other mark and inline node is dropped, since the markup has no way to spell it.
  */
 export function markupOfNodes(nodes: readonly NodeJSON[]): string {
   const runs: InlineRun[] = [];
@@ -22,11 +31,15 @@ export function markupOfNodes(nodes: readonly NodeJSON[]): string {
     const text = node.type === 'hardBreak' ? '\n' : node.type === 'text' ? (node.text ?? '') : '';
     if (text === '') continue;
     const marks = node.marks ?? [];
+    const color = paintOf(marks, 'textColor');
+    const background = paintOf(marks, 'textBackground');
     const part: InlineText = {
       kind: 'text',
       text,
       bold: marks.some((mark) => mark.type === 'bold'),
       italic: marks.some((mark) => mark.type === 'italic'),
+      ...(color === undefined ? {} : { color }),
+      ...(background === undefined ? {} : { background }),
     };
     const href = hrefOf(node);
     const last = runs.at(-1);
@@ -58,6 +71,8 @@ function nodesOfText(part: InlineText, href?: string): NodeJSON[] {
   const marks: MarkJSON[] = [
     ...(part.bold ? [{ type: 'bold' }] : []),
     ...(part.italic ? [{ type: 'italic' }] : []),
+    ...(part.color === undefined ? [] : [{ type: 'textColor', attrs: { token: part.color } }]),
+    ...(part.background === undefined ? [] : [{ type: 'textBackground', attrs: { token: part.background } }]),
     ...(href === undefined || !opensLink(href) ? [] : [{ type: 'link', attrs: { href } }]),
   ];
   return part.text

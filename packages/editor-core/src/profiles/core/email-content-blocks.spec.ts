@@ -94,14 +94,14 @@ describe('a quote through the email codec', () => {
 });
 
 describe('an image through the email codec', () => {
-  it('exports the document image with its caption, link and width, and round-trips', () => {
+  it("exports the document image with its caption, link and a pixel width as a fraction of the Document's, and round-trips", () => {
     const image: NodeJSON = {
       type: 'image',
       attrs: {
         src: 'https://x.test/a.png',
         alt: 'A bay',
         title: '',
-        width: 300,
+        width: 360,
         caption: 'Morning',
         href: '{{u}}',
         align: 'center',
@@ -111,18 +111,18 @@ describe('an image through the email codec', () => {
       id: null,
       key: '',
       type: 'image',
-      attributes: { align: 'center', width: 300 },
+      attributes: { align: 'center', width: 0.5 },
       content: { src: 'https://x.test/a.png', alt: 'A bay', caption: 'Morning', href: '{{u}}' },
     });
     const stored = [
-      block({ id: 'i', type: 'image', attributes: { width: 200 }, content: { src: '{{banner}}', alt: 'Banner' } }),
+      block({ id: 'i', type: 'image', attributes: { width: 0.35 }, content: { src: '{{banner}}', alt: 'Banner' } }),
     ];
     expect(toEmailBlocks(fromEmailBlocks(stored), [], ALL)).toEqual(stored);
   });
 
-  it("exports a width past the card's content at the content width", () => {
+  it("exports a pixel width past the Document's content as the whole width", () => {
     const image: NodeJSON = { type: 'image', attrs: { src: 'https://x.test/a.png', alt: 'a', width: 900 } };
-    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({ width: 566 });
+    expect(toEmailBlocks(docOf(image), [], ALL)[0].attributes).toEqual({ width: 1 });
   });
 });
 

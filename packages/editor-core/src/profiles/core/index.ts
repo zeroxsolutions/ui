@@ -1,5 +1,11 @@
 export { docProblems } from './doc-problems.js';
-export { buttonNodeSpec, columnsNodeSpecs, EMAIL_GLOBAL_ATTRIBUTES, emailNodeSpecs } from './email-nodes.js';
+export {
+  buttonNodeSpec,
+  columnsNodeSpecs,
+  EMAIL_LAYOUT_ATTRIBUTES,
+  emailNodeSpecs,
+  sectionNodeSpecs,
+} from './email-nodes.js';
 export { emailBlockCodec } from './email-block-codec.js';
 export { emailPreset, presetFits, type PresetRules } from './email-preset.js';
 export { fromEmailBlocks, toEmailBlocks } from './email-blocks.js';
