@@ -4,14 +4,15 @@ import { Suspense, type ComponentProps, type ReactNode } from 'react';
 
 import { type Host, useHost } from '../../../host/host-provider';
 import { useHydrated } from '../../hooks/use-hydrated';
-import { cn } from '../../../../registry/bases/base-ui/lib/utils';
+
+import { LinkSwitch, LinkSwitchItem } from './link-switch';
 
 /**
- * A row of underlined text links to one page in each of its variants, such as its engine or base, under
- * the page's title. `aria-label` names what they switch.
+ * A row of links to one page in each of its variants, such as its engine or base, under the page's title,
+ * drawn as the style's underlined tabs. `aria-label` names what they switch.
  */
-function LinkTabs({ className, ...props }: ComponentProps<'nav'> & { 'aria-label': string }): ReactNode {
-  return <nav data-slot="link-tabs" className={cn('flex items-center gap-6', className)} {...props} />;
+function LinkTabs(props: Omit<ComponentProps<typeof LinkSwitch>, 'variant'>): ReactNode {
+  return <LinkSwitch data-slot="link-tabs" variant="line" {...props} />;
 }
 
 interface LinkTabsItemProps extends Omit<ComponentProps<Host['Link']>, 'href'> {
@@ -37,26 +38,8 @@ function LinkTabsItemFromUrl(props: LinkTabsItemProps): ReactNode {
   return <LinkTabsItemLink {...props} search={useHydrated() ? search : ''} />;
 }
 
-function LinkTabsItemLink({
-  path,
-  current,
-  search,
-  className,
-  ...props
-}: LinkTabsItemProps & { search: string }): ReactNode {
-  const { Link } = useHost();
-  return (
-    <Link
-      data-slot="link-tabs-item"
-      href={search ? `${path}?${search}` : path}
-      aria-current={current ? 'page' : undefined}
-      className={cn(
-        'text-muted-foreground hover:text-foreground aria-[current=page]:text-foreground focus-visible:ring-ring/50 relative inline-flex rounded-sm outline-none focus-visible:ring-[3px] items-center pt-1 pb-0.5 text-base font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity aria-[current=page]:after:opacity-100',
-        className,
-      )}
-      {...props}
-    />
-  );
+function LinkTabsItemLink({ path, search, ...props }: LinkTabsItemProps & { search: string }): ReactNode {
+  return <LinkSwitchItem data-slot="link-tabs-item" href={search ? `${path}?${search}` : path} {...props} />;
 }
 
 export { LinkTabs, LinkTabsItem };
