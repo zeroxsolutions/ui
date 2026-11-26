@@ -40,7 +40,7 @@ function MarkdownViewInlineCode({ className, ...props }: ComponentProps<'code'>)
   return (
     <code
       data-slot="markdown-view-inline-code"
-      className={cn('bg-muted rounded px-1.5 py-0.5 font-mono', className)}
+      className={cn('cn-markdown-view-inline-code bg-muted px-1.5 py-0.5 font-mono', className)}
       {...props}
     />
   );
@@ -113,8 +113,8 @@ function MarkdownViewTaskCheckbox({
 /**
  * The renderers: tables as upstream's `Table` parts, GFM task items as a read-only `Checkbox`, and
  * fenced code as a `CodeCard`, headed with its language when the fence names one; inline code stays
- * a chip. `pre` is unwrapped, because the `code` renderer draws the whole block, and a `CodeCard`
- * root is a `<div>`, which must not nest in a `<pre>`.
+ * a chip, and an image takes the style's radius. `pre` is unwrapped, because the `code` renderer
+ * draws the whole block, and a `CodeCard` root is a `<div>`, which must not nest in a `<pre>`.
  */
 const markdownViewComponents: Components = {
   pre: ({ children }) => <>{children}</>,
@@ -131,6 +131,14 @@ const markdownViewComponents: Components = {
       <li className={className} {...props} />
     ),
   input: MarkdownViewTaskCheckbox,
+  img: ({ node: _node, className, alt, ...props }) => (
+    <img
+      data-slot="markdown-view-image"
+      alt={alt ?? ''}
+      className={cn('cn-markdown-view-image max-w-full', className)}
+      {...props}
+    />
+  ),
   code: ({ node: _node, className, children, ...props }) => {
     const text = String(children ?? '');
     if (!isBlockCode(className, text)) {
@@ -196,7 +204,6 @@ function MarkdownView({ children, className, ...props }: MarkdownViewProps): Rea
         '[&_li]:my-1',
         '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-3 [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:italic',
         '[&_hr]:border-border [&_hr]:my-6',
-        '[&_img]:max-w-full [&_img]:rounded-md',
         className,
       )}
       {...props}

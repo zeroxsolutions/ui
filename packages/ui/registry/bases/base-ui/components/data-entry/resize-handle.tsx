@@ -157,7 +157,7 @@ function ResizeHandle({
       }}
       {...props}
     >
-      <div className="bg-border z-10 flex h-6 w-1 shrink-0 rounded-lg" />
+      <div className="cn-resizable-handle-icon z-10 flex shrink-0" />
     </div>
   );
 }

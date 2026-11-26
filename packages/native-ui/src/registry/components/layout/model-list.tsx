@@ -44,7 +44,7 @@ function ModelListHeader({ className, ...props }: ComponentProps<typeof View>): 
 
 /** The section's heading, announced as a heading, growing to push the header's controls to its end. */
 function ModelListTitle({ className, ...props }: ComponentProps<typeof Text>): ReactNode {
-  return <Text role="heading" className={cn('flex-1 text-base font-sans-medium', className)} {...props} />;
+  return <Text role="heading" className={cn('cn-model-list-title/text flex-1', className)} {...props} />;
 }
 
 /** Trailing header controls, such as a search field or a refresh button. */

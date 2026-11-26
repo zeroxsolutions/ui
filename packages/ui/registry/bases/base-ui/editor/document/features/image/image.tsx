@@ -142,7 +142,7 @@ function ImageFigure({
       ) : (
         <span
           data-slot="image-empty"
-          className="cn-editor-block text-muted-foreground flex aspect-[3/1] min-h-28 w-full items-center justify-center gap-2 border border-dashed text-sm"
+          className="cn-editor-block cn-field-description flex aspect-[3/1] min-h-28 w-full items-center justify-center gap-2 border border-dashed"
         >
           <ImageIcon size={16} aria-hidden />
           <span>{empty}</span>

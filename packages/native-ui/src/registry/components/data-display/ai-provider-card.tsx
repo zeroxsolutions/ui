@@ -124,7 +124,7 @@ function AiProviderCardTrigger({
       className={cn(
         'cn-ai-provider-card-trigger absolute inset-0 -z-10',
         (pressed || cardPressed) && 'border-foreground/20 border',
-        focus.focusVisible && 'border-ring/50 border-[3px]',
+        focus.focusVisible && 'cn-ai-provider-card-trigger-focus-ring@focused',
         className,
       )}
       onPressIn={(event) => {

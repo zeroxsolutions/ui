@@ -14,7 +14,7 @@ import {
   type SerializeContext,
 } from '@zeroxsolutions/editor-core/document/core/index';
 import type { ReactNodeCodec } from '../../../react-types';
-import { CHROME_ICON_CLASS, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
+import { ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 
 const toggleHeadingAttrs = z.object({ open: z.boolean().default(true) });
 type ToggleHeadingAttrs = z.infer<typeof toggleHeadingAttrs>;
@@ -80,7 +80,8 @@ function ToggleHeadingView({
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}
-            className={cn(CHROME_ICON_CLASS, 'transition-transform', attrs.open && 'rotate-90')}
+            sized
+            className={cn('transition-transform', attrs.open && 'rotate-90')}
           />
         </span>
       </span>
@@ -149,7 +150,8 @@ function ToggleHeadingDetails({ open, children }: { open: boolean; children: [Re
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}
-            className={cn(CHROME_ICON_CLASS, 'transition-transform group-open:rotate-90')}
+            sized
+            className="transition-transform group-open:rotate-90"
           />
         </span>
         {heading}

@@ -8686,7 +8686,7 @@
       "title": "Tab bar",
       "description": "A bar of top-level destinations at one edge of the screen, a tablist of pressable tab items with an indicator, an icon, a label and a count badge.",
       "categories": ["navigation"],
-      "registryDependencies": ["@zui/badge", "@zui/icon", "@zui/text", "@zui/utils"],
+      "registryDependencies": ["@zui/badge", "@zui/focus-visible", "@zui/icon", "@zui/text", "@zui/utils"],
       "files": [
         {
           "path": "src/registry/components/navigation/tab-bar.tsx",
@@ -9322,6 +9322,7 @@
       "dependencies": ["@rn-primitives/slot"],
       "registryDependencies": [
         "@zui/button",
+        "@zui/focus-visible",
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input",
@@ -9610,6 +9611,7 @@
         "@zui/emoji-picker",
         "@zui/empty",
         "@zui/field",
+        "@zui/focus-visible",
         "@zui/icon",
         "@zui/icon-motion",
         "@zui/input",

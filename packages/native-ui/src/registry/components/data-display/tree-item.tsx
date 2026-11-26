@@ -2,6 +2,7 @@ import { Slot } from '@rn-primitives/slot';
 import { createContext, useContext, useMemo, useRef, type ComponentProps, type ReactNode } from 'react';
 import { Pressable, View, type TextInputInstance } from 'react-native';
 import { ChevronRightIcon } from '../../icons/lucide/chevron-right-icon';
+import { useFocusVisible } from '../../lib/focus-visible';
 import { iconTrigger, type IconHandle } from '../../lib/icon-motion';
 import { asText } from '../../lib/text-children';
 import { cn } from '../../lib/utils';
@@ -49,7 +50,8 @@ type TreeItemProps = ComponentProps<typeof View> & {
  *
  * A `TreeItemRenameInput` replaces the label's text while renaming. Trailing actions go in the row; with
  * `asChild` a Pressable child makes the whole row take a press for selection, and a press on the trigger or on
- * a trailing button still reaches that control alone. A context menu wraps the row in a `ContextMenuTrigger`.
+ * a trailing button still reaches that control alone, and the row is ringed while that child holds keyboard focus. A
+ * context menu wraps the row in a `ContextMenuTrigger`.
  */
 function TreeItem({
   expanded = false,
@@ -57,15 +59,30 @@ function TreeItem({
   editing: _editing = false,
   asChild = false,
   className,
+  onFocus,
+  onBlur,
   ...props
 }: TreeItemProps): ReactNode {
   const context = useMemo(() => ({ expanded, leaf }), [expanded, leaf]);
+  const focus = useFocusVisible();
   const Component = asChild ? Slot : View;
   return (
     <TreeItemContext.Provider value={context}>
       <TextClassContext.Provider value="cn-tree-item/text text-foreground/80">
         <Component
-          className={cn('cn-tree-item w-full min-w-0 flex-row items-center gap-1.5 ps-1.5 pe-2', className)}
+          className={cn(
+            'cn-tree-item w-full min-w-0 flex-row items-center gap-1.5 ps-1.5 pe-2',
+            focus.focusVisible && 'cn-tree-item-focus-ring@focused',
+            className,
+          )}
+          onFocus={(event: Parameters<NonNullable<typeof onFocus>>[0]) => {
+            focus.onFocus(event);
+            onFocus?.(event);
+          }}
+          onBlur={(event: Parameters<NonNullable<typeof onBlur>>[0]) => {
+            focus.onBlur();
+            onBlur?.(event);
+          }}
           {...props}
         />
       </TextClassContext.Provider>

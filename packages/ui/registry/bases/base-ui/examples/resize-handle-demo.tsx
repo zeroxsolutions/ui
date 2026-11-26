@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 
 import { ResizeHandle } from '@/registry/bases/base-ui/components/data-entry/resize-handle';
+import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 
 const MIN_WIDTH = 120;
 const MAX_WIDTH = 320;
@@ -12,27 +13,26 @@ function ResizeHandleDemo(): ReactNode {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="bg-muted/50 relative h-48 w-full overflow-hidden rounded-lg border">
-      <p className="text-muted-foreground absolute right-3 bottom-3 text-sm">Canvas</p>
-      <div className="absolute inset-y-3 left-3 flex">
-        <div
-          className="bg-popover text-popover-foreground overflow-hidden rounded-l-lg border border-r-0 p-2 text-sm"
-          style={{ width: collapsed ? COLLAPSED_WIDTH : width }}
-        >
-          {collapsed ? 'Panel' : `Floating panel (${width}px)`}
+    <Card className="h-48 w-full">
+      <CardContent className="flex flex-1 justify-between">
+        <div className="flex">
+          <Card size="sm" style={{ width: collapsed ? COLLAPSED_WIDTH : width }}>
+            <CardContent>{collapsed ? 'Panel' : `Floating panel (${width}px)`}</CardContent>
+          </Card>
+          <ResizeHandle
+            aria-label="Resize panel"
+            value={collapsed ? COLLAPSED_WIDTH : width}
+            min={COLLAPSED_WIDTH}
+            max={MAX_WIDTH}
+            onDrag={(dx) => {
+              if (!collapsed) setWidth((current) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, current + dx)));
+            }}
+            onToggle={() => setCollapsed((current) => !current)}
+          />
         </div>
-        <ResizeHandle
-          aria-label="Resize panel"
-          value={collapsed ? COLLAPSED_WIDTH : width}
-          min={COLLAPSED_WIDTH}
-          max={MAX_WIDTH}
-          onDrag={(dx) => {
-            if (!collapsed) setWidth((current) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, current + dx)));
-          }}
-          onToggle={() => setCollapsed((current) => !current)}
-        />
-      </div>
-    </div>
+        <p className="text-muted-foreground self-end">Canvas</p>
+      </CardContent>
+    </Card>
   );
 }
 

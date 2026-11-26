@@ -10,7 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/registry/bases/b
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/registry/bases/base-ui/ui/item';
 import type { BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import { CHROME_ICON_CLASS, ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
+import { ChromeIcon, useChromeActive } from '../../ui/chrome-icon';
 import { startPresetDrag } from './presets-feature';
 
 /** Every string the presets panel draws. */
@@ -135,7 +135,7 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
         className="cn-editor-menu-item hover:bg-accent hover:text-accent-foreground cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
       >
         <ItemMedia variant="icon" className="cn-editor-menu-media bg-secondary size-8 border text-base">
-          <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} className={CHROME_ICON_CLASS} active={active} />
+          <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} sized active={active} />
         </ItemMedia>
         <ItemContent className="gap-0.5">
           <ItemTitle>{preset.label}</ItemTitle>

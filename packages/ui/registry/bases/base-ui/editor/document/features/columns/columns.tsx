@@ -53,7 +53,7 @@ function ColumnsShell({ attrs, children }: { attrs: ColumnsAttrs; children: Reac
 
 function ColumnShell({ children }: { children: ReactNode }) {
   return (
-    <div data-slot="column" className="cn-editor-block h-full min-w-0 border border-dashed p-2">
+    <div data-slot="column" className="cn-editor-lane h-full min-w-0 border border-dashed">
       {children}
     </div>
   );

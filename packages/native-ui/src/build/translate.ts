@@ -316,6 +316,17 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ],
 ]);
 
+/** Each width and colour a style rings keyboard focus with, behind `modifier`, to the border a device draws. */
+function focusRingAsBorder(modifier: string, ring = 'ring'): ReadonlyMap<string, string> {
+  return new Map([
+    [`${modifier}:${ring}-1`, `${modifier}:border`],
+    [`${modifier}:${ring}-2`, `${modifier}:border-2`],
+    [`${modifier}:${ring}-3`, `${modifier}:border-[3px]`],
+    [`${modifier}:${ring}-ring/50`, `${modifier}:border-ring/50`],
+    [`${modifier}:${ring}-ring/30`, `${modifier}:border-ring/30`],
+  ]);
+}
+
 /**
  * Classes of one named slot that a device draws with another class, each to the one it becomes. A tinted
  * bubble mixes the primary colour to a fixed lightness with the relative colour syntax, which neither engine
@@ -329,7 +340,9 @@ const SLOT_DROPPED_CLASSES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
  * component gives a selected tab of the default variant, so the class becomes the border and the same colour
  * in that state, which the component merges after its own. zui's floating toolbar takes its ring's colour from
  * the slot and its width from the component, so the slot's colours become a border's, light and dark, and the
- * component draws the border as wide as the web's ring. A class may become several, space-separated.
+ * component draws the border as wide as the web's ring. zui's keyboard focus rings become a border of the
+ * ring's width and colour, which the component applies while it holds focus. A class may become several,
+ * space-separated.
  */
 const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = new Map([
   [
@@ -361,6 +374,12 @@ const SLOT_REPLACED_CLASSES: ReadonlyMap<string, ReadonlyMap<string, string>> = 
       ['dark:ring-foreground/10', 'dark:border-foreground/10'],
     ]),
   ],
+  ['cn-tree-item-focus-ring', focusRingAsBorder('focus-visible')],
+  ['cn-file-tree-item-focus-ring', focusRingAsBorder('group-focus-visible/file-tree-item')],
+  ['cn-ai-provider-card-trigger-focus-ring', focusRingAsBorder('focus-visible', 'inset-ring')],
+  ['cn-avatar-picker-color-focus-ring', focusRingAsBorder('focus-visible')],
+  ['cn-tab-bar-item-focus-ring', focusRingAsBorder('focus-visible')],
+  ['cn-tab-bar-indicator-focus-ring', focusRingAsBorder('group-focus-visible/tab-bar-item')],
   ['cn-tooltip-arrow', new Map([['translate-y-[calc(-50%-2px)]', 'translate-y-[-7px]']])],
   [
     'cn-tabs-trigger',

@@ -136,7 +136,7 @@ function MarkdownViewImage({ url, alt }: { url: string; alt: string | null | und
       accessible
       role="img"
       aria-label={alt ?? undefined}
-      className="w-full max-w-full overflow-hidden rounded-md"
+      className="cn-markdown-view-image w-full max-w-full overflow-hidden"
       style={size ? { aspectRatio: size.width / size.height, maxWidth: size.width } : { aspectRatio: 16 / 9 }}
     >
       <Image
@@ -176,7 +176,7 @@ function renderInline(nodes: readonly Phrasing[], definitions: Definitions): Rea
         );
       case 'inlineCode':
         return (
-          <Text key={index} className="bg-muted rounded px-1.5 py-0.5 font-mono" style={MONOSPACE}>
+          <Text key={index} className="cn-markdown-view-inline-code bg-muted px-1.5 py-0.5 font-mono" style={MONOSPACE}>
             {node.value}
           </Text>
         );

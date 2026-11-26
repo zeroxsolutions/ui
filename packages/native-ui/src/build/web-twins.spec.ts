@@ -31,6 +31,8 @@ const NOT_PORTED: ReadonlyMap<string, string> = new Map([
   ['editor-media', EDITOR],
   ['editor-table-of-contents', EDITOR],
   ['block-library', EDITOR],
+  ['block-presets', EDITOR],
+  ['editor-uploads', EDITOR],
   ['editor-features', EDITOR],
   ['math-editor', EDITOR],
   ['mermaid-editor', EDITOR],

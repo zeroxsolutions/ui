@@ -23,7 +23,7 @@ function IconMedia({ className, ...props }: ComponentProps<'span'>): ReactNode {
     <span
       data-slot="icon-media"
       className={cn(
-        "flex size-5 items-center justify-center rounded-sm [&_svg:not([class*='size-'])]:size-3",
+        "cn-icon-media flex size-5 items-center justify-center [&_svg:not([class*='size-'])]:size-3",
         className,
       )}
       {...props}

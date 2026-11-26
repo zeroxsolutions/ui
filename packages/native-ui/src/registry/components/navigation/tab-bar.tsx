@@ -10,6 +10,7 @@ import {
   type SetStateAction,
 } from 'react';
 import { Platform, Pressable, View } from 'react-native';
+import { useFocusVisible } from '../../lib/focus-visible';
 import { Badge } from '../../ui/badge';
 import { IconClassContext } from '../../ui/icon';
 import { Text, TextClassContext } from '../../ui/text';
@@ -24,7 +25,7 @@ type TabBarLabels = 'always' | 'selected' | 'none';
 /** `translucent` is `bg-background/70`, `solid` is `bg-background`. */
 type TabBarSurface = 'translucent' | 'solid';
 
-/** `attached` runs edge to edge, `floating` is a pill inset 16px from the edges. */
+/** `attached` runs edge to edge, `floating` is inset 16px from the edges and rounded as the style rounds a badge. */
 type TabBarShape = 'attached' | 'floating';
 
 const ATTACHED_EDGE: Readonly<Record<TabBarSide, string>> = {
@@ -58,7 +59,10 @@ function useTabBar(): TabBarContextValue {
 interface TabBarItemContextValue {
   active: boolean;
   pressed: boolean;
+  /** Whether the item holds keyboard focus, which its indicator rings where it has one. */
+  focusVisible: boolean;
   setDescription: Dispatch<SetStateAction<string | undefined>>;
+  setIndicated: Dispatch<SetStateAction<boolean>>;
 }
 
 const TabBarItemContext = createContext<TabBarItemContextValue | null>(null);
@@ -78,7 +82,7 @@ type TabBarProps = ComponentProps<typeof View> & {
   labels?: TabBarLabels;
   /** `translucent` when omitted, or `solid`. */
   surface?: TabBarSurface;
-  /** `attached` when omitted, or `floating`, which is `rounded-full`. */
+  /** `attached` when omitted, or `floating`, which is rounded as the style rounds a badge. */
   shape?: TabBarShape;
 };
 
@@ -119,7 +123,7 @@ function TabBar({
         wrapped ? null : 'absolute z-50',
         side === 'top' || side === 'bottom' ? 'flex-row items-center justify-between' : 'flex-col gap-1',
         surface === 'solid' ? 'bg-background' : 'bg-background/70',
-        floating ? 'rounded-full p-1.5 shadow-lg' : null,
+        floating ? 'cn-tab-bar-floating p-1.5 shadow-lg' : null,
         floating ? (wrapped ? null : FLOATING_EDGE[side]) : ATTACHED_EDGE[side],
         className,
       )}
@@ -152,7 +156,8 @@ type TabBarItemProps = ComponentProps<typeof Pressable> & {
 /**
  * One destination, a `Pressable` with the tab role that calls `onPress`, so a router's navigation goes
  * there. Its name is its `TabBarLabel`, or `accessibilityLabel` where the label is hidden and you want
- * another. A `TabBarBadge` inside it becomes its `accessibilityHint` unless you pass one.
+ * another. A `TabBarBadge` inside it becomes its `accessibilityHint` unless you pass one. Ringed while it holds
+ * keyboard focus, unless a `TabBarIndicator` inside it carries the ring.
  */
 function TabBarItem({
   active = false,
@@ -160,6 +165,8 @@ function TabBarItem({
   accessibilityState,
   onPressIn,
   onPressOut,
+  onFocus,
+  onBlur,
   className,
   children,
   ...props
@@ -167,7 +174,12 @@ function TabBarItem({
   const { side } = useTabBar();
   const [description, setDescription] = useState<string>();
   const [pressed, setPressed] = useState(false);
-  const context = useMemo(() => ({ active, pressed, setDescription }), [active, pressed]);
+  const [indicated, setIndicated] = useState(false);
+  const focus = useFocusVisible();
+  const context = useMemo(
+    () => ({ active, pressed, focusVisible: focus.focusVisible, setDescription, setIndicated }),
+    [active, pressed, focus.focusVisible],
+  );
   return (
     <TabBarItemContext.Provider value={context}>
       <TextClassContext.Provider value={active ? 'text-primary' : 'text-muted-foreground'}>
@@ -176,10 +188,19 @@ function TabBarItem({
           accessibilityState={{ ...accessibilityState, selected: active }}
           accessibilityHint={accessibilityHint ?? description}
           className={cn(
-            'min-h-12 min-w-16 items-center justify-center gap-1 rounded-lg p-1',
+            'cn-tab-bar-item min-h-12 min-w-16 items-center justify-center gap-1 p-1',
             side === 'top' || side === 'bottom' ? 'flex-1' : null,
+            focus.focusVisible && !indicated && 'cn-tab-bar-item-focus-ring@focused',
             className,
           )}
+          onFocus={(event) => {
+            focus.onFocus(event);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            focus.onBlur();
+            onBlur?.(event);
+          }}
           onPressIn={(event) => {
             setPressed(true);
             onPressIn?.(event);
@@ -201,16 +222,22 @@ function TabBarItem({
 }
 
 /**
- * The pill behind the icon: tinted while its item is active, and muted while an inactive item is pressed. Holds
- * the `TabBarIcon` and any `TabBarBadge`.
+ * The shape behind the icon, rounded as the style rounds a badge: tinted while its item is active, muted while an
+ * inactive item is pressed, and ringed in its item's place while the item holds keyboard focus. Holds the
+ * `TabBarIcon` and any `TabBarBadge`.
  */
 function TabBarIndicator({ className, ...props }: ComponentProps<typeof View>): ReactNode {
-  const { active, pressed } = useTabBarItem();
+  const { active, pressed, focusVisible, setIndicated } = useTabBarItem();
+  useEffect(() => {
+    setIndicated(true);
+    return () => setIndicated(false);
+  }, [setIndicated]);
   return (
     <View
       className={cn(
-        'relative h-8 w-14 items-center justify-center rounded-full',
+        'cn-tab-bar-indicator relative h-8 w-14 items-center justify-center',
         active ? 'bg-primary/10' : pressed && 'bg-muted',
+        focusVisible && 'cn-tab-bar-indicator-focus-ring@focused',
         className,
       )}
       {...props}

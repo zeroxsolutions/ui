@@ -9,7 +9,7 @@ function EmailUnknownView({ attrs, editor }: NodeViewProps<{ block?: { type?: un
     <div
       data-slot="email-unknown"
       contentEditable={false}
-      className="cn-editor-block text-muted-foreground mb-4 border border-dashed p-3 text-sm"
+      className="cn-editor-block cn-field-description mb-4 border border-dashed p-3"
     >
       {messagesOf(editor).unknownBlock(type)}
     </div>

@@ -354,7 +354,7 @@ function FileTreeLabel({
       className={cn(
         'cn-file-tree-item text-foreground/80 flex cursor-pointer items-center gap-1.5 pr-2 transition-colors',
         'hover:bg-muted hover:text-foreground',
-        'group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-3',
+        'cn-file-tree-item-focus-ring',
         'data-[selected]:bg-muted data-[selected]:text-foreground data-[selected]:font-medium',
         className,
       )}

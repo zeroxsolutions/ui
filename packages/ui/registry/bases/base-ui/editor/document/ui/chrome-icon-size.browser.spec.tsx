@@ -17,7 +17,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import '../../../../../../test/nova-style.css';
@@ -44,13 +44,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/registry/bases/base-ui/ui/toggle-group';
 import { EditorBlockMenu } from '../react/editor-block-menu';
 import { BubbleMenu } from './bubble-menu';
-import { CHROME_ICON_CLASS, ChromeIcon } from './chrome-icon';
+import { ChromeIcon } from './chrome-icon';
 import { EditorToolbar } from './editor-toolbar';
 import { SlashMenu } from './slash-menu';
 
-/** The rendered widths of the svgs inside an element, in order. */
+/** The widths of the svgs inside an element, in order, as laid out: an opening menu's scale is not in them. */
 function svgWidths(root: ParentNode): number[] {
-  return Array.from(root.querySelectorAll('svg')).map((svg) => svg.getBoundingClientRect().width);
+  return Array.from(root.querySelectorAll('svg')).map((svg) => Number.parseFloat(getComputedStyle(svg).width));
 }
 
 /** The nova sheet draws the controls, as in an installing app. */
@@ -80,21 +80,41 @@ const items = [
   { id: 'now', title: 'Now', icon: LetterBIcon, command: 'x' },
 ];
 
-/** The two icons of a menu draw at the same size, and at 16px. */
-function expectSameAsBefore([was, now]: number[]): void {
-  expect(was).toBeGreaterThan(0);
-  expect(now).toBeCloseTo(was, 0);
+/** The width the style's `cn-editor-icon` slot draws an svg at, which a bare svg would draw at 28px. */
+async function iconSlotWidth(): Promise<number> {
+  const { container, unmount } = await render(
+    <Nova>
+      <span className="cn-editor-icon">
+        <svg width={28} height={28} />
+      </span>
+    </Nova>,
+  );
+  const [width] = svgWidths(container);
+  unmount();
+  return width;
+}
+
+/** The two icons of a menu draw at the same size, the one the style's icon slot draws. */
+async function expectSameAsBefore([was, now]: number[]): Promise<void> {
+  const slot = await iconSlotWidth();
+  expect(slot).toBeGreaterThan(0);
+  expect(slot).toBeLessThan(28);
+  expect(was).toBeCloseTo(slot, 0);
+  expect(now).toBeCloseTo(slot, 0);
 }
 
 describe('the size of an icon the chrome draws', () => {
+  // A menu or a bubble opens in a portal on the body, outside `<Nova>`, where an app's root carries its style.
+  beforeAll(() => document.body.classList.add('style-nova'));
+  afterAll(() => document.body.classList.remove('style-nova'));
+
   it('keeps a toolbar icon at the size the lucide element had', async () => {
     const { container } = await render(
       <Nova>
         <EditorToolbar editor={editor} items={items} />
       </Nova>,
     );
-    const widths = svgWidths(container);
-    expect(widths).toEqual([16, 16]);
+    await expectSameAsBefore(svgWidths(container));
   });
 
   it('keeps a bubble icon at the size the lucide element had', async () => {
@@ -115,7 +135,7 @@ describe('the size of an icon the chrome draws', () => {
       if (!found) throw new Error('the bubble is not open');
       return found;
     });
-    expectSameAsBefore(svgWidths(bubble));
+    await expectSameAsBefore(svgWidths(bubble));
   });
 
   it('keeps a slash row icon at the size the lucide element had', async () => {
@@ -129,7 +149,7 @@ describe('the size of an icon the chrome draws', () => {
       if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
       return found;
     });
-    expectSameAsBefore(svgWidths(menu));
+    await expectSameAsBefore(svgWidths(menu));
   });
 
   it('keeps a block menu icon at the size the lucide element had', async () => {
@@ -149,7 +169,7 @@ describe('the size of an icon the chrome draws', () => {
       if (!found || svgWidths(found).length < 2) throw new Error('the menu is not open');
       return found;
     });
-    expectSameAsBefore(svgWidths(menu));
+    await expectSameAsBefore(svgWidths(menu));
   });
 
   it('keeps the other controls at the size their lucide element had', async () => {
@@ -219,7 +239,7 @@ describe('the size of an icon the chrome draws', () => {
           <ChevronRight className="size-4" />
         </span>,
         <span className="flex size-6 items-center justify-center">
-          <ChromeIcon icon={ChevronRightIcon} className={CHROME_ICON_CLASS} active={false} />
+          <ChromeIcon icon={ChevronRightIcon} sized active={false} />
         </span>,
       ],
       [

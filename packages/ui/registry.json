@@ -1721,7 +1721,7 @@
       "title": "Resize Handle Demo",
       "description": "A panel floating over a canvas, resized by dragging its ResizeHandle or collapsed by a double-click.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/resize-handle"],
+      "registryDependencies": ["@zui/resize-handle", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/resize-handle-demo.tsx",
@@ -1766,7 +1766,7 @@
       "title": "Copy Button Demo",
       "description": "An install command with its own copy button, announcing the copy inline.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/copy-button"],
+      "registryDependencies": ["@zui/copy-button", "@shadcn/item"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/copy-button-demo.tsx",
@@ -1884,7 +1884,7 @@
       "title": "Meteors Demo",
       "description": "Meteors falling behind a heading in a bordered panel.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/meteors"],
+      "registryDependencies": ["@zui/meteors", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/meteors-demo.tsx",
@@ -1899,7 +1899,7 @@
       "title": "Animated Grid Pattern Demo",
       "description": "A grid whose cells light and fade behind a heading, masked to fade toward the panel's edges.",
       "categories": ["examples"],
-      "registryDependencies": ["@zui/animated-grid-pattern"],
+      "registryDependencies": ["@zui/animated-grid-pattern", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/animated-grid-pattern-demo.tsx",
@@ -2074,7 +2074,7 @@
       "description": "A model list of three providers, one dimmed as unavailable, each toggleable and removable.",
       "categories": ["examples"],
       "dependencies": ["@zeroxsolutions/icons"],
-      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "@zui/model-list"],
+      "registryDependencies": ["@shadcn/item", "@shadcn/switch", "@zui/model-list", "@shadcn/card"],
       "files": [
         {
           "path": "registry/bases/base-ui/examples/model-list-demo.tsx",
@@ -2341,27 +2341,25 @@
         ".document-editor :where( [data-slot='callout'] > div > [data-node-view-content] > [data-node-view-content-react] > :last-child > [data-node-view-wrapper] > * )": {
           "margin-bottom": "0"
         },
-        "@layer components": {
-          ".document-editor [data-slot='callout']": {
-            "border-color": "var(--border)",
-            "background": "color-mix(in oklab, var(--muted-foreground) 6%, var(--background))"
-          },
-          ".document-editor [data-callout='info']": {
-            "border-color": "color-mix(in oklab, var(--info) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--info) 8%, var(--background))"
-          },
-          ".document-editor [data-callout='success']": {
-            "border-color": "color-mix(in oklab, var(--success) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--success) 8%, var(--background))"
-          },
-          ".document-editor [data-callout='warning']": {
-            "border-color": "color-mix(in oklab, var(--warning) 40%, var(--border))",
-            "background": "color-mix(in oklab, var(--warning) 10%, var(--background))"
-          },
-          ".document-editor [data-callout='danger']": {
-            "border-color": "color-mix(in oklab, var(--destructive) 35%, var(--border))",
-            "background": "color-mix(in oklab, var(--destructive) 8%, var(--background))"
-          }
+        ".document-editor [data-slot='callout']": {
+          "border-color": "var(--border)",
+          "background": "color-mix(in oklab, var(--muted-foreground) 6%, var(--background))"
+        },
+        ".document-editor [data-callout='info']": {
+          "border-color": "color-mix(in oklab, var(--info) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--info) 8%, var(--background))"
+        },
+        ".document-editor [data-callout='success']": {
+          "border-color": "color-mix(in oklab, var(--success) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--success) 8%, var(--background))"
+        },
+        ".document-editor [data-callout='warning']": {
+          "border-color": "color-mix(in oklab, var(--warning) 40%, var(--border))",
+          "background": "color-mix(in oklab, var(--warning) 10%, var(--background))"
+        },
+        ".document-editor [data-callout='danger']": {
+          "border-color": "color-mix(in oklab, var(--destructive) 35%, var(--border))",
+          "background": "color-mix(in oklab, var(--destructive) 8%, var(--background))"
         }
       },
       "dependencies": ["@zeroxsolutions/editor-core", "@zeroxsolutions/fluent-emoji", "zod"]
@@ -2833,6 +2831,9 @@
         }
       ],
       "css": {
+        ".document-editor :is(th, td)": {
+          "padding": "0.375rem 0.75rem"
+        },
         "@layer components": {
           ".document-editor table": {
             "border-collapse": "separate",
@@ -2846,7 +2847,6 @@
             "border": "0 solid var(--border)",
             "border-inline-end-width": "1px",
             "border-block-end-width": "1px",
-            "padding": "0.375rem 0.75rem",
             "vertical-align": "top",
             "position": "relative"
           },
@@ -2869,6 +2869,9 @@
             "width": "4px",
             "background": "var(--primary)",
             "pointer-events": "none"
+          },
+          ".document-editor tr > :last-child > .column-resize-handle": {
+            "right": "0"
           },
           ".document-editor .tableWrapper": {
             "overflow-x": "auto"
@@ -3852,6 +3855,7 @@
         "@shadcn/combobox",
         "@shadcn/field",
         "@shadcn/input",
+        "@shadcn/label",
         "@shadcn/popover",
         "@shadcn/tabs",
         "@shadcn/tooltip",

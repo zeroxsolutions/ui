@@ -80,6 +80,76 @@
     @apply rounded-2xl;
   }
 
+  /* MARK: Focus Rings */
+  /* cn-button's focus ring, a tree row holding keyboard focus */
+  .cn-tree-item-focus-ring {
+    @apply focus-visible:ring-ring/50 focus-visible:ring-3;
+  }
+
+  /* cn-button's focus ring, a file tree row whose item holds keyboard focus */
+  .cn-file-tree-item-focus-ring {
+    @apply group-focus-visible/file-tree-item:ring-ring/50 group-focus-visible/file-tree-item:ring-3;
+  }
+
+  /* cn-button's focus ring, inset on the card the trigger covers */
+  .cn-ai-provider-card-trigger-focus-ring {
+    @apply focus-visible:inset-ring-ring/50 focus-visible:inset-ring-3;
+  }
+
+  /* cn-button's focus ring, a colour swatch */
+  .cn-avatar-picker-color-focus-ring {
+    @apply focus-visible:ring-ring/50 focus-visible:ring-3;
+  }
+
+  /* MARK: Icon Media */
+  /* cn-kbd's radius, a tile of the same 20px */
+  .cn-icon-media {
+    @apply rounded-sm;
+  }
+
+  /* MARK: Markdown View */
+  /* cn-kbd's radius, an inline code chip */
+  .cn-markdown-view-inline-code {
+    @apply rounded-sm;
+  }
+
+  /* cn-dropdown-menu-item's radius, as the image preview's */
+  .cn-markdown-view-image {
+    @apply rounded-xl;
+  }
+
+  /* MARK: Model List */
+  /* cn-card-title's text size and weight */
+  .cn-model-list-title {
+    @apply text-base font-medium;
+  }
+
+  /* MARK: Tab Bar */
+  /* cn-badge's radius, a pill wherever the badge is one, the floating bar */
+  .cn-tab-bar-floating {
+    @apply rounded-full;
+  }
+
+  /* cn-badge's radius, a pill wherever the badge is one, behind the icon */
+  .cn-tab-bar-indicator {
+    @apply rounded-full;
+  }
+
+  /* cn-button's radius, a destination */
+  .cn-tab-bar-item {
+    @apply rounded-4xl;
+  }
+
+  /* cn-button's focus ring, a destination, which its indicator carries instead where it has one */
+  .cn-tab-bar-item-focus-ring {
+    @apply focus-visible:ring-ring/50 focus-visible:ring-3;
+  }
+
+  /* cn-button's focus ring, the indicator of a destination holding keyboard focus */
+  .cn-tab-bar-indicator-focus-ring {
+    @apply group-focus-visible/tab-bar-item:ring-ring/50 group-focus-visible/tab-bar-item:ring-3;
+  }
+
   /* MARK: Floating Toolbar */
   /* cn-dropdown-menu-content's ring, radius and shadow */
   .cn-floating-toolbar {
@@ -137,5 +207,20 @@
   /* cn-input's focus and invalid ring, a field whose focus sits on the text inside it */
   .cn-editor-field {
     @apply focus-within:border-ring focus-within:ring-ring/50 data-invalid:ring-destructive/20 dark:data-invalid:ring-destructive/40 data-invalid:border-destructive dark:data-invalid:border-destructive/50 focus-within:ring-[3px] data-invalid:ring-[3px];
+  }
+
+  /* cn-alert's radius and padding, a lane of a columns block */
+  .cn-editor-lane {
+    @apply rounded-lg px-4 py-3;
+  }
+
+  /* cn-dropdown-menu-item's icon size, a menu or toolbar icon whose control would size it otherwise */
+  .cn-editor-icon {
+    @apply size-4 [&_svg]:size-4!;
+  }
+
+  /* cn-badge's type, a short label the editor sets on a block, as a spacer's size */
+  .cn-editor-caption {
+    @apply text-xs font-medium;
   }
 }

@@ -78,7 +78,7 @@ function AiProviderCardTrigger({
       data-slot="ai-provider-card-trigger"
       type={type}
       className={cn(
-        'hover:inset-ring-foreground/20 focus-visible:inset-ring-ring/50 cn-ai-provider-card-trigger absolute inset-0 z-10 cursor-pointer outline-none hover:inset-ring-1 focus-visible:inset-ring-3',
+        'hover:inset-ring-foreground/20 cn-ai-provider-card-trigger cn-ai-provider-card-trigger-focus-ring absolute inset-0 z-10 cursor-pointer outline-none hover:inset-ring-1',
         className,
       )}
       {...props}

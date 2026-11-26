@@ -48,7 +48,7 @@ function IconMedia({ className, 'aria-label': label, ...props }: ComponentProps<
           accessible={label !== undefined}
           role={label === undefined ? undefined : 'img'}
           aria-label={label}
-          className={cn('size-5 items-center justify-center rounded-sm', view)}
+          className={cn('cn-icon-media size-5 items-center justify-center', view)}
           {...props}
         />
       </IconClassContext.Provider>

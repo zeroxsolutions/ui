@@ -6,6 +6,7 @@ import { LinkIcon } from '@/registry/bases/base-ui/icons/lucide/link-icon';
 import { SettingsIcon } from '@/registry/bases/base-ui/icons/lucide/settings-icon';
 import { Button } from '@/registry/bases/base-ui/ui/button';
 import { Input } from '@/registry/bases/base-ui/ui/input';
+import { Label } from '@/registry/bases/base-ui/ui/label';
 import {
   Popover,
   PopoverContent,
@@ -130,9 +131,7 @@ function EmailBlockNumberField({
   const [draft, setDraft] = useState<string | null>(null);
   return (
     <div className="flex items-center justify-between gap-2">
-      <label htmlFor={id} className="text-sm">
-        {label}
-      </label>
+      <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}
         type="number"
@@ -224,7 +223,7 @@ function EmailBlockImage({
       />
     ) : (
       variable !== undefined && (
-        <span className="cn-editor-block text-muted-foreground flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed text-sm">
+        <span className="cn-editor-block cn-field-description flex aspect-[3/1] w-full items-center justify-center gap-2 border border-dashed">
           <ImageIcon size={16} aria-hidden />
           {variable}
         </span>
@@ -266,9 +265,8 @@ function EmailBlockImage({
             aria-label={label}
             className={cn(
               // An image that has not loaded still leaves a control to open its popover from.
-              'cn-editor-block cn-editor-control bg-muted/40 block min-h-12 w-full outline-none',
-              !drawn &&
-                'text-muted-foreground hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed text-sm',
+              'cn-editor-block cn-editor-control cn-field-description bg-muted/40 block min-h-12 w-full outline-none',
+              !drawn && 'hover:bg-muted/50 flex aspect-[3/1] items-center justify-center gap-2 border border-dashed',
             )}
           >
             {drawn || (
