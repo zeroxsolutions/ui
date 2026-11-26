@@ -11,7 +11,8 @@ import { Extension } from '@zeroxsolutions/editor-core/document/advanced';
 import { defineFeature, type EditorFeature } from '@zeroxsolutions/editor-core/document/core/index';
 import { blockLayout, type BlockLayoutOptions } from '@zeroxsolutions/editor-core/profiles/editor/index';
 import { standardMarkCodecs, standardNodeCodecs } from './standard-codecs';
-import { standardBlockMenuItems, standardBubbleItems, standardSlashItems, standardToolbarItems } from './standard-ui';
+import { layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
+import { standardBlockMenu, standardSlashItems, standardToolbarItems, textStyleBubbleItems } from './standard-ui';
 import { TaskItemView } from './task-item-view';
 
 /** The width the drag handle is given. The handle looks this much plus 50px right of the pointer for the node it
@@ -56,6 +57,11 @@ export interface StandardKitOptions {
    * `{ email: true }`; `false` leaves the layout out, for a host that declares it itself.
    */
   layout?: BlockLayoutOptions | false;
+  /**
+   * The words of the paragraph styles in the block menu and the bubble's text styling, over the English; a getter
+   * is read once, as the kit is built.
+   */
+  messages?: Partial<LayoutWords> | (() => LayoutWords);
 }
 
 /**
@@ -73,6 +79,7 @@ export interface StandardKitOptions {
 export function standardKit(options: StandardKitOptions = {}): EditorFeature {
   const { placeholder = "Type '/' for commands...", dragHandle = true, trailingNode = true, layout = {} } = options;
   const layoutFeature = layout === false ? null : blockLayout(layout);
+  const words = layoutWordsOf(options.messages);
   return defineFeature({
     id: 'standard',
     ...(layoutFeature ? { commands: layoutFeature.commands } : {}),
@@ -80,8 +87,8 @@ export function standardKit(options: StandardKitOptions = {}): EditorFeature {
     markCodecs: standardMarkCodecs,
     slash: standardSlashItems,
     toolbar: standardToolbarItems,
-    bubble: standardBubbleItems,
-    blockMenu: standardBlockMenuItems,
+    bubble: [...standardToolbarItems, ...textStyleBubbleItems(words)],
+    blockMenu: standardBlockMenu(words),
     advanced: {
       engineExtensions: [
         StarterKit.configure({

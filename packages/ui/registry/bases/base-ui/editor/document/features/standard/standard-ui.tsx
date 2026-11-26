@@ -188,10 +188,19 @@ const turnIntoText: BlockMenuItem = {
   active: (editor) => editor.isActive('paragraph') && !isSized(editor),
 };
 
-/** The grip menu of the standard blocks: turn the block into another, copy it, remove it. */
-export const standardBlockMenuItems: BlockMenuItem[] = [
-  turnIntoText,
-  ...PARAGRAPH_SIZES.map((size) => turnInto(size, DEFAULT_LAYOUT_WORDS.paragraphSizes[size], 'paragraph', { size })),
+/**
+ * The grip menu of the standard blocks, the paragraph styles named in `words`: turn the block into another, copy it,
+ * remove it.
+ */
+export function standardBlockMenu(words: LayoutWords = DEFAULT_LAYOUT_WORDS): BlockMenuItem[] {
+  return [
+    turnIntoText,
+    ...PARAGRAPH_SIZES.map((size) => turnInto(size, words.paragraphSizes[size], 'paragraph', { size })),
+    ...blockMenuTail,
+  ];
+}
+
+const blockMenuTail: BlockMenuItem[] = [
   turnInto('heading-1', 'Heading 1', 'heading', { level: 1 }),
   turnInto('heading-2', 'Heading 2', 'heading', { level: 2 }),
   turnInto('heading-3', 'Heading 3', 'heading', { level: 3 }),
@@ -202,3 +211,6 @@ export const standardBlockMenuItems: BlockMenuItem[] = [
   { id: 'duplicate', title: 'Duplicate', icon: CopyIcon, command: 'duplicateBlock' },
   { id: 'delete', title: 'Delete', icon: TrashIcon, command: 'deleteBlock', destructive: true, separatorBefore: true },
 ];
+
+/** The grip menu of the standard blocks in English. */
+export const standardBlockMenuItems: BlockMenuItem[] = standardBlockMenu();

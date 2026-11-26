@@ -40,7 +40,9 @@ export interface LayoutWords {
   readonly colors: Readonly<Record<ColorToken, string>>;
   /** The paragraph styles beside the plain paragraph, as Turn into lists them. */
   readonly paragraphSizes: Readonly<Record<ParagraphSize, string>>;
+  /** The section's slash item, and what its description says it is. */
   readonly section: string;
+  readonly sectionDescription: string;
   readonly sectionBackground: string;
   /** A section's background that draws the page behind it. */
   readonly noBackground: string;
@@ -91,6 +93,7 @@ export const DEFAULT_LAYOUT_WORDS: LayoutWords = {
   },
   paragraphSizes: { lead: 'Lead', small: 'Small text' },
   section: 'Section',
+  sectionDescription: 'Blocks set together on a background',
   sectionBackground: 'Background',
   noBackground: 'None',
   sectionPadding: 'Padding',

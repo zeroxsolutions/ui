@@ -27,7 +27,7 @@ import {
 import type { ReactNodeCodec } from '../../../react-types';
 import { BlockToolbar } from '../../layout/block-toolbar';
 import { layoutProps } from '../../layout/layout-props';
-import { DEFAULT_LAYOUT_WORDS, layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
+import { layoutWordsOf, type LayoutWords } from '../../layout/layout-words';
 
 export interface SectionOptions {
   /** The words its toolbar draws: some over the English, or a getter read on each draw. */
@@ -359,8 +359,8 @@ export function section(options: SectionOptions = {}): EditorFeature {
       {
         id: 'section',
         icon: LayoutPanelTopIcon,
-        title: DEFAULT_LAYOUT_WORDS.section,
-        description: 'Blocks set together on a background',
+        title: words().section,
+        description: words().sectionDescription,
         group: 'Blocks',
         keywords: ['section', 'background', 'band', 'layout'],
         command: 'insertSection',

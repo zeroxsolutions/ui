@@ -13,7 +13,10 @@ import { section } from './section';
 const features = [section(), columns(), callout(), table(), standardKit()];
 const registry = createCodecRegistry(features);
 
-const line = (text: string): NodeJSON => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+const line = (text: string): NodeJSON => ({
+  type: 'paragraph',
+  content: [{ type: 'text', text }],
+});
 const sectionOf = (attrs: Record<string, unknown>, ...content: NodeJSON[]): NodeJSON => ({
   type: 'section',
   attrs,
@@ -35,10 +38,30 @@ function sectionBelowTop(nodes: readonly NodeJSON[], inside = false): boolean {
 }
 
 describe('section', () => {
+  it("names its slash item in the host's words", () => {
+    const [item] =
+      section({
+        messages: {
+          section: 'Abschnitt',
+          sectionDescription: 'Bloecke auf einem Grund',
+        },
+      }).slash ?? [];
+    expect(item).toMatchObject({
+      title: 'Abschnitt',
+      description: 'Bloecke auf einem Grund',
+    });
+  });
+
   it('round-trips through HTML with its background, padding, width and space', () => {
     const doc = docOf(
       sectionOf(
-        { background: 'teal', padding: 'large', width: 'wide', spaceBefore: 'none', spaceAfter: 'small' },
+        {
+          background: 'teal',
+          padding: 'large',
+          width: 'wide',
+          spaceBefore: 'none',
+          spaceAfter: 'small',
+        },
         line('inside'),
         line('more'),
       ),

@@ -25,6 +25,16 @@ const para = (text: string): DocJSON => ({
 });
 
 describe('standardKit', () => {
+  it("names the lead and small turn-into items and the bubble's text styling in the host's words", () => {
+    const kit = standardKit({
+      messages: { paragraphSizes: { lead: 'Einleitung', small: 'Kleingedrucktes' }, textColor: 'Textfarbe' },
+    });
+    const titles = (kit.blockMenu ?? []).map((item) => item.title);
+    expect(titles).toEqual(expect.arrayContaining(['Einleitung', 'Kleingedrucktes']));
+    expect(titles).not.toContain('Lead');
+    expect((kit.bubble ?? []).map((item) => item.title)).toContain('Textfarbe');
+  });
+
   it('toggles a heading via its structural command', () => {
     const editor = build(para('Title'));
     editor.run('selectAll');
