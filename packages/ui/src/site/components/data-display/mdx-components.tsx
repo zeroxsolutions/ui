@@ -64,7 +64,7 @@ export const mdxComponents = {
   hr: (props: ComponentProps<'hr'>) => <hr className="my-8" {...props} />,
   // Only inline code reaches this: `pre` below reads a fence's code element without rendering it.
   code: (props: ComponentProps<'code'>) => (
-    <code className="bg-muted rounded-md px-1 py-0.5 font-mono text-sm" {...props} />
+    <code className="cn-docs-inline-code bg-muted px-1 py-0.5 font-mono text-sm" {...props} />
   ),
   // A wide table scrolls sideways inside the column rather than widening the page.
   table: (props: ComponentProps<'table'>) => (

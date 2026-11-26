@@ -15,7 +15,7 @@ function ComponentPreview({ className, ...props }: ComponentProps<'div'>): React
   return (
     <div
       data-slot="component-preview"
-      className={cn('ring-foreground/10 flex flex-col overflow-hidden rounded-xl ring-1', className)}
+      className={cn('cn-component-preview flex flex-col overflow-hidden', className)}
       {...props}
     />
   );

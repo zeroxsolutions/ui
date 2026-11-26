@@ -24,7 +24,6 @@ import { codeLanguageIcon } from '@/registry/bases/base-ui/lib/language-options'
 import { Card, CardContent } from '@/registry/bases/base-ui/ui/card';
 import { Separator } from '@/registry/bases/base-ui/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/registry/bases/base-ui/ui/tabs';
-import { cn } from '@/registry/bases/base-ui/lib/utils';
 import { z } from 'zod';
 import { defineFeature, type EditorFeature, type NodeCodec } from '@zeroxsolutions/editor-core/document/core/index';
 import type { NodeViewProps } from '@zeroxsolutions/editor-core/document/core/index';
@@ -101,7 +100,8 @@ export function MermaidView({ attrs, updateAttrs, editable, selected }: NodeView
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      className={cn('my-4', selected && 'ring-ring ring-2')}
+      data-selected={selected ? '' : undefined}
+      className="cn-editor-selection my-4"
     >
       <Tabs defaultValue={initialTab} className="contents">
         <CollapsibleCardHeader>

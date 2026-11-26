@@ -8,6 +8,7 @@ import {
   type AnimatedIconHandle,
   type AnimatedIconHandlers,
 } from '@/registry/bases/base-ui/hooks/use-animated-icon';
+import { cva } from 'class-variance-authority';
 import { cn } from '@/registry/bases/base-ui/lib/utils';
 
 export type { AnimatedIconHandle };
@@ -44,10 +45,9 @@ export interface ChromeIconProps {
 /** Where a chrome icon sits, which decides the style's size for it. */
 export type ChromeIconSize = 'menu' | 'toolbar';
 
-const SIZE_SLOTS: Record<ChromeIconSize, string> = {
-  menu: 'cn-editor-icon',
-  toolbar: 'cn-editor-toolbar-icon',
-};
+const chromeIconVariants = cva('', {
+  variants: { sized: { menu: 'cn-editor-icon', toolbar: 'cn-editor-toolbar-icon' } },
+});
 
 /**
  * The icon of a menu row or a toolbar button. A component renders with a ref and
@@ -61,7 +61,7 @@ export function ChromeIcon({ icon, className, active, sized }: ChromeIconProps):
   if (icon == null || typeof icon === 'boolean') return null;
   if (isComponent(icon)) {
     const Icon = icon;
-    return <Icon ref={handle} aria-hidden className={sized ? cn(SIZE_SLOTS[sized], className) : className} />;
+    return <Icon ref={handle} aria-hidden className={cn(chromeIconVariants({ sized }), className)} />;
   }
   return icon as ReactNode;
 }

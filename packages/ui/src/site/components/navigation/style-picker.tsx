@@ -97,7 +97,7 @@ interface StyleRowProps {
 }
 
 /**
- * One style's row in the menu. The check on the style in use is the row's icon: it plays while the row holds
+ * One style's row in the menu, a link drawn as the menu's item. The check on the style in use is the row's icon: it plays while the row holds
  * the pointer or the focus, which the menu moves with its highlight, and it plays for the row highlighted as
  * the menu opens, where the reader has just acted.
  */
@@ -111,7 +111,9 @@ function StyleRow({ label, href, selected, onChoose }: StyleRowProps): ReactNode
     <MenuPrimitive.LinkItem
       closeOnClick
       render={<Link href={href} aria-current={selected ? 'page' : undefined} onClick={onChoose} />}
-      className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center justify-between gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none"
+      data-slot="dropdown-menu-item"
+      data-variant="default"
+      className="cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center justify-between outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0"
       {...handlers}
     >
       {label}

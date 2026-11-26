@@ -359,4 +359,30 @@
   .cn-editor-handle {
     @apply focus-visible:border-ring focus-visible:ring-ring/30 border-background bg-foreground/60 hover:bg-foreground data-dragging:bg-foreground h-7 w-1 rounded-md border focus-visible:ring-2;
   }
+
+  /* cn-button's focus ring, on a block or a formula while the editor holds it selected */
+  .cn-editor-selection {
+    @apply data-selected:ring-ring/30 data-selected:ring-2;
+  }
+
+  /* MARK: Docs Site */
+  /* cn-card's ring, radius and shadow, the frame a demo and its source share */
+  .cn-component-preview {
+    @apply ring-foreground/10 rounded-lg ring-1;
+  }
+
+  /* cn-dropdown-menu-content's ring, radius, padding and shadow, the controls floating over a demo */
+  .cn-example-view-controls {
+    @apply ring-foreground/10 rounded-lg p-1 shadow-md ring-1;
+  }
+
+  /* cn-item's radius and cn-button's focus ring, an icon's tile in the gallery */
+  .cn-icon-grid-tile {
+    @apply focus-visible:ring-ring/30 rounded-md focus-visible:ring-2;
+  }
+
+  /* cn-kbd's radius, an inline code chip in a docs page */
+  .cn-docs-inline-code {
+    @apply rounded-xs;
+  }
 }

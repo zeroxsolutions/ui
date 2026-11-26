@@ -186,10 +186,8 @@ export function MathInlineView({ attrs, updateAttrs, editable, selected }: NodeV
         nativeButton={false}
         data-math="inline"
         contentEditable={false}
-        className={cn(
-          'cn-editor-inline hover:bg-muted inline-block cursor-pointer align-middle',
-          selected && 'ring-ring ring-2',
-        )}
+        data-selected={selected ? '' : undefined}
+        className="cn-editor-inline cn-editor-selection hover:bg-muted inline-block cursor-pointer align-middle"
         onMouseDown={(event) => event.stopPropagation()}
       >
         {attrs.latex ? (
@@ -239,7 +237,8 @@ export function MathBlockView({ attrs, updateAttrs, editable, selected }: NodeVi
       contentEditable={false}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      className={cn('my-4', selected && 'ring-ring ring-2')}
+      data-selected={selected ? '' : undefined}
+      className="cn-editor-selection my-4"
     >
       <Tabs defaultValue={initialTab} className="contents">
         <CollapsibleCardHeader>

@@ -49,7 +49,7 @@ function IconGridTile({ name, glyph, picked, onPick }: IconGridTileProps) {
       data-slot="icon-grid-tile"
       title={glyph}
       aria-current={picked ? 'true' : undefined}
-      className="hover:bg-muted aria-[current=true]:bg-muted aria-[current=true]:border-foreground focus-visible:ring-ring/50 flex h-full w-full flex-col items-center gap-2 rounded-lg border px-2 py-4 outline-none focus-visible:ring-3"
+      className="cn-icon-grid-tile hover:bg-muted aria-[current=true]:bg-muted aria-[current=true]:border-foreground flex h-full w-full flex-col items-center gap-2 border px-2 py-4 outline-none"
       onClick={() => onPick(name)}
       {...handlers}
     >

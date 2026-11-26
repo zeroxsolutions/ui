@@ -40,7 +40,7 @@ function ExampleView({ name, href }: ExampleViewProps): ReactNode {
       <script dangerouslySetInnerHTML={{ __html: viewPageScript() }} />
       <div
         data-slot="example-view-controls"
-        className="bg-background/80 ring-foreground/10 fixed top-3 right-3 z-50 rounded-lg p-1 shadow-md ring-1 backdrop-blur in-data-embed:hidden"
+        className="cn-example-view-controls bg-background/80 fixed top-3 right-3 z-50 backdrop-blur in-data-embed:hidden"
       >
         <ExamplePreviewToolbar device={device} theme={theme} onDeviceChange={setDevice} onThemeChange={forceTheme} />
       </div>

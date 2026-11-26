@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { createStyleMap } from 'shadcn/utils';
@@ -27,6 +27,15 @@ function published(type: (itemType: string) => boolean): Map<string, string> {
 const shipped = published((type) => type !== 'registry:example');
 const examples = published((type) => type === 'registry:example');
 
+/** Each `.tsx` source under `directory`, where the docs site draws its own parts with zui's slots. */
+function siteSources(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return siteSources(path);
+    return entry.name.endsWith('.tsx') && !entry.name.endsWith('.spec.tsx') ? [path] : [];
+  });
+}
+
 /** The `cn-` tokens `source` writes. */
 function tokens(source: string): Set<string> {
   return new Set(source.match(/\bcn-[a-z0-9-]+/g) ?? []);
@@ -52,8 +61,9 @@ describe("zui's own slots", () => {
     }
   });
 
-  it('are each written by a published item', () => {
-    const written = new Set([...shipped.values()].flatMap((source) => [...tokens(source)]));
+  it('are each written by a published item or by the docs site', () => {
+    const site = siteSources(join(ROOT, 'src/site')).map((path) => readFileSync(path, 'utf8'));
+    const written = new Set([...shipped.values(), ...site].flatMap((source) => [...tokens(source)]));
     expect([...slots(styleSheets(ROOT, 'nova').zui)].filter((slot) => !written.has(slot))).toEqual([]);
   });
 });
