@@ -23,6 +23,9 @@ export interface FluentEmojiProps extends Omit<React.ComponentProps<'img'>, 'src
  * native glyph so nothing renders blank. Pass `base` (or call
  * `setFluentEmojiBase`) to serve the artwork from a CDN instead.
  *
+ * The animated `'anim'` artwork gives way to the still `'3d'` picture of the glyph for a reader who asked
+ * for reduced motion.
+ *
  * Style precedence: an explicit `variant` wins; otherwise the ambient style from
  * a {@link FluentEmojiStyleProvider} (re-renders on change); otherwise the
  * resolver default (`setFluentEmojiStyle` / `'3d'`).
@@ -44,7 +47,7 @@ export function FluentEmoji({ glyph, name, base, variant, className, ...props }:
       </span>
     );
   }
-  return (
+  const image = (
     <img
       src={src}
       alt={name ?? glyph}
@@ -55,5 +58,14 @@ export function FluentEmoji({ glyph, name, base, variant, className, ...props }:
       onError={() => setFailed(true)}
       {...props}
     />
+  );
+  const still = style === 'anim' ? fluentEmojiUrl(glyph, { base, style: '3d' }) : undefined;
+  if (!still) return image;
+  return (
+    // `contents` leaves the img to the layout the caller placed it in, as if the picture were not there.
+    <picture style={{ display: 'contents' }}>
+      <source media="(prefers-reduced-motion: reduce)" srcSet={still} />
+      {image}
+    </picture>
   );
 }

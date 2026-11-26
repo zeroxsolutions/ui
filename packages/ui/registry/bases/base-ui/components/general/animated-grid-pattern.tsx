@@ -34,6 +34,14 @@ interface Square {
   iteration: number;
 }
 
+/** A number in [0, 1) that `seed` always gives, so a still grid lights the same cells on every draw. */
+function seeded(seed: number): number {
+  let t = (seed + 0x6d2b79f5) | 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
 /**
  * A grid of lines over the box of its nearest positioned ancestor, in which `numSquares` cells fade
  * in and out, each moving to another cell at random once it has faded out. Decorative: hidden from
@@ -41,7 +49,8 @@ interface Square {
  * so a `text-*` class recolours it: the lines at 30% of it, a lit cell at up to `maxOpacity`.
  *
  * It measures its own box, so it lights no cell until it has been laid out. Under
- * `prefers-reduced-motion` the lit cells are drawn still at `maxOpacity` and never move.
+ * `prefers-reduced-motion` the lit cells are drawn still at `maxOpacity`, in the same cells on every draw,
+ * and never move.
  */
 function AnimatedGridPattern({
   width = 40,
@@ -83,8 +92,14 @@ function AnimatedGridPattern({
 
   React.useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
-    setSquares(Array.from({ length: numSquares }, (_, i) => ({ id: i, pos: getPos(), iteration: 0 })));
-  }, [dimensions.width, dimensions.height, getPos, numSquares]);
+    const stillPos = (i: number): [number, number] => [
+      Math.floor((seeded(2 * i) * dimensions.width) / width),
+      Math.floor((seeded(2 * i + 1) * dimensions.height) / height),
+    ];
+    setSquares(
+      Array.from({ length: numSquares }, (_, i) => ({ id: i, pos: reduced ? stillPos(i) : getPos(), iteration: 0 })),
+    );
+  }, [dimensions.width, dimensions.height, width, height, getPos, numSquares, reduced]);
 
   React.useEffect(() => {
     const element = containerRef.current;

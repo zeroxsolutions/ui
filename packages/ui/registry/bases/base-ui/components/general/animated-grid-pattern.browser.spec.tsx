@@ -66,6 +66,23 @@ describe('AnimatedGridPattern', () => {
     expect(opacities.size).toBe(1);
   });
 
+  it('lights the same cells on every mount under reduced motion', async () => {
+    const cells = (): string[] => squares().map((square) => `${square.getAttribute('x')},${square.getAttribute('y')}`);
+    const grid = (
+      <Box width={400} height={200}>
+        <AnimatedGridPattern numSquares={6} />
+      </Box>
+    );
+    const first = await render(grid);
+    await expect.poll(() => squares().length).toBe(6);
+    const lit = cells();
+    await first.unmount();
+
+    await render(grid);
+
+    await expect.poll(cells).toEqual(lit);
+  });
+
   it('is hidden from assistive technology, as decoration', async () => {
     await render(<AnimatedGridPattern />);
     await expect.element(page.getByTestId('animated-grid-pattern')).toHaveAttribute('aria-hidden', 'true');
