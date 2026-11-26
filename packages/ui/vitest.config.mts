@@ -3,12 +3,14 @@ import { resolve } from 'node:path';
 import tailwindcss from '@tailwindcss/postcss';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
+import { msw } from 'msw/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/packages/ui',
-  plugins: [react()],
+  // Serves msw's worker script, which a browser spec's `setupWorker` registers to answer the requests it fakes.
+  plugins: [react(), msw({ mode: 'worker-only' })],
   // The browser specs load the registry's stylesheet, whose `@import 'tailwindcss'` only Tailwind compiles.
   css: { postcss: { plugins: [tailwindcss()] } },
   // The items import each other through the alias `components.json` names, which tsconfig.lib.json maps.

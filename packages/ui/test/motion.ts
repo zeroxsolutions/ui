@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect } from 'vitest';
+import { afterAll, beforeAll, expect, vi } from 'vitest';
 import { cdp } from 'vitest/browser';
 
 import { drawingsOver } from '../src/test/drawings-over';
@@ -15,6 +15,10 @@ export function playMotion(): void {
     await cdp().send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
     });
+    await vi.waitFor(() => {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) throw new Error('motion is still reduced');
+    });
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   });
   afterAll(async () => {
     await cdp().send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
