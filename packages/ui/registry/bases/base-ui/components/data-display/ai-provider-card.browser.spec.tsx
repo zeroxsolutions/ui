@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
+import { render } from 'vitest-browser-react';
 
 import { CardFooter, CardHeader, CardTitle } from '@/registry/bases/base-ui/ui/card';
 import {
@@ -10,12 +11,10 @@ import {
   AiProviderCardTrigger,
 } from './ai-provider-card';
 
-afterEach(cleanup);
-
 describe('AiProviderCard', () => {
-  it('can be focused and selected from the keyboard', () => {
+  it('is reached with Tab and selected with Enter', async () => {
     const onSelect = vi.fn();
-    render(
+    await render(
       <AiProviderCard>
         <CardHeader>
           <CardTitle>OpenAI</CardTitle>
@@ -24,18 +23,17 @@ describe('AiProviderCard', () => {
       </AiProviderCard>,
     );
 
-    const trigger = screen.getByRole('button', { name: 'Select OpenAI' });
-    trigger.focus();
-    expect(document.activeElement).toBe(trigger);
+    await userEvent.tab();
+    await expect.element(page.getByRole('button', { name: 'Select OpenAI' })).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
 
-    fireEvent.click(trigger);
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it('does not invoke the trigger when the action is activated', () => {
+  it('lets a pointer reach an action over the card without selecting the card', async () => {
     const onSelect = vi.fn();
     const onAction = vi.fn();
-    render(
+    await render(
       <AiProviderCard>
         <CardFooter>
           <AiProviderCardAction>
@@ -48,33 +46,30 @@ describe('AiProviderCard', () => {
       </AiProviderCard>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
+    await userEvent.click(page.getByRole('button', { name: 'toggle' }), { timeout: 2000 });
 
     expect(onAction).toHaveBeenCalledTimes(1);
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it("draws the label's tone as a status dot before its text", () => {
-    const { container } = render(
+  it('draws a status dot before a label given a tone, and none before one given no tone', async () => {
+    await render(
       <AiProviderCard>
         <CardFooter>
           <AiProviderCardLabel tone="busy">Command failed</AiProviderCardLabel>
+          <AiProviderCardLabel>12 models</AiProviderCardLabel>
         </CardFooter>
       </AiProviderCard>,
     );
 
-    expect(container.querySelector('[data-slot=status-indicator]')?.getAttribute('data-tone')).toBe('busy');
-    expect(screen.getByText('Command failed')).toBeTruthy();
+    await expect.element(page.getByText('Command failed')).toBeVisible();
+    const dots = page.getByTestId('status-indicator').all();
+    expect(dots).toHaveLength(1);
+    expect(page.getByText('Command failed').element().parentElement?.contains(dots[0].element())).toBe(true);
   });
 
-  it('draws no dot on a label given no tone', () => {
-    const { container } = render(<AiProviderCardLabel>12 models</AiProviderCardLabel>);
-
-    expect(container.querySelector('[data-slot=status-indicator]')).toBeNull();
-  });
-
-  it('renders the composed header and description', () => {
-    render(
+  it('renders the composed header and description', async () => {
+    await render(
       <AiProviderCard>
         <CardHeader>
           <CardTitle>Custom provider</CardTitle>
@@ -83,7 +78,7 @@ describe('AiProviderCard', () => {
       </AiProviderCard>,
     );
 
-    expect(screen.getByText('Custom provider')).toBeTruthy();
-    expect(screen.getByText('Models')).toBeTruthy();
+    await expect.element(page.getByText('Custom provider')).toBeVisible();
+    await expect.element(page.getByText('Models')).toBeVisible();
   });
 });
