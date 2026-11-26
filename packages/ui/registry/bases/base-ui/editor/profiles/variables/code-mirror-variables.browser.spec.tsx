@@ -84,6 +84,9 @@ async function typeAtEnd(text: string): Promise<void> {
   await userEvent.keyboard(text);
 }
 
+/** `@codemirror/autocomplete`'s default `interactionDelay`, with room for a frame. */
+const AUTOCOMPLETE_INTERACTION_DELAY_MS = 75 + 50;
+
 describe('variables in a code pane', () => {
   it('lists the declarations on {{, each with its icon, and filters them by label or name', async () => {
     await mount('Hi ');
@@ -103,12 +106,12 @@ describe('variables in a code pane', () => {
     const probe = await mount('Hi ');
     await typeAtEnd('{{{{');
     await expect.element(page.getByRole('option', { name: 'Name' })).toBeVisible();
-    // @codemirror/autocomplete ignores keys for its `interactionDelay` after the list opens, so the arrow is
-    // pressed again until the highlight moves, as a person presses it again.
-    await vi.waitFor(async () => {
-      await userEvent.keyboard('{ArrowDown}');
-      expect(page.getByRole('option', { name: 'Reset link', selected: true }).query()).not.toBeNull();
-    });
+    // @codemirror/autocomplete takes an arrow pressed within its `interactionDelay` of the list opening as a caret
+    // move, which closes the list. Nothing on the page marks the end of that delay, so the spec waits it out, as a
+    // person reading the list does.
+    await new Promise((resolve) => setTimeout(resolve, AUTOCOMPLETE_INTERACTION_DELAY_MS));
+    await userEvent.keyboard('{ArrowDown}');
+    await expect.element(page.getByRole('option', { name: 'Reset link', selected: true })).toBeInTheDocument();
     await userEvent.keyboard('{Enter}');
 
     await vi.waitFor(() => expect(probe.value).toBe('Hi {{resetUrl}}'));

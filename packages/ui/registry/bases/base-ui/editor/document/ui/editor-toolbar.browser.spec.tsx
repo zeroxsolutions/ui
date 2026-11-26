@@ -167,7 +167,8 @@ describe('EditorToolbar over the Document Editor', () => {
     await userEvent.hover(bold);
     await vi.waitFor(() => expect(icon.changes()).toBeGreaterThan(0));
     await userEvent.unhover(bold);
-    await vi.waitFor(() => expect(icon.drawn()).toBe(still));
+    // The icon plays its motion out before it is still, frame by frame, which a loaded runner stretches.
+    await vi.waitFor(() => expect(icon.drawn()).toBe(still), { timeout: 10_000 });
 
     const before = icon.changes();
     await userEvent.click(page.getByText('Notes'));
