@@ -69,13 +69,13 @@ const content: DocJSON = {
   ],
 };
 
-async function mount(): Promise<IEditor> {
+async function mount(doc: DocJSON = content, room = 'p-16'): Promise<IEditor> {
   let ready: IEditor | null = null;
   await render(
-    <div className="style-nova p-16">
+    <div className={`style-nova ${room}`}>
       <Editor
         features={[standardKit({ layout: { types: { box: ['align', 'width'] } } }), box]}
-        content={content}
+        content={doc}
         onReady={(e) => (ready = e)}
       />
     </div>,
@@ -137,6 +137,45 @@ describe('BlockToolbar', () => {
 
     await userEvent.click(page.getByText('After'));
     await vi.waitFor(() => expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull());
+  });
+
+  it('stays out of the way of a block dragged by its grip, and opens again on the dropped block', async () => {
+    await page.viewport(900, 700);
+    // No room above the box, so its toolbar would open below it, over the line it is dropped on.
+    const editor = await mount(
+      {
+        type: 'doc',
+        content: [
+          { type: 'box', attrs: { width: null, align: null } },
+          { type: 'paragraph', content: [{ type: 'text', text: 'After' }] },
+        ],
+      },
+      'px-16',
+    );
+    const target = page.getByText('After');
+    await userEvent.hover(page.getByTestId('box'), { position: { x: 4, y: 4 } });
+    const grip = await vi.waitFor(() => {
+      const found = document.querySelector<HTMLElement>('.drag-handle:not(.hide)');
+      if (!found) throw new Error('the grip is not shown');
+      return found;
+    });
+    // Past the line's text, under the middle of the box, where its toolbar opens below it.
+    const line = target.element().getBoundingClientRect();
+
+    await userEvent.dragAndDrop(grip, target.element(), {
+      targetPosition: { x: line.width / 2, y: line.height - 2 },
+      steps: 10,
+    });
+
+    await vi.waitFor(() =>
+      expect(
+        editor
+          .getJSON()
+          .content?.map((node) => node.type)
+          .slice(0, 2),
+      ).toEqual(['paragraph', 'box']),
+    );
+    await expect.element(toolbar()).toBeVisible();
   });
 
   it('draws nothing in a read-only editor', async () => {

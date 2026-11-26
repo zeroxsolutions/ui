@@ -90,24 +90,6 @@ function useHoldsCaret(editor: IEditor, root: HTMLElement | null): boolean {
   return holds;
 }
 
-/** Whether a drag is in flight on the page, as a block dragged by its grip is; its drop target must stay clear. */
-function useDragInFlight(): boolean {
-  const [dragging, setDragging] = useState(false);
-  useEffect(() => {
-    const start = () => setDragging(true);
-    const end = () => setDragging(false);
-    document.addEventListener('dragstart', start);
-    document.addEventListener('dragend', end);
-    document.addEventListener('drop', end);
-    return () => {
-      document.removeEventListener('dragstart', start);
-      document.removeEventListener('dragend', end);
-      document.removeEventListener('drop', end);
-    };
-  }, []);
-  return dragging;
-}
-
 /**
  * The editable table: its rows in a `<table>` whose `<colgroup>` draws the stored column widths, a handle on each
  * border between two columns, and a floating toolbar with Full width where the editor draws one (the email's does
@@ -129,7 +111,6 @@ export function TableView({
   const [preview, setPreview] = useState<number[] | null>(null);
   const [measured, setMeasured] = useState<number[] | null>(null);
   const active = useHoldsCaret(editor, root);
-  const dragging = useDragInFlight();
   const count = columnCountOf(node);
   const stored = storedShares(node.attrs.columnWidths, count);
   const table = root?.querySelector<HTMLTableElement>(':scope > .tableWrapper > table') ?? null;
@@ -183,7 +164,7 @@ export function TableView({
           onCommit={(columnWidths) => editor.run('setTableLayout', { pos: getPos(), columnWidths })}
         />
       )}
-      {offersFull && !dragging && (
+      {offersFull && (
         <BlockToolbar editor={editor} pos={pos} anchor={root} label={layout.toolbar}>
           <WidthToggle
             full={full}

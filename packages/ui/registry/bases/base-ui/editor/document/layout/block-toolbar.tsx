@@ -52,8 +52,30 @@ function liveRect(element: HTMLElement): RectLike {
 }
 
 /**
+ * Whether a drag is in flight on the page, as a block dragged by its grip is. Picking a block by its grip selects
+ * it whole, which would open its toolbar, and one opened below the block takes the drop meant for the line under it.
+ */
+function useDragInFlight(): boolean {
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => {
+    const start = () => setDragging(true);
+    const end = () => setDragging(false);
+    document.addEventListener('dragstart', start);
+    document.addEventListener('dragend', end);
+    document.addEventListener('drop', end);
+    return () => {
+      document.removeEventListener('dragstart', start);
+      document.removeEventListener('dragend', end);
+      document.removeEventListener('drop', end);
+    };
+  }, []);
+  return dragging;
+}
+
+/**
  * A block's floating toolbar: a popover above the block, shown while the block is selected whole or holds the
- * caret in an editable editor, and while the focus is in the toolbar itself. Opening it never moves the focus.
+ * caret in an editable editor, and while the focus is in the toolbar itself, never while a block is dragged.
+ * Opening it never moves the focus.
  * Tab from the selected block, or Alt+F10 from its text, moves the focus into it; the arrow keys, Home and End move
  * between its controls past what a group's own arrow keys reach, and Escape gives the focus back to the text.
  */
@@ -61,6 +83,7 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
   const toolbar = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const rect = useMemo(() => (anchor ? liveRect(anchor) : null), [anchor]);
+  const dragging = useDragInFlight();
 
   useEffect(() => {
     if (!anchor || pos === undefined) {
@@ -122,6 +145,8 @@ export function BlockToolbar({ editor, pos, anchor, label, children }: BlockTool
     controls[step(index, controls.length)]?.focus();
   };
 
+  // Unmounted rather than closed, so no closing popup is left over the drop target.
+  if (dragging) return null;
   return (
     <Popover open={open && rect !== null}>
       <RectPopover
