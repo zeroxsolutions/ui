@@ -26,6 +26,10 @@ editors cannot upload by themselves.
    present). The email editor takes images only.
 5. Docs: each feature's page and the email editor's page document `upload`; demos use a fake upload that
    reads the file to a blob URL with simulated progress and sends nothing anywhere.
+   Revised 2026-11-26 during the build: the demos' fake upload answers an `https://` sample address the site
+   already serves, not a blob URL. The store refuses any answer that is not a web address, as the anti-goals
+   require, so a blob answer would fail every demo upload; the picked file still shows as a local preview while
+   it uploads.
 
 ## Non-goals
 
