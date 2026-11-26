@@ -23,9 +23,9 @@ measures a radius, a padding, a colour, a size or where a part sits. Those go to
 `*.visual.spec.tsx` that `vitest.visual.config.mts` runs apart from the specs, so each suite fails for its own
 reasons.
 
-The suite captures every demo in `examples/`, every primitive in `ui/` (its gallery fails when a primitive is
-added without a capture), the editors' toolbars and menus as a reader opens them, and the docs' header and
-switches. Each is captured in the eight styles and both themes, one Chromium instance per pair, at 1280 and,
+The suite captures every demo in `examples/` but the two its spec names as moving under reduced motion,
+every primitive in `ui/` (its gallery fails when a primitive is added without a capture), the editors'
+toolbars and menus as a reader opens them, and the docs' header and switches. Each is captured in the eight styles and both themes, one Chromium instance per pair, at 1280 and,
 where its layout changes with width, at 375. A subject is added in its spec's list, and `test/visual.tsx`
 expands it across the matrix.
 

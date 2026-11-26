@@ -50,8 +50,38 @@ async function settled(): Promise<void> {
     // An emoji picker loads a picture per emoji, which outlasts the one-second default.
     { timeout: 30_000 },
   );
+  // Highlighted code shows its raw source until the grammar loads, then its coloured tokens.
+  await vi.waitFor(
+    () => {
+      const plain = [...document.querySelectorAll('[data-slot=highlighted-code]')].filter(
+        (code) => code.querySelector('span[style]') === null,
+      );
+      if (plain.length > 0) throw new Error(`${plain.length} code blocks not yet highlighted`);
+    },
+    { timeout: 30_000 },
+  );
   await document.fonts.ready;
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  await quiet();
+}
+
+/**
+ * Resolves once the page has gone five frames without a change to its DOM, so a part laid out after its
+ * content arrives, such as a diagram fitted to its frame, has settled before the capture.
+ */
+function quiet(): Promise<void> {
+  return new Promise((resolve) => {
+    let still = 0;
+    const observer = new MutationObserver(() => (still = 0));
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+    const frame = (): void => {
+      still += 1;
+      if (still >= 5) {
+        observer.disconnect();
+        resolve();
+      } else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  });
 }
 
 /**
