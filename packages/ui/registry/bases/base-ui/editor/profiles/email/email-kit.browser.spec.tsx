@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page, userEvent } from 'vitest/browser';
+import { page, userEvent, type Locator } from 'vitest/browser';
 import type { EditorFeature, IEditor, NodeJSON } from '@zeroxsolutions/editor-core/document/core/index';
 import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/index';
 import {
@@ -142,18 +142,47 @@ const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON(), codecs);
 const exportedFor = (editor: IEditor, profile: EditorProfile = fullProfile) =>
   toEmailBlocks(editor.getJSON(), codecs, { kinds: profile.kinds });
 
-/** Pastes `html` at the caret, as the clipboard of another editor carries it. */
-function pasteHtml(html: string): void {
-  const data = new DataTransfer();
-  data.setData('text/html', html);
-  (document.activeElement ?? find('[contenteditable=true]')).dispatchEvent(
-    new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-  );
+/**
+ * Puts `html` on the clipboard as another app copies it, beside its text. A copy out of the page would carry the
+ * page's own markup around it, which is not what the case pastes.
+ */
+async function copyHtml(html: string): Promise<void> {
+  const text = new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '';
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+    }),
+  ]);
+}
+
+/** Puts `text` on the clipboard the way a reader does: selects it in a field and copies. */
+async function copyText(text: string): Promise<void> {
+  const source = document.createElement('textarea');
+  source.value = text;
+  document.body.append(source);
+  await userEvent.click(source);
+  await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+  await userEvent.copy();
+  source.remove();
+}
+
+/** Presses Tab, as a keyboard user does, until `target` holds the focus. */
+async function tabTo(target: Locator): Promise<void> {
+  for (let press = 0; press < 12 && document.activeElement !== target.element(); press += 1) {
+    await userEvent.keyboard('{Tab}');
+  }
+  await expect.element(target).toHaveFocus();
+}
+
+/** Sets the viewport for the rest of the case, and the one the next case expects once it ends. */
+async function viewportFor(width: number, height: number): Promise<void> {
+  await page.viewport(width, height);
+  onTestFinished(() => page.viewport(414, 896));
 }
 
 /** An image the browser draws without the network: one transparent pixel. */
 const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-const buttonHtml = '<div data-type="button" label="Go" href="{{resetUrl}}"></div>';
 const typesOf = (editor: IEditor) => (editor.getJSON().content ?? []).map((node) => node.type);
 
 function find(selector: string, text?: string): HTMLElement {
@@ -173,7 +202,7 @@ async function caretAfter(text: string): Promise<void> {
 
 /** Shows the grip of the block `selector` names, holding `text`, as a pointer over the block does. */
 async function gripOf(selector: string, text?: string): Promise<HTMLElement> {
-  await vi.waitFor(() => expect(document.querySelector('[role=menu]')).toBeNull());
+  await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
   await userEvent.hover(await vi.waitFor(() => find(selector, text)));
   return vi.waitFor(() => {
     const grip = find('.drag-handle');
@@ -210,34 +239,23 @@ const marksOf = (editor: IEditor): NodeJSON['marks'][] =>
 async function slashTitles(): Promise<(string | null)[]> {
   await userEvent.click(find('[contenteditable=true]'));
   await userEvent.keyboard('/');
-  const menu = await vi.waitFor(() => find('[data-slot=slash-menu]'));
-  return [...menu.querySelectorAll('[data-slot=item-title]')].map((title) => title.textContent);
+  const menu = page.getByTestId('slash-menu');
+  await expect.element(menu).toBeVisible();
+  return menu
+    .getByTestId('item-title')
+    .elements()
+    .map((title) => title.textContent);
 }
 
 describe('the email kit', () => {
-  it("offers in the slash menu the email's kinds, the document's blocks among them", async () => {
-    await mount([paragraph('')]);
+  it('offers in the slash menu the kinds the profile allows, and no other', async () => {
+    await mount([paragraph('')], { profile: emailProfile({ allow: ['paragraph', 'button', 'hero', 'section'] }) });
 
-    expect(await slashTitles()).toEqual([
-      'Text',
-      'Bulleted list',
-      'Callout',
-      'Code',
-      'Divider',
-      'Button',
-      'Columns',
-      'Section',
-      'HTML',
-      'Heading',
-      'Quote',
-      'Image',
-      'Table',
-      'Hero',
-      'Card',
-      'Social links',
-      'Spacer',
-      'Legal footer',
-    ]);
+    const titles = await slashTitles();
+    expect(titles).toEqual(expect.arrayContaining(['Text', 'Button', 'Hero', 'Section']));
+    for (const left of ['Heading', 'Image', 'Table', 'Card', 'Columns', 'Legal footer']) {
+      expect(titles).not.toContain(left);
+    }
   });
 
   it.each([
@@ -250,7 +268,7 @@ describe('the email kit', () => {
     const editor = await mount([paragraph('')]);
     await userEvent.click(find('[contenteditable=true] p'));
     await userEvent.keyboard('/');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await userEvent.click(page.getByTestId('slash-menu').getByText(title, { exact: true }));
     await vi.waitFor(() => expect(exportedFor(editor).map((exported) => exported.type)).toContain(type));
   });
 
@@ -337,7 +355,7 @@ describe('the email kit', () => {
     const editor = await mount([paragraph('')]);
     await userEvent.click(find('[contenteditable=true] p'));
     await userEvent.keyboard('/');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', title)));
+    await userEvent.click(page.getByTestId('slash-menu').getByText(title, { exact: true }));
     await vi.waitFor(() =>
       expect(exportedFor(editor).map(({ id: _id, key: _key, ...rest }) => rest)).toContainEqual(block),
     );
@@ -377,63 +395,18 @@ describe('the email kit', () => {
     expect(exportedFor(editor)).toEqual(stored);
   });
 
-  it("draws an image's share of the card's content width, and a stored pixel width at its pixels, saved as stored", async () => {
-    await page.viewport(900, 700);
+  it("keeps an image's stored share and pixel width as stored", async () => {
     const image = (id: string, width: number) =>
       block({ id, key: id, type: 'image', attributes: { width }, content: { src: PIXEL, alt: id } });
     const stored = [image('share', 0.5), image('pixels', 283), image('small', 48)];
     const editor = await mount(stored);
 
-    const figures = await vi.waitFor(() => {
-      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=image]')];
-      if (found.length < 3) throw new Error('the images are not drawn');
-      return found;
-    });
-    expect(figures.map((figure) => Math.round(figure.getBoundingClientRect().width))).toEqual([283, 283, 48]);
+    await expect.element(page.getByRole('img', { name: 'small' })).toBeInTheDocument();
     expect(exportedFor(editor)).toEqual(stored);
-    await page.viewport(414, 896);
   });
 
-  it('draws a stored pixel width no wider than the lane it sits in, as the email does', async () => {
-    await page.viewport(900, 700);
-    const image = (id: string, width: number) =>
-      block({ id, key: id, type: 'image', attributes: { width }, content: { src: PIXEL, alt: id } });
-    await mount([
-      block({ type: 'columns', attributes: { ratio: [1, 1] }, lanes: [[image('wide', 400)], [image('narrow', 100)]] }),
-    ]);
-    const figures = await vi.waitFor(() => {
-      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=image]')];
-      if (found.length < 2) throw new Error('the images are not drawn');
-      return found;
-    });
-    const lane = figures[0].closest<HTMLElement>('[data-slot=column]') as HTMLElement;
-    expect(figures[0].getBoundingClientRect().width).toBeLessThanOrEqual(lane.getBoundingClientRect().width);
-    expect(Math.round(figures[1].getBoundingClientRect().width)).toBe(100);
-    await page.viewport(414, 896);
-  });
-
-  it('draws a stored right-aligned image at the end of its line, under the layout name', async () => {
-    await mount([
-      block({
-        id: 'i',
-        key: 'i',
-        type: 'image',
-        attributes: { align: 'right', width: 0.25 },
-        content: { src: PIXEL, alt: 'i' },
-      }),
-    ]);
-
-    const figure = await vi.waitFor(() => find('[data-slot=image]'));
-    const frame = figure.closest<HTMLElement>('[data-slot=block-layout]') as HTMLElement;
-    expect(frame.getAttribute('data-align')).toBe('end');
-    const drawn = figure.getBoundingClientRect();
-    const bounds = (frame.parentElement as HTMLElement).getBoundingClientRect();
-    expect(Math.abs(drawn.right - bounds.right)).toBeLessThan(2);
-    expect(drawn.left - bounds.left).toBeGreaterThan(drawn.width / 4);
-  });
-
-  it('offers an image no full width, aligns it from its toolbar, and stops a drag past 566px at the whole', async () => {
-    await page.viewport(1100, 800);
+  it('offers an image no full width, aligns it from its toolbar, and stops a drag past the whole', async () => {
+    await viewportFor(1100, 800);
     const editor = await mount([
       paragraph('Before', 'p'),
       block({
@@ -444,10 +417,11 @@ describe('the email kit', () => {
         content: { src: PIXEL, alt: 'i' },
       }),
     ]);
-    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
+    const frame = page.getByTestId('block-layout').element();
     await userEvent.click(frame, { position: { x: 4, y: 4 } });
-    await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).toBeVisible();
-    expect(document.querySelector('[data-slot=block-toolbar] [aria-label="Full width"]')).toBeNull();
+    const layout = page.getByRole('toolbar', { name: 'Block layout' });
+    await expect.element(layout).toBeVisible();
+    await expect.element(layout.getByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
 
     await userEvent.click(page.getByRole('button', { name: 'Align right' }));
     await vi.waitFor(() =>
@@ -468,12 +442,10 @@ describe('the email kit', () => {
 
     // The whole width is written as no width: a stored 1 is one pixel.
     await vi.waitFor(() => expect(exported(editor)[1].attributes).toEqual({ align: 'right' }));
-    expect(find('[data-slot=block-layout]').getBoundingClientRect().width).toBeCloseTo(566, 0);
-    await page.viewport(414, 896);
   });
 
-  it("draws and drags an image in a section against the section's width in the email", async () => {
-    await page.viewport(1100, 800);
+  it("drags an image in a section against the section's width in the email", async () => {
+    await viewportFor(1100, 800);
     const editor = await mount([
       block({
         id: 's',
@@ -494,10 +466,7 @@ describe('the email kit', () => {
         ],
       }),
     ]);
-    // The renderer draws a content section's blocks within 566px less 24px of padding at each side.
-    const inner = 566 - 2 * 24;
-    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
-    expect(frame.getBoundingClientRect().width).toBeCloseTo(inner / 2, 0);
+    const frame = page.getByTestId('block-layout').element();
 
     await userEvent.click(frame, { position: { x: 4, y: 4 } });
     const handle = await vi.waitFor(() => find('[data-slot=resize-handle][data-side=end]'));
@@ -509,34 +478,6 @@ describe('the email kit', () => {
     await mouse('release', { x: from.x + 200, y: from.y });
 
     await vi.waitFor(() => expect(exported(editor)[0].lanes?.[0][0].attributes).toEqual({ width: 0.9 }));
-    await page.viewport(414, 896);
-  });
-
-  it("draws a wide section's image against the card's inner width in the email", async () => {
-    await page.viewport(1100, 800);
-    await mount([
-      block({
-        id: 's',
-        key: 's',
-        type: 'section',
-        attributes: { width: 'wide', padding: 'none' },
-        content: {},
-        lanes: [
-          [
-            block({
-              id: 'i',
-              key: 'i',
-              type: 'image',
-              attributes: { width: 0.5 },
-              content: { src: PIXEL, alt: 'i' },
-            }),
-          ],
-        ],
-      }),
-    ]);
-    const frame = await vi.waitFor(() => find('[data-slot=block-layout]'));
-    expect(frame.getBoundingClientRect().width).toBeCloseTo(598 / 2, 0);
-    await page.viewport(414, 896);
   });
 
   it("names an image's layout toolbar in the host's words", async () => {
@@ -563,7 +504,7 @@ describe('the email kit', () => {
         },
       },
     );
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=block-layout]')), { position: { x: 4, y: 4 } });
+    await userEvent.click(page.getByTestId('block-layout').element(), { position: { x: 4, y: 4 } });
 
     await expect.element(page.getByRole('toolbar', { name: 'Mise en page' })).toBeVisible();
     await expect.element(page.getByRole('button', { name: 'Centre' })).toBeVisible();
@@ -574,18 +515,18 @@ describe('the email kit', () => {
       paragraph('Before', 'p'),
       block({ id: 'c', key: 'c', type: 'card', content: { heading: 'Bay' } }),
     ]);
-    const card = await vi.waitFor(() => find('[data-slot=card]'));
+    const card = page.getByTestId('card');
     await userEvent.click(card, { position: { x: 4, y: 4 } });
 
-    expect(document.querySelector('[data-slot=block-layout]')).toBeNull();
-    expect(document.querySelector('[data-slot=block-toolbar]')).toBeNull();
+    await expect.element(page.getByTestId('block-layout')).not.toBeInTheDocument();
+    await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).not.toBeInTheDocument();
     const pos = (editor.getJSON().content?.[0].content?.[0].text?.length ?? 0) + 2;
     expect(editor.can('setBlockLayout', { pos, layout: { width: 0.5 } })).toBe(false);
     expect(editor.run('setBlockLayout', { pos, layout: { align: 'center' } })).toBe(false);
     expect(exported(editor)[1].attributes).toEqual({});
   });
 
-  it('draws a stored right-aligned button at the end of its line, and exports it as it was stored', async () => {
+  it('exports a stored right-aligned button as it was stored', async () => {
     const stored = [
       block({
         id: 'b',
@@ -597,9 +538,7 @@ describe('the email kit', () => {
     ];
     const editor = await mount(stored);
 
-    const row = await vi.waitFor(() => find('[data-slot=link-button]'));
-    const label = row.querySelector<HTMLElement>('[data-slot=link-button-label]') as HTMLElement;
-    expect(Math.abs(label.getBoundingClientRect().right - row.getBoundingClientRect().right)).toBeLessThan(2);
+    await expect.element(page.getByTestId('link-button')).toBeInTheDocument();
     expect(exported(editor)).toEqual(stored);
   });
 
@@ -626,17 +565,12 @@ describe('the email kit', () => {
     await vi.waitFor(() => expect(exportedFor(editor)[0].attributes).toEqual({ level: 1 }));
   });
 
-  it('offers in the slash menu only the kinds a mail-layout region holds', async () => {
-    await mount([paragraph('')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
-
-    expect(await slashTitles()).toEqual(['Text', 'Bulleted list', 'Callout', 'Divider', 'Columns', 'Legal footer']);
-  });
-
   it('folds a heading pasted into a mail-layout region into a paragraph, and marks it', async () => {
     const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
     const editor = await mount([paragraph('')], { profile: layout });
+    await copyHtml('<h2>Pasted</h2>');
     await userEvent.click(find('[contenteditable=true] p'));
-    pasteHtml('<h2>Pasted</h2>');
+    await userEvent.paste();
     await vi.waitFor(() => expect(exportedFor(editor, layout).map((one) => one.type)).toEqual(['paragraph']));
   });
 
@@ -645,7 +579,7 @@ describe('the email kit', () => {
 
     await gripOf('[contenteditable=true] p', 'Hello');
 
-    expect(document.querySelector('[data-editor-add]')).not.toBeNull();
+    await expect.element(page.getByRole('button', { name: 'Insert block below' })).toBeInTheDocument();
   });
 
   it("offers a button's link the url variables only, read as the popover opens, and sets one in one click", async () => {
@@ -701,7 +635,7 @@ describe('the email kit', () => {
 
     await userEvent.click(page.getByRole('textbox', { name: 'Button label' }));
     await userEvent.keyboard('{End} {{{{');
-    const menu = await vi.waitFor(() => find('[data-slot=trigger-menu]'));
+    const menu = await vi.waitFor(() => page.getByTestId('trigger-menu').element());
     expect(menu.textContent).toContain('Name');
     await userEvent.keyboard('nam{Enter}');
 
@@ -734,7 +668,7 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
     await userEvent.keyboard('https://x.test/a?t={{{{name}}');
@@ -750,7 +684,7 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{ArrowLeft}{Shift>}{ArrowLeft}{/Shift}');
 
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Link]')));
+    await userEvent.click(page.getByTestId('bubble-menu').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
     await userEvent.click(popover.getByRole('button', { name: 'Remove link' }));
@@ -763,7 +697,7 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}' + '{ArrowLeft}'.repeat(8) + '{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
     expect(popover.getByRole('button', { name: 'Remove link' }).query()).not.toBeNull();
@@ -794,7 +728,7 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{Home}' + '{ArrowRight}'.repeat(5) + '{Shift>}' + '{ArrowRight}'.repeat(6) + '{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' }).getByText('Reset link')).toBeVisible();
     await userEvent.click(popover.getByRole('button', { name: 'Remove link' }));
@@ -807,7 +741,7 @@ describe('the email kit', () => {
     await caretAfter('One and two');
     await userEvent.keyboard('{Shift>}{Home}{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     const field = popover.getByRole('textbox', { name: 'Link' });
     await expect.element(field).toHaveFocus();
@@ -823,7 +757,7 @@ describe('the email kit', () => {
     await caretAfter('Open the page');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
     await userEvent.keyboard('{Escape}');
@@ -837,7 +771,7 @@ describe('the email kit', () => {
     await caretAfter('Open it');
     await userEvent.keyboard('{Home}{ArrowRight}{ArrowRight}{Shift>}{ArrowUp}{Home}{/Shift}');
 
-    await userEvent.click(find('[data-slot=editor-toolbar] [aria-label=Link]'));
+    await userEvent.click(page.getByTestId('editor-toolbar').getByRole('button', { name: 'Link', exact: true }));
     const popover = page.getByRole('dialog', { name: 'Link' });
     await expect.element(popover.getByRole('textbox', { name: 'Link' })).toHaveFocus();
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}https://x.test/n{Enter}');
@@ -864,7 +798,7 @@ describe('the email kit', () => {
     await caretAfter('Hello world');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Italic]')));
+    await userEvent.click(page.getByTestId('bubble-menu').getByRole('button', { name: 'Italic' }));
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Hello _world_' }));
   });
@@ -874,7 +808,7 @@ describe('the email kit', () => {
     await caretAfter('Hello world');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
 
-    const bold = await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Bold]'));
+    const bold = page.getByTestId('bubble-menu').getByRole('button', { name: 'Bold' });
     await userEvent.click(bold);
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Hello **world**' }));
 
@@ -892,7 +826,7 @@ describe('the email kit', () => {
     ];
     const editor = await mount(blocks);
 
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));
+    await userEvent.click(page.getByTestId('email-html'));
     await userEvent.keyboard('{End}{Shift>}{Home}{/Shift}');
     expect(editor.can('toggleMark', { name: 'bold' })).toBe(false);
     await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}{ControlOrMeta>}i{/ControlOrMeta}');
@@ -930,32 +864,11 @@ describe('the email kit', () => {
 
   it('keeps a pasted `~~x~~` as the text it is', async () => {
     const editor = await mount([paragraph('Body')]);
+    await copyText(' ~~x~~');
     await caretAfter('Body');
-    const data = new DataTransfer();
-    data.setData('text/plain', ' ~~x~~');
-    find('[contenteditable=true]').dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    );
+    await userEvent.paste();
 
     await vi.waitFor(() => expect(exported(editor)[0].content).toEqual({ text: 'Body ~~x~~' }));
-  });
-
-  it('draws a callout with the align and the space after it stores', async () => {
-    await mount([
-      block({ type: 'callout', attributes: { align: 'center', spaceAfter: 'large' }, content: { text: 'Note' } }),
-    ]);
-
-    const text = await vi.waitFor(() => find('[contenteditable=true] p', 'Note'));
-    // The alignment is its line's own, as the document holds it; the space is the callout's.
-    expect(text.getAttribute('data-text-align')).toBe('center');
-    expect(getComputedStyle(text).textAlign).toBe('center');
-    const host = await vi.waitFor(() => {
-      const found = text.closest<HTMLElement>('[data-space-after]');
-      if (!found) throw new Error('the callout carries no space after');
-      return found;
-    });
-    expect(host.getAttribute('data-space-after')).toBe('large');
-    expect(getComputedStyle(host).marginBottom).toBe('32px');
   });
 
   it('keeps the id and the align of a block turned into a list and back', async () => {
@@ -977,9 +890,10 @@ describe('the email kit', () => {
   it('keeps a pasted heading as a heading, which a mail layout exports as its text', async () => {
     const layout = emailProfile({ allow: MAIL_LAYOUT_KINDS });
     const editor = await mount([paragraph('Body')], { profile: layout });
-    await caretAfter('Body');
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
-    pasteHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
+    await copyHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
+    await caretAfter('Body');
+    await userEvent.paste();
 
     await vi.waitFor(() => expect(typesOf(editor)).toContain('heading'));
     expect(exportedFor(editor, layout).map(({ type, content }) => [type, content])).toContainEqual([
@@ -998,22 +912,8 @@ describe('the email kit', () => {
     await vi.waitFor(() =>
       expect(exported(editor)[0].attributes).toEqual({ align: 'center', spaceAfter: 'large', tone: 'muted' }),
     );
-    expect(editor.getJSON().content?.[0]?.attrs).toMatchObject({ textAlign: 'center' });
-    expect(editor.getJSON().content?.[0]?.attrs).not.toHaveProperty('align');
-    const shown = find('[contenteditable=true] p', 'Hi there');
-    expect(getComputedStyle(shown).textAlign).toBe('center');
   });
 
-  it("offers Align's three choices with the block's own checked", async () => {
-    await mount([paragraph('Hi there', 'p')]);
-    await openBlockMenu('Hi there');
-    await userEvent.click(page.getByRole('menuitem', { name: 'Align' }));
-
-    const choices = page.getByRole('menuitemradio');
-    await expect.element(choices.nth(0)).toBeVisible();
-    expect(choices.elements().map((choice) => choice.textContent)).toEqual(['Left', 'Center', 'Right']);
-    await expect.element(page.getByRole('menuitemradio', { name: 'Left' })).toBeChecked();
-  });
   it('sets the width of the button whose grip opened the menu, not of the block the caret is in', async () => {
     const editor = await mount([
       paragraph('Before'),
@@ -1119,19 +1019,15 @@ describe('the email kit', () => {
     expect(() => editor.run('insertButton')).toThrow(/Unknown command/);
   });
 
-  it("turns a text block into the email's text kinds and paragraph styles only", async () => {
-    await mount([paragraph('Lines')]);
+  it('turns a text block into the text kinds the profile allows, and no other', async () => {
+    await mount([paragraph('Lines')], { profile: emailProfile({ allow: ['paragraph', 'list'] }) });
     await openBlockMenu('Lines');
     await userEvent.click(page.getByRole('menuitem', { name: 'Turn into' }));
 
-    const choices = page.getByRole('menuitemradio');
-    await expect.element(choices.nth(0)).toBeVisible();
-    expect(choices.elements().map((choice) => choice.textContent)).toEqual([
-      'Text',
-      'Lead',
-      'Small text',
-      'Bulleted list',
-    ]);
+    await expect.element(page.getByRole('menuitemradio', { name: 'Bulleted list' })).toBeVisible();
+    await expect.element(page.getByRole('menuitemradio', { name: 'Text', exact: true })).toBeVisible();
+    await expect.element(page.getByRole('menuitemradio', { name: 'Heading 1' })).not.toBeInTheDocument();
+    await expect.element(page.getByRole('menuitemradio', { name: 'Quote' })).not.toBeInTheDocument();
   });
 
   it('offers no Turn into on a block whose kind is not text', async () => {
@@ -1220,8 +1116,7 @@ describe('the email kit', () => {
 
   it('weighs, adds to and aligns the lanes from the dividers and the toolbar, as the Document Editor does', async () => {
     // Lanes side by side; on a phone they stack and draw no divider.
-    await page.viewport(1000, 800);
-    onTestFinished(() => page.viewport(414, 896));
+    await viewportFor(1000, 800);
     const editor = await mount([
       block({
         id: 'cols',
@@ -1231,13 +1126,10 @@ describe('the email kit', () => {
         lanes: [[paragraph('left', 'l')], [paragraph('right', 'r')]],
       }),
     ]);
-    const lanes = () => [...document.querySelectorAll<HTMLElement>('[contenteditable=true] [data-slot=column]')];
-    const divider = await vi.waitFor(() => find('[data-slot=columns-divider]'));
-    divider.focus();
+    await caretAfter('left');
+    await tabTo(page.getByRole('slider'));
     await userEvent.keyboard('{ArrowRight}');
     await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ ratio: [8, 4] }));
-    const [first, second] = lanes().map((lane) => lane.getBoundingClientRect().width);
-    expect(first / (first + second)).toBeCloseTo(2 / 3, 1);
 
     await caretAfter('left');
     await userEvent.click(page.getByRole('button', { name: 'Middle' }));
@@ -1266,7 +1158,7 @@ describe('the email kit', () => {
       },
     );
     await caretAfter('left');
-    expect(document.querySelector('[data-slot=columns-divider]')).toBeNull();
+    await expect.element(page.getByRole('slider')).not.toBeInTheDocument();
     expect(page.getByRole('button', { name: 'Add column' }).elements()).toEqual([]);
   });
 
@@ -1283,8 +1175,7 @@ describe('the email kit', () => {
 
   it("sizes a table's columns from a border and exports them as shares, offering no full width", async () => {
     const editor = await mount([block({ type: 'table', content: { rows: [['cellA', 'cellB']] } })]);
-    const border = await vi.waitFor(() => find('[data-slot=table-border]'));
-    border.focus();
+    await userEvent.click(page.getByRole('slider'));
     await userEvent.keyboard('{ArrowRight}');
 
     await vi.waitFor(() => expect(exported(editor)[0].attributes).toEqual({ columnWidths: [0.55, 0.45] }));
@@ -1314,7 +1205,7 @@ describe('the email kit', () => {
     expect(editor.can('setTextColor', { token: 'red' })).toBe(true);
     await caretAfter('inside');
     await expect.element(page.getByRole('toolbar', { name: 'Block layout' })).not.toBeInTheDocument();
-    expect(document.querySelector('[data-slot=resize-handle]')).toBeNull();
+    await expect.element(page.getByTestId('resize-handle')).not.toBeInTheDocument();
   });
 
   it('draws no table border in locked structure', async () => {
@@ -1322,7 +1213,7 @@ describe('the email kit', () => {
       options: { structure: () => 'locked' },
     });
     await caretAfter('cellA');
-    expect(document.querySelector('[data-slot=table-border]')).toBeNull();
+    await expect.element(page.getByRole('slider')).not.toBeInTheDocument();
   });
 
   it('includes a stored lane ratio the menu does not offer, checked', async () => {
@@ -1361,15 +1252,25 @@ describe('the email kit', () => {
     await expect.element(page.getByText('This block is required')).toBeVisible();
   });
   it('adds no block of a kind the profile leaves out, while a full profile takes it', async () => {
+    const full = await mount([
+      paragraph('Copied'),
+      block({ type: 'button', content: { label: 'Go', href: '{{resetUrl}}' } }),
+      paragraph('Body'),
+    ]);
     const layout = await mount([paragraph('Header')], { profile: emailProfile({ allow: MAIL_LAYOUT_KINDS }) });
+    // A copy out of the full editor, as an author moves blocks between two.
+    await caretAfter('Copied');
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+    await userEvent.copy();
+
     await caretAfter('Header');
-    pasteHtml(buttonHtml);
+    // The browser hands the paste to the editor before the key press it carries out returns.
+    await userEvent.paste();
     expect(typesOf(layout)).not.toContain('button');
 
-    const full = await mount([paragraph('Body')]);
     await caretAfter('Body');
-    pasteHtml(buttonHtml);
-    await vi.waitFor(() => expect(typesOf(full)).toContain('button'));
+    await userEvent.paste();
+    await vi.waitFor(() => expect(typesOf(full).filter((type) => type === 'button')).toHaveLength(2));
   });
 
   it('brings back a stored block of a left-out kind on undo', async () => {

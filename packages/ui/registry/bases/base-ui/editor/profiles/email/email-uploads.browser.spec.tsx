@@ -19,7 +19,8 @@ import {
   dropFiles,
   fileInput,
   heldUpload,
-  pasteFiles,
+  firePastedFiles,
+  pasteImage,
   pngFile,
   type HeldUploadCall,
 } from '../../../../../../src/test/uploads';
@@ -248,26 +249,39 @@ describe('uploads in the email editor', () => {
     await vi.waitFor(() => expect(contentOf(probe, 'banner')).toMatchObject({ picture: 'http://i.test/banner.png' }));
   });
 
-  it('turns a pasted image file into an image block, and a pasted document into nothing', async () => {
+  it('turns a pasted image into an image block that uploads', async () => {
     const { upload, calls } = heldUpload();
     const probe = await mount([text], upload);
     await userEvent.click(await findElement('.ProseMirror p', 'Hello'));
 
-    pasteFiles(await findElement('.ProseMirror'), [new File(['%PDF'], 'plan.pdf', { type: 'application/pdf' })]);
-    pasteFiles(await findElement('.ProseMirror'), [pngFile()]);
+    await pasteImage();
     await waitForCalls(calls, 1);
     calls[0].answer('https://i.test/pasted.png');
 
     await vi.waitFor(() => expect(contentOf(probe, 'image')).toMatchObject({ src: 'https://i.test/pasted.png' }));
-    expect(calls.map((call) => call.file.name)).toEqual(['cat.png']);
+    expect(calls.map((call) => call.file.name)).toEqual(['image.png']);
     expect(JSON.stringify(probe.reported)).not.toMatch(/blob:/);
+  });
+
+  it('takes nothing from a pasted document, fired by script as the clipboard cannot carry a PDF', async () => {
+    const { upload, calls } = heldUpload();
+    const probe = await mount([text], upload);
+    await userEvent.click(await findElement('.ProseMirror p', 'Hello'));
+
+    const pasted = firePastedFiles(await findElement('.ProseMirror'), [
+      new File(['%PDF'], 'plan.pdf', { type: 'application/pdf' }),
+    ]);
+
+    expect(pasted.defaultPrevented).toBe(false);
+    expect(calls).toEqual([]);
+    expect(probe.editor?.getJSON().content?.map((node) => node.type)).toEqual(['paragraph']);
   });
 
   it('turns a dropped image file into an image block that uploads', async () => {
     const { upload, calls } = heldUpload();
     const probe = await mount([text], upload);
 
-    dropFiles(await findElement('.ProseMirror p', 'Hello'), [pngFile('drop.png')]);
+    await dropFiles(await findElement('.ProseMirror p', 'Hello'), ['drop.png']);
     await waitForCalls(calls, 1);
     calls[0].answer('https://i.test/drop.png');
 

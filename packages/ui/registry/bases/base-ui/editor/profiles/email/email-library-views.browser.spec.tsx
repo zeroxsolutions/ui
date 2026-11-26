@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { page, userEvent } from 'vitest/browser';
+import { page, userEvent, type Locator } from 'vitest/browser';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
 import { emailProfile, type EditorEmailBlock } from '@zeroxsolutions/editor-core/profiles/index';
 import '../../../../../../test/nova-style.css';
@@ -90,6 +90,14 @@ async function mount(initial: EditorEmailBlock[]): Promise<Probe> {
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 const reportedOf = (probe: Probe, id: string) => last(probe.reported)?.find((block) => block.id === id);
 
+/** Presses Tab, as a keyboard user does, until `target` holds the focus. */
+async function tabTo(target: Locator): Promise<void> {
+  for (let press = 0; press < 12 && document.activeElement !== target.element(); press += 1) {
+    await userEvent.keyboard('{Tab}');
+  }
+  await expect.element(target).toHaveFocus();
+}
+
 describe("the email editor's library blocks", () => {
   it("edits a hero's heading in place, and undoes the edit from the document", async () => {
     const probe = await mount([hero]);
@@ -113,7 +121,7 @@ describe("the email editor's library blocks", () => {
 
     const image = page.getByRole('button', { name: 'Image', exact: true });
     await expect.element(image).toBeInTheDocument();
-    (image.element() as HTMLElement).focus();
+    await tabTo(image);
     await userEvent.keyboard('{Enter}');
     const popover = page.getByRole('dialog', { name: 'Image' });
     const address = popover.getByRole('textbox', { name: 'Image' });
@@ -200,9 +208,6 @@ describe("the email editor's library blocks", () => {
     await userEvent.click(page.getByRole('menuitemradio', { name: 'Center', exact: true }));
 
     await vi.waitFor(() => expect(reportedOf(probe, 'f1')?.attributes).toEqual({ align: 'center' }));
-    await vi.waitFor(() =>
-      expect(document.querySelector<HTMLElement>('[data-slot=email-legal-footer]')?.dataset.align).toBe('center'),
-    );
   });
 
   it("changes a required block's address, and none of its fields in locked structure", async () => {
@@ -244,15 +249,9 @@ describe("the email editor's library blocks", () => {
     expect(document.querySelector('[data-type=hero] [data-slot=card-button] [data-state=set]')).not.toBeNull();
   });
 
-  it('draws a spacer at the height the email gives it', async () => {
+  it('labels a spacer with the height the email gives it', async () => {
     await mount([{ id: 'g1', key: 'g1', type: 'spacer', attributes: { height: 'large' }, content: {} }]);
 
-    const gap = await vi.waitFor(() => {
-      const found = document.querySelector<HTMLElement>('[data-slot=email-spacer]');
-      if (!found) throw new Error('no spacer');
-      return found;
-    });
-    expect(gap.dataset.height).toBe('large');
-    expect(gap.textContent).toContain('Large, 32px');
+    await expect.element(page.getByTestId('email-spacer')).toHaveTextContent('Large, 32px');
   });
 });

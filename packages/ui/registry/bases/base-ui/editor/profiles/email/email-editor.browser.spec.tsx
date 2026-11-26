@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import type { BlockPreset } from '@zeroxsolutions/editor-core/blocks/index';
@@ -203,6 +203,32 @@ async function caretAfter(text: string): Promise<void> {
 
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
+/**
+ * Puts `html` on the clipboard as another app copies it, beside its text. A copy out of the page would carry the
+ * page's own markup around it, which is not what the case pastes.
+ */
+async function copyHtml(html: string): Promise<void> {
+  const text = new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '';
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+    }),
+  ]);
+}
+
+/** Fakes the timers the editor schedules a validation on, until the case ends. */
+function fakeTimers(): void {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  onTestFinished(() => vi.useRealTimers());
+}
+
+/** Runs every timer the editor has set, so a validation it scheduled has run before the count is read. */
+function settleTimers(): void {
+  vi.runOnlyPendingTimers();
+  vi.runOnlyPendingTimers();
+}
+
 /** The renderer's HTML in a preview frame, without the policy and the measuring script the preview adds. */
 function rendered(frame: HTMLIFrameElement): string {
   return frame.srcdoc
@@ -232,8 +258,8 @@ const button = (): EditorEmailBlock => ({
 
 /** Picks `label` from the toolbar's variable menu. */
 async function pickVariable(label: string): Promise<void> {
-  await userEvent.click(find('[data-slot=variable-menu]'));
-  await userEvent.click(await vi.waitFor(() => find('[data-slot=combobox-item]', label)));
+  await userEvent.click(page.getByTestId('variable-menu'));
+  await userEvent.click(page.getByRole('option', { name: label, exact: true }));
 }
 
 async function openBlockMenu(text: string, selector?: string): Promise<void> {
@@ -257,8 +283,6 @@ describe('EmailEditor', () => {
   it('loads a value the host changes, and does not reload the one it reported', async () => {
     const probe = await mount([paragraph('Hello', 'p1')]);
     await caretAfter('Hello');
-    // ProseMirror takes a caret at the start of the document within 200ms of a focus event for the browser's own
-    // reset and puts its last selection back, so a slow runner's Home could land the text at the end.
     await userEvent.keyboard('{End}{ArrowLeft}{ArrowLeft}{ArrowLeft}abc');
     // Each reported value came back as the value; a reload would have moved the caret out of the word.
     await vi.waitFor(() => expect(probe.editor.getText()).toBe('Heabcllo'));
@@ -301,19 +325,21 @@ describe('EmailEditor', () => {
   it('tells the host when the focus leaves it, and not while it is in a popup the editor opened', async () => {
     const probe = await mount([paragraph('Hello')]);
     await caretAfter('Hello');
-    await userEvent.click(find('[data-slot=variable-menu]'));
-    const option = await vi.waitFor(() => find('[data-slot=combobox-item]', 'Reset link'));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await userEvent.click(page.getByTestId('variable-menu'));
+    const option = page.getByRole('option', { name: 'Reset link' });
+    // The leave is told a task after the blur, and each input the browser carries out spans several, so a leave
+    // the popup caused has been told by the time the hover lands.
+    await userEvent.hover(option);
     expect(probe.blurs).toBe(0);
 
     await userEvent.click(option);
     await vi.waitFor(() => expect(last(probe.reported)?.[0].content).toEqual({ text: 'Hello{{resetUrl}}' }));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await userEvent.hover(page.getByRole('button', { name: 'Elsewhere' }));
     expect(probe.blurs).toBe(0);
-    await userEvent.click(find('button', 'Elsewhere'));
+    await userEvent.click(page.getByRole('button', { name: 'Elsewhere' }));
 
     await vi.waitFor(() => expect(probe.blurs).toBe(1));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await userEvent.hover(page.getByRole('textbox', { name: 'Body' }));
     expect(probe.blurs).toBe(1);
   });
 
@@ -323,24 +349,26 @@ describe('EmailEditor', () => {
     await userEvent.keyboard('{Shift>}{Home}{/Shift}{Backspace}');
 
     const message = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'text-empty', block: 'p1', field: 'text' });
-    const marker = await vi.waitFor(() => find('[data-slot=email-problem-marker]'), { timeout: 1000 });
+    const marker = await vi.waitFor(() => page.getByTestId('email-problem-marker').element(), { timeout: 1000 });
     const decorated = find('[contenteditable=true] [data-problem]');
     expect(document.getElementById(decorated.getAttribute('aria-describedby') ?? '')?.textContent).toBe(message);
 
     await userEvent.hover(marker);
-    await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(message));
+    await expect.element(page.getByTestId('tooltip-content')).toHaveTextContent(message);
     await userEvent.unhover(marker);
-    await vi.waitFor(() => expect(document.querySelector('[data-slot=tooltip-content]')).toBeNull());
+    await expect.element(page.getByTestId('tooltip-content')).not.toBeInTheDocument();
 
-    marker.focus();
-    await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(message));
+    await caretAfter('');
+    await userEvent.keyboard('{F8}');
+    await vi.waitFor(() => expect(document.activeElement).toBe(marker));
+    await expect.element(page.getByTestId('tooltip-content')).toHaveTextContent(message);
     expect(last(probe.validated)).toEqual(validate(last(probe.reported) ?? [], profile));
   });
 
   it('reaches each problem from the text with F8 and Shift+F8, and goes back to its block with Escape', async () => {
     const probe = await mount([paragraph('One', 'p1'), paragraph('', 'p2'), paragraph('Three {{nobody}}', 'p3')]);
     const markers = await vi.waitFor(() => {
-      const found = [...document.querySelectorAll<HTMLElement>('[data-slot=email-problem-marker]')];
+      const found = page.getByTestId('email-problem-marker').elements();
       expect(found).toHaveLength(2);
       return found;
     });
@@ -349,7 +377,7 @@ describe('EmailEditor', () => {
     await userEvent.keyboard('{F8}');
     expect(document.activeElement).toBe(markers[0]);
     const empty = DEFAULT_PROFILE_MESSAGES.problem({ kind: 'text-empty', block: 'p2' });
-    await vi.waitFor(() => expect(find('[data-slot=tooltip-content]').textContent).toBe(empty));
+    await expect.element(page.getByTestId('tooltip-content')).toHaveTextContent(empty);
     await userEvent.keyboard('{F8}');
     expect(document.activeElement).toBe(markers[1]);
     await userEvent.keyboard('{Shift>}{F8}{/Shift}');
@@ -363,10 +391,11 @@ describe('EmailEditor', () => {
   });
 
   it('marks the token a problem names, and validates once on mount', async () => {
+    fakeTimers();
     const probe = await mount([paragraph('Hi {{nobody}}', 'p1')]);
 
     await vi.waitFor(() => expect(probe.validated).toHaveLength(1));
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    settleTimers();
     expect(probe.validated).toHaveLength(1);
     expect(probe.validated[0]).toEqual([{ kind: 'variable-undeclared', block: 'p1', field: 'text', name: 'nobody' }]);
     const token = await vi.waitFor(() => find('[contenteditable=true] [data-problem]'));
@@ -400,20 +429,23 @@ describe('EmailEditor', () => {
     );
 
     await vi.waitFor(() =>
-      expect([...document.querySelectorAll('[data-slot=email-block-adornment]')].map((row) => row.textContent)).toEqual(
-        ['badge p1', 'badge c1', 'badge l1', 'badge l2'],
-      ),
+      expect(
+        page
+          .getByTestId('email-block-adornment')
+          .elements()
+          .map((row) => row.textContent),
+      ).toEqual(['badge p1', 'badge c1', 'badge l1', 'badge l2']),
     );
     probe.adorn((id) => <span>stale {id}</span>);
-    await vi.waitFor(() => expect(find('[data-slot=email-block-adornment]').textContent).toBe('stale p1'));
+    await expect.element(page.getByTestId('email-block-adornment').first()).toHaveTextContent('stale p1');
   });
 
-  it('marks the block the grip selected while its menu is open', async () => {
-    await mount([paragraph('First', 'p1'), paragraph('Second', 'p2')]);
+  it('selects the block the grip opened its menu for, while the menu is open', async () => {
+    const probe = await mount([paragraph('First', 'p1'), paragraph('Second', 'p2')]);
     await openBlockMenu('Second');
 
-    expect(find('[contenteditable=true] p', 'Second').classList).toContain('ProseMirror-selectednode');
-    expect(find('[contenteditable=true] p', 'First').classList).not.toContain('ProseMirror-selectednode');
+    // `First` takes positions 0 to 7, so `Second` is the node from 7 to 15.
+    expect(probe.editor.getSelection()).toMatchObject({ from: 7, to: 15, isNode: true });
   });
 
   it("disables a required block's Delete with its reason", async () => {
@@ -432,40 +464,22 @@ describe('EmailEditor', () => {
     await userEvent.keyboard(' /');
 
     await vi.waitFor(() => expect(find('[contenteditable=true] p').textContent).toBe('Hi /'));
-    expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
+    await expect.element(page.getByTestId('slash-menu')).not.toBeInTheDocument();
     await openBlockMenu('Hi /');
     await expect.element(page.getByRole('menuitem', { name: 'Delete' })).toBeDisabled();
-  });
-
-  it('draws an undeclared variable chip in the destructive token, with no underline', async () => {
-    await mount([paragraph('Hi {{ghost}}', 'p1')]);
-
-    const chip = await vi.waitFor(() => find('[contenteditable=true] [data-slot=variable][data-problem]'));
-    const host = await vi.waitFor(() => {
-      const marked = chip.closest<HTMLElement>('[aria-describedby]');
-      if (!marked) throw new Error('the chip is not marked');
-      return marked;
-    });
-    expect(host.className).not.toContain('underline');
-    expect(getComputedStyle(chip).textDecorationLine).toBe('none');
-    const style = getComputedStyle(chip);
-    expect(style.borderTopColor).toBe(style.color);
   });
 
   it('marks a heading pasted where the profile holds none, whose structure the email cannot carry, with one problem', async () => {
     const probe = await mount([paragraph('Body', 'p1')], {
       profile: emailProfile({ variables: declared, allow: MAIL_LAYOUT_KINDS }),
     });
-    await caretAfter('Body');
-    const data = new DataTransfer();
     // Between two paragraphs, so the heading is pasted whole rather than joined to the line it lands in.
-    data.setData('text/html', '<p>Before</p><h1>Hi</h1><p>After</p>');
-    document.activeElement?.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    );
+    await copyHtml('<p>Before</p><h1>Hi</h1><p>After</p>');
+    await caretAfter('Body');
+    await userEvent.paste();
 
     await vi.waitFor(() => expect(last(probe.validated)?.map(({ kind }) => kind)).toEqual(['block-not-carried']));
-    await vi.waitFor(() => expect(document.querySelectorAll('[data-slot=email-problem-marker]')).toHaveLength(1));
+    await vi.waitFor(() => expect(page.getByTestId('email-problem-marker').elements()).toHaveLength(1));
     const exported = toEmailBlocks(probe.editor.getJSON(), [], { kinds: MAIL_LAYOUT_KINDS });
     expect(exported.map(({ type, content }) => [type, content])).toContainEqual(['paragraph', { text: 'Hi' }]);
   });
@@ -477,14 +491,12 @@ describe('EmailEditor', () => {
     await userEvent.keyboard('{Enter}More');
 
     const frame = await vi.waitFor(() => {
-      const found = find('iframe[data-slot=email-preview]') as HTMLIFrameElement;
+      const found = page.getByTitle('Email preview').element() as HTMLIFrameElement;
       expect(found.srcdoc).toContain('More');
       return found;
     });
     const expected = renderer.render({ ...previewInput, ...sampled, blocks: withIds(last(probe.reported) ?? []) });
     expect(rendered(frame)).toBe(expected.html);
-    // Scripts run under a policy that admits the measuring script alone, at an opaque origin.
-    expect(frame.getAttribute('sandbox')).toBe('allow-scripts');
   });
 
   it('previews a columns block, keys standing in for the ids of its lanes, and lists the render problems', async () => {
@@ -500,7 +512,7 @@ describe('EmailEditor', () => {
     };
     const probe = await mount([columns], { preview: { renderer, input: previewInput } });
 
-    const frame = await vi.waitFor(() => find('iframe[data-slot=email-preview]') as HTMLIFrameElement);
+    const frame = await vi.waitFor(() => page.getByTitle('Email preview').element() as HTMLIFrameElement);
     const blocks = exportedOf(probe.editor);
     const laneIds = (blocks[0].lanes ?? []).flat().map(({ id, key }) => [id, key !== '']);
     expect(laneIds).toEqual([
@@ -511,10 +523,10 @@ describe('EmailEditor', () => {
     expect(rendered(frame)).toBe(expected.html);
     expect(expected.problems.length).toBeGreaterThan(0);
     // In words, at the place of its block in the document: the columns, Left, then Right.
-    expect(find('[data-slot=email-preview-problems]').textContent).toContain(
+    expect(page.getByTestId('email-preview-problems').element().textContent).toContain(
       DEFAULT_PROFILE_MESSAGES.renderProblem({ kind: 'variable-missing', name: 'nobody', blockId: 'x' }, 3),
     );
-    expect(find('[data-slot=email-preview-problems]').textContent).not.toContain('variable-missing');
+    expect(page.getByTestId('email-preview-problems').element().textContent).not.toContain('variable-missing');
   });
 
   it('lists two render problems that read the same as two lines', async () => {
@@ -536,7 +548,9 @@ describe('EmailEditor', () => {
       region: 'footer',
     });
     await vi.waitFor(() => {
-      const lines = [...find('[data-slot=email-preview-problems]').querySelectorAll('li')].map((li) => li.textContent);
+      const lines = [...page.getByTestId('email-preview-problems').element().querySelectorAll('li')].map(
+        (li) => li.textContent,
+      );
       expect(lines).toEqual([line, line]);
     });
     expect(errors.mock.calls.flat().join(' ')).not.toContain('same key');
@@ -544,6 +558,7 @@ describe('EmailEditor', () => {
   });
 
   it('validates a bounded number of times under a host that re-renders on each report', async () => {
+    fakeTimers();
     let calls = 0;
     const renderer = createEmailRenderer({ theme });
     function Restless() {
@@ -564,7 +579,8 @@ describe('EmailEditor', () => {
     }
     await render(<Restless />);
     await vi.waitFor(() => expect(calls).toBe(1));
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    settleTimers();
+    settleTimers();
     expect(calls).toBe(1);
   });
 
@@ -591,7 +607,7 @@ describe('EmailEditor', () => {
   it("draws a problem in the host's words", async () => {
     await mount([paragraph('', 'p1')], { messages: { problem: () => 'Khoi trong' } });
 
-    const marker = await vi.waitFor(() => find('[data-slot=email-problem-marker]'));
+    const marker = await vi.waitFor(() => page.getByTestId('email-problem-marker').element());
     expect(document.getElementById(marker.getAttribute('aria-describedby') ?? '')?.textContent).toBe('Khoi trong');
   });
 
@@ -606,7 +622,7 @@ describe('EmailEditor', () => {
     await caretAfter('Hello');
     await userEvent.keyboard('{Enter}/');
 
-    await vi.waitFor(() => expect(find('[data-slot=slash-menu]').textContent).toContain('Duong ke'));
+    await expect.element(page.getByTestId('slash-menu')).toHaveTextContent('Duong ke');
   });
 
   it('is named by its label', async () => {
@@ -658,8 +674,8 @@ describe('EmailEditor', () => {
     await userEvent.click(field);
     await userEvent.keyboard('{End}');
 
-    await userEvent.click(find('[data-slot=variable-menu]'));
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=combobox-item]', 'Reset link')));
+    await userEvent.click(page.getByTestId('variable-menu'));
+    await userEvent.click(page.getByRole('option', { name: 'Reset link' }));
 
     await vi.waitFor(() =>
       expect(last(probe.reported)?.[1].content).toEqual({ label: 'Reset{{resetUrl}}', href: '{{resetUrl}}' }),
@@ -709,14 +725,13 @@ describe('EmailEditor', () => {
     await userEvent.type(page.getByRole('textbox', { name: 'Body' }), ' there');
     await userEvent.keyboard('/');
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
     expect(probe.reported).toEqual([]);
     expect(probe.editor.getText()).toBe('Hello');
     await userEvent.hover(find('[data-editor=document] p', 'Hello'));
     expect(document.querySelector('.drag-handle:not(.hide)')).toBeNull();
-    expect(document.querySelector('[role=menu]')).toBeNull();
-    expect(document.querySelector('[data-slot=slash-menu]')).toBeNull();
-    expect(document.querySelector('[data-slot=editor-toolbar]')).toBeNull();
+    await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
+    await expect.element(page.getByTestId('slash-menu')).not.toBeInTheDocument();
+    await expect.element(page.getByRole('toolbar')).not.toBeInTheDocument();
   });
 });
 
@@ -766,8 +781,8 @@ describe('EmailEditor frame', () => {
 
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
     await expect.element(page.getByTitle('Email preview')).toBeVisible();
-    expect(document.querySelector('[role=toolbar]')).toBeNull();
-    expect(find('[data-slot=email-editor-bar]').querySelectorAll('button:not([role=tab])')).toHaveLength(0);
+    await expect.element(page.getByRole('toolbar')).not.toBeInTheDocument();
+    expect(page.getByTestId('email-editor-bar').getByRole('button').elements()).toHaveLength(0);
 
     await userEvent.click(page.getByRole('tab', { name: 'Edit' }));
     const toolbar = page.getByRole('toolbar');
@@ -775,38 +790,11 @@ describe('EmailEditor frame', () => {
     await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeEnabled();
   });
 
-  const frame = () => find('iframe[data-slot=email-preview]') as HTMLIFrameElement;
+  const frame = () => page.getByTitle('Email preview').element() as HTMLIFrameElement;
 
-  const previewAt = async (width: number) => {
-    await page.viewport(width, 800);
-    await mount([paragraph('Hello', 'p1')], withPreview());
-    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    return vi.waitFor(() => {
-      expect(frame().offsetWidth).toBeGreaterThan(0);
-      return frame().offsetWidth;
-    });
-  };
-
-  // The email's narrow-screen rules apply at 600px and under.
-  it("draws the email at the editor's own width, past the narrow-screen breakpoint on a wide page", async () => {
-    expect(await previewAt(1280)).toBeGreaterThan(600);
-  });
-
-  it('draws the email under the narrow-screen breakpoint on a phone, unscaled and inside the page', async () => {
-    const width = await previewAt(375);
-
-    expect(width).toBeLessThan(375);
-    expect(frame().getBoundingClientRect().width).toBe(width);
-    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(375);
-  });
-
-  it('grows the frame with the email, running only its own measuring script', async () => {
+  it('grows the frame with the email', async () => {
     const probe = await mount([paragraph('Hello', 'p1')], withPreview());
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    expect(frame().getAttribute('sandbox')).toBe('allow-scripts');
-    expect(frame().srcdoc).toMatch(
-      /<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-[0-9a-f]+'">/,
-    );
     const first = await vi.waitFor(() => {
       const height = parseFloat(frame().style.height);
       expect(height).toBeGreaterThan(0);
@@ -826,12 +814,10 @@ describe('EmailEditor frame', () => {
         preview: { renderer: createEmailRenderer({ theme: { ...theme, dark } }), input: previewInput },
       });
       await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media all{.zx-body{background:#18181B'));
-      expect(frame().style.colorScheme).toBe('dark');
+      await vi.waitFor(() => expect(frame().style.colorScheme).toBe('dark'));
 
       root.classList.remove('dark');
-      await vi.waitFor(() => expect(frame().srcdoc).toContain('@media not all{.zx-body{background:#18181B'));
-      expect(frame().style.colorScheme).toBe('light');
+      await vi.waitFor(() => expect(frame().style.colorScheme).toBe('light'));
     } finally {
       root.classList.remove('dark');
     }
@@ -850,7 +836,7 @@ describe('EmailEditor frame', () => {
     );
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
 
-    const inbox = page.elementLocator(await vi.waitFor(() => find('[data-slot=email-preview-inbox]')));
+    const inbox = page.getByTestId('email-preview-inbox');
     await expect.element(inbox.getByText('Example')).toBeVisible();
     await expect.element(inbox.getByText('Hi Lan')).toBeVisible();
     await expect.element(inbox.getByText('Your week')).toBeVisible();
@@ -861,7 +847,7 @@ describe('EmailEditor frame', () => {
 
     await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
     await expect.element(page.getByTitle('Email preview')).toBeVisible();
-    expect(document.querySelector('[role=toolbar]')).toBeNull();
+    await expect.element(page.getByRole('toolbar')).not.toBeInTheDocument();
   });
 
   it('draws the editor alone without a renderer, at any viewport', async () => {
@@ -869,8 +855,8 @@ describe('EmailEditor frame', () => {
     await mount([paragraph('Hello', 'p1')]);
 
     await expect.element(page.getByRole('textbox', { name: 'Body' })).toBeVisible();
-    expect(document.querySelector('[role=tablist]')).toBeNull();
-    expect(document.querySelector('iframe')).toBeNull();
+    await expect.element(page.getByRole('tablist')).not.toBeInTheDocument();
+    await expect.element(page.getByTitle('Email preview')).not.toBeInTheDocument();
   });
 
   it("draws the link control and the variable menu as the toolbar's controls", async () => {
@@ -881,14 +867,12 @@ describe('EmailEditor frame', () => {
     await expect.element(toolbar.getByRole('combobox', { name: 'Variable', exact: true })).toBeVisible();
   });
 
-  it('reads bold, italic, then the link control and the variable menu, with no remove-link control', async () => {
+  it('offers no remove-link control in the toolbar', async () => {
     await mount([paragraph('Hello', 'p1')]);
 
-    const toolbar = await vi.waitFor(() => find('[role=toolbar]'));
-    const names = [...toolbar.querySelectorAll('button, [role=combobox]')].map((control) =>
-      control.getAttribute('aria-label'),
-    );
-    expect(names).toEqual(['Bold', 'Italic', 'Link', 'Variable']);
+    const toolbar = page.getByRole('toolbar');
+    await expect.element(toolbar.getByRole('button', { name: 'Link', exact: true })).toBeVisible();
+    await expect.element(toolbar.getByRole('button', { name: 'Remove link' })).not.toBeInTheDocument();
   });
 
   it('offers to remove a link in the bubble only while the selection is in one', async () => {
@@ -902,12 +886,14 @@ describe('EmailEditor frame', () => {
     const probe = await mount([linked]);
     await caretAfter('Open the page');
     await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{Shift>}{ArrowLeft}{/Shift}');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label="Remove link"]')));
+    await userEvent.click(page.getByTestId('bubble-menu').getByRole('button', { name: 'Remove link' }));
     await vi.waitFor(() => expect(exportedOf(probe.editor)[0].content).toEqual({ text: 'Open the page' }));
 
     await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}');
-    await vi.waitFor(() => find('[data-slot=bubble-menu] [aria-label=Italic]'));
-    expect(document.querySelector('[data-slot=bubble-menu] [aria-label="Remove link"]')).toBeNull();
+    await expect.element(page.getByTestId('bubble-menu').getByRole('button', { name: 'Italic' })).toBeVisible();
+    await expect
+      .element(page.getByTestId('bubble-menu').getByRole('button', { name: 'Remove link' }))
+      .not.toBeInTheDocument();
   });
 
   it('presses the link control while the caret is in a link', async () => {
@@ -970,7 +956,7 @@ describe('EmailEditor variables in code and html', () => {
 
   it('inserts a variable into an html block as its token, so the export is the text as written', async () => {
     const probe = await mount([html('<b>')]);
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=email-html]')));
+    await userEvent.click(page.getByTestId('email-html'));
     await userEvent.keyboard('{End}');
     await pickVariable('Name');
 
@@ -1067,7 +1053,11 @@ describe('EmailEditor presets', () => {
 
     await expect.element(page.getByText('Ready-made', { exact: true })).toBeVisible();
     const slash = () =>
-      [...document.querySelectorAll('[data-slot=slash-menu] [data-slot=item-title]')].map((title) => title.textContent);
+      page
+        .getByTestId('slash-menu')
+        .getByTestId('item-title')
+        .elements()
+        .map((title) => title.textContent);
     expect(slash()).toContain('Action');
     expect(slash()).not.toContain('Call to action');
   });

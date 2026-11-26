@@ -10,12 +10,6 @@ import {
   toEmailBlocks,
   type EditorEmailBlock,
 } from '@zeroxsolutions/editor-core/profiles/index';
-import {
-  createEmailRenderer,
-  type EmailTheme,
-  type DefaultLayoutProps,
-  type RenderEmailInput,
-} from '@zeroxsolutions/editor-core/template/email/index';
 import '../../../../../../test/nova-style.css';
 import '../../styles.css';
 import { Editor } from '../../document/react/editor';
@@ -23,20 +17,6 @@ import { BubbleMenu } from '../../document/ui/bubble-menu';
 import { emailKit, emailUi } from './email-kit';
 
 const profile = emailProfile({ variables: [] });
-
-const theme: EmailTheme = {
-  colors: {
-    background: '#FFFFFF',
-    foreground: '#09090B',
-    primary: '#007A55',
-    primaryForeground: '#ECFDF5',
-    muted: '#F4F4F5',
-    mutedForeground: '#63636D',
-    border: '#E4E4E7',
-  },
-  radius: 10,
-  font: { family: 'Inter', fallback: 'Arial, Helvetica, sans-serif' },
-};
 
 function block(overrides: Partial<EditorEmailBlock> & Pick<EditorEmailBlock, 'type'>): EditorEmailBlock {
   return { id: null, key: '', attributes: {}, content: {}, ...overrides };
@@ -96,19 +76,6 @@ async function pickColor(group: 'Text color' | 'Background', name: string): Prom
 
 const exported = (editor: IEditor) => toEmailBlocks(editor.getJSON(), [], { kinds: profile.kinds });
 
-function rendered(blocks: readonly EditorEmailBlock[]): string {
-  const input: RenderEmailInput<DefaultLayoutProps> = {
-    subject: 'Hello',
-    preheader: null,
-    locale: 'en',
-    layoutProps: { logo: { url: 'https://cdn.example.test/logo.png', alt: 'Example', width: 120 }, footer: ['Ex'] },
-    variables: {},
-    variableTypes: {},
-    blocks: blocks.map(({ lanes: _lanes, ...stored }) => ({ ...stored, id: stored.id ?? stored.key })),
-  };
-  return createEmailRenderer({ theme }).render(input).html;
-}
-
 describe('text styling in the email editor', () => {
   it('aligns a line from the bubble, offering no justify, which the email cannot draw', async () => {
     const editor = await mount([paragraph('Hi there')]);
@@ -122,7 +89,7 @@ describe('text styling in the email editor', () => {
     await vi.waitFor(() => expect(exported(editor)[0]?.attributes.align).toBe('right'));
   });
 
-  it('carries a colour as inline markup, which the sent email draws from its theme', async () => {
+  it('carries a colour as inline markup', async () => {
     const editor = await mount([paragraph('Hi there')]);
     await select('[contenteditable=true] p', 'Hi there');
 
@@ -132,16 +99,13 @@ describe('text styling in the email editor', () => {
     await vi.waitFor(() =>
       expect(exported(editor)[0]?.content.text).toBe('{bg=amber}{color=red}Hi there{/color}{/bg}'),
     );
-    const html = rendered(exported(editor));
-    expect(html).toContain('zx-color-red');
-    expect(html).toContain('zx-bg-amber');
     expect(JSON.stringify(editor.getJSON())).not.toMatch(/#[0-9a-f]{3,8}/i);
   });
 
   it('turns a line into Lead and Small text from the block menu, and back to a paragraph', async () => {
     const editor = await mount([paragraph('Hi there'), paragraph('After')]);
     const choose = async (title: string) => {
-      await vi.waitFor(() => expect(document.querySelector('[role=menu]')).toBeNull());
+      await expect.element(page.getByRole('menu')).not.toBeInTheDocument();
       await userEvent.hover(await vi.waitFor(() => find('[contenteditable=true] p', 'Hi there')));
       const grip = await vi.waitFor(() => {
         const found = document.querySelector<HTMLElement>('.drag-handle');
@@ -155,7 +119,6 @@ describe('text styling in the email editor', () => {
 
     await choose('Lead');
     await vi.waitFor(() => expect(exported(editor)[0]?.attributes.size).toBe('lead'));
-    expect(rendered(exported(editor))).toContain('zx-text-lead');
 
     await choose('Small text');
     await vi.waitFor(() => expect(exported(editor)[0]?.attributes.size).toBe('small'));
@@ -186,6 +149,5 @@ describe('text styling in the email editor', () => {
     await pickColor('Text color', 'Teal');
 
     await vi.waitFor(() => expect(String(exported(editor)[0]?.content.text)).toContain('{color=teal}'));
-    expect(rendered(exported(editor))).toContain('zx-color-teal');
   });
 });

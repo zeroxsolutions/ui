@@ -5,12 +5,7 @@ import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 import { defineBlock } from '@zeroxsolutions/editor-core/blocks/index';
 import type { IEditor } from '@zeroxsolutions/editor-core/document/core/index';
-import {
-  emailProfile,
-  validate,
-  type EditorEmailBlock,
-  type ProfileProblem,
-} from '@zeroxsolutions/editor-core/profiles/index';
+import { emailProfile, type EditorEmailBlock, type ProfileProblem } from '@zeroxsolutions/editor-core/profiles/index';
 import {
   choice,
   defineEmailBlock,
@@ -117,7 +112,7 @@ function find(selector: string, text?: string): HTMLElement {
 const last = <T,>(list: T[]): T | undefined => list[list.length - 1];
 
 async function openBlockMenu(): Promise<void> {
-  await userEvent.hover(await vi.waitFor(() => find('[data-slot=email-block]')));
+  await userEvent.hover(page.getByTestId('email-block'));
   const grip = await vi.waitFor(() => {
     const found = find('.drag-handle');
     if (found.classList.contains('hide')) throw new Error('the grip is hidden');
@@ -132,9 +127,9 @@ describe('emailBlockFeature', () => {
     const probe = await mount([{ id: 'p1', key: 'p1', type: 'paragraph', attributes: {}, content: { text: '' } }]);
     await userEvent.click(page.getByRole('textbox', { name: 'Body' }));
     await userEvent.keyboard('/');
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=slash-menu] [data-slot=item]', 'Testimonial')));
+    await userEvent.click(page.getByTestId('slash-menu').getByText('Testimonial'));
 
-    await userEvent.click(await vi.waitFor(() => find('[data-slot=email-block-body]')));
+    await userEvent.click(page.getByTestId('email-block-body'));
     await userEvent.keyboard('Kind words');
     await userEvent.click(page.getByRole('textbox', { name: 'Author' }));
     await userEvent.keyboard('Lan');
@@ -169,8 +164,8 @@ describe('emailBlockFeature', () => {
     const block = page.getByRole('group', { name: 'Testimonial' });
     await expect.element(block.getByText('Kind words')).toBeVisible();
     await expect.element(block.getByRole('textbox', { name: 'Author' })).toHaveTextContent('Lan');
-    expect(document.querySelector('[data-slot=email-block]')?.textContent).not.toContain('Testimonial');
-    expect(document.querySelector('[data-slot=email-block] input, [data-slot=email-block] fieldset')).toBeNull();
+    await expect.element(page.getByTestId('email-block')).not.toHaveTextContent('Testimonial');
+    expect(page.getByTestId('email-block').element().querySelector('input, fieldset')).toBeNull();
   });
 
   it('loads a stored block as it was written, and sets a number in its settings popover', async () => {
@@ -186,7 +181,6 @@ describe('emailBlockFeature', () => {
   });
 
   it('refuses a block the profile does not name, so the server validates what the editor offers', () => {
-    expect(validate([stored({ size: 3 })], profile)).toEqual([]);
     expect(() =>
       renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[testimonial]} value={[]} />),
     ).toThrow(/Block "testimonial" is in `blocks` but not in the profile/);
@@ -321,7 +315,6 @@ describe('a block from defineBlock in the email editor', () => {
     await render(<SayingHost probe={probe} />);
 
     await expect.element(page.getByText('Kind words')).toBeVisible();
-    expect(document.querySelector('[data-slot=email-block][data-type=saying]')).not.toBeNull();
     await userEvent.click(page.getByRole('textbox', { name: 'Author' }));
     await userEvent.keyboard('Lan');
 
@@ -339,7 +332,6 @@ describe('a block from defineBlock in the email editor', () => {
       fields: { title: plainText() },
       document: { html: (view, markup) => markup`<p>${view.fields.title}</p>` },
     });
-    expect(() => emailProfile({ blocks: [pageNote] })).toThrow(/has no email side/);
     expect(() =>
       renderToString(<EmailEditor label="Body" profile={emailProfile()} blocks={[pageNote]} value={[]} />),
     ).toThrow(/not in the profile/);

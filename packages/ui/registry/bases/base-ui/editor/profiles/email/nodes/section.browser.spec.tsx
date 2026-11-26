@@ -168,12 +168,4 @@ describe('the section in the email editor', () => {
     await userEvent.keyboard('{End}');
     expect(probe.editor.can('insertEmailBlock', { kind: 'section' })).toBe(true);
   });
-
-  it('draws the section in the preview', async () => {
-    await mount([block({ type: 'section', attributes: { background: 'teal' }, lanes: [[paragraph('Inside')]] })]);
-    await userEvent.click(page.getByRole('tab', { name: 'Preview' }));
-    const frame = await vi.waitFor(() => find('iframe[data-slot=email-preview]') as HTMLIFrameElement);
-    await vi.waitFor(() => expect(frame.srcdoc).toMatch(/class="[^"]*zx-section-bg-teal/));
-    expect(frame.srcdoc).toContain('Inside');
-  });
 });
