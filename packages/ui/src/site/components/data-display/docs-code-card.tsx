@@ -11,15 +11,17 @@ import {
   SourceCodeCardLanguage,
   SourceCodeCardTitle,
 } from './source-code-card';
-import type { HighlightLine } from '../../../../registry/bases/base-ui/lib/shiki';
 
 interface DocsCodeCardProps {
   code: string;
   language?: string;
   /** A file name shown beside the language. */
   title?: string;
-  /** Lines highlighted as the page compiled; left out, the block highlights itself once it mounts. */
-  lines?: HighlightLine[] | null;
+  /**
+   * Lines highlighted as the page compiled, packed by `packHighlightLines`; left out, the block highlights
+   * itself once it mounts.
+   */
+  lines?: string;
   className?: string;
 }
 

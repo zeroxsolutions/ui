@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 
 import { SourceCodeCard } from './source-code-card';
-import { unpackHighlightLines } from '../../lib/packed-lines';
+import { packHighlightLines, unpackHighlightLines } from '../../lib/packed-lines';
 
 import { StyledSource, type StyleSources } from './styled-source';
 
@@ -44,14 +44,11 @@ function ComponentSource({
 }: ComponentSourceProps): ReactNode {
   if (code === undefined) throw new Error(`ComponentSource: "${name}" has no source; only a docs page reads it`);
   const card = (source: string, sourceLines: string | undefined): ReactNode => {
-    const highlighted = unpackHighlightLines(sourceLines, source);
+    if (!maxLines) return <SourceCodeCard code={source} language={language} lines={sourceLines ?? 'null'} {...props} />;
+    const excerpt = source.split('\n').slice(0, maxLines).join('\n');
+    const excerptLines = unpackHighlightLines(sourceLines, source)?.slice(0, maxLines) ?? null;
     return (
-      <SourceCodeCard
-        code={maxLines ? source.split('\n').slice(0, maxLines).join('\n') : source}
-        language={language}
-        lines={maxLines ? (highlighted?.slice(0, maxLines) ?? null) : highlighted}
-        {...props}
-      />
+      <SourceCodeCard code={excerpt} language={language} lines={packHighlightLines(excerptLines, excerpt)} {...props} />
     );
   };
   if (!styleSources) return card(code, lines);

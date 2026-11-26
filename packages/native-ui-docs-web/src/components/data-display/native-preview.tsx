@@ -14,7 +14,6 @@ import {
   SourceCodeCardTitle,
 } from '@zeroxsolutions/ui/site/components/data-display/source-code-card';
 import { EXPO_PROJECT_IDS } from '../../constants/native-preview-device';
-import { unpackHighlightLines } from '@zeroxsolutions/ui/site/lib/packed-lines';
 import type { NativeEngine } from '@zeroxsolutions/ui/site/types/native-engine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zeroxsolutions/ui/registry/bases/base-ui/ui/tabs';
 
@@ -59,7 +58,7 @@ function NativePreview({ engine, name, code, language, lines }: NativePreviewPro
         </ComponentPreview>
       </TabsContent>
       <TabsContent value="code" className="mt-4">
-        <SourceCodeCard code={code} language={language} lines={unpackHighlightLines(lines, code)}>
+        <SourceCodeCard code={code} language={language} lines={lines ?? 'null'}>
           <SourceCodeCardHeader>
             <SourceCodeCardTitle>
               <SourceCodeCardLanguage>{language}</SourceCodeCardLanguage>

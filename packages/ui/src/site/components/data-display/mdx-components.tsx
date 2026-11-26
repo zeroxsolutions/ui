@@ -1,7 +1,6 @@
 import { isValidElement, type ComponentProps, type ReactNode } from 'react';
 
 import { DocsCodeCard } from './docs-code-card';
-import { unpackHighlightLines } from '../../lib/packed-lines';
 import { cn } from '../../../../registry/bases/base-ui/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '../../../../registry/bases/base-ui/ui/alert';
 import { ScrollArea, ScrollBar } from '../../../../registry/bases/base-ui/ui/scroll-area';
@@ -84,15 +83,7 @@ export const mdxComponents = {
     const language = /language-(\S+)/.exec(code.className ?? '')?.[1];
     const text = nodeText(code.children).replace(/\n$/, '');
 
-    return (
-      <DocsCodeCard
-        code={text}
-        language={language}
-        title={title}
-        lines={unpackHighlightLines(lines, text)}
-        className="mt-6"
-      />
-    );
+    return <DocsCodeCard code={text} language={language} title={title} lines={lines ?? 'null'} className="mt-6" />;
   },
   // A numbered list of steps, each a heading, with the blocks between them; `steps` numbers them.
   Step: (props: ComponentProps<'h3'>) => <h3 className="mt-6 font-semibold tracking-tight" {...props} />,
