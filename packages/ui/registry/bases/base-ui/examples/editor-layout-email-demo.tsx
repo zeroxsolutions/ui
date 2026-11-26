@@ -87,12 +87,22 @@ const initial: EditorEmailBlock[] = [
       [
         { id: 'title', key: 'title', type: 'heading', attributes: { level: 2 }, content: { text: 'A wide section' } },
         paragraph('inside', "It reaches the card's inner edges, and holds the blocks set on its background."),
+        {
+          id: 'inset',
+          key: 'inset',
+          type: 'image',
+          attributes: { align: 'center', width: 0.5 },
+          content: { src: `${SHARE}/email-editor/image.png`, alt: 'The Email Editor share card, inside the section' },
+        },
       ],
     ],
   },
 ];
 
-/** An email laid out in the email editor: a resized image, weighed columns and a wide section, and its preview. */
+/**
+ * An email laid out in the email editor: a resized image, weighed columns and a wide section holding an image, and
+ * its preview.
+ */
 function EditorLayoutEmailDemo(): ReactNode {
   const [blocks, setBlocks] = useState(initial);
   const renderer = useMemo(() => createEmailRenderer({ theme }), []);
