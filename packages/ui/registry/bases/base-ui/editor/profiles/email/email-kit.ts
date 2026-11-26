@@ -100,6 +100,7 @@ import { columns } from '../../document/features/columns/index';
 import { EmailButtonLabelField, emailButtonSlashItem } from './nodes/button';
 import { emailColumnsSlashItem } from './nodes/columns';
 import { emailHtmlNode, emailHtmlSlashItem } from './nodes/html';
+import { emailSection } from './nodes/section';
 import { emailUnknownNode } from './nodes/unknown';
 import { emailAddressProblems } from './email-address-popover';
 import type { KitUploads } from './kit-context';
@@ -226,6 +227,7 @@ const SLASH_ORDER: readonly EmailBlockKind[] = [
   'divider',
   'button',
   'columns',
+  'section',
   'html',
   'heading',
   'quote',
@@ -811,6 +813,7 @@ export function emailKit(
     if (kind !== 'paragraph' && cellAt(found.engine.state) !== undefined) return false;
     // A library block's own feature knows where it goes, as a lane holds no hero.
     if (Object.hasOwn(libraryBlocks, kind)) return editor.can(`insertEmailBlock:${kind}`);
+    if (kind === 'section') return !editor.isActive('section') && !editor.isActive('column');
     return kind !== 'columns' || laneAt(found.engine.state) === undefined;
   };
   const attributable = (editor: IEditor, attrs: Record<string, string>) => {
@@ -947,6 +950,7 @@ export function emailKit(
     // locked structure and lanes.
     { ...button({ labelField: EmailButtonLabelField, linkField: false }), slash: [], commands: {} },
     { ...columns({ columnContent: laneContent }), slash: [], commands: {} },
+    emailSection(messages),
     // In the schema whatever the profile allows, so a stored image or table opens and shows its problem.
     {
       ...image({

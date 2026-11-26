@@ -224,6 +224,7 @@ describe('the email kit', () => {
       'Divider',
       'Button',
       'Columns',
+      'Section',
       'HTML',
       'Heading',
       'Quote',

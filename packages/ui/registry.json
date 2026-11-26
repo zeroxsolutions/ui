@@ -4248,6 +4248,7 @@
         "@zui/editor-columns",
         "@zui/editor-image",
         "@zui/editor-layout",
+        "@zui/editor-section",
         "@zui/editor-table",
         "@zui/editor-uploads",
         "@zui/lucide-at-sign-icon",
@@ -4321,6 +4322,11 @@
           "path": "registry/bases/base-ui/editor/profiles/email/nodes/columns.tsx",
           "type": "registry:component",
           "target": "@components/editor/profiles/email/nodes/columns.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/profiles/email/nodes/section.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/profiles/email/nodes/section.tsx"
         },
         {
           "path": "registry/bases/base-ui/editor/profiles/email/nodes/html.tsx",
