@@ -42,7 +42,7 @@ export function ToggleView({ attrs, updateAttrs, children }: NodeViewProps<Toggl
         <ChromeIcon
           icon={ChevronRightIcon}
           active={marker.active}
-          sized
+          sized="menu"
           className={cn('transition-transform', attrs.open && 'rotate-90')}
         />
       </span>

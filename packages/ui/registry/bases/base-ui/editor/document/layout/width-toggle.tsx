@@ -24,7 +24,7 @@ export function WidthToggle({ full, onChange, words, disabled = false }: WidthTo
   return (
     <ChromeControl
       icon={Maximize2Icon}
-      iconSized
+      iconSized="toolbar"
       render={(control) => (
         <Tooltip>
           <TooltipTrigger

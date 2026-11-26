@@ -58,7 +58,7 @@ function ColumnsToolbarButton({
   return (
     <ChromeControl
       icon={icon}
-      iconSized
+      iconSized="toolbar"
       render={(control) => (
         <Tooltip>
           <TooltipTrigger
@@ -125,7 +125,7 @@ export function ColumnsToolbar({
           <ChromeControl
             key={value}
             icon={VALIGN_ICONS[value]}
-            iconSized
+            iconSized="toolbar"
             render={(control) => (
               <Tooltip>
                 <TooltipTrigger

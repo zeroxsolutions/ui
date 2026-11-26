@@ -101,7 +101,7 @@ export function EditorToolbar({ editor, items, end, disabled = false, className 
               <ChromeControl
                 icon={item.icon}
                 fallback={item.title}
-                iconSized
+                iconSized="toolbar"
                 render={(control) => (
                   <Tooltip>
                     <TooltipTrigger

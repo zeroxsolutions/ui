@@ -260,9 +260,14 @@
     @apply inset-ring-foreground/20 rounded-[4px] inset-ring-1;
   }
 
-  /* cn-dropdown-menu-item's icon size, a menu or toolbar icon whose control would size it otherwise */
+  /* cn-dropdown-menu-item's icon size, a menu icon whose control would size it otherwise */
   .cn-editor-icon {
     @apply size-3.5 [&_svg]:size-3.5!;
+  }
+
+  /* cn-toggle's icon size, a toolbar icon whose toggle or button would size it otherwise */
+  .cn-editor-toolbar-icon {
+    @apply size-4 [&_svg]:size-4!;
   }
 
   /* cn-badge's type, a short label the editor sets on a block, as a spacer's size */

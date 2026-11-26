@@ -159,7 +159,7 @@ export function EditorBlockMenu({
                   <ChromeControl
                     icon={item.icon}
                     fallback={item.title}
-                    iconSized
+                    iconSized="menu"
                     render={(control) => (
                       <DropdownMenuItem
                         variant={item.destructive ? 'destructive' : 'default'}

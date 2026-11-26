@@ -21,7 +21,7 @@ export function EditorToolbarComboboxTrigger({ icon, label, className, ...props 
   return (
     <ChromeControl
       icon={icon}
-      iconSized
+      iconSized="toolbar"
       render={({ children, ...control }) => (
         <Tooltip>
           <TooltipTrigger

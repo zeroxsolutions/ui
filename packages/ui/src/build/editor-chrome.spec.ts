@@ -95,7 +95,7 @@ const PIECES: Record<string, string[]> = {
   'document/layout/width-toggle.tsx': ['<Toggle', '<Tooltip'],
   'document/layout/resize-handles.tsx': ['cn-editor-handle'],
   'document/ui/slash-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media', 'cn-combobox-label'],
-  'document/ui/chrome-icon.tsx': ['cn-editor-icon'],
+  'document/ui/chrome-icon.tsx': ['cn-editor-icon', 'cn-editor-toolbar-icon'],
   'document/features/image/image.tsx': ['cn-editor-block', 'cn-field-description'],
   'composer/triggers/trigger-menu.tsx': ['cn-editor-menu-item', 'cn-editor-menu-media'],
   'document/features/mention/mention.tsx': ['<Badge'],
@@ -210,6 +210,14 @@ describe("the editor's chrome", () => {
     expect(size).toBeDefined();
     // The svg is held to the size with `!`, as a toggle's or a menu row's own rule would otherwise size it.
     expect((map['cn-editor-icon'] ?? '').split(/\s+/).sort()).toEqual([size, `[&_svg]:${size}!`].sort());
+  });
+
+  it.each(STYLES)("draws a toolbar's icon at the size cn-toggle draws its icon, in %s", (style) => {
+    const map = styleMapOf(ROOT, style);
+    const size = svgSize(map['cn-toggle']);
+    expect(size).toBeDefined();
+    // The small toggles and icon buttons of a toolbar would draw it smaller than the style's toggles do.
+    expect((map['cn-editor-toolbar-icon'] ?? '').split(/\s+/).sort()).toEqual([size, `[&_svg]:${size}!`].sort());
   });
 
   it.each(STYLES)(

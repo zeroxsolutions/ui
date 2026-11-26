@@ -34,26 +34,34 @@ export interface ChromeIconProps {
   /** True while the item holds the pointer, the focus or the menu's highlight. */
   active: boolean;
   /**
-   * Drawn at the style's menu icon size, the editor's icon slot, whatever its control's own rule draws. Unset,
-   * the control sizes the svg as it sizes a lucide element; a menu row or a toolbar's toggle would draw it larger
-   * or smaller than the style's menus do.
+   * Drawn at the style's icon size for a menu row, `menu`, or for a toolbar's toggle, `toolbar`, whatever its
+   * control's own rule draws: a small toggle or button would draw it smaller than the style's toggles do. Unset,
+   * the control sizes the svg as it sizes a lucide element.
    */
-  sized?: boolean;
+  sized?: ChromeIconSize;
 }
+
+/** Where a chrome icon sits, which decides the style's size for it. */
+export type ChromeIconSize = 'menu' | 'toolbar';
+
+const SIZE_SLOTS: Record<ChromeIconSize, string> = {
+  menu: 'cn-editor-icon',
+  toolbar: 'cn-editor-toolbar-icon',
+};
 
 /**
  * The icon of a menu row or a toolbar button. A component renders with a ref and
  * plays while `active` is true; a node is the feature's own markup and renders
  * as given.
  */
-export function ChromeIcon({ icon, className, active, sized = false }: ChromeIconProps): ReactNode {
+export function ChromeIcon({ icon, className, active, sized }: ChromeIconProps): ReactNode {
   const handle = useRef<AnimatedIconHandle>(null);
   usePlayWhile(handle, active, { playOnFirstDraw: true });
 
   if (icon == null || typeof icon === 'boolean') return null;
   if (isComponent(icon)) {
     const Icon = icon;
-    return <Icon ref={handle} aria-hidden className={sized ? cn('cn-editor-icon', className) : className} />;
+    return <Icon ref={handle} aria-hidden className={sized ? cn(SIZE_SLOTS[sized], className) : className} />;
   }
   return icon as ReactNode;
 }
@@ -67,8 +75,8 @@ export interface ChromeControlProps {
   icon: unknown;
   /** Rendered in place of the icon when the item has none. */
   fallback?: ReactNode;
-  /** Draws the icon at the style's menu icon size, as {@link ChromeIconProps.sized} does. */
-  iconSized?: boolean;
+  /** Draws the icon at the style's size for where it sits, as {@link ChromeIconProps.sized} does. */
+  iconSized?: ChromeIconSize;
   /** Renders the control with the handlers that start its icon, and the icon as children. */
   render: (props: ChromeActiveHandlers & { children: ReactNode }) => ReactNode;
 }

@@ -233,7 +233,7 @@ export function SlashMenu({
                         className="cn-editor-menu-item cursor-pointer"
                       >
                         <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-tile">
-                          <ChromeIcon icon={item.icon} sized active={highlighted} />
+                          <ChromeIcon icon={item.icon} sized="menu" active={highlighted} />
                         </ItemMedia>
                         <ItemContent className="cn-editor-menu-content">
                           <ItemTitle>{item.title}</ItemTitle>

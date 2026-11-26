@@ -47,7 +47,7 @@ export function AlignControl({ value, onChange, words, disabled = false }: Align
         <ChromeControl
           key={align}
           icon={ALIGN_ICONS[align]}
-          iconSized
+          iconSized="toolbar"
           render={(control) => (
             <Tooltip>
               <TooltipTrigger

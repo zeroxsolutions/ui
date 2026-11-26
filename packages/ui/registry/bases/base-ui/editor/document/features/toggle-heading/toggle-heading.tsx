@@ -80,7 +80,7 @@ function ToggleHeadingView({
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}
-            sized
+            sized="menu"
             className={cn('transition-transform', attrs.open && 'rotate-90')}
           />
         </span>
@@ -150,7 +150,7 @@ function ToggleHeadingDetails({ open, children }: { open: boolean; children: [Re
           <ChromeIcon
             icon={ChevronRightIcon}
             active={marker.active}
-            sized
+            sized="menu"
             className="transition-transform group-open:rotate-90"
           />
         </span>

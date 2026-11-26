@@ -80,11 +80,11 @@ const items = [
   { id: 'now', title: 'Now', icon: LetterBIcon, command: 'x' },
 ];
 
-/** The width the style's `cn-editor-icon` slot draws an svg at, which a bare svg would draw at 28px. */
-async function iconSlotWidth(): Promise<number> {
+/** The width a style's icon slot draws an svg at, which a bare svg would draw at 28px. */
+async function iconSlotWidth(slot: 'cn-editor-icon' | 'cn-editor-toolbar-icon'): Promise<number> {
   const { container, unmount } = await render(
     <Nova>
-      <span className="cn-editor-icon">
+      <span className={slot}>
         <svg width={28} height={28} />
       </span>
     </Nova>,
@@ -94,9 +94,12 @@ async function iconSlotWidth(): Promise<number> {
   return width;
 }
 
-/** The two icons of a menu draw at the same size, the one the style's icon slot draws. */
-async function expectSameAsBefore([was, now]: number[]): Promise<void> {
-  const slot = await iconSlotWidth();
+/** The two icons of a menu or a toolbar draw at the same size, the one the style's slot for it draws. */
+async function expectSameAsBefore(
+  [was, now]: number[],
+  slotName: 'cn-editor-icon' | 'cn-editor-toolbar-icon' = 'cn-editor-icon',
+): Promise<void> {
+  const slot = await iconSlotWidth(slotName);
   expect(slot).toBeGreaterThan(0);
   expect(slot).toBeLessThan(28);
   expect(was).toBeCloseTo(slot, 0);
@@ -114,7 +117,7 @@ describe('the size of an icon the chrome draws', () => {
         <EditorToolbar editor={editor} items={items} />
       </Nova>,
     );
-    await expectSameAsBefore(svgWidths(container));
+    await expectSameAsBefore(svgWidths(container), 'cn-editor-toolbar-icon');
   });
 
   it('keeps a bubble icon at the size the lucide element had', async () => {
@@ -135,7 +138,7 @@ describe('the size of an icon the chrome draws', () => {
       if (!found) throw new Error('the bubble is not open');
       return found;
     });
-    await expectSameAsBefore(svgWidths(bubble));
+    await expectSameAsBefore(svgWidths(bubble), 'cn-editor-toolbar-icon');
   });
 
   it('keeps a slash row icon at the size the lucide element had', async () => {
@@ -239,7 +242,7 @@ describe('the size of an icon the chrome draws', () => {
           <ChevronRight className="size-4" />
         </span>,
         <span className="flex size-6 items-center justify-center">
-          <ChromeIcon icon={ChevronRightIcon} sized active={false} />
+          <ChromeIcon icon={ChevronRightIcon} sized="menu" active={false} />
         </span>,
       ],
       [

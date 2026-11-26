@@ -68,7 +68,7 @@ function BubbleMenuTextAlign({ editor, words }: { editor: IEditor; words: Layout
         <ChromeControl
           key={align}
           icon={TEXT_ALIGN_ICONS[align]}
-          iconSized
+          iconSized="toolbar"
           render={(control) => (
             <Tooltip>
               <TooltipTrigger
@@ -190,7 +190,7 @@ export function BubbleMenu({ editor, items, container }: BubbleMenuProps) {
                 key={item.id}
                 icon={item.icon}
                 fallback={item.title}
-                iconSized
+                iconSized="toolbar"
                 render={(control) => (
                   <Tooltip>
                     <TooltipTrigger

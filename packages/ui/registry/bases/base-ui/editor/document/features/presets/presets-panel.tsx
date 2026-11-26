@@ -135,7 +135,7 @@ function EditorPresetsPanelItem({ row, notAtCaretId, onInsert }: EditorPresetsPa
         className="cn-editor-menu-item cn-editor-preset-item cursor-grab text-start active:cursor-grabbing aria-disabled:opacity-60"
       >
         <ItemMedia variant="icon" className="cn-editor-menu-media cn-editor-menu-tile">
-          <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} sized active={active} />
+          <ChromeIcon icon={preset.icon ?? LayoutPanelTopIcon} sized="menu" active={active} />
         </ItemMedia>
         <ItemContent className="cn-editor-menu-content">
           <ItemTitle>{preset.label}</ItemTitle>

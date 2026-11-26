@@ -79,7 +79,7 @@ function SectionToolbarTrigger({ children, ...props }: ComponentProps<typeof But
   return (
     <ChromeControl
       icon={ChevronDownIcon}
-      iconSized
+      iconSized="menu"
       render={({ children: chevron, ...control }) => (
         <Button variant="ghost" size="sm" {...control} {...props}>
           {children}

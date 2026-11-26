@@ -118,7 +118,7 @@ function ColorMenu({ editor, words, onOpenChange }: ColorMenuProps): ReactNode {
     >
       <ChromeControl
         icon={PaletteIcon}
-        iconSized
+        iconSized="toolbar"
         render={(control) => (
           <Tooltip>
             <TooltipTrigger
