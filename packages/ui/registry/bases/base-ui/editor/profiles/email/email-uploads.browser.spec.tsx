@@ -23,7 +23,7 @@ import {
   pasteImage,
   pngFile,
   type HeldUploadCall,
-} from '../../../../../../src/test/uploads';
+} from '../../../../../../test/uploads';
 import type { EditorUpload } from '../../document/uploads/upload';
 import { DEFAULT_PROFILE_MESSAGES, type ProfileEditorMessages } from '../messages';
 import { EmailEditor } from './email-editor';
@@ -211,6 +211,7 @@ describe('uploads in the email editor', () => {
   it("uploads the image block's image from its Upload tab", async () => {
     const { upload, calls } = heldUpload();
     const probe = await mount([imageBlock], upload);
+    await userEvent.click(page.getByRole('figure').getByRole('img'));
     await userEvent.click(page.getByRole('button', { name: 'Edit' }));
     await userEvent.click(page.getByRole('tab', { name: 'Upload' }));
 

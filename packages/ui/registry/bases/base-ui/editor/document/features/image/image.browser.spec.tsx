@@ -14,7 +14,7 @@ import {
   storedLayout,
   viewerFrame,
 } from '../../../../../../../test/block-layout';
-import { dropFiles, fileInput, heldUpload, pasteImage, pngFile } from '../../../../../../../src/test/uploads';
+import { dropFiles, fileInput, heldUpload, pasteImage, pngFile } from '../../../../../../../test/uploads';
 import { standardKit } from '../standard/index';
 import { image, type ImageOptions } from './image';
 
@@ -58,7 +58,9 @@ const refusesPastes = defineFeature({
   },
 });
 
+/** Selects the image by a press on its picture, which shows its Edit button, and opens it. */
 async function openEdit(): Promise<void> {
+  await userEvent.click(page.getByRole('figure').getByRole('img'));
   await userEvent.click(page.getByRole('button', { name: 'Edit' }));
 }
 
@@ -394,6 +396,15 @@ describe('the image block layout', () => {
     await vi.waitFor(() => expect(editor.getSelection().isNode).toBe(true));
     expect(page.getByRole('toolbar', { name: 'Block layout' }).query()).toBeNull();
     expect(page.getByTestId('resize-handle').query()).toBeNull();
+  });
+
+  it('selects a half-width image from a press on its middle, on a phone', async () => {
+    await page.viewport(375, 700);
+    const editor = await mountDocumentEditor(features, sized({ width: 0.5 }));
+
+    await userEvent.click(page.getByRole('img', { name: 'Bay' }));
+
+    await vi.waitFor(() => expect(editor.getSelection()).toMatchObject({ isNode: true }));
   });
 
   it('dragging the right handle to half the column stores 0.5 in one undo step', async () => {

@@ -141,7 +141,14 @@ function ColorMenu({ editor, words, onOpenChange }: ColorMenuProps): ReactNode {
           </Tooltip>
         )}
       />
-      <PopoverContent aria-label={words.textColor} side="bottom" align="start">
+      <PopoverContent
+        aria-label={words.textColor}
+        side="bottom"
+        align="start"
+        // The close hands the focus to the editor at once; Base UI's own return to the trigger waits for the exit
+        // animation, and would take the focus from a key pressed in the editor meanwhile.
+        finalFocus={false}
+      >
         <FieldGroup>
           <ColorMenuSwatches editor={editor} paint="text" words={words} onPicked={picked} />
           <ColorMenuSwatches editor={editor} paint="background" words={words} onPicked={picked} />

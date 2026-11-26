@@ -7,7 +7,8 @@ import { collectUiContributions } from '@zeroxsolutions/editor-core/document/ui/
 import '../../../../../../test/nova-style.css';
 import '../../styles.css';
 import { findElement } from '../../../../../../src/test/document-editor';
-import { heldUpload, pasteImage } from '../../../../../../src/test/uploads';
+import { playMotion } from '../../../../../../test/motion';
+import { heldUpload, pasteImage } from '../../../../../../test/uploads';
 import { image } from '../features/image/image';
 import { standardKit } from '../features/standard/index';
 import { Editor } from '../react/editor';
@@ -94,12 +95,7 @@ describe('the bubble menu', () => {
     // The pointer rests on the image's block, which holds the image with its Edit control and
     // resize handles over it.
     await userEvent.hover(page.getByTestId('block-layout'));
-    const grip = await vi.waitFor(() => {
-      const found = document.querySelector<HTMLElement>('.drag-handle:not(.hide)');
-      if (!found) throw new Error('the grip is not shown');
-      return found;
-    });
-    await userEvent.click(grip);
+    await userEvent.click(page.getByRole('button', { name: 'Block handle' }));
     await userEvent.keyboard('{Escape}');
 
     await vi.waitFor(() => expect(editor.getSelection()).toMatchObject({ isNode: true }));
@@ -283,6 +279,22 @@ describe('the bubble menu colours', () => {
     await userEvent.keyboard('{ArrowRight}{ArrowRight}{Enter}');
 
     await vi.waitFor(() => expect(firstMarks(editor)).toEqual([{ type: 'textColor', attrs: { token: 'primary' } }]));
+  });
+});
+
+describe('the bubble menu colours, as their menu animates', () => {
+  playMotion();
+
+  it('gives the editor its focus back on Escape at once, so an undo right after takes the colour away', async () => {
+    const editor = await mount([standardKit()], { content: plain });
+    await selectNotes();
+    await openColors();
+    await userEvent.click(swatch('Text color', 'Red'));
+    await vi.waitFor(() => expect(firstMarks(editor)).toEqual([{ type: 'textColor', attrs: { token: 'red' } }]));
+
+    await userEvent.keyboard('{Escape}{ControlOrMeta>}z{/ControlOrMeta}');
+
+    await vi.waitFor(() => expect(firstMarks(editor)).toEqual([]));
   });
 });
 

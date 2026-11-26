@@ -182,11 +182,11 @@ function ImageFigure({
     >
       <figure
         data-slot="image"
-        data-selected={selected}
+        data-selected={selected || undefined}
         data-empty={!src || undefined}
         contentEditable={contentEditable}
         // An image with no address takes the line, tall enough that its Edit button sits clear of what it shows.
-        className="relative my-4 inline-block max-w-full data-empty:block"
+        className="group/image relative my-4 inline-block max-w-full data-empty:block"
       >
         {src ? (
           href ? (
@@ -293,8 +293,9 @@ function ImageEditView({
           contentEditable={false}
           onMouseDown={(event) => event.stopPropagation()}
           onPointerDown={(event) => event.stopPropagation()}
-          // Over the width handles, which reach into an image narrower than their reach.
-          className="absolute top-2 right-2 z-20"
+          // Over the width handles, which reach into an image narrower than their reach. Shown on a picture only
+          // once it is selected, so a press on a picture narrower than the button selects it rather than editing.
+          className="absolute top-2 right-2 z-20 hidden group-data-empty/image:block group-data-selected/image:block"
         >
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger

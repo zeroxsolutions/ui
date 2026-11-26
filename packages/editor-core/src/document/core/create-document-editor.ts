@@ -241,6 +241,9 @@ export function createDocumentEditor(config: DocumentEditorConfig): IEditor {
       engine.view.dispatch(engine.state.tr.setMeta(SLASH_DECORATION_KEY, next));
     },
     focus: (position) => {
+      // Tiptap's focus waits a frame before it focuses the view, and a key pressed in that frame goes to whatever
+      // held the focus; the view takes it now, and the command then places the selection.
+      engine.view.focus();
       engine.commands.focus(position as Parameters<typeof engine.commands.focus>[0]);
     },
     blur: () => {
