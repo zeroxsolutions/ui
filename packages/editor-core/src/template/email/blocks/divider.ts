@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { readOr, spaceAfter } from './shared.js';
+import { readOr, spaceAfter, spaceBefore } from './shared.js';
 
-const attributes = z.object({ spaceAfter }).strict();
+const attributes = z.object({ spaceBefore, spaceAfter }).strict();
 const content = z.object({}).strict();
 
 /** A rule. It carries no text. */

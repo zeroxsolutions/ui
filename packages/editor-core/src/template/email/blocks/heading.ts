@@ -1,17 +1,18 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { align, inlineText, readOr, spaceAfter } from './shared.js';
+import { align, inlineText, readOr, spaceAfter, spaceBefore } from './shared.js';
 
 const LEVELS = [1, 2, 3] as const;
 /** The level a heading is drawn at when it names none: a section's title under the subject. */
 const DEFAULT_LEVEL = 2;
 
 const level = z.union(LEVELS.map((value) => z.literal(value)) as [z.ZodLiteral<1>, z.ZodLiteral<2>, z.ZodLiteral<3>]);
-const attributes = z.object({ level: level.optional(), align, spaceAfter }).strict();
+const attributes = z.object({ level: level.optional(), align, spaceBefore, spaceAfter }).strict();
 const content = z.object({ text: inlineText }).strict();
 const lenientAttributes = z.object({
   level: level.optional().catch(undefined),
   align: align.catch(undefined),
+  spaceBefore: spaceBefore.catch(undefined),
   spaceAfter: spaceAfter.catch(undefined),
 });
 const lenientContent = z.object({ text: z.string().catch('') });

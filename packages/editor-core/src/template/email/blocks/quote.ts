@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { align, inlineText, readOr, spaceAfter } from './shared.js';
+import { align, inlineText, readOr, spaceAfter, spaceBefore } from './shared.js';
 
-const attributes = z.object({ align, spaceAfter }).strict();
+const attributes = z.object({ align, spaceBefore, spaceAfter }).strict();
 const content = z.object({ text: inlineText }).strict();
 const lenientContent = z.object({ text: z.string().catch('') });
 

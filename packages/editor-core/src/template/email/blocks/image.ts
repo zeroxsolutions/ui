@@ -6,16 +6,17 @@ import {
   BUTTON_HREF_MAX_LENGTH,
   CONTENT_WIDTH,
   IMAGE_START,
+  imageWidth,
   LINK_START,
   readOr,
   spaceAfter,
+  spaceBefore,
 } from './shared.js';
 
 /** The longest alt text and caption: a sentence or two, never a body. */
 export const IMAGE_TEXT_MAX_LENGTH = 500;
 
-const width = z.number().int().min(1).max(CONTENT_WIDTH);
-const attributes = z.object({ align, spaceAfter, width: width.optional() }).strict();
+const attributes = z.object({ align, spaceBefore, spaceAfter, width: imageWidth.optional() }).strict();
 const content = z
   .object({
     src: address(IMAGE_START, BUTTON_HREF_MAX_LENGTH),
@@ -30,8 +31,9 @@ const content = z
   .strict();
 const lenientAttributes = z.object({
   align: align.catch(undefined),
+  spaceBefore: spaceBefore.catch(undefined),
   spaceAfter: spaceAfter.catch(undefined),
-  width: width.optional().catch(undefined),
+  width: imageWidth.optional().catch(undefined),
 });
 const lenientContent = z.object({
   src: z.string().catch(''),

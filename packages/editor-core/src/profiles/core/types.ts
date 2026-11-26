@@ -19,7 +19,8 @@ export type EmailBlockKind =
   | 'socialLinks'
   | 'hero'
   | 'card'
-  | 'legalFooter';
+  | 'legalFooter'
+  | 'section';
 
 export type ProblemKind =
   | 'variable-undeclared'

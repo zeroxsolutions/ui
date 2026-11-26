@@ -21,6 +21,9 @@ import type { EditorEmailBlock, EditorProfile, ProfileProblem } from './types.js
 
 const RATIO_WEIGHT_MAX = 12;
 
+/** Where a block sits: at the top of the body, in a section's one lane, or in a lane of a columns or lanes block. */
+type Nesting = 'top' | 'section' | 'lane';
+
 interface Walk {
   readonly profile: EditorProfile;
   readonly problems: ProfileProblem[];
@@ -275,6 +278,7 @@ const CONTENT_KEYS: Readonly<Record<string, readonly string[]>> = {
   html: ['html'],
   divider: [],
   columns: [],
+  section: [],
   heading: ['text'],
   quote: ['text'],
   image: ['src', 'alt', 'caption', 'href'],
@@ -363,18 +367,32 @@ function checkColumns(walk: Walk, block: EditorEmailBlock, id: string): void {
     lanes.length <= walk.profile.bounds.lanes &&
     ratio.every((weight) => Number.isInteger(weight) && weight >= 1 && weight <= RATIO_WEIGHT_MAX);
   if (!valid) walk.problems.push({ kind: 'lanes-mismatch', block: id, field: 'ratio' });
-  for (const lane of lanes) walkBlocks(walk, lane, 1);
+  for (const lane of lanes) walkBlocks(walk, lane, 'lane');
 }
 
-function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
+/** A section holds exactly one lane, whose blocks sit in the section. */
+function checkSection(walk: Walk, block: EditorEmailBlock, id: string): void {
+  const lanes = Array.isArray(block.lanes) ? block.lanes : [];
+  if (lanes.length !== 1) walk.problems.push({ kind: 'lanes-count', block: id });
+  for (const lane of lanes) walkBlocks(walk, lane, 'section');
+}
+
+/** Whether the default block of `type` is drawn with its flag `flag` set. */
+function defaultFlag(type: string, flag: 'wide' | 'section'): boolean {
+  return Object.hasOwn(defaultBlocks, type) && defaultBlocks[type as DefaultBlockType][flag] === true;
+}
+
+function checkBlock(walk: Walk, block: EditorEmailBlock, nesting: Nesting): void {
   const id = block.id ?? block.key;
   const { bounds, kinds } = walk.profile;
   walk.count += 1;
 
-  // A lane holds no block of lanes: the renderer draws a columns block, or a product's lanes block, at the top only.
-  // A hero's and a card's image is drawn at the card's width, which Outlook would push a lane past.
-  const wide = Object.hasOwn(defaultBlocks, block.type) && defaultBlocks[block.type as DefaultBlockType].wide === true;
-  if (depth > 0 && (block.type === 'columns' || block.lanes !== undefined || wide)) {
+  // A lane holds no block of lanes: the renderer draws a columns block, or a product's lanes block, at the top or in
+  // a section only. A hero's and a card's image is drawn at the card's width, which Outlook would push a lane past.
+  // A section is a row of the body's own table, so it sits at the top only.
+  const section = defaultFlag(block.type, 'section');
+  const lanesOrWide = block.type === 'columns' || block.lanes !== undefined || defaultFlag(block.type, 'wide');
+  if ((nesting === 'lane' && (lanesOrWide || section)) || (nesting === 'section' && section)) {
     walk.problems.push({ kind: 'block-nested-too-deep', block: id });
     return;
   }
@@ -418,6 +436,9 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
     case 'columns':
       checkColumns(walk, block, id);
       break;
+    case 'section':
+      checkSection(walk, block, id);
+      break;
     case 'divider':
       break;
     case 'image':
@@ -438,15 +459,15 @@ function checkBlock(walk: Walk, block: EditorEmailBlock, depth: number): void {
         }
       }
       // A product's lanes block: its lanes' blocks are checked as a columns block's are.
-      for (const lane of Array.isArray(block.lanes) ? block.lanes : []) walkBlocks(walk, lane, depth + 1);
+      for (const lane of Array.isArray(block.lanes) ? block.lanes : []) walkBlocks(walk, lane, 'lane');
     }
   }
 }
 
-function walkBlocks(walk: Walk, blocks: readonly EditorEmailBlock[], depth: number): void {
+function walkBlocks(walk: Walk, blocks: readonly EditorEmailBlock[], nesting: Nesting): void {
   // Stored JSON is read, not trusted: a lane or an entry of another shape is passed over rather than thrown on.
   if (!Array.isArray(blocks)) return;
-  for (const block of blocks) if (isRecord(block)) checkBlock(walk, block as unknown as EditorEmailBlock, depth);
+  for (const block of blocks) if (isRecord(block)) checkBlock(walk, block as unknown as EditorEmailBlock, nesting);
 }
 
 function checkSms(walk: Walk, body: string): void {
@@ -470,7 +491,7 @@ export function validate(value: readonly EditorEmailBlock[] | string, profile: E
     checkSms(walk, value);
     return walk.problems;
   }
-  walkBlocks(walk, value, 0);
+  walkBlocks(walk, value, 'top');
   if (walk.count > profile.bounds.blocks) walk.problems.push({ kind: 'too-many-blocks', block: null });
   for (const { name, required } of profile.variables) {
     if (required && !walk.printed.has(name)) {

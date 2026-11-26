@@ -121,6 +121,11 @@ export interface BlockDefinition<Type extends string = string, Attributes = unkn
    * draws no lane past `max`; without it, every stored lane is drawn.
    */
   readonly laneBounds?: { readonly min: number; readonly max: number };
+  /**
+   * Whether the block is a section: it holds one lane of blocks and sits at the top only. The renderer reports
+   * `block-nested-too-deep` for one in a lane or in another section and draws nothing of it.
+   */
+  readonly section?: boolean;
   /** The content with each sentence replaced by `translateOne`'s answer; what is not a sentence is copied. */
   translate(content: Content, translateOne: (sentence: string) => Promise<string>): Promise<Content>;
   render(block: BlockView<Attributes, Content>, ctx: RenderContext): BlockRendering;

@@ -1,17 +1,25 @@
 import { z } from 'zod';
 import { defineBlockType } from '../block.js';
-import { readOr, spaceAfter } from './shared.js';
+import { VALIGNS } from '../../layout/index.js';
+import { readOr, spaceAfter, spaceBefore } from './shared.js';
 
 /** The most lanes, and the heaviest one lane may weigh against its siblings: a twelve-column grid. */
 export const MAX_LANES = 4;
 const COLUMN_WEIGHT_MAX = 12;
 
 const attributes = z
-  .object({ ratio: z.array(z.number().int().positive().max(COLUMN_WEIGHT_MAX)).min(2).max(MAX_LANES), spaceAfter })
+  .object({
+    ratio: z.array(z.number().int().positive().max(COLUMN_WEIGHT_MAX)).min(2).max(MAX_LANES),
+    valign: z.enum(VALIGNS).optional(),
+    spaceBefore,
+    spaceAfter,
+  })
   .strict();
 const content = z.object({}).strict();
 const lenientAttributes = z.object({
   ratio: z.array(z.number().positive()).catch([]),
+  valign: z.enum(VALIGNS).optional().catch(undefined),
+  spaceBefore: spaceBefore.catch(undefined),
   spaceAfter: spaceAfter.catch(undefined),
 });
 

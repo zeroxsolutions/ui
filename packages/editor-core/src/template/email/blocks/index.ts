@@ -13,6 +13,7 @@ import { legalFooter } from './legal-footer.js';
 import { list } from './list.js';
 import { paragraph } from './paragraph.js';
 import { quote } from './quote.js';
+import { section } from './section.js';
 import { socialLinks } from './social-links.js';
 import { spacer } from './spacer.js';
 import { table } from './table.js';
@@ -36,6 +37,7 @@ export const defaultBlocks = {
   hero,
   card,
   legalFooter,
+  section,
 } as const;
 
 /**

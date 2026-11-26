@@ -504,3 +504,75 @@ describe('validate an SMS body', () => {
     });
   });
 });
+
+describe('validate sections and layout on the email wire', () => {
+  const section = (lanes: EditorEmailBlock[][], attributes: Record<string, unknown> = {}, key = 's1') =>
+    ({ ...block('section', {}, { attributes, lanes }), key }) satisfies EditorEmailBlock;
+  const image = (attributes: Record<string, unknown>) =>
+    block('image', { src: 'https://x.test/a.png', alt: 'A bay' }, { attributes });
+
+  it('lets a section hold columns, a hero and a card', () => {
+    const columns = block(
+      'columns',
+      {},
+      { attributes: { ratio: [1, 1] }, lanes: [[paragraph('a')], [paragraph('b')]] },
+    );
+    const feature = { image: 'https://x.test/h.png', alt: 'A bay', heading: 'Hi', text: 'Welcome' };
+    const hero = block('hero', feature);
+    const card = block('card', feature);
+    expect(validate([section([[columns, hero, card]])], profile)).toEqual([]);
+  });
+
+  it('reports a section in a lane as nested too deep', () => {
+    const inner = section([[paragraph('a')]], {}, 'inner');
+    const columns = block('columns', {}, { attributes: { ratio: [1, 1] }, lanes: [[inner], [paragraph('b')]] });
+    expect(validate([columns], profile)).toEqual([{ kind: 'block-nested-too-deep', block: 'inner' }]);
+  });
+
+  it('reports a section in a section as nested too deep', () => {
+    const inner = section([[paragraph('a')]], {}, 'inner');
+    expect(validate([section([[inner]])], profile)).toEqual([{ kind: 'block-nested-too-deep', block: 'inner' }]);
+  });
+
+  it.each([
+    ['no lane', []],
+    ['two lanes', [[paragraph('a')], [paragraph('b')]]],
+  ])('reports a section holding %s as lanes-count', (_case, lanes) => {
+    expect(validate([section(lanes)], profile)).toEqual([{ kind: 'lanes-count', block: 's1' }]);
+  });
+
+  it.each([
+    ['an image at full width', image({ width: 'full' }), 'width'],
+    ['an image wider than the card', image({ width: 600 }), 'width'],
+    ['a section at full width', section([[paragraph('a')]], { width: 'full' }, 'k1'), 'width'],
+    ['a justified paragraph', block('paragraph', { text: 'a' }, { attributes: { align: 'justify' } }), 'align'],
+    [
+      'a section on a colour outside the set',
+      section([[paragraph('a')]], { background: 'magenta' }, 'k1'),
+      'background',
+    ],
+  ])('refuses what the email cannot draw: %s', (_case, refused, field) => {
+    expect(validate([refused], profile)).toEqual([{ kind: 'attributes-invalid', block: 'k1', field }]);
+  });
+
+  it.each([
+    ['a legacy pixel width', 283],
+    ['a fraction', 0.5],
+  ])('takes an image width as %s', (_case, width) => {
+    expect(validate([image({ width })], profile)).toEqual([]);
+  });
+
+  it('takes the new attributes', () => {
+    const document = [
+      block('paragraph', { text: 'a' }, { attributes: { spaceBefore: 'none', spaceAfter: 'none', size: 'lead' } }),
+      block(
+        'columns',
+        {},
+        { attributes: { ratio: [1, 1], valign: 'center' }, lanes: [[paragraph('a')], [paragraph('b')]] },
+      ),
+      block('table', { rows: [['a', 'b']] }, { attributes: { columnWidths: [0.3, 0.7] } }),
+      section([[paragraph('a')]], { background: 'teal', padding: 'large', width: 'wide', spaceBefore: 'small' }),
+    ];
+    expect(validate(document, profile)).toEqual([]);
+  });
+});
