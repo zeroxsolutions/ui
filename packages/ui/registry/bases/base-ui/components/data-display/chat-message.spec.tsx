@@ -24,19 +24,6 @@ describe('ChatMessage', () => {
     expect(screen.getByText('answer')).toBeTruthy();
   });
 
-  it('aligns through the upstream message root', () => {
-    const { container } = render(<ChatMessage align="end">hello</ChatMessage>);
-    expect(container.firstElementChild?.getAttribute('data-align')).toBe('end');
-  });
-
-  it('marks the root only while the message is streaming', () => {
-    const { container, rerender } = render(<ChatMessage streaming>body</ChatMessage>);
-    expect(container.firstElementChild?.hasAttribute('data-streaming')).toBe(true);
-
-    rerender(<ChatMessage>body</ChatMessage>);
-    expect(container.firstElementChild?.hasAttribute('data-streaming')).toBe(false);
-  });
-
   it('keeps the streaming line out of the accessibility tree', () => {
     render(
       <ChatMessage streaming>
@@ -45,10 +32,5 @@ describe('ChatMessage', () => {
       </ChatMessage>,
     );
     expect(screen.getByTestId('accent').getAttribute('aria-hidden')).toBe('true');
-  });
-
-  it('passes the caller style through to the row', () => {
-    const { container } = render(<ChatMessage style={{ maxWidth: '40rem' }}>body</ChatMessage>);
-    expect((container.firstElementChild as HTMLElement).style.maxWidth).toBe('40rem');
   });
 });

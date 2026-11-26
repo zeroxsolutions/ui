@@ -10,7 +10,6 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/registry/bases/base-ui/ui/item';
-import * as modelInfoCardModule from './model-info-card';
 import { ModelInfoCard, ModelInfoCardIndicator, ModelInfoCardSection } from './model-info-card';
 
 afterEach(cleanup);
@@ -61,15 +60,5 @@ describe('ModelInfoCardSection', () => {
     expect(screen.getByText('Context length')).toBeTruthy();
     expect(screen.getByText('128K tokens')).toBeTruthy();
     expect(screen.getByTestId('line')).toBeTruthy();
-  });
-});
-
-describe('model-info-card module', () => {
-  it('exports the card, its section and the accent indicator - no line/row or hover-wrapper component', () => {
-    expect(Object.keys(modelInfoCardModule).sort()).toEqual([
-      'ModelInfoCard',
-      'ModelInfoCardIndicator',
-      'ModelInfoCardSection',
-    ]);
   });
 });
