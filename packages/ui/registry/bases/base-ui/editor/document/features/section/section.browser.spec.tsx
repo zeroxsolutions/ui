@@ -187,30 +187,91 @@ describe('the section in the Document Editor', () => {
     );
   });
 
-  it('sets its background, padding and width from its toolbar, named from words, each one undo step', async () => {
-    const editor = await mount({ type: 'doc', content: [sectionOf(line('inside')), line('after')] });
+  it('sets its background, padding and width from three menus, named from words, each one undo step', async () => {
+    const editor = await mount({
+      type: 'doc',
+      content: [sectionOf(line('inside')), line('after')],
+    });
     await userEvent.click(page.getByText('inside'));
     await expect.element(toolbar()).toBeVisible();
+    expect(
+      toolbar()
+        .getByRole('button')
+        .elements()
+        .map((button) => button.getAttribute('aria-label') ?? button.textContent),
+    ).toEqual(['Fond', 'Marge interne', 'Largeur']);
 
-    await userEvent.click(toolbar().getByRole('button', { name: 'Sarcelle' }));
-    await userEvent.click(toolbar().getByRole('button', { name: 'Grande' }));
-    await userEvent.click(toolbar().getByRole('button', { name: 'Large', exact: true }));
+    await userEvent.click(toolbar().getByRole('button', { name: 'Fond' }));
+    const swatches = page.getByRole('dialog', { name: 'Fond' });
+    await expect
+      .element(swatches.getByRole('button', { name: 'Aucun', exact: true }))
+      .toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(swatches.getByRole('button', { name: 'Sarcelle' }));
+    await expect.element(swatches).not.toBeInTheDocument();
+
+    await userEvent.click(toolbar().getByRole('button', { name: 'Marge interne' }));
+    await expect.element(page.getByRole('menuitemradio', { name: 'Moyenne' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Grande' }));
+    await userEvent.click(toolbar().getByRole('button', { name: 'Largeur' }));
+    await userEvent.click(page.getByRole('menuitemradio', { name: 'Large', exact: true }));
     await vi.waitFor(() =>
-      expect(sectionAttrs(editor)).toMatchObject({ background: 'teal', padding: 'large', width: 'wide' }),
+      expect(sectionAttrs(editor)).toMatchObject({
+        background: 'teal',
+        padding: 'large',
+        width: 'wide',
+      }),
     );
-    await expect.element(toolbar().getByRole('group', { name: 'Fond' })).toBeVisible();
-    await expect.element(toolbar().getByRole('group', { name: 'Marge interne' })).toBeVisible();
-    await expect.element(toolbar().getByRole('group', { name: 'Largeur' })).toBeVisible();
-    expect(drawnSection().dataset).toMatchObject({ background: 'teal', padding: 'large', width: 'wide' });
+    expect(drawnSection().dataset).toMatchObject({
+      background: 'teal',
+      padding: 'large',
+      width: 'wide',
+    });
 
-    // The toolbar keeps the focus in the text, so the undo key reaches the editor.
+    // A menu closed by a pick gives the focus back to the text, so the undo key reaches the editor.
+    await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}');
     await vi.waitFor(() => expect(sectionAttrs(editor)?.width ?? null).toBeNull());
-    expect(sectionAttrs(editor)).toMatchObject({ background: 'teal', padding: 'large' });
+    expect(sectionAttrs(editor)).toMatchObject({
+      background: 'teal',
+      padding: 'large',
+    });
 
     // The section's defaults are stored as no value at all.
-    await userEvent.click(toolbar().getByRole('button', { name: 'Aucun', exact: true }));
+    await userEvent.click(toolbar().getByRole('button', { name: 'Fond' }));
+    await expect.element(page.getByRole('button', { name: 'Sarcelle' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(page.getByRole('button', { name: 'Aucun', exact: true }));
     await vi.waitFor(() => expect(sectionAttrs(editor)?.background ?? null).toBeNull());
+  });
+
+  it('opens each menu from the keyboard, Escape closing it back to its control, then to the text', async () => {
+    const editor = await mount({
+      type: 'doc',
+      content: [sectionOf(line('inside')), line('after')],
+    });
+    await userEvent.click(page.getByText('inside'));
+    await expect.element(toolbar()).toBeVisible();
+    const focused = () => document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.textContent;
+
+    await userEvent.keyboard('{Alt>}{F10}{/Alt}');
+    await vi.waitFor(() => expect(focused()).toBe('Fond'));
+    await userEvent.keyboard('{ArrowRight}');
+    await vi.waitFor(() => expect(focused()).toBe('Marge interne'));
+    await userEvent.keyboard('{Enter}');
+    await expect.element(page.getByRole('menu', { name: 'Marge interne' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect.element(page.getByRole('menu', { name: 'Marge interne' })).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(focused()).toBe('Marge interne'));
+
+    // A pick by a key keeps the focus in the toolbar.
+    await userEvent.keyboard('{ArrowLeft}{Enter}');
+    await vi.waitFor(() => expect(document.activeElement?.getAttribute('aria-pressed')).toBe('true'));
+    await userEvent.keyboard('{ArrowRight}{Enter}');
+    await vi.waitFor(() => expect(sectionAttrs(editor)?.background).toBe('muted'));
+    await vi.waitFor(() => expect(focused()).toBe('Fond'));
+
+    await userEvent.keyboard('{Escape}');
+    await vi.waitFor(() => expect(editor.isFocused()).toBe(true));
+    await expect.element(toolbar()).toBeVisible();
   });
 
   it('draws no toolbar on a section the host keeps from changing', async () => {

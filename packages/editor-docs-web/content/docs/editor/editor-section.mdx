@@ -41,7 +41,7 @@ pnpm add @zeroxsolutions/editor-core
 <Step>Add the components it is built from.</Step>
 
 ```bash
-pnpm dlx shadcn@latest add separator toggle-group tooltip @zui/editor-layout @zui/lucide-layout-panel-top-icon
+pnpm dlx shadcn@latest add button dropdown-menu field popover toggle-group tooltip @zui/editor-layout @zui/lucide-check-icon @zui/lucide-chevron-down-icon @zui/lucide-layout-panel-top-icon
 ```
 
 <Step>Copy the files into your project.</Step>
@@ -52,6 +52,12 @@ pnpm dlx shadcn@latest add separator toggle-group tooltip @zui/editor-layout @zu
   name="editor-section"
   file="registry/bases/base-ui/editor/document/features/section/section.tsx"
   title="components/editor/document/features/section/section.tsx"
+/>
+
+<ComponentSource
+  name="editor-section"
+  file="registry/bases/base-ui/editor/document/features/section/section-toolbar.tsx"
+  title="components/editor/document/features/section/section-toolbar.tsx"
 />
 
 <Step>Add its styles to your global CSS.</Step>
@@ -141,11 +147,22 @@ pnpm dlx shadcn@latest add separator toggle-group tooltip @zui/editor-layout @zu
   --section-surface: var(--hue-pink-surface);
 }
 [data-slot='section-swatch'] {
-  fill: var(--section-surface, transparent);
-  stroke: var(--border);
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--foreground);
+  background-color: var(--section-surface, transparent);
 }
-[data-slot='section-swatch'] line {
-  stroke: var(--muted-foreground);
+[data-slot='section-swatch'][data-background='none'] {
+  background-image: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--muted-foreground) calc(50% - 0.5px) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
 }
 ```
 
@@ -181,14 +198,14 @@ runs the standard kit's `insertSection`: it adds one holding an empty line after
 the slash menu does not offer it inside a section, a column, a callout, a toggle, a quote, a list or a table. A
 section pasted or dropped there lands at the top.
 
-Its floating toolbar sets its background, its padding and its width, through the standard kit's `setSectionLayout`.
-The background is `none`, `muted`, `primary`, `accent` or one of the eight hues, drawn from the theme's tokens so it
-follows light and dark mode; the padding is `none`, `small`, `medium` (the default) or `large`; the width is
-`content` (the default), `wide` or `full`. A wide or a full section reaches into the room the surface leaves beside
-the text, `--section-bleed`, which the Document Editor's styles set to the editable editor's gutter; the Viewer has
-none unless its host sets one. A full width image, video, embed or card in a section stops at the section's
-padding, whatever the section's width. [Editor Layout](/docs/editor/editor-layout) shows a section with the other
-blocks' layout.
+Its floating toolbar holds three menus, its background's swatches, its padding and its width, each setting one
+through the standard kit's `setSectionLayout`. The background is `none`, `muted`, `primary`, `accent` or one of the
+eight hues, drawn from the theme's tokens so it follows light and dark mode; the padding is `none`, `small`,
+`medium` (the default) or `large`; the width is `content` (the default), `wide` or `full`. A wide or a full section
+reaches into the room the surface leaves beside the text, `--section-bleed`, which the Document Editor's styles set
+to the editable editor's gutter; the Viewer has none unless its host sets one. A full width image, video, embed or
+card in a section stops at the section's padding, whatever the section's width. [Editor
+Layout](/docs/editor/editor-layout) shows a section with the other blocks' layout.
 
 `messages` takes the toolbar's words, `LayoutWords`, and `widths` narrows the widths it offers: the email editor's
 section offers `content` and `wide`. HTML keeps the section whole; Markdown has no section, so it writes its blocks

@@ -533,13 +533,24 @@
 :is(.document-editor [data-slot='section'], [data-slot='section-swatch'])[data-background='pink'] {
   --section-surface: var(--hue-pink-surface);
 }
-/* A swatch: a dot of the section's background, ringed so a pale one shows on the toolbar; none is the ring, struck. */
+/* A swatch of the section's background in its toolbar, at a colour menu swatch's size; none is struck through. */
 [data-slot='section-swatch'] {
-  fill: var(--section-surface, transparent);
-  stroke: var(--border);
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--foreground);
+  background-color: var(--section-surface, transparent);
 }
-[data-slot='section-swatch'] line {
-  stroke: var(--muted-foreground);
+[data-slot='section-swatch'][data-background='none'] {
+  background-image: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--muted-foreground) calc(50% - 0.5px) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
 }
 
 /* MARK: layout - text */

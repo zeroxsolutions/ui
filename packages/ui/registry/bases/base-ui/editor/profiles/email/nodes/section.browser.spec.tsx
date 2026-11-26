@@ -125,8 +125,10 @@ describe('the section in the email editor', () => {
     await userEvent.click(find('[contenteditable=true] p', 'Inside'));
     await expect.element(toolbar()).toBeVisible();
 
-    const widths = toolbar().getByRole('group', { name: 'Largeur' }).getByRole('button');
-    expect(widths.elements().map((button) => button.textContent)).toEqual(['Contenu', 'Large']);
+    await userEvent.click(toolbar().getByRole('button', { name: 'Largeur' }));
+    const widths = page.getByRole('menu', { name: 'Largeur' }).getByRole('menuitemradio');
+    await expect.element(widths.first()).toBeVisible();
+    expect(widths.elements().map((item) => item.textContent)).toEqual(['Contenu', 'Large']);
     expect(probe.editor.can('setSectionLayout', { layout: { width: 'full' } })).toBe(false);
 
     await userEvent.click(widths.getByText('Large', { exact: true }));

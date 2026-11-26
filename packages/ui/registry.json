@@ -3766,11 +3766,16 @@
       "description": "Blocks set together on a background from the theme, inside a padding, at the content's width, wider or the editor's full width.",
       "categories": ["editor"],
       "registryDependencies": [
-        "@shadcn/separator",
+        "@shadcn/button",
+        "@shadcn/dropdown-menu",
+        "@shadcn/field",
+        "@shadcn/popover",
         "@shadcn/toggle-group",
         "@shadcn/tooltip",
         "@zui/document-editor",
         "@zui/editor-layout",
+        "@zui/lucide-check-icon",
+        "@zui/lucide-chevron-down-icon",
         "@zui/lucide-layout-panel-top-icon"
       ],
       "files": [
@@ -3783,6 +3788,11 @@
           "path": "registry/bases/base-ui/editor/document/features/section/section.tsx",
           "type": "registry:component",
           "target": "@components/editor/document/features/section/section.tsx"
+        },
+        {
+          "path": "registry/bases/base-ui/editor/document/features/section/section-toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/editor/document/features/section/section-toolbar.tsx"
         }
       ],
       "css": {
@@ -3849,11 +3859,17 @@
           "--section-surface": "var(--hue-pink-surface)"
         },
         "[data-slot='section-swatch']": {
-          "fill": "var(--section-surface, transparent)",
-          "stroke": "var(--border)"
+          "display": "inline-flex",
+          "flex-shrink": "0",
+          "align-items": "center",
+          "justify-content": "center",
+          "width": "1.25rem",
+          "height": "1.25rem",
+          "color": "var(--foreground)",
+          "background-color": "var(--section-surface, transparent)"
         },
-        "[data-slot='section-swatch'] line": {
-          "stroke": "var(--muted-foreground)"
+        "[data-slot='section-swatch'][data-background='none']": {
+          "background-image": "linear-gradient( to top right, transparent calc(50% - 0.5px), var(--muted-foreground) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px) )"
         }
       },
       "cssVars": {

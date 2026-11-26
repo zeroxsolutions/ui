@@ -255,6 +255,11 @@
     @apply rounded-lg px-2 py-1.5;
   }
 
+  /* cn-checkbox's radius, a swatch of a colour a menu offers, inset with a ring so a pale one shows on the menu */
+  .cn-editor-swatch {
+    @apply inset-ring-foreground/20 rounded-[4px] inset-ring-1;
+  }
+
   /* cn-dropdown-menu-item's icon size, a menu or toolbar icon whose control would size it otherwise */
   .cn-editor-icon {
     @apply size-3.5 [&_svg]:size-3.5!;
