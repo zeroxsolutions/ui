@@ -159,6 +159,26 @@ function quiet(deadline: number, signal: AbortSignal): Promise<void> {
   });
 }
 
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+/**
+ * Has the browser draw the whole page again in one pass, by giving `<html>` a layer of its own for two frames and
+ * taking it away. Chromium redraws only the region a change touches, and what it had kept from earlier passes could
+ * differ from a fresh one: in sera at 375 the toolbar icons in the four rows above the bubble menu, which the
+ * bubble's shadow region covers, came out one of two ways depending on when the bubble last moved.
+ */
+async function repaint(): Promise<void> {
+  const root = document.documentElement;
+  root.style.transform = 'translateZ(0)';
+  await nextFrame();
+  await nextFrame();
+  root.style.transform = '';
+  await nextFrame();
+  await nextFrame();
+}
+
 /**
  * Makes `Math.random` answer one fixed sequence from here on (mulberry32), so a part placed at random, such as
  * the animated grid's lit cells or the highlighter's strokes, lands in the same place on every run.
@@ -255,6 +275,7 @@ async function capture(subject: VisualSubject, width: number, signal: AbortSigna
   await settled(signal);
   const target = (await subject.arrange?.(stage)) ?? stage;
   await settled(signal);
+  await repaint();
   // A case that timed out is not cancelled; left to run on, it would capture the next case's page under its own name.
   signal.throwIfAborted();
 
