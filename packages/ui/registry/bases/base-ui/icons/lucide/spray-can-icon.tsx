@@ -36,12 +36,11 @@ const SPRAY_DOT_VARIANTS: Variants = {
 };
 
 const DOT_PATHS_RTL = [
-  { d: 'M11 7h.01', key: 'dot-3' },
-  { d: 'M7 5h.01', key: 'dot-2' },
-  { d: 'M7 9h.01', key: 'dot-5' },
-  { d: 'M3 3h.01', key: 'dot-1' },
-  { d: 'M3 7h.01', key: 'dot-4' },
-  { d: 'M3 11h.01', key: 'dot-6' },
+  { d: 'M8 4h.01', key: 'dot-1' },
+  { d: 'M8 8h.01', key: 'dot-2' },
+  { d: 'M4 2h.01', key: 'dot-3' },
+  { d: 'M4 6h.01', key: 'dot-4' },
+  { d: 'M4 10h.01', key: 'dot-5' },
 ] as const;
 
 const SprayCanIcon = forwardRef<SprayCanIconHandle, SprayCanIconProps>(
@@ -114,10 +113,11 @@ const SprayCanIcon = forwardRef<SprayCanIconHandle, SprayCanIconProps>(
           width={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect height="4" width="4" x="15" y="5" />
-          <path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" />
-          <path d="m13 14 8-2" />
-          <path d="m13 19 8-2" />
+          <path d="M18 8.172V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v3.172" />
+          <path d="M14 6h-2" />
+          <path d="M20 20a2 2 0 01-2 2h-4a2 2 0 01-2-2v-9a3 3 0 013-3h2a3 3 0 013 3z" />
+          <path d="m20 11-8 3" />
+          <path d="m12 19 8-3" />
           <g>
             {DOT_PATHS_RTL.map((item, index) => (
               <motion.path

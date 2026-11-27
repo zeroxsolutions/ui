@@ -1,9 +1,11 @@
 import {
-  type ColumnDef,
-  getCoreRowModel,
-  getSortedRowModel,
-  type Table as TanstackTable,
-  useReactTable,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createSortedRowModel,
+  type ReactTable,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import type { MouseEvent, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -25,22 +27,25 @@ interface Row {
   size: number;
 }
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+});
+
+const COLUMN = createColumnHelper<typeof FEATURES, Row>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', { header: 'Name' }),
+  COLUMN.accessor('size', { header: 'Size' }),
+]);
 
 // Module-level, so the data keeps its identity across renders.
 const ROWS: Row[] = [{ name: 'a', size: 1 }];
 const NO_ROWS: Row[] = [];
 
-function useRowsTable(rows: Row[]): TanstackTable<Row> {
-  return useReactTable({
-    data: rows,
-    columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+function useRowsTable(rows: Row[]): ReactTable<typeof FEATURES, Row> {
+  return useTable({ features: FEATURES, data: rows, columns: COLUMNS });
 }
 
 /** Renders the three column actions for `name` in a menu, and the table state they change. */
@@ -58,7 +63,7 @@ function ColumnActions({ onClick }: { onClick: (event: MouseEvent) => void }): R
           <DataTableColumnHeaderHide onClick={onClick} />
         </DataTableColumnHeaderContent>
       </DataTableColumnHeader>
-      <output aria-label="Sorting">{JSON.stringify(table.getState().sorting)}</output>
+      <output aria-label="Sorting">{JSON.stringify(table.state.sorting)}</output>
       <output aria-label="Visible">{String(column.getIsVisible())}</output>
     </>
   );

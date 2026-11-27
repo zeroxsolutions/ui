@@ -1,10 +1,13 @@
 import { PortalHost } from '@rn-primitives/portal';
 import {
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  rowPaginationFeature,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
@@ -49,39 +52,52 @@ const FILES: FileRow[] = [
 ];
 const NO_FILES: FileRow[] = [];
 
-const COLUMNS: ColumnDef<FileRow>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column}>
-        <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
-        <DataTableColumnHeaderContent>
-          <DataTableColumnHeaderSortAscending />
-          <DataTableColumnHeaderSortDescending />
-        </DataTableColumnHeaderContent>
-      </DataTableColumnHeader>
-    ),
-  },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+});
 
-const FIXED_COLUMNS: ColumnDef<FileRow>[] = COLUMNS.map((column) => ({ ...column, enableHiding: false }));
+const COLUMN = createColumnHelper<typeof FEATURES, FileRow>();
+
+/** The file columns, whose View options list them only while `enableHiding` holds. */
+function fileColumns(enableHiding: boolean) {
+  return COLUMN.columns([
+    COLUMN.accessor('name', {
+      enableHiding,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column}>
+          <DataTableColumnHeaderTrigger>Name</DataTableColumnHeaderTrigger>
+          <DataTableColumnHeaderContent>
+            <DataTableColumnHeaderSortAscending />
+            <DataTableColumnHeaderSortDescending />
+          </DataTableColumnHeaderContent>
+        </DataTableColumnHeader>
+      ),
+    }),
+    COLUMN.accessor('size', { header: 'Size', enableHiding }),
+  ]);
+}
+
+const COLUMNS = fileColumns(true);
+
+const FIXED_COLUMNS = fileColumns(false);
 
 interface FilesProps {
   data?: FileRow[];
-  columns?: ColumnDef<FileRow>[];
+  columns?: typeof COLUMNS;
   pageSize?: number;
 }
 
 /** A file table over a real table instance, with every part of the item. */
 function Files({ data = FILES, columns = COLUMNS, pageSize = 10 }: FilesProps): ReactNode {
-  const table = useReactTable({
+  const table = useTable({
+    features: FEATURES,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize } },
+    initialState: { pagination: { pageIndex: 0, pageSize } },
   });
   return (
     <>
@@ -229,12 +245,11 @@ describe('DataTable', () => {
 
 /** The file table a page at a time, holding only the `children` a case draws in it. */
 function Bare({ children }: { children: ReactNode }): ReactNode {
-  const table = useReactTable({
+  const table = useTable({
+    features: FEATURES,
     data: FILES,
     columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 1 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 1 } },
   });
   return (
     <>

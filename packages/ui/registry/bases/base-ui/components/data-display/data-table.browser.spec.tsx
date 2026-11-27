@@ -1,9 +1,11 @@
 import {
-  type ColumnDef,
-  getCoreRowModel,
-  getPaginationRowModel,
-  type Table as TanstackTable,
-  useReactTable,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createPaginatedRowModel,
+  type ReactTable,
+  rowPaginationFeature,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -26,17 +28,25 @@ interface Row {
   size: number;
 }
 
-const COLUMNS: ColumnDef<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+});
 
-function useRowsTable(rows: Row[]): TanstackTable<Row> {
-  return useReactTable({
-    data: rows,
-    columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-  });
+const COLUMN = createColumnHelper<typeof FEATURES, Row>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', { header: 'Name' }),
+  COLUMN.accessor('size', { header: 'Size' }),
+]);
+
+// Module-level, so the data keeps its identity across renders.
+const ONE_ROW: Row[] = [{ name: 'a', size: 1 }];
+const NO_ROWS: Row[] = [];
+
+function useRowsTable(rows: Row[]): ReactTable<typeof FEATURES, Row> {
+  return useTable({ features: FEATURES, data: rows, columns: COLUMNS });
 }
 
 function RowsTable({ rows }: { rows: Row[] }): ReactNode {
@@ -52,13 +62,13 @@ function RowsTable({ rows }: { rows: Row[] }): ReactNode {
 
 describe('DataTableEmpty', () => {
   it('renders one cell spanning every column when there are no rows', async () => {
-    await render(<RowsTable rows={[]} />);
+    await render(<RowsTable rows={NO_ROWS} />);
 
     await expect.element(page.getByRole('cell', { name: 'No results.' })).toHaveAttribute('colspan', '2');
   });
 
   it('is not rendered while there are rows', async () => {
-    await render(<RowsTable rows={[{ name: 'a', size: 1 }]} />);
+    await render(<RowsTable rows={ONE_ROW} />);
 
     await expect.element(page.getByRole('cell', { name: 'a', exact: true })).toBeVisible();
     await expect.element(page.getByText('No results.')).not.toBeInTheDocument();
@@ -73,12 +83,11 @@ const PAGED_ROWS: Row[] = [
 ];
 
 function PagedTable(): ReactNode {
-  const table = useReactTable({
+  const table = useTable({
+    features: FEATURES,
     data: PAGED_ROWS,
     columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 1 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 1 } },
   });
   return (
     <DataTable table={table}>
@@ -109,7 +118,7 @@ describe('DataTableViewOptions', () => {
   playMotion();
 
   function OptionsTable({ onPointerEnter }: { onPointerEnter?: () => void }): ReactNode {
-    const table = useRowsTable([]);
+    const table = useRowsTable(NO_ROWS);
     return (
       <DataTable table={table}>
         <DataTableViewOptions onPointerEnter={onPointerEnter} />

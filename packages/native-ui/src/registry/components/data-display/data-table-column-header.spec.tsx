@@ -1,5 +1,12 @@
 import { PortalHost } from '@rn-primitives/portal';
-import { getCoreRowModel, getSortedRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
+import {
+  columnVisibilityFeature,
+  createColumnHelper,
+  createSortedRowModel,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
+} from '@tanstack/react-table';
 import { act, configure, render, screen, userEvent } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
@@ -26,10 +33,21 @@ interface FileRow {
   size: string;
 }
 
-const COLUMNS: ColumnDef<FileRow>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'size', header: 'Size' },
-];
+const FEATURES = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+});
+
+const COLUMN = createColumnHelper<typeof FEATURES, FileRow>();
+
+const COLUMNS = COLUMN.columns([
+  COLUMN.accessor('name', { header: 'Name' }),
+  COLUMN.accessor('size', { header: 'Size' }),
+]);
+
+// Module-level, so the data keeps its identity across renders.
+const NO_FILES: FileRow[] = [];
 
 interface HeaderProps {
   onAscending?: () => void;
@@ -43,12 +61,7 @@ interface HeaderProps {
 
 /** The "Name" column's header over a real table, beside what the table says of that column. */
 function Header({ onAscending, onDescending, onHide, plain = false, onPressIn }: HeaderProps): ReactNode {
-  const table = useReactTable({
-    data: [],
-    columns: COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+  const table = useTable({ features: FEATURES, data: NO_FILES, columns: COLUMNS });
   const column = table.getColumn('name');
   if (!column) return null;
   return (
