@@ -167,6 +167,17 @@ async function open(role: 'button' | 'combobox', name: string): Promise<undefine
   return undefined;
 }
 
+/**
+ * Focuses the control named `name` and presses Enter on it, as a reader on a keyboard opens its popup. A popup that
+ * moves focus into itself then shows the focus ring on its first control every time; opened with a click, the ring
+ * showed in some runs and not in others.
+ */
+async function openFromKeyboard(name: string): Promise<undefined> {
+  await page.getByRole('button', { name }).element().focus();
+  await userEvent.keyboard('{Enter}');
+  return undefined;
+}
+
 /** Waits for the popup of `role` to be on the page, so the capture holds it. */
 async function shown(role: 'dialog' | 'alertdialog' | 'menu'): Promise<undefined> {
   await expect.element(page.getByRole(role).first()).toBeVisible();
@@ -535,7 +546,7 @@ const SUBJECTS = {
         </DrawerContent>
       </Drawer>
     ),
-    arrange: () => open('button', 'Open drawer').then(() => shown('dialog')),
+    arrange: () => openFromKeyboard('Open drawer').then(() => shown('dialog')),
   },
   'dropdown-menu': {
     window: true,

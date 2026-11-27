@@ -40,7 +40,10 @@ export interface VisualSubject {
   window?: boolean;
 }
 
-/** Resolves once every image on the page has loaded, every font it uses is in, and a frame has painted. */
+/**
+ * Resolves once every image on the page has loaded, every font it uses is in, every animation with an end has
+ * ended, and a frame has painted.
+ */
 async function settled(): Promise<void> {
   await vi.waitFor(
     () => {
@@ -61,7 +64,24 @@ async function settled(): Promise<void> {
     { timeout: 30_000 },
   );
   await document.fonts.ready;
+  // What the page does once an animation ends, such as a drawer moving focus to its first control, can start another.
+  while (finishAnimations()) await quiet();
   await quiet();
+}
+
+/**
+ * Plays every running animation that has an end, such as a drawer's slide in, to its end at once; answers whether
+ * there was one. The capture's own `animations: 'disabled'` does the same, but only as it takes each shot, so what
+ * the page did once one ended changed the next shot, and a capture taken under load could come out differently.
+ */
+function finishAnimations(): boolean {
+  const running = document
+    .getAnimations()
+    .filter(
+      (animation) => animation.playState === 'running' && animation.effect?.getComputedTiming().endTime !== Infinity,
+    );
+  for (const animation of running) animation.finish();
+  return running.length > 0;
 }
 
 /**
