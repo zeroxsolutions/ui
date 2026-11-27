@@ -82,7 +82,11 @@
         "continuous": true,
         "options": {
           "cwd": "{projectRoot}",
-          "command": "opennextjs-cloudflare preview --env development"
+          "command": "opennextjs-cloudflare preview --env development",
+          "env": {
+            "CHOKIDAR_USEPOLLING": "1",
+            "CHOKIDAR_INTERVAL": "10000"
+          }
         }
       },
       "wrangler:deploy": {
