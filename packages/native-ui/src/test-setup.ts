@@ -1,3 +1,6 @@
+// The types of the matchers `setUpTests` adds, which reanimated declares only in its native build's typings.
+import type {} from 'react-native-reanimated/lib/typescript/jestUtils/index.native';
+
 // Expo installs these globals as lazy getters that load their module on first read, and Jest refuses
 // that load once a test file is importing. Reading each here, before any test file loads, settles it.
 const lazyGlobals = [
