@@ -246,6 +246,29 @@
   }
 }
 
+/* For a reader who asked for reduced motion, a drawer or a popup appears and leaves where it rests. The drawer's
+   slide and fade are transitions in its upstream classes, and without them its popup needs no layer of its own; on
+   one, it rested at whatever sub-pixel offset it was first rasterised at mid-slide. Every other popup's slot opens
+   and closes it with tw-animate's `animate-in` and `animate-out`, under a variant such as `data-open:`, and a fade
+   left on them still composites the popup, so the page around it was drawn one way or the other by when the fade
+   ended. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='drawer-overlay'],
+  [data-slot='drawer-popup'],
+  [data-slot='drawer-content'],
+  [data-slot='drawer-swipe-handle'] {
+    transition: none;
+    will-change: auto;
+  }
+
+  [class~='animate-in'],
+  [class*=':animate-in'],
+  [class~='animate-out'],
+  [class*=':animate-out'] {
+    animation: none;
+  }
+}
+
 /* ImagePreview's backdrop, so transparent pixels read. The image-preview item ships the same
    utility in its registry `css`; registry.spec.ts fails until the two match. */
 @utility bg-checkerboard {
