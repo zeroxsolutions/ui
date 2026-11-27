@@ -1,16 +1,37 @@
 import { render, screen } from '@testing-library/react-native';
+import { execFileSync } from 'node:child_process';
 import { Check } from 'lucide-react-native';
 import { createRef } from 'react';
 import type { IconHandle } from '../lib/icon-motion';
 import { CopyIcon } from '../icons/lucide/copy-icon';
-import { registerCSS } from 'react-native-css-interop/test';
+import { injectData } from 'react-native-css-interop/dist/runtime/native/styles';
 import { Icon, IconClassContext } from './icon';
+
+/**
+ * `css` as NativeWind's runtime reads it, compiled in a node process of its own. Compiling loads lightningcss's
+ * native addon, which leaves a handle open in the jest worker that loads it, so the worker never exits cleanly.
+ */
+function compiledCSS(css: string): Parameters<typeof injectData>[0] {
+  const compile = `process.stdout.write(JSON.stringify(require('react-native-css-interop/dist/css-to-rn').cssToReactNativeRuntime(${JSON.stringify(css)})))`;
+  return JSON.parse(execFileSync(process.execPath, ['-e', compile], { cwd: __dirname, encoding: 'utf8' }));
+}
+
+/**
+ * The size and stroke the glyph named `name` is drawn with. Read off its props rather than matched against them
+ * whole, because a failed match prints the props, and theirs are too large to print.
+ */
+function drawn(name: string): { width: unknown; height: unknown; stroke: unknown } {
+  const { width, height, stroke } = screen.getByRole('img', { name }).props;
+  return { width, height, stroke };
+}
+
+const CLASSES = compiledCSS(
+  '.text-red-500 { color: #ef4444; } .size-4 { width: 16px; height: 16px; } .size-5 { width: 20px; height: 20px; }',
+);
 
 describe('Icon', () => {
   beforeEach(() => {
-    registerCSS(
-      '.text-red-500 { color: #ef4444; } .size-4 { width: 16px; height: 16px; } .size-5 { width: 20px; height: 20px; }',
-    );
+    injectData(CLASSES);
   });
 
   it('hands its ref to the glyph it draws', async () => {
@@ -30,8 +51,7 @@ describe('Icon', () => {
   it('draws the glyph in the colour and size its classes name', async () => {
     await render(<Icon as={Check} className="size-4 text-red-500" accessible role="img" aria-label="Saved" />);
 
-    const glyph = screen.getByRole('img', { name: 'Saved' });
-    expect(glyph.props).toEqual(expect.objectContaining({ width: 16, height: 16, stroke: '#ef4444' }));
+    expect(drawn('Saved')).toEqual({ width: 16, height: 16, stroke: '#ef4444' });
   });
 
   it('takes an explicit size and colour over its classes', async () => {
@@ -47,8 +67,7 @@ describe('Icon', () => {
       />,
     );
 
-    const glyph = screen.getByRole('img', { name: 'Saved' });
-    expect(glyph.props).toEqual(expect.objectContaining({ width: 24, height: 24, stroke: '#000000' }));
+    expect(drawn('Saved')).toEqual({ width: 24, height: 24, stroke: '#000000' });
   });
 
   it('takes the size its container gives an icon', async () => {
@@ -58,9 +77,7 @@ describe('Icon', () => {
       </IconClassContext.Provider>,
     );
 
-    expect(screen.getByRole('img', { name: 'Saved' }).props).toEqual(
-      expect.objectContaining({ width: 16, height: 16 }),
-    );
+    expect(drawn('Saved')).toEqual(expect.objectContaining({ width: 16, height: 16 }));
   });
 
   it("keeps its own size class over its container's size", async () => {
@@ -70,9 +87,7 @@ describe('Icon', () => {
       </IconClassContext.Provider>,
     );
 
-    expect(screen.getByRole('img', { name: 'Saved' }).props).toEqual(
-      expect.objectContaining({ width: 20, height: 20 }),
-    );
+    expect(drawn('Saved')).toEqual(expect.objectContaining({ width: 20, height: 20 }));
   });
 
   it("keeps an explicit size over its container's size", async () => {
@@ -82,8 +97,6 @@ describe('Icon', () => {
       </IconClassContext.Provider>,
     );
 
-    expect(screen.getByRole('img', { name: 'Saved' }).props).toEqual(
-      expect.objectContaining({ width: 24, height: 24 }),
-    );
+    expect(drawn('Saved')).toEqual(expect.objectContaining({ width: 24, height: 24 }));
   });
 });
