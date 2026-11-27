@@ -14,7 +14,7 @@ its docs.
   every style's sheets, and a web page carries the picker's `style-<style>` class on `<html>`.
 - `pnpm nx examples-index @zeroxsolutions/ui` writes the docs' demo index under `registry/bases/base-ui/examples`.
 - `pnpm nx test @zeroxsolutions/ui` runs the items' specs; a `*.browser.spec.tsx` runs in Chromium.
-- `pnpm nx test-visual @zeroxsolutions/ui` runs the visual suite, below.
+- `pnpm nx test-visual @zeroxsolutions/ui` runs the visual suite, below, and `test-visual-linux` runs it as CI does.
 
 ## How things look is checked by screenshots
 
@@ -30,26 +30,27 @@ where its layout changes with width, at 375. A subject is added in its spec's li
 expands it across the matrix.
 
 Each capture is compared with its reference under `visual-baselines/`, pixel for pixel past pixelmatch's
-colour threshold. The committed references are Linux captures from CI's `visual` job, and fonts, scrollbars
-and emoji differ between systems, so a run on macOS writes and compares its own `-darwin` references, which
-git ignores: locally the suite says what changed since your own last run.
+colour threshold. The committed references are `-linux` captures taken in the Playwright image CI's `visual`
+job runs in, pinned by digest, so its Chromium and fonts change only when that digest does. A run on macOS
+writes and compares its own `-darwin` references, which git ignores: locally `test-visual` says what changed
+since your own last run, and `test-visual-linux` says what CI will.
 
-To change a reference on purpose:
+`pnpm nx test-visual-linux @zeroxsolutions/ui` runs the suite in that image under Docker, on x86-64 like CI,
+and brings back what it writes. Its arguments go to Vitest, such as a spec's name or `--shard=1/4`. To change
+references on purpose:
 
-1. Push. CI's `visual` job fails on each capture that changed, and on each new one, and uploads the
-   `visual-diffs-<shard>` artefacts: per capture its `-reference-`, `-actual-` and `-diff-` images, or for a new one only
-   what CI captured.
-2. Review every `-diff-` image, and every new capture, as the change's evidence.
-3. Take CI's captures as the references, and commit the files it lists:
+1. Run `pnpm nx test-visual-linux @zeroxsolutions/ui`. Each capture that changed fails, and its
+   `-reference-`, `-actual-` and `-diff-` images land in `test-output/visual/ui/`; a new subject's references
+   are written beside the others, and its cases fail once so the new images are looked at.
+2. Review every `-diff-` image, and every new reference, as the change's evidence.
+3. Run `pnpm nx test-visual-linux @zeroxsolutions/ui -c update`, which rewrites the references, and commit
+   them. A subject renamed or removed leaves its references behind; delete them in the same change.
 
-   ```bash
-   gh run download <run id> -p 'visual-diffs-*' -D /tmp/visual-diffs
-   pnpm nx adopt-visual @zeroxsolutions/ui -- /tmp/visual-diffs
-   ```
-
-On Linux, `pnpm nx test-visual @zeroxsolutions/ui -- --update` rewrites the references in place. A subject
-renamed or removed leaves its references behind; delete them in the same change.
+Without Docker, push instead: CI uploads the same images as the `visual-diffs-<shard>` artefacts, and
+`pnpm nx adopt-visual @zeroxsolutions/ui -- <the unpacked artefacts>` copies its captures over the references,
+after `gh run download <run id> -p 'visual-diffs-*' -D /tmp/visual-diffs`.
 
 A capture is still because the run is a reader who asked for reduced motion and the items answer that
 preference; it waits for the page's fonts and images; a request to another host is answered from
-`test/visual-stand-in.svg`, Geist, or a 404; and the clock, locale, time zone and device scale are fixed.
+`test/visual-stand-in.svg`, Geist, or a 404; the clock, locale, time zone and device scale are fixed; and
+the whole page is drawn afresh before each capture, since what Chromium kept from an earlier pass could differ.

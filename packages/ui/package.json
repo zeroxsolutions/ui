@@ -187,6 +187,18 @@
           "command": "vitest --config vitest.visual.config.mts"
         }
       },
+      "test-visual-linux": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "{projectRoot}",
+          "command": "tools/test-visual-linux.sh"
+        },
+        "configurations": {
+          "update": {
+            "args": "--update=all"
+          }
+        }
+      },
       "adopt-visual": {
         "executor": "nx:run-commands",
         "options": {

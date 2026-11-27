@@ -7,8 +7,8 @@
 #   e2e   - gate-only. The hook's set stays inside the gate's and never the
 #           reverse, so a target that starts a runtime, or runs every spec, lands
 #           here instead.
-#   visual - gate-only, `test-visual` over the projects the change reaches: each capture compared with
-#           the committed Linux reference, and on a failure the diffs uploaded as an artefact.
+#   visual - gate-only, `test-visual` over the projects the change reaches, in a pinned Playwright image:
+#           each capture compared with the committed Linux reference, and on a failure the diffs uploaded.
 #   format - the whole tree through the formatter, which no nx target runs.
 #   dependabot - the Dependabot config's ignore list checked against what `nx migrate` manages.
 #
@@ -90,6 +90,12 @@ jobs:
   visual:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # The references were captured in this image, by digest, with its Chromium and its fonts, so a new
+    # `ubuntu-latest` changes no pixel. `test-visual-linux` runs the same digest on a developer's machine,
+    # and the two change together.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+      options: --init --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -97,15 +103,14 @@ jobs:
     steps:
       - uses: zeroxsolutions/github-actions/nx-setup@v1
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
-
       # `nx-gate`'s own range resolution, which a push that creates a branch or an unreachable base needs.
+      # The container runs as root over a checkout the runner's user owns, which git refuses to read until told.
       - name: Compare every capture with its reference
         shell: bash
         env:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           case "$BASE" in ''|0000000000000000000000000000000000000000) BASE='' ;; esac
           if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
             NX_BASE="$BASE" NX_HEAD='${{ github.sha }}' pnpm nx affected -t test-visual -- --shard=${{ matrix.shard }}/4
