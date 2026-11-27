@@ -91,8 +91,12 @@ test("picking Native shows a QR code that opens the page's style from the projec
 });
 
 test("a Uniwind page draws the Uniwind export, and its QR opens the Uniwind project's updates", async ({ page }) => {
+  // The frame asks for the export's index.html, which Cloudflare's assets answer with a redirect to its folder.
   const uniwindExport = page.waitForResponse(
-    (response) => new URL(response.url()).pathname === '/native-preview-uniwind/index.html' && response.ok(),
+    (response) =>
+      response.request().resourceType() === 'document' &&
+      new URL(response.url()).pathname.startsWith('/native-preview-uniwind/') &&
+      response.ok(),
   );
   await page.goto(`${UNIWIND_BUTTON}?style=nova`);
 

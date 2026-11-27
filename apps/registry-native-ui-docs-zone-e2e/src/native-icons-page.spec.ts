@@ -1,6 +1,6 @@
 import { expect, test } from './test/fixtures';
 import { waitForHydration } from './test/hydrated';
-import { DRAWN, inside } from './test/native-preview';
+import { DRAWN, frame, inside } from './test/native-preview';
 
 test.slow(true, 'the frame may take all of DRAWN to draw, and then loads the icons as a chunk of their own');
 
@@ -44,6 +44,9 @@ test('the grid scrolls inside its frame to the icons at the end of the set', asy
   await expect(first).toBeVisible(DRAWN);
 
   const zap = gallery.getByRole('button', { name: 'zap', exact: true });
+  // The frame runs below a desktop window, and a same-origin frame's content is in view only where the window shows
+  // it; WebKit passes no wheel from the frame's end on to the page, so the page is scrolled to the frame first.
+  await frame(page, 'Icon gallery demo').scrollIntoViewIfNeeded();
   await first.hover();
   // The grid mounts only the rows near its viewport, so each wheel may bring the last row nearer to mounting.
   await expect(async () => {

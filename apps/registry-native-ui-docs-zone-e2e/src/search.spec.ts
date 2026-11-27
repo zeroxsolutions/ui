@@ -12,5 +12,7 @@ test("a native page's search finds native text and keeps the page's engine", asy
   await expect(results.getByRole('option').first()).toBeVisible();
   await results.getByRole('option').first().click();
 
+  // The page searched from matches the pattern below as well, so the move is waited for first.
+  await expect(page).not.toHaveURL('/native/components/uniwind/button');
   await expect(page).toHaveURL(/\/native\/components\/uniwind\/[a-z-]+(#.*)?$/);
 });
