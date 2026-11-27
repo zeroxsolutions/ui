@@ -67,6 +67,16 @@ async function settled(signal: AbortSignal): Promise<void> {
     },
     { timeout: 30_000 },
   );
+  // A Mermaid diagram draws an empty canvas until its render resolves.
+  await vi.waitFor(
+    () => {
+      const drawing = document.querySelectorAll(
+        '[data-slot=diagram-canvas]:is([data-status=idle], [data-status=rendering])',
+      );
+      if (drawing.length > 0) throw new Error(`${drawing.length} diagrams not yet drawn`);
+    },
+    { timeout: 30_000 },
+  );
   await document.fonts.ready;
   const deadline = performance.now() + SETTLE_DEADLINE;
   // What the page does once an animation ends, such as a drawer moving focus to its first control, can start another.

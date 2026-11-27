@@ -179,7 +179,7 @@ export function DiagramCanvas({ state, variant, className }: DiagramCanvasProps)
   const reset = useCallback(() => setTransform(IDENTITY), []);
 
   return (
-    <div data-slot="diagram-canvas" className={cn(diagramCanvasVariants({ variant }), className)}>
+    <div data-slot="diagram-canvas" data-status={status} className={cn(diagramCanvasVariants({ variant }), className)}>
       <div
         ref={viewportRef}
         className="relative flex-1 touch-none overflow-hidden"
