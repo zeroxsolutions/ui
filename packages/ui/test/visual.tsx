@@ -4,7 +4,8 @@ import { cleanup, render } from 'vitest-browser-react';
 import { cdp, page } from 'vitest/browser';
 
 import { PLATFORM_STYLES } from '../src/site/constants/platform-styles';
-import { applyStyleClass } from '../src/site/lib/style-class';
+import { rememberStyle } from '../src/site/hooks/use-remembered-choice';
+import { styleClassScript } from '../src/site/lib/style-class';
 import { VISUAL_THEMES, VISUAL_VIEWPORT } from './visual-environment';
 
 declare module 'vitest' {
@@ -250,15 +251,25 @@ async function mouseTo({ x, y }: { x: number; y: number }): Promise<void> {
   });
 }
 
+/** Runs `source` as the page runs an inline `<script>` in its markup: at once, in the page's global scope. */
+function runInlineScript(source: string): void {
+  const script = document.createElement('script');
+  script.textContent = source;
+  document.head.append(script);
+  script.remove();
+}
+
 async function capture(subject: VisualSubject, width: number, signal: AbortSignal): Promise<void> {
   seedRandom();
   const style = inject('visualStyle');
   const theme = inject('visualTheme');
   await page.viewport(width, VISUAL_VIEWPORT.height);
-  // The classes the page's style script and the theme provider put on `<html>`.
-  const root = document.documentElement;
-  applyStyleClass(root, 'web', style);
-  root.classList.toggle('dark', theme === 'dark');
+  // The reader's remembered style, which the docs' style picker names, and the page's own inline script putting
+  // it on `<html>`, as a docs page in that style is served.
+  rememberStyle('web', style);
+  runInlineScript(styleClassScript('web'));
+  // The class the theme provider puts on `<html>`.
+  document.documentElement.classList.toggle('dark', theme === 'dark');
 
   const screen = await render(
     <div
