@@ -2,8 +2,8 @@
 
 import { memo, type CSSProperties, type FC } from 'react';
 
-import { BrandMark } from './brand-mark';
-import { resolveAiProviderMark, type AiProviderMapping } from './ai-provider-mappings';
+import { BrandMark } from './brand-mark.js';
+import { resolveAiProviderMark, type AiProviderMapping } from './ai-provider-mappings.js';
 
 /** Which visual form of the resolved brand mark to render. */
 export type AiProviderIconType = 'color' | 'mono' | 'avatar' | 'combine';

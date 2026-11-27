@@ -1,4 +1,4 @@
-import type { BrandMarkName } from './lib/brand-manifest';
+import type { BrandMarkName } from './lib/brand-manifest.js';
 
 /** One entry in the AI provider registry: the keys that resolve to a mark. */
 export interface AiProviderMapping {

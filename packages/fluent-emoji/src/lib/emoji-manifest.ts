@@ -1,6 +1,6 @@
 // Written by tools/build-emoji-manifest.mts from assets/. Regenerate, never hand-edit.
 
-import type { FluentEmojiStyle } from './fluent-emoji-url';
+import type { FluentEmojiStyle } from './fluent-emoji-url.js';
 
 export const FLUENT_EMOJI_MANIFEST_KEYS: readonly string[] = [
   '1f004',

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { setBrandMarkStyle, type BrandMarkVariant } from './brand-mark-url';
+import { setBrandMarkStyle, type BrandMarkVariant } from './brand-mark-url.js';
 
 interface BrandMarkStyleContextValue {
   /** The variant every `<BrandMark>` without its own resolves to. */

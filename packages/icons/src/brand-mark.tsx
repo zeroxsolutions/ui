@@ -3,29 +3,29 @@
 import * as React from 'react';
 import type { CSSProperties } from 'react';
 
-import type { BrandMarkName } from './lib/brand-manifest';
+import type { BrandMarkName } from './lib/brand-manifest.js';
 import {
   brandMarkChain,
   brandMarkRatio,
   brandMarkUrlFor,
   getBrandMarkStyle,
   type BrandMarkVariant,
-} from './lib/brand-mark-url';
-import { useAmbientBrandMarkStyle } from './lib/brand-mark-style-provider';
+} from './lib/brand-mark-url.js';
+import { useAmbientBrandMarkStyle } from './lib/brand-mark-style-provider.js';
 
-export type { BrandMarkName } from './lib/brand-manifest';
+export type { BrandMarkName } from './lib/brand-manifest.js';
 export {
   brandMarkUrl,
   DEFAULT_BRAND_MARK_BASE,
   setBrandMarkBase,
   setBrandMarkStyle,
   type BrandMarkVariant,
-} from './lib/brand-mark-url';
+} from './lib/brand-mark-url.js';
 export {
   BrandMarkStyleProvider,
   useBrandMarkStyle,
   type BrandMarkStyleProviderProps,
-} from './lib/brand-mark-style-provider';
+} from './lib/brand-mark-style-provider.js';
 
 export interface BrandMarkProps {
   /** The brand to draw. */

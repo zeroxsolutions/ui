@@ -1,5 +1,5 @@
-import { emojiToUnicode } from './emoji-to-unicode';
-import { FLUENT_EMOJI_MANIFEST_KEYS, FLUENT_EMOJI_MANIFEST_MISSING } from './emoji-manifest';
+import { emojiToUnicode } from './emoji-to-unicode.js';
+import { FLUENT_EMOJI_MANIFEST_KEYS, FLUENT_EMOJI_MANIFEST_MISSING } from './emoji-manifest.js';
 
 /**
  * The rendering styles we ship, each in its own `assets/<style>/` subfolder:

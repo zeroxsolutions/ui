@@ -1,4 +1,4 @@
-import { BRAND_MARKS, type BrandMarkName } from './brand-manifest';
+import { BRAND_MARKS, type BrandMarkName } from './brand-manifest.js';
 
 /** How a brand mark draws: its own colours, one colour, on a filled tile, or beside its wordmark. */
 export type BrandMarkVariant = 'color' | 'mono' | 'avatar' | 'combine';

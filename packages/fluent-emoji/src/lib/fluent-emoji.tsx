@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { fluentEmojiUrl, type FluentEmojiStyle } from './fluent-emoji-url';
-import { useAmbientFluentEmojiStyle } from './fluent-emoji-style-provider';
+import { fluentEmojiUrl, type FluentEmojiStyle } from './fluent-emoji-url.js';
+import { useAmbientFluentEmojiStyle } from './fluent-emoji-style-provider.js';
 
 export interface FluentEmojiProps extends Omit<React.ComponentProps<'img'>, 'src' | 'alt'> {
   /** The emoji glyph to render. */
