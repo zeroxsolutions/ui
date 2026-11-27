@@ -12,7 +12,8 @@ function runtimeImports(file: string): string[] {
   const specifiers = [...text.matchAll(/^(?:import|export)\s+(?!type\b)[^;]*?from\s+'(\.[^']+)'/gm)].map(
     (match) => match[1],
   );
-  return specifiers.map((specifier) => resolve(dirname(file), `${specifier}.ts`));
+  // A source names the file it loads by its emitted `.js` name.
+  return specifiers.map((specifier) => resolve(dirname(file), specifier.replace(/\.js$/, '.ts')));
 }
 
 /** Every source file `entry` loads, itself included. */
