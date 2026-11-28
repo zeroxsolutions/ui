@@ -48,7 +48,7 @@ function PanelView({
     <div
       ref={setAnchor}
       {...layoutProps({ ...attrs, width: preview ?? attrs.width })}
-      className="bg-muted text-muted-foreground relative my-4 flex h-28 items-center justify-center"
+      className="cn-editor-block bg-muted text-muted-foreground relative my-4 flex h-28 items-center justify-center"
     >
       A block that takes a layout
       {editable && selected && attrs.width !== 'full' && (
