@@ -29,11 +29,13 @@ toolbars and menus as a reader opens them, and the docs' header and switches. Ea
 where its layout changes with width, at 375. A subject is added in its spec's list, and `test/visual.tsx`
 expands it across the matrix.
 
-Each capture is compared with its reference under `visual-baselines/`, pixel for pixel past pixelmatch's
-colour threshold. The committed references are `-linux` captures taken in the Playwright image CI's `visual`
-job runs in, pinned by digest, so its Chromium and fonts change only when that digest does. A run on macOS
-writes and compares its own `-darwin` references, which git ignores: locally `test-visual` says what changed
-since your own last run, and `test-visual-linux` says what CI will.
+Each capture is compared with its reference under `visual-baselines/`, pixel for pixel with no colour
+tolerance, so a light theme's muted fill or hairline border, which sits close to the white page, cannot change
+unseen, and with the pixels pixelmatch reads as anti-aliasing counted, since a radius change moves only those.
+The committed references are `-linux` captures taken in the Playwright image CI's `visual` job runs in, pinned
+by digest, so its Chromium and fonts change only when that digest does. A run on macOS writes and compares its
+own `-darwin` references, which git ignores: locally `test-visual` says what changed since your own last run,
+and `test-visual-linux` says what CI will.
 
 `pnpm nx test-visual-linux @zeroxsolutions/ui` runs the suite in that image under Docker, on x86-64 like CI,
 and brings back what it writes. Its arguments go to Vitest, such as a spec's name or `--shard=1/4`. To change

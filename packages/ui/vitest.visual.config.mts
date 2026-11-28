@@ -105,10 +105,14 @@ export default defineConfig({
           comparatorName: 'pixelmatch',
           comparatorOptions: {
             // The reference and the capture come from one browser build on one machine image, so a pixel that
-            // differs is a change. `threshold` is pixelmatch's own colour tolerance, which absorbs a one-level
-            // rounding in a blended shadow; any pixel past it fails, because a radius moved by one step changes
-            // only a few dozen pixels at a corner, and a ratio over the whole capture would let that through.
-            threshold: 0.1,
+            // differs is a change. `threshold` is pixelmatch's colour tolerance, and a light theme's muted fill or
+            // border hairline sits nearer the white page than its 0.1 default, so any tolerance lets one appear or
+            // vanish unseen. `includeAA` counts the pixels pixelmatch reads as anti-aliasing, which it otherwise
+            // skips, and a radius change moves only those. Any differing pixel fails, because a radius moved by one
+            // step changes only a few dozen pixels at a corner, and a ratio over the whole capture would let that
+            // through.
+            threshold: 0,
+            includeAA: true,
             allowedMismatchedPixels: 0,
           },
           screenshotOptions: { animations: 'disabled', caret: 'hide', scale: 'css' },
