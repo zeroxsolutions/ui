@@ -8,6 +8,7 @@ import {
   type LayoutAttributes,
 } from '@zeroxsolutions/editor-core/document/layout/index';
 import type { ReactNodeCodec } from '../../../react-types';
+import { Checkbox } from '@/registry/bases/base-ui/ui/checkbox';
 
 /**
  * Codecs for the standard blocks/marks the `standardKit` feature contributes
@@ -190,7 +191,15 @@ const taskItem: ReactNodeCodec = {
     `- [${node.attrs?.checked ? 'x' : ' '}] ${blocks(node, (p) => p.join('\n'), ctx.serializeNode)}`,
   toHTML: (node, ctx) =>
     `<li data-checked="${Boolean(node.attrs?.checked)}">${blocks(node, (p) => p.join(''), ctx.serializeNode)}</li>`,
-  toReact: (node, ctx) => <li data-checked={Boolean(node.attrs?.checked)}>{ctx.renderChildren(node)}</li>,
+  // The editor's own item, `TaskItemView`, read-only: the style's checkbox beside the item's blocks.
+  toReact: (node, ctx) => (
+    <li data-checked={Boolean(node.attrs?.checked)}>
+      <label>
+        <Checkbox checked={Boolean(node.attrs?.checked)} disabled />
+      </label>
+      <div>{ctx.renderChildren(node)}</div>
+    </li>
+  ),
   fromMarkdown: (token, ctx) =>
     token.type === 'listItem' && token.checked != null
       ? {

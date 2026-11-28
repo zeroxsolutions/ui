@@ -362,7 +362,7 @@ export function Editor({
         // Its width comes from where it is placed, never from its content: a code line, a formula or a
         // diagram that does not wrap would otherwise widen the whole document instead of scrolling in its block.
         className={cn(
-          'cn-editor-content document-editor prose max-w-none [contain:inline-size] text-base leading-relaxed focus:outline-none',
+          'cn-editor-content cn-editor-document document-editor prose max-w-none [contain:inline-size] text-base leading-relaxed focus:outline-none',
           className,
         )}
       />

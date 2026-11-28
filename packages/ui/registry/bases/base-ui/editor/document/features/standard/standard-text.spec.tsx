@@ -96,4 +96,24 @@ describe('the Viewer', () => {
     expect(html).toContain('<span data-color="red">red</span>');
     expect(html).toContain('<span data-bg="amber">washed</span>');
   });
+
+  it("draws each task's checkbox, ticked as the editor's is", () => {
+    const tasks: DocJSON = {
+      type: 'doc',
+      content: [
+        {
+          type: 'taskList',
+          content: [true, false].map((checked) => ({
+            type: 'taskItem',
+            attrs: { checked },
+            content: [{ type: 'paragraph', content: [text(checked ? 'Done' : 'Open')] }],
+          })),
+        },
+      ],
+    };
+    const html = renderToStaticMarkup(<Viewer doc={tasks} features={[standardKit()]} />);
+
+    expect(html.match(/role="checkbox"/g)).toHaveLength(2);
+    expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
+  });
 });

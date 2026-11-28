@@ -268,7 +268,7 @@ function EmailEditorStatic({ doc, features, editable }: EmailEditorStaticProps) 
     <div
       data-slot="email-editor-static"
       data-editor="document"
-      className="cn-editor-content document-editor prose max-w-none text-base leading-relaxed [contain:inline-size]"
+      className="cn-editor-content cn-editor-document document-editor prose max-w-none text-base leading-relaxed [contain:inline-size]"
     >
       {/* The engine's own wrapper, which the document's rules in `styles.css` select. */}
       <div className={cn('ProseMirror', editable && 'px-12')}>{renderToReact(doc, registry)}</div>

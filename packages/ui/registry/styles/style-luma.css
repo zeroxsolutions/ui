@@ -205,6 +205,14 @@
     @apply [&_.ProseMirror-selectednode:not(span)]:rounded-2xl [&_.slash-active]:rounded-lg [&_mark]:rounded-lg [&_table]:rounded-2xl;
   }
 
+  /* Variables the editor's sheet reads for the blocks the engine draws: cn-table's text size, cn-table-cell's
+   * padding and cn-table-head's height and type; cn-kbd's radius, padding and weight on inline code; a quote's rule
+   * as upstream's typography blockquote's border-l-2, inset by cn-alert's padding; cn-editor-selection's ring on
+   * a selected block; and cn-field's gap between a columns block's lanes */
+  .cn-editor-document {
+    @apply [--editor-code-padding:--spacing(1.5)] [--editor-code-radius:var(--radius-lg)] [--editor-code-weight:var(--font-weight-medium)] [--editor-lane-gap:--spacing(3)] [--editor-quote-color:var(--border)] [--editor-quote-inset:--spacing(4)] [--editor-quote-rule:--spacing(0.5)] [--editor-selection-color:color-mix(in_oklab,var(--ring)_30%,transparent)] [--editor-selection-width:3px] [--editor-table-cell-padding:--spacing(3)] [--editor-table-head-color:var(--foreground)] [--editor-table-head-height:--spacing(12)] [--editor-table-head-weight:var(--font-weight-medium)] [--editor-table-size:var(--text-sm)];
+  }
+
   /* cn-kbd's radius, an inline formula */
   .cn-editor-inline {
     @apply rounded-lg;

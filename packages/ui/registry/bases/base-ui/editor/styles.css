@@ -592,7 +592,14 @@
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   grid-template-columns: var(--columns-ratio, none);
-  gap: 0.75rem;
+}
+/* A columns block's lanes stand apart by the style's gap, from the root's `cn-editor-document` slot; an email's by
+ * the gutter its email draws them with, `LANE_GUTTER`, so the email editor shows what is sent. */
+.document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react] {
+  gap: var(--editor-lane-gap);
+}
+.document-editor [data-slot='email-block-lanes'] > [data-node-view-content] > [data-node-view-content-react] {
+  gap: 0.5rem;
 }
 @media (max-width: 40rem) {
   .document-editor [data-slot='columns'] > [data-node-view-content] > [data-node-view-content-react],
@@ -643,14 +650,15 @@
   margin-bottom: 0;
 }
 
-/* A selected button: the grip's outline goes round the button, following its corners. Unlayered to beat the
- * `outline-none` of the design system's button, a utility. */
+/* A selected button: the grip's outline goes round the button, following its corners, in the style's selection ring
+ * from the root's `cn-editor-document` slot. Unlayered to beat the `outline-none` of the design system's button, a
+ * utility. */
 .document-editor
   .ProseMirror-selectednode
   > [data-node-view-wrapper]
   > [data-slot='link-button']
   > [data-slot='link-button-label'] {
-  outline: 1px solid color-mix(in oklab, var(--ring) 60%, transparent);
+  outline: var(--editor-selection-width) solid var(--editor-selection-color);
   outline-offset: 2px;
 }
 
@@ -707,10 +715,49 @@
   background: color-mix(in oklab, var(--destructive) 8%, var(--background));
 }
 
-/* A table cell's padding, both sides of every column. Unlayered to beat the typography plugin, which drops the
- * first column's start padding and the last's end padding, as a table without an outer border wants. */
+/* A table's type, its cells' padding and its head's height and type, as the style's own Table draws them, from the
+ * root's `cn-editor-document` slot. Unlayered to beat the typography plugin, which sets its own and drops the first
+ * column's start padding and the last's end padding, as a table without an outer border wants. */
+.document-editor table {
+  font-size: var(--editor-table-size);
+}
 .document-editor :is(th, td) {
-  padding: 0.375rem 0.75rem;
+  padding: var(--editor-table-cell-padding);
+}
+/* A cell's first and last block sit flush with its padding, as a callout's do. */
+.document-editor :is(th, td) > :first-child {
+  margin-top: 0;
+}
+.document-editor :is(th, td) > :last-child {
+  margin-bottom: 0;
+}
+.document-editor th {
+  height: var(--editor-table-head-height);
+  color: var(--editor-table-head-color);
+  font-size: var(--editor-table-head-size, inherit);
+  font-weight: var(--editor-table-head-weight);
+  text-transform: var(--editor-table-head-case, none);
+  letter-spacing: var(--editor-table-head-tracking, normal);
+}
+
+/* Inline code, drawn as the style's key chip in place of the typography plugin's bold run between backticks, from
+ * the root's `cn-editor-document` slot. Unlayered to beat the plugin's own. */
+.document-editor :not(pre) > code {
+  background-color: var(--muted);
+  border-radius: var(--editor-code-radius);
+  padding: 0 var(--editor-code-padding);
+  font-weight: var(--editor-code-weight);
+}
+.document-editor :not(pre) > code::before,
+.document-editor :not(pre) > code::after {
+  content: none;
+}
+
+/* A quote's rule and the room after it, from the root's `cn-editor-document` slot. Unlayered to beat the typography
+ * plugin's own. */
+.document-editor blockquote {
+  border-inline-start: var(--editor-quote-rule) solid var(--editor-quote-color);
+  padding-inline-start: var(--editor-quote-inset);
 }
 
 @layer components {
@@ -757,7 +804,8 @@
   .document-editor ul[data-type='taskList'] li {
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
+    /* cn-label's gap, the room every style leaves between a checkbox and its label */
+    gap: calc(var(--spacing) * 2);
   }
   .document-editor ul[data-type='taskList'] li > label {
     display: flex;
@@ -808,7 +856,6 @@
   }
   .document-editor th {
     background: var(--muted);
-    font-weight: 600;
     text-align: left;
   }
   .document-editor .column-resize-handle {
@@ -887,19 +934,21 @@
    * ghost, which follows the pointer, is the only cue a drag needs; a static
    * tint on the source block is just noise. Only atomic media keeps a light ring
    * so a selected image's bounds stay visible; the outline follows the
-   * element's own radius. */
+   * element's own radius, in the style's selection ring from the root's
+   * `cn-editor-document` slot. */
   .document-editor img.ProseMirror-selectednode,
   .document-editor [data-slot='image'].ProseMirror-selectednode,
   .document-editor [data-slot='image'][data-selected='true'] > img,
   .document-editor [data-slot='image'][data-selected='true'] > a > img,
   .document-editor [data-slot='image'][data-selected='true'] > [data-slot='image-empty'],
   .document-editor .ProseMirror-selectednode:is(img, video, iframe) {
-    outline: 2px solid var(--primary);
+    outline: var(--editor-selection-width) solid var(--editor-selection-color);
     outline-offset: 2px;
   }
   /* A block the grip selected for its menu. An inline atom (a chip) is a span and keeps its own look; an image
-   * keeps the ring above. Its corners are the style's block radius, from the root's `cn-editor-content` slot. A
-   * button's row spans the line past the button and its Link, so the outline goes round the button instead. */
+   * keeps the ring above. Its corners are the style's block radius, from the root's `cn-editor-content` slot, and its
+   * ring the style's selection ring, from `cn-editor-document`. A button's row spans the line past the button and
+   * its Link, so the outline goes round the button instead. */
   .document-editor
     .ProseMirror-selectednode:not(
       span,
@@ -911,7 +960,7 @@
       :has(> [data-node-view-wrapper] > [data-slot='link-button'])
     ) {
     background-color: color-mix(in oklab, var(--primary) 6%, transparent);
-    outline: 1px solid color-mix(in oklab, var(--ring) 60%, transparent);
+    outline: var(--editor-selection-width) solid var(--editor-selection-color);
   }
 
   /* Drag in flight — GRAY OUT the source block, don't fill. The editor root
@@ -1000,16 +1049,12 @@
     pointer-events: none;
     opacity: 0.6;
   }
-  /* The composer's own accent — a deliberate coloured exception to the design
-   * system's monochrome tokens, scoped to the chat surface so it never leaks
-   * elsewhere. A proper CSS variable with a light AND a dark value (NOT a
-   * hardcoded per-rule colour), so dark mode and theming still work; the mention
-   * pill reads it too (the unlayered override at the end of this file). */
+  /* The composer's own accent, a coloured exception to the design system's
+   * monochrome tokens, scoped to the chat surface so it never leaks elsewhere.
+   * The theme's blue, which reads at WCAG AA on the page in light and dark; the
+   * mention pill reads it too (the unlayered override at the end of this file). */
   .chat-composer {
-    --composer-accent: oklch(0.55 0.18 265);
-  }
-  .dark .chat-composer {
-    --composer-accent: oklch(0.7 0.15 265);
+    --composer-accent: var(--hue-blue);
   }
 
   /* The inline `@query` / `/query` the open menu is filtering on — a coloured
