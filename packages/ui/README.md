@@ -37,6 +37,10 @@ by digest, so its Chromium and fonts change only when that digest does. A run on
 own `-darwin` references, which git ignores: locally `test-visual` says what changed since your own last run,
 and `test-visual-linux` says what CI will.
 
+The `-linux` references are stored with Git LFS, so the repository's history keeps one small pointer per
+change instead of every image. Install `git-lfs` before cloning; without it the references check out as text
+pointers and every capture fails against them.
+
 `pnpm nx test-visual-linux @zeroxsolutions/ui` runs the suite in that image under Docker, on x86-64 like CI,
 and brings back what it writes. Its arguments go to Vitest, such as a spec's name or `--shard=1/4`. To change
 references on purpose:

@@ -1,3 +1,7 @@
+# The visual references are Git LFS files; without its hooks a push sends pointers whose images never reach
+# the remote, and a checkout leaves pointers where the suite reads PNGs.
+git lfs pre-push "$@"
+
 # Run from pre-commit instead, this froze the machine whenever several worktrees committed at once.
 # A run-many over every project here re-ran the whole workspace on each push after a merge from
 # origin. `affected` diffs from the merge-base with `defaultBase` in nx.json, and adds the

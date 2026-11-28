@@ -1,0 +1,3 @@
+# The visual references are Git LFS files; without its hooks a push sends pointers whose images never reach
+# the remote, and a checkout leaves pointers where the suite reads PNGs.
+git lfs post-merge "$@"

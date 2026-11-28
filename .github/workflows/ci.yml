@@ -103,6 +103,25 @@ jobs:
     steps:
       - uses: zeroxsolutions/github-actions/nx-setup@v1
 
+      # The references are Git LFS files, which the checkout leaves as pointers, and the image ships no
+      # `git-lfs`. The pointer list keys the cache, so a run whose references did not change downloads none.
+      - name: List the references
+        shell: bash
+        run: |
+          apt-get update -qq && apt-get install -y -qq git-lfs > /dev/null
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p test-output && git lfs ls-files --long > test-output/lfs-files
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .git/lfs/objects
+          key: lfs-${{ hashFiles('test-output/lfs-files') }}
+          restore-keys: lfs-
+
+      - name: Fetch the references
+        shell: bash
+        run: git lfs pull
+
       # `nx-gate`'s own range resolution, which a push that creates a branch or an unreachable base needs.
       # The container runs as root over a checkout the runner's user owns, which git refuses to read until told.
       - name: Compare every capture with its reference

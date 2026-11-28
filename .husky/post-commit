@@ -7,3 +7,5 @@ git -c core.quotePath=false diff-tree --root --no-commit-id --name-only -r HEAD 
     git reset -q -- "$path"
   fi
 done
+
+git lfs post-commit "$@"
